@@ -1,2 +1,6 @@
 .idea/
 venv/
+docs/source/api
+docs/build
+build
+deployments
