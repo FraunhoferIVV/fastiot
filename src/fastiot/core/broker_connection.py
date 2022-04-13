@@ -2,6 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, Dict, Union, Generator, AsyncIterator
 
+from nats.aio.client import Client
 from ormsgpack import ormsgpack
 from pydantic.main import BaseModel
 
@@ -81,7 +82,12 @@ class BrokerConnection(ABC):
 
 
 class BrokerConnectionImpl(BrokerConnection):
-    def connect(self):
+
+    @classmethod
+    def connect(cls):
+        pass
+
+    def __init__(self, client: Client):
         pass
 
     def close(self):
