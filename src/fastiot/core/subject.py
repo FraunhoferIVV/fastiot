@@ -1,5 +1,6 @@
 import random
-from typing import Type, Any
+from enum import Enum
+from typing import Type
 
 from pydantic import BaseModel, root_validator
 
@@ -16,7 +17,7 @@ class Subject(BaseModel):
             if 'reply_cls' not in values or values['reply_cls'] is None:
                 raise ValueError("Stream mode only with reply_cls allowed")
 
-    def create_generic_reply_inbox(self) -> "Subject":
+    def make_generic_reply_inbox(self) -> "Subject":
         if self.reply_cls is None:
             raise ValueError("Cannot create generic inbox: reply_cls must not be none")
 

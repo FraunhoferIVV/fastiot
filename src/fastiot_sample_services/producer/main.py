@@ -8,7 +8,7 @@ from fastiot_sample_services.producer.sample_data_source import SampleDataSource
 
 class MyApp(FastIoTApp):
 
-    @subscribe @reply @stream(subject=)
+    @subscribe @reply @stream
     async def asdf
 
 

@@ -30,10 +30,9 @@ class FastIoTAppClient:
         pass
 
 
-class _WrappedImplementation(BaseModel):
+class _SubjectWrapper(BaseModel):
     fn: Callable
     subject: Subject
-    inject: List[str]
 
 
 class _WrappedLoop(BaseModel):
@@ -42,16 +41,44 @@ class _WrappedLoop(BaseModel):
 
 
 
-def subscribe(fn):
-    pass
+def subscribe(subject: Subject):
+    if subject.reply_cls is not None:
+        raise ValueError("Expected subject to have no reply_cls for subscription mode")
+
+    def subscribe_wrapper_fn(fn):
+        fn.__fastiot_subject = subject
+        return fn
+    return subscribe_wrapper_fn
 
 
-def reply(fn):
-    pass
+def reply(subject: Subject):
+    if subject.reply_cls is None:
+        raise ValueError("Expected subject to have a reply_cls for reply mode")
+    if subject.stream_mode:
+        raise ValueError("Expected subject to have stream mode disabled for reply mode")
+
+    def subscribe_wrapper_fn(fn):
+        fn.__fastiot_subject = subject
+        return fn
+    return subscribe_wrapper_fn
 
 
-def stream(fn):
-    pass
+def stream(subject: Subject):
+    if subject.reply_cls is None:
+        raise ValueError("Expected subject to have a reply_cls for stream mode")
+    if subject.stream_mode is False:
+        raise ValueError("Expected subject to have stream mode enabled for stream mode")
+
+    def subscribe_wrapper_fn(fn):
+        fn.__fastiot_subject = subject
+        return fn
+
+    return subscribe_wrapper_fn
+
+
+def loop(fn):
+    fn.__fastiot_is_loop = True
+    return fn
 
 
 class FastIoTAppMeta(ABCMeta):
@@ -61,8 +88,7 @@ class FastIoTAppMeta(ABCMeta):
 
 class FastIoTApp(metaclass=FastIoTAppMeta, ABC):
     def __init__(self, broker_connection: BrokerConnection):
-        self._implementations: List[_WrappedImplementation] = []
-        self._loops: List[_WrappedLoop] = []
+        pass
 
     def implement(self, subject: Subject, inject: List[str] = None):
         def fn_wrapper(fn):
