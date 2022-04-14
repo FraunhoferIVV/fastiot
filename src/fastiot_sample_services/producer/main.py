@@ -1,27 +1,29 @@
 import asyncio
-from datetime import timedelta
+import logging
+import random
+from datetime import timedelta, datetime
 
-from fastiot.core.app import FastIoTApp, BROKER_CONNECTION_KEY
+from fastiot.core.app import FastIoTApp
+from fastiot.core.app_annotations import loop
 from fastiot.core.broker_connection import BrokerConnection, BrokerConnectionImpl
-from fastiot_sample_services.producer.sample_data_source import SampleDataSource
+from fastiot.msg.thing import Thing
 
 
 class MyApp(FastIoTApp):
 
-    @subscribe @reply @stream
-    async def asdf
-
-
     @loop
     async def produce(self):
-        value = data_source.get_value()
-        await broker_connection.send(
-            subject=,
-            msg=value
+        sensor = Thing.get_subject('my_sensor')
+        await self.broker_connection.publish(
+            subject=sensor,
+            msg=Thing(
+                value=random.randint(20, 30),
+                timestamp=datetime.utcnow()
+            )
         )
         return asyncio.sleep(2)
 
 
 if __name__ == '__main__':
-    app = MyApp()
-    app.run()
+    logging.basicConfig(level=logging.INFO)
+    MyApp.main()

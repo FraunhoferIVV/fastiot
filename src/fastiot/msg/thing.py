@@ -1,14 +1,18 @@
+from datetime import datetime
+from typing import Any
+
+from pydantic.main import BaseModel
+
 from fastiot.core.subject import Subject
 
 
-class ThingSubjects:
-    def __init__(self, name: str):
-        self.
+class Thing(BaseModel):
+    value: Any
+    timestamp: datetime
 
-    def subscribable(self, name: str):
+    @classmethod
+    def get_subject(cls, name: str):
         return Subject(
-
+            name=f"v1.thing.{name}",
+            msg_cls=Thing
         )
-
-
-thing_subjects = ThingSubjects('v1')

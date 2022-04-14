@@ -1,15 +1,15 @@
 import asyncio
+import signal
+import threading
 from abc import ABCMeta, ABC
+from asyncio import CancelledError
 from functools import wraps
 from typing import List, Dict, Any, Callable
 
 from pydantic import BaseModel
 
-from fastiot.core.broker_connection import BrokerConnection
+from fastiot.core.broker_connection import BrokerConnection, BrokerConnectionImpl
 from fastiot.core.subject import Subject
-
-
-BROKER_CONNECTION_KEY = "fastiot-broker"
 
 
 class FastIoTAppClient:
@@ -30,94 +30,78 @@ class FastIoTAppClient:
         pass
 
 
-class _SubjectWrapper(BaseModel):
-    fn: Callable
-    subject: Subject
+class FastIoTApp:
+    @classmethod
+    def main(cls, **kwargs):
+        async def run_main():
+            #broker_connection = await BrokerConnectionImpl.connect()
+            broker_connection = None
+            try:
+                app = cls(broker_connection=broker_connection, **kwargs)
+                await app.run()
+            finally:
+                await broker_connection.close()
+        asyncio.run(run_main())
 
+    def __init__(self, broker_connection: BrokerConnection, **kwargs):
+        super().__init__(**kwargs)
+        self.broker_connection = broker_connection
 
-class _WrappedLoop(BaseModel):
-    fn: Callable
-    inject: List[str]
+        self.__subscription_fns = []
+        self.__loop_fns = []
+        self.__tasks: List[asyncio.Task] = []
+        self.__subs = []
 
+        for name in dir(self):
+            if name.startswith('__'):
+                continue
+            attr = self.__getattribute__(name)
+            if hasattr(attr, '__fastiot_is_loop'):
+                self.__loop_fns.append(attr)
+            if hasattr(attr, '__fastiot_subject'):
+                self.__subscription_fns.append(attr)
 
+    async def run(self):
+        loop = asyncio.get_running_loop()
+        shutdown_requested = asyncio.Event()
 
-def subscribe(subject: Subject):
-    if subject.reply_cls is not None:
-        raise ValueError("Expected subject to have no reply_cls for subscription mode")
+        async def _set_shutdown():
+            nonlocal shutdown_requested
+            shutdown_requested.set()
 
-    def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
-        return fn
-    return subscribe_wrapper_fn
+        def handler(signum, frame):
+            nonlocal loop, _set_shutdown
+            if signum == signal.SIGTERM:
+                asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
+        signal.signal(signal.SIGTERM, handler)
 
+        for loop_fn in self.__loop_fns:
+            self.__tasks.append(
+                asyncio.create_task(self._run_loop(loop_fn=loop_fn))
+            )
 
-def reply(subject: Subject):
-    if subject.reply_cls is None:
-        raise ValueError("Expected subject to have a reply_cls for reply mode")
-    if subject.stream_mode:
-        raise ValueError("Expected subject to have stream mode disabled for reply mode")
+        for subscription_fn in self.__subscription_fns:
+            sub = await self.broker_connection.subscribe(
+                subject=subscription_fn.__fastiot_subject,
+                cb=subscription_fn
+            )
+            self.__subs.append(sub)
 
-    def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
-        return fn
-    return subscribe_wrapper_fn
+        await shutdown_requested.wait()
 
+        for task in self.__tasks:
+            task.cancel()
+        await asyncio.gather(*self.__tasks, *[sub.unsubscribe() for sub in self.__subs], return_exceptions=True)
+        self.__tasks = []
+        self.__subs = []
 
-def stream(subject: Subject):
-    if subject.reply_cls is None:
-        raise ValueError("Expected subject to have a reply_cls for stream mode")
-    if subject.stream_mode is False:
-        raise ValueError("Expected subject to have stream mode enabled for stream mode")
+    async def _run_loop(self, loop_fn):
+        try:
+            while True:
+                awaitable = await asyncio.shield(loop_fn())
+                await awaitable
+        except CancelledError:
+            pass
 
-    def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
-        return fn
-
-    return subscribe_wrapper_fn
-
-
-def loop(fn):
-    fn.__fastiot_is_loop = True
-    return fn
-
-
-class FastIoTAppMeta(ABCMeta):
-    def __new__(cls, name, bases, dct):
-        cls.
-
-
-class FastIoTApp(metaclass=FastIoTAppMeta, ABC):
-    def __init__(self, broker_connection: BrokerConnection):
-        pass
-
-    def implement(self, subject: Subject, inject: List[str] = None):
-        def fn_wrapper(fn):
-            if asyncio.iscoroutinefunction(fn) is False:
-                raise TypeError("Expected a coroutine function")
-
-            self._implementations.append(_WrappedImplementation(
-                fn=fn,
-                subject=subject,
-                inject=inject
-            ))
-        return fn_wrapper
-
-    def loop(self, inject: List[str] = None, name: str = None):
-        def fn_wrapper(fn):
-            if asyncio.iscoroutinefunction(fn) is False:
-                raise TypeError("Expected a coroutine function")
-
-            self._loops.append(_WrappedLoop(
-                fn=fn,
-                inject=inject
-            ))
-        return fn_wrapper
-
-    def run(self, provide: Dict[str, Any]):
-        if self._broker_connection_key not in provide:
-            raise ValueError(f"Expected {self._broker_connection_key} to be included in provide.")
-
-        task_runners = []
-
-    def test_client(self, provide: Dict[str, Any]) -> FastIoTAppClient:
+    async def test_client(self, provide: Dict[str, Any]) -> FastIoTAppClient:
         pass

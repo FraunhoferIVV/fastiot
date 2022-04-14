@@ -1,6 +1,7 @@
 import asyncio
 from abc import ABC, abstractmethod
 import time
+from dataclasses import dataclass
 from typing import Any, Callable, Coroutine, Dict, Union, Generator, AsyncIterator, Tuple, Optional
 
 import nats
@@ -37,7 +38,8 @@ class Subscription(ABC):
 
 
 class SubscriptionImpl(Subscription):
-    class _StreamTaskHandler(BaseModel):
+    @dataclass
+    class _StreamTaskHandler:
         time: float
         task: asyncio.Task
 
@@ -200,7 +202,7 @@ class BrokerConnection(ABC):
 class BrokerConnectionImpl(BrokerConnection):
 
     @classmethod
-    async def connect(cls) -> BrokerConnection:
+    async def connect(cls) -> "BrokerConnectionImpl":
         client = await nats.connect(f"nats://{fastiot_broker_env.host}:{fastiot_broker_env.port}")
         return cls(
             client=client
