@@ -13,7 +13,7 @@
 
 * You can find hints on the syntax for [Markdown](https://myst-parser.readthedocs.io) or [RST](https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html)
 * Environment Variables can also be marked as reference, use ~~~.. envvar::`MY_ENV_VAR`~~~ 
-
+* Mark new additions with `.. versionadded::`
 
 ## Building the documentation
 

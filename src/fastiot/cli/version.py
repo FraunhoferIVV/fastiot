@@ -48,7 +48,7 @@ def _get_number_of_commits() -> int:
         return int(p.stdout.readlines()[0].decode('ascii').strip())
 
 
-def call_git_describe() -> Optional[str]:
+def _call_git_describe() -> Optional[str]:
     with Popen(['git', 'describe', '--abbrev=7', '--tag'], stdout=PIPE, stderr=PIPE) as p:
         result = p.stdout.readlines()
         if not result:
@@ -57,15 +57,15 @@ def call_git_describe() -> Optional[str]:
             return result[0].decode('ascii').strip()
 
 
-def call_git_branch() -> str:
+def _call_git_branch() -> str:
     with Popen(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=PIPE, stderr=PIPE) as p:
         return p.stdout.readlines()[0].decode('ascii').strip()
 
 
-def git_version() -> str:
+def _git_version() -> str:
 
     try:
-        branch = call_git_branch()
+        branch = _call_git_branch()
     except IndexError:  # If git could not run (git not found, no git directory) readline[0] will fail with IndexError
         return GIT_UNSPECIFIED
 
@@ -79,7 +79,7 @@ def git_version() -> str:
         branch = 'unknown'
 
     # First try to get the current version using “git describe”.
-    git_tag = call_git_describe()
+    git_tag = _call_git_describe()
 
     if git_tag:
         # Match "[major].[minor]-[commits since tag as patch]" where the latest part "-[...]" is optional. Also a char
@@ -113,7 +113,7 @@ def git_version() -> str:
     return version
 
 
-def version_file_version() -> Optional[str]:
+def _version_file_version() -> Optional[str]:
 
     def get_file():
         for root, dirs, files in os.walk(os.getcwd()):
@@ -152,15 +152,23 @@ def create_version_file(destination: Optional[str] = None):
 
 
 def get_version(complete=False, only_major=False, minor=False) -> str:
+    """
+    Returns the current version depending on the git commits and tags or version file
+
+    :param complete: Set to true to get the full version including dev, e.g. 1.4+dev10
+    :param only_major: Set to true to get only the major version, e.g. 1.x
+    :param minor: Set to true to only get the minor version, e.g. .4
+    :return: String with version
+    """
 
     assert complete + only_major + minor <= 1, "Only one option for version output can be selected"
 
     if not (complete or only_major or minor):  # Nothing was selected
         complete = True  # Set some useful default
 
-    version = git_version()
+    version = _git_version()
     if version == GIT_UNSPECIFIED:
-        version = version_file_version() or version
+        version = _version_file_version() or version
 
     if complete:
         return version
