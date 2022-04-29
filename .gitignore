@@ -4,3 +4,4 @@ docs/source/api
 docs/build
 build
 deployments
+__pycache__/

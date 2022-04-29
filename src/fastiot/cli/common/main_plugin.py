@@ -1,3 +1,5 @@
+from fastiot.cli.configuration.plugin import Plugin
 
 
-def
+def provide_plugin() -> Plugin:
+    pass

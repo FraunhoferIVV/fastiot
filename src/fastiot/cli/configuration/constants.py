@@ -1,0 +1,1 @@
+CONFIG_KEY_EXTENSIONS = "extensions"
