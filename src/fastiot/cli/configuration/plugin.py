@@ -1,6 +1,7 @@
 from typing import Dict
 
 from fastiot.cli.configuration.command import Command
+from fastiot.cli.configuration.service import Service
 
 
 class Plugin:
