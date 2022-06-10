@@ -92,7 +92,7 @@ class DeploymentConfig(BaseModel):
     deployment_target: Optional[DeploymentTargetSetup]
     """ A deployment configuration to auto-generate Ansible Playbooks
     """
-    docker_registry: str
+    docker_registry: Optional[str] = ""
     tag: Optional[str] = 'latest'
     """ Define the tag to use for all docker images, defaults to ``latest``."""
     config_dir: Optional[str]
@@ -113,7 +113,6 @@ class DeploymentConfig(BaseModel):
                 #if service not in context.services:
                 #    raise()
         return values
-
 
     @staticmethod
     def from_yaml_file(filename) -> "DeploymentConfig":
