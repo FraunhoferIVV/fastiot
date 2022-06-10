@@ -1,6 +1,6 @@
-extensions = ['fastiot.ext.print']
+from fastiot.cli.model import ModulePackageConfig
 
-module_packages = [
-
-]
+#extensions = ['fastiot.ext.print']
+project_namespace = 'fastiot'
+module_packages = []
 
