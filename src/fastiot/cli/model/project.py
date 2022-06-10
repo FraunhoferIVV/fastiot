@@ -18,7 +18,7 @@ class ModulePackageConfig(BaseModel):
     to append it and also use the docker registry cache as a prefix. So you only need to specify the base name. 
     Example: mypackage-cache
     """
-    extra_caches: List[str] = None
+    extra_caches: Optional[List[str]] = None
     """
     A list of extra caches used to speed up building. It is intended if you want to read from other caches or different 
     tags. Each extra cache must match a cache name extended by ':' followed by the tag for the cache. Per default no
