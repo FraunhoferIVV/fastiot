@@ -1,3 +1,4 @@
+import os
 import unittest
 from tempfile import NamedTemporaryFile
 
@@ -14,6 +15,7 @@ class TestConfigurationImport(unittest.TestCase):
             config = import_configure(f.name)
 
             self.assertEqual(config.project_namespace, 'fastiot_unittest')
+            self.assertEqual(config.project_root_dir, os.getcwd())
             self.assertIsNone(config.library_package)
 
     def test_missing_configuration_option(self):

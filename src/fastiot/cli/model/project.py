@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional
 
 from pydantic.main import BaseModel
@@ -37,12 +38,12 @@ class ModulePackageConfig(BaseModel):
 class ProjectConfiguration(BaseModel):
     """ This class holds all variables reade from :file:`configure.py` in the project root directory. """
 
-    project_root_dir: str
+    project_root_dir: str = os.getcwd()
     project_namespace: str
     library_package: Optional[str]
-    library_setup_py_dir: Optional[str] = None
+    library_setup_py_dir: str = os.getcwd()
     module_packages: Optional[List[ModulePackageConfig]] = None
-    deploy_configs: List[str]
+    deploy_configs: Optional[List[str]] = None
     test_config: Optional[str]
     test_package: Optional[str]
     imports_for_test_config_environment_variables: Optional[List[str]] = None
