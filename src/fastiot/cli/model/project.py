@@ -32,35 +32,6 @@ class ModulePackageConfig(BaseModel):
             self.extra_caches = []
 
 
-class CustomModuleConfig(BaseModel):
-    """
-    Definition of a custom module. A custom module uses its own dockerfile instead of a predefined one.
-    """
-    module_name: str
-    """Name of custom module"""
-    workdir: str
-    """The workdir defines the directory, where the dockerfile is executed. It is project root dir or a subdir of 
-    project root dir in most case, but can be anywhere."""
-    dockerfile_filename: str = 'Dockerfile'
-    """The name of the dockerfile. You may specify it, if it lies in a subdir and not inside workdir."""
-    manifest_filename: str = 'manifest.yaml'
-    """The manifest.yaml is needed to be compatible with sam-compose. Please make sure to copy it to 
-    '/opt/sam/manifest.yaml' inside the dockerimage. """
-    do_use_debug_mode: bool = False
-    """If true it will use a multi-stage build target 'debug' if mode debug is specified. This way, you can implement 
-    custom functionality for debugging."""
-    cache_name: str = ''
-    """
-    The cache name for the custom module. Works the same like cache name from module package config.
-    """
-    extra_caches: Optional[List[str]] = None
-    """
-    The extra caches to read from for the custom module. Works the same like extra caches from module package config.
-    """
-
-    def __post_init__(self):
-        if self.extra_caches is None:
-            self.extra_caches = []
 
 
 class ProjectConfiguration(BaseModel):
@@ -71,7 +42,6 @@ class ProjectConfiguration(BaseModel):
     library_package: Optional[str]
     library_setup_py_dir: Optional[str] = None
     module_packages: Optional[List[ModulePackageConfig]] = None
-    custom_modules: Optional[List[CustomModuleConfig]] = None
     deploy_configs: List[str]
     test_config: Optional[str]
     test_package: Optional[str]

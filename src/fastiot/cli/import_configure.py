@@ -4,9 +4,8 @@ import os
 import sys
 from typing import Optional
 
+from fastiot.cli.configuration.constants import CONFIGURE_FILE_NAME
 from fastiot.cli.model import ProjectConfiguration
-
-CONFIGURE_FILE_NAME = 'configure.py'
 
 
 def import_configure(file_name: Optional[str] = None) -> ProjectConfiguration:
@@ -35,7 +34,6 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfiguration:
                                 library_package=_read_from_config("library_package"),
                                 library_setup_py_dir=_read_from_config("library_setup_py_dir") or os.getcwd(),
                                 module_packages=_read_from_config("module_packages"),
-                                custom_modules=_read_from_config('custom_modules'),
                                 deploy_configs=_read_from_config('deploy_configs') or deploy_configs,
                                 test_config=_read_from_config('test_config'),
                                 test_package=_read_from_config('test_package'),
