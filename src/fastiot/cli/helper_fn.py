@@ -1,5 +1,9 @@
 import logging
-from typing import Dict
+import os
+from glob import glob
+from typing import Dict, Optional
+
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 
 def get_cli_logger():
@@ -23,3 +27,17 @@ def parse_env_file(env_filename: str) -> Dict[str, str]:
                 raise ValueError(f"Cannot parse env file: Invalid line {i_line + 1}: {line}")
             environment[parts[0]] = parts[1]
     return environment
+
+
+def get_jinja_env(search_path):
+    jinja_env = Environment(
+        loader=FileSystemLoader(search_path),
+        trim_blocks=True,
+        undefined=StrictUndefined
+    )
+    return jinja_env
+
+
+def find_modules(package_name: str, project_root_dir: str):
+    package_dir = os.path.join(project_root_dir, 'src', package_name)
+    return [os.path.basename(m) for m in glob(package_dir + "/*") if os.path.isfile(os.path.join(m, 'manifest.yaml'))]

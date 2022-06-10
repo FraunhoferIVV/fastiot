@@ -11,8 +11,8 @@ class ModulePackageConfig(BaseModel):
     """
     package_name: str
     """The package name of the modules"""
-    module_names: List[str]
-    """The module names as a list of strings"""
+    module_names: Optional[List[str]] = None
+    """The module names as a list of strings. Leave empty to use all modules found in the package."""
     cache_name: str = ''
     """
     The name to use as the cache. If empty, no cache is used for building. It will use the first given tag for building 
@@ -25,14 +25,8 @@ class ModulePackageConfig(BaseModel):
     tags. Each extra cache must match a cache name extended by ':' followed by the tag for the cache. Per default no
     extra caches are used. You might find it useful to always include the cache name of the current module package 
     followed by tag latest to always use latest cache for feature branches.
-    Examples: mypackage-cache:latest, sam-cache:latest, sam-cache:mybranch
+    Examples: mypackage-cache:latest, fastiot-cache:latest, fastiot-cache:mybranch
     """
-
-    def __post_init__(self):
-        if self.extra_caches is None:
-            self.extra_caches = []
-
-
 
 
 class ProjectConfiguration(BaseModel):
