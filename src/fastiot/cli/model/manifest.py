@@ -106,7 +106,7 @@ class ModuleManifest(BaseModel):
     """
     Manifest files should consist of these variables.
     """
-    name: str
+    name: str  # Name needs to comply with the modules name
     ports: Optional[Dict[str, Port]] = None
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating 
@@ -119,6 +119,9 @@ class ModuleManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be 
     used.
     """
+    docker_cache_image: Optional[str] = None
+    """ If set this will override the per module package configuration for a docker registry cache. The full cache name 
+    will be constructed from the docker cache registry set and this name. """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
     devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
@@ -127,7 +130,9 @@ class ModuleManifest(BaseModel):
     """
     Enable if this module needs privileged permissions inside docker, e.g. for hardware access
     """
-    platforms: List[CPUPlatform] = [CPUPlatform.amd64]  # Define the cpu platforms to build the container for
+    platforms: List[CPUPlatform] = [CPUPlatform.amd64]
+    """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one 
+    specified (or amd64 if none) will be used to build the image. """
 
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
     copy_dirs_to_container: List[str] = ()

@@ -1,2 +1,6 @@
 fastiot_module:
   name: producer
+
+  platforms:
+    - amd64
+    - arm64
