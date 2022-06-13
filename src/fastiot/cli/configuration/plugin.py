@@ -18,5 +18,5 @@ class Plugin:
         return self._services
 
     @property
-    def base_images(self) -> Dict[str]:
+    def base_images(self) -> Dict[str, str]:
         pass
