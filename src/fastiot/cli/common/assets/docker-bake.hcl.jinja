@@ -1,0 +1,32 @@
+group "default" {
+    targets = [
+    {% for manifest in manifests %}
+      "{{ manifest.name }}",
+    {% endfor %}
+    ]
+}
+
+{% for manifest in manifests %}
+target "{{ manifest.name }}" {
+    context= "."
+    dockerfile= "./build/Dockerfile.{{ manifest.name }}"
+    tags= [
+    {% for tag in tags %}
+      "{{ docker_registry }}{{ project_config.project_namespace }}/{{ manifest.name }}:{{ tag }}"
+    {% endfor %}
+    ]
+    cache-from= [
+      "user/app:cache",
+      "type=local,src=.docker-cache"
+    ]
+    cache-to= [
+      "type=local,dest=.docker-cache"
+    ]
+    platforms= [
+    {% for platform in manifest.platforms %}
+      "{{ platform.as_docker_platform() }}",
+    {% endfor %}
+    ]
+    pull= true
+}
+{% endfor %}

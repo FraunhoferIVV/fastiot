@@ -35,8 +35,8 @@ class Volume(BaseModel):
 
     location: str
     """
-    The volume location to be used. If you provide something like `/opt/mydata` it will be accessible as `opt/mydata` in
-    your container. 
+    The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as 
+    file:`opt/mydata` in  your container. 
     """
     env_variable: str
     """
@@ -52,7 +52,7 @@ class Device:
 
     location: str
     """
-    The default device location, e.g. /dev/ttyS0 for a serial port
+    The default device location, e.g. :file:`/dev/ttyS0` for a serial port
     """
     env_variable: str
     """
@@ -71,6 +71,11 @@ class CPUPlatform(str, Enum):
 
     amd64 = "amd64"  # The most common architecture for servers, desktop and laptop computers with Intel or AMD CPUs.
     arm64 = "arm64"  # Modern architecture for e.g. Raspberry Pi 3 and 4 if a 64 Bit OS is used like Ubuntu 20.04
+
+    def as_docker_platform(self):
+        """ Returns a member (accessed by self in this case!) as docker-style platform. This usually means e.g.
+        `linux/amd64`, but for some this may vary, so we can add additional manipulations here."""
+        return "linux/" + self
 
 
 class Healthcheck(str, Enum):
@@ -122,7 +127,7 @@ class ModuleManifest(BaseModel):
     """
     Enable if this module needs privileged permissions inside docker, e.g. for hardware access
     """
-    platforms: List[CPUPlatform] = CPUPlatform.amd64  # Define the cpu platforms to build the container for
+    platforms: List[CPUPlatform] = [CPUPlatform.amd64]  # Define the cpu platforms to build the container for
 
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
     copy_dirs_to_container: List[str] = ()
