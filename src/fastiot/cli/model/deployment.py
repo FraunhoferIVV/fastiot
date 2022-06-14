@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 
-import services as services
 import yaml
 from pydantic.class_validators import root_validator, validator
 from pydantic.main import BaseModel
@@ -8,7 +7,7 @@ from pydantic.main import BaseModel
 
 class ModuleDeploymentConfig(BaseModel):
     """
-    The config for a regular python module
+    The config for a module
     """
 
     image_name: str
@@ -101,6 +100,7 @@ class DeploymentConfig(BaseModel):
     def module_defaults(cls, v):
         for module_name, module in v.items():
             if module is None:
+                # TODO: Don't do this: Validate function should not manipulate objects
                 v[module_name] = ModuleDeploymentConfig(image_name=module_name)
         return v
 

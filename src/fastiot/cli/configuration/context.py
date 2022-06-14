@@ -21,3 +21,12 @@ class Context:
     @property
     def config(self) -> Dict[str, Any]:
         pass
+
+
+__default_context = None
+
+
+def get_default_context():
+    nonlocal __default_context
+    if __default_context is None:
+        __default_context = Context()

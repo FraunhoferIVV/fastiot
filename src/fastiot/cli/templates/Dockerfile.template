@@ -1,0 +1,78 @@
+### Stage: Base ###
+
+FROM python:3.8-buster as base
+RUN apt-get update -y && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y \
+    gcc \
+    make \
+# We need these packages for building cryptography
+    build-essential libssl-dev libffi-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# As a convention, the workdir should always be the project root dir inside the container.
+WORKDIR /opt/sam
+
+# As a convention, the python source files should always be placed inside src-dir.
+RUN mkdir /opt/sam/src
+ENV PYTHONPATH=$PYTHONPATH:/opt/sam/src
+
+# Install requirements
+COPY install.sh ./
+COPY requirements.txt ./
+RUN SAM_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
+
+{% if healthcheck == 'error_log' %}
+HEALTHCHECK --retries=1 CMD if [ -s "/var/sam/logs/error.log" ]; then; exit 1; fi
+{% endif %}
+
+{% if vue %}
+### Stage: vue.js ###
+FROM node:14-buster-slim as build-vue
+WORKDIR /opt/vue_app
+COPY src/{{ module_package_name }}/{{ module_name }}/{{vue.src}}/package*.json /opt/vue_app/
+RUN npm install
+COPY src/{{ module_package_name }}/{{ module_name }}/{{vue.src}} /opt/vue_app/
+RUN npm run build
+{% endif %}
+
+### Stage: Debug ###
+FROM base as debug
+# In debug mode we just want to copy everything from source to make it easier.
+{% if vue %}
+COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module_package_name }}/{{ module_name }}/{{ vue.dst }}
+{% endif %}
+{% if library_package %}
+COPY src/{{library_package}} /opt/sam/src/{{library_package}}
+{% endif %}
+COPY src/{{ module_package_name }} /opt/sam/src/{{ module_package_name }}
+COPY src/{{ module_package_name }}/{{ module_name }}/manifest.yaml /opt/sam/manifest.yaml
+CMD ["python3.8", "/opt/sam/src/{{ module_package_name }}/{{ module_name }}/run.py"]
+
+
+### Stage: Compile ###
+FROM base as compile
+# In release mode we want to compile everything and only copy compiled artifacts into release container.
+# The compilation takes place in this stage, so we need to compile it accordingly.
+{% if library_package %}
+COPY src/{{library_package}} /opt/sam/src/{{library_package}}
+RUN nuitka_compile.py --package_name={{ library_package }} --src_dir=/opt/sam/src --out_dir=/opt/sam/output
+{% endif %}
+
+COPY src/{{ module_package_name }} /opt/sam/src/{{ module_package_name }}
+RUN nuitka_compile.py --package_name={{ module_package_name }} --src_dir=/opt/sam/src --out_dir=/opt/sam/output
+
+
+### Stage: Release ###
+FROM base
+
+{% if vue %}
+COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module_package_name }}/{{ module_name }}/{{ vue.dst }}
+{% endif %}
+# Nuitka compiles "__file__"-variable relative to current location. So we have to place everything inside "/opt/sam/src".
+COPY --from=compile /opt/sam/output/*.so /opt/sam/src
+COPY --from=compile /opt/sam/src/{{ module_package_name }}/{{ module_name }}/run.py /opt/sam/src/{{ module_package_name }}/{{ module_name }}/run.py
+{% for module_dir_to_copy in module_dirs_to_copy %}
+COPY --from=compile /opt/sam/src/{{ module_package_name }}/{{ module_name }}/{{ module_dir_to_copy }} /opt/sam/src/{{ module_package_name }}/{{ module_name }}/{{ module_dir_to_copy }}
+{% endfor %}
+COPY src/{{ module_package_name }}/{{ module_name }}/manifest.yaml /opt/sam/manifest.yaml
+CMD ["python3.8",  "/opt/sam/src/{{ module_package_name }}/{{ module_name }}/run.py"]
