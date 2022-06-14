@@ -13,6 +13,8 @@ Options:
 """
 from typing import List
 
+import typer
+
 from fastiot.cli.configuration.command import Command
 from fastiot.cli.configuration.context import Context
 from fastiot.cli.typer_app import app
@@ -30,38 +32,47 @@ class BuildCommand(Command):
         print(__file__.__docs__)
 
 
- -m <mode>, --mode=<mode>   The build mode for docker images. Can be 'debug' (default) or 'release'. No compilation of
-                            python code will happen if chosen 'debug'. Nuitka compilation will be applied if chosen
-                            'release'.
- -e, --experimental         Enable experimental features.
- -t <list(tag1,tag2,...,tagn)>, --tag=<list(tag1,tag2,...,tagn)>
-                            The tags to use for building as a comma ',' separated list. Defaults to 'latest'.
- -r <docker_registry>, --docker_registry=<docker_registry>
-                            The docker registry to be used for tagging. If docker_registry is unspecified, it will look
-                            for a process environment variable SAM_DOCKER_REGISTRY. If docker registry is not empty,
-                            the built image names will begin with the docker registry followed by a slash.
- -c <docker_registry_cache>, --docker_registry_cache=<docker_registry_cache>
-                            Experimental feature. The docker registry cache. If docker registry cache is unspecified and
-                            buildx is used, it will look for a process environment variable SAM_DOCKER_REGISTRY_CACHE.
-                            If docker registry cache is not empty, it will use it as a cache for intermediate image
-                            layers.
- -p <list(amd64,arm64,armv6,armv7)>, --platform=<list(amd64,arm64,armv6,armv7)>
-                            Experimental feature. The platform to compile for given as a comma ',' separated list.
-                            Possible values are 'amd64', 'arm64', 'armv6' and 'armv7'. Currently, it is only supported
-                            in combination with the '--push' flag. Per default, the platform of the current OS
-                            is used. If multiple platforms are specified, they will be included into the resulting
-                            image.
-                            It will also look in the manifest.yaml and check if each module can be built for the
-                            selected platform. If not, the platform builds will be skipped where unspecified. If nothing
-                            can be built, it will exit with 2.
- --push                     Experimental feature. Instead of using --load for buildx, it uses --push which outputs the
-                            image to a registry. Push is only allowed if a docker registry is specified. Additionally,
-                            if a docker registry cache is used, it will also push intermediate image layers.
- -d, --dry                  Instead of building, it will print the content of the dockerfile to stdout. If using this
-                            flag, it is required to specify a module.
+def mode_callback(mode: str):
+    if mode != 'debug' and mode != 'release':
+        raise typer.BadParameter(f"Mode must be 'debug' or 'release'. But it is {mode}")
+    return mode
+
 
 @app.command()
-def build():
+def build(mode: str = typer.Option('debug', '-m', '--mode',
+                                   callback=mode_callback,
+                                   help="The build mode for docker images. Can be 'debug' or 'release'. "
+                                        "No compilation of python code will happen if chosen 'debug'. Nuitka "
+                                        "compilation will be applied if chosen 'release'."),
+          tag: str = typer.Option('latest', '-t', '--tag',
+                                  help="The tags to use for building as a comma ',' separated list."),
+          docker_registry: str = typer.Option(..., '-r', '--docker_registry',
+                                              help="The docker registry to be used for tagging. If docker_registry is "
+                                                   "unspecified, it will look for a process environment variable "
+                                                   "SAM_DOCKER_REGISTRY. If docker registry is not empty, the built "
+                                                   "image names will begin with the docker registry followed by a "
+                                                   "slash."),
+          docker_registry_cache: str = typer.Option(..., '-c', '--docker_registry_cache',
+                                                    help="The docker registry cache. If docker registry cache is "
+                                                         "unspecified, it will look for a process environment variable "
+                                                         "SAM_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
+                                                         "empty, it will use it as a cache for intermediate image "
+                                                         "layers."),
+          platform: str = typer.Option(..., '-p', '--platform',
+                                       help="The platform to compile for given as a comma ',' separated list. Possible "
+                                            "values are 'amd64', 'arm64', 'armv6' and 'armv7'. Currently, it is only "
+                                            "supported in combination with the '--push' flag. Per default, the "
+                                            "platform of the current OS is used. If multiple platforms are specified, "
+                                            "they will be included into the resulting image. \n"
+                                            "It will also look in the manifest.yaml and check if each module can be "
+                                            "built for the selected platform. If not, the platform builds will be "
+                                            "skipped where unspecified. If nothing can be built, it will exit with 2."),
+          push: bool = typer.Option(False, '--push',
+                                    help="Instead of using --load for buildx, it uses --push which outputs the image "
+                                         "to a registry. Push is only allowed if a docker registry is specified. "
+                                         "Additionally, if a docker registry cache is used, it will also push "
+                                         "intermediate image layers."),
+          ):
     pass
 
 
