@@ -35,8 +35,8 @@ class Volume(BaseModel):
 
     location: str
     """
-    The volume location to be used. If you provide something like `/opt/mydata` it will be accessible as `opt/mydata` in
-    your container. 
+    The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as 
+    file:`opt/mydata` in  your container. 
     """
     env_variable: str
     """
@@ -52,7 +52,7 @@ class Device:
 
     location: str
     """
-    The default device location, e.g. /dev/ttyS0 for a serial port
+    The default device location, e.g. :file:`/dev/ttyS0` for a serial port
     """
     env_variable: str
     """
@@ -71,6 +71,11 @@ class CPUPlatform(str, Enum):
 
     amd64 = "amd64"  # The most common architecture for servers, desktop and laptop computers with Intel or AMD CPUs.
     arm64 = "arm64"  # Modern architecture for e.g. Raspberry Pi 3 and 4 if a 64 Bit OS is used like Ubuntu 20.04
+
+    def as_docker_platform(self):
+        """ Returns a member (accessed by self in this case!) as docker-style platform. This usually means e.g.
+        `linux/amd64`, but for some this may vary, so we can add additional manipulations here."""
+        return "linux/" + self
 
 
 class Healthcheck(str, Enum):
@@ -101,7 +106,7 @@ class ModuleManifest(BaseModel):
     """
     Manifest files should consist of these variables.
     """
-    name: str
+    name: str  # Name needs to comply with the modules name
     ports: Optional[Dict[str, Port]] = None
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating 
@@ -114,6 +119,9 @@ class ModuleManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be 
     used.
     """
+    docker_cache_image: Optional[str] = None
+    """ If set this will override the per module package configuration for a docker registry cache. The full cache name 
+    will be constructed from the docker cache registry set and this name. """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
     devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
@@ -122,7 +130,9 @@ class ModuleManifest(BaseModel):
     """
     Enable if this module needs privileged permissions inside docker, e.g. for hardware access
     """
-    platforms: List[CPUPlatform] = CPUPlatform.amd64  # Define the cpu platforms to build the container for
+    platforms: List[CPUPlatform] = [CPUPlatform.amd64]
+    """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one 
+    specified (or amd64 if none) will be used to build the image. """
 
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
     copy_dirs_to_container: List[str] = ()

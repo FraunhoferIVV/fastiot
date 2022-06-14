@@ -13,11 +13,11 @@ class ModulePackageConfig(BaseModel):
     """The package name of the modules"""
     module_names: Optional[List[str]] = None
     """The module names as a list of strings. Leave empty to use all modules found in the package."""
-    cache_name: str = ''
+    cache_name: Optional[str] = None
     """
-    The name to use as the cache. If empty, no cache is used for building. It will use the first given tag for building 
-    to append it and also use the docker registry cache as a prefix. So you only need to specify the base name. 
-    Example: mypackage-cache
+    The name to use as the cache on the set docker cache registry. If not defined and a cache registry is configured 
+    the `project_namespace:latest` will be used.  
+    Example: mypackage-cache:latest
     """
     extra_caches: Optional[List[str]] = None
     """

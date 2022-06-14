@@ -9,6 +9,27 @@ If you want to use experimental features like platform tag, use the flag -e to i
 
 Options:
 
+ -h, --help                 Print help
+"""
+from typing import List
+
+from fastiot.cli.configuration.command import Command
+from fastiot.cli.configuration.context import Context
+from fastiot.cli.typer_app import app
+
+
+class BuildCommand(Command):
+    @property
+    def name(self) -> str:
+        return 'build'
+
+    def execute(self, context: Context, vargs: List[str]):
+        pass
+
+    def print_help(self, context: Context):
+        print(__file__.__docs__)
+
+
  -m <mode>, --mode=<mode>   The build mode for docker images. Can be 'debug' (default) or 'release'. No compilation of
                             python code will happen if chosen 'debug'. Nuitka compilation will be applied if chosen
                             'release'.
@@ -38,26 +59,6 @@ Options:
                             if a docker registry cache is used, it will also push intermediate image layers.
  -d, --dry                  Instead of building, it will print the content of the dockerfile to stdout. If using this
                             flag, it is required to specify a module.
- -h, --help                 Print help
-"""
-from typing import List
-
-from fastiot.cli.configuration.command import Command
-from fastiot.cli.configuration.context import Context
-from fastiot.cli.typer_app import app
-
-
-class BuildCommand(Command):
-    @property
-    def name(self) -> str:
-        return 'build'
-
-    def execute(self, context: Context, vargs: List[str]):
-        pass
-
-    def print_help(self, context: Context):
-        print(__file__.__docs__)
-
 
 @app.command()
 def build():
@@ -223,4 +224,3 @@ def _execute_docker_cmd(docker_cmd: str, workdir: str):
     ret = os.system(f"cd {workdir}; {docker_cmd}")
     if ret != 0:
         raise RuntimeError("Docker build command exited with none-zero code.")
-
