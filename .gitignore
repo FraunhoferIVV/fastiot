@@ -1,7 +1,8 @@
 .idea/
 venv/
-docs/source/api
-docs/build
-build
-deployments
+docs/source/api/
+docs/build/
+build/
+deployments/
 __pycache__/
+.docker-cache/

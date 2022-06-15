@@ -1,9 +1,11 @@
 import logging
 import os
 from glob import glob
-from typing import Dict, Optional
+from typing import Dict
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+from fastiot.cli.constants import TEMPLATES_DIR
 
 
 def get_cli_logger():
@@ -29,13 +31,18 @@ def parse_env_file(env_filename: str) -> Dict[str, str]:
     return environment
 
 
-def get_jinja_env(search_path):
-    jinja_env = Environment(
-        loader=FileSystemLoader(search_path),
-        trim_blocks=True,
-        undefined=StrictUndefined
-    )
-    return jinja_env
+_jinja_env = None
+
+
+def get_jinja_env():
+    global _jinja_env
+    if _jinja_env is None:
+        _jinja_env = Environment(
+            loader=FileSystemLoader(searchpath=TEMPLATES_DIR),
+            trim_blocks=True,
+            undefined=StrictUndefined
+        )
+    return _jinja_env
 
 
 def find_modules(package_name: str, project_root_dir: str):

@@ -29,7 +29,7 @@ class ModulePackageConfig(BaseModel):
     """
 
 
-class ProjectConfiguration(BaseModel):
+class ProjectConfig(BaseModel):
     """ This class holds all variables reade from :file:`configure.py` in the project root directory. """
 
     project_root_dir: str = os.getcwd()
@@ -41,4 +41,5 @@ class ProjectConfiguration(BaseModel):
     test_config: Optional[str]
     test_package: Optional[str]
     imports_for_test_config_environment_variables: Optional[List[str]] = None
-    npm_test_dir: Optional[str] = None
+    npm_test_dir: Optional[str] = ''
+    build_dir: str = 'build'

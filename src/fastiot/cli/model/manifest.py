@@ -1,16 +1,15 @@
 import os
-import re
 import tempfile
 from dataclasses import dataclass
 from enum import Enum
+from shlex import quote as shlex_quote
 from typing import List, Dict, Optional
 
 import yaml
 from pydantic.main import BaseModel
 
-from fastiot.cli.configuration.constants import DOCKER_BASE_IMAGE
+from fastiot.cli.constants import DOCKER_BASE_IMAGE
 from fastiot.cli.helper_fn import get_cli_logger
-from shlex import quote as shlex_quote
 
 
 class Port(BaseModel):
@@ -125,7 +124,7 @@ class ModuleManifest(BaseModel):
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
     devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
-    #depends_on: List[ServiceEnum] = ()
+    # depends_on: List[ServiceEnum] = ()
     privileged: bool = False
     """
     Enable if this module needs privileged permissions inside docker, e.g. for hardware access

@@ -1,47 +1,28 @@
 import importlib
 import logging
-from typing import List, Dict
+import os
 
-from fastiot.cli.configuration.command import Command
-from fastiot.cli.configuration.context import Context
-
-
-def main():
-    context = _import_configuration()
-    commands = _import_extensions(context=context)
-    # execute command
+from fastiot.cli.import_configure import import_configure
+from fastiot.cli.model.context import get_default_context
+from fastiot.cli.typer_app import app
 
 
-def _import_configuration() -> Context:
-    config = {}
-    try:
-        m = importlib.import_module('configure')
-        for key in dir(m):
-            if key.startswith('_'):
-                # skip hidden vars
-                continue
-            config[key] = getattr(m, key)
-    except ImportError:
-        logging.warning('Trying to import configure.py failed')
-    return Context(config=config)
-
-
-def _import_extensions(context: Context) -> Dict[str, Command]:
-    plugins = []
-    for ext in context.extensions:
+def _import_commands():
+    for f in os.listdir(os.path.join(os.path.dirname(__file__), 'common', 'commands')):
+        if f.startswith('_'):
+            continue
+        f, _ = os.path.splitext(f)
+        mod = f'fastiot.cli.common.commands.{f}'
         try:
-            importlib.import_module(ext)
-            #plugins.append(a.provide_plugin())
+            importlib.import_module(mod)
         except ImportError:
-            pass
-
-    commands = {}
-    for plugin in plugins:
-        commands.update(plugin.commands)
-    return commands
+            logging.exception(f"Import error raised during import of module {mod}")
 
 
 if __name__ == '__main__':
     # entry point for fastiot command
     logging.basicConfig(level=logging.INFO)
-    main()
+    default_context = get_default_context()
+    default_context.project_config = import_configure()
+    _import_commands()
+    app()
