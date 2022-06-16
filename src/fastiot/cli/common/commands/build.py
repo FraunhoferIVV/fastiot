@@ -1,6 +1,7 @@
 import logging
 import os.path
 import subprocess
+from glob import glob
 from typing import List, Optional
 
 import typer
@@ -13,15 +14,27 @@ from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
-def mode_callback(mode: str):
-    if mode != 'debug' and mode != 'release':
+def _mode_completion() -> List[str]:
+    return ['debug', 'release']
+
+
+def _mode_callback(mode: str):
+    if mode not in _mode_completion():
         raise typer.BadParameter(f"Mode must be 'debug' or 'release'. But it is {mode}")
     return mode
 
 
+def _modules_completion() -> List[str]:
+    return [os.path.basename(os.path.dirname(m)) for m in list(glob("src/*/*/manifest.yaml"))]
+
+
+def _platform_completion() -> List[str]:
+    return ['amd64', 'arm64']
+
+
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build(mode: str = typer.Option('debug', '-m', '--mode',
-                                   callback=mode_callback,
+                                   callback=_mode_callback, autocompletion=_mode_completion,
                                    help="The build mode for docker images. Can be 'debug' or 'release'. "
                                         "No compilation of python code will happen if chosen 'debug'. Nuitka "
                                         "compilation will be applied if chosen 'release'."),
@@ -41,7 +54,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                                          "SAM_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
                                                          "empty, it will use it as a cache for intermediate image "
                                                          "layers."),
-          platform: str = typer.Option(None, '-p', '--platform',
+          platform: str = typer.Option(None, '-p', '--platform', autocompletion=_platform_completion,
                                        help="The platform to compile for given as a comma ',' separated list. Possible "
                                             "values are 'amd64' and 'arm64'. Currently, it is only supported in "
                                             "combination with the '--push' flag. Per default, the platform of the "
@@ -58,14 +71,13 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
-          modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules")
+          modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules",
+                                                        autocompletion=_modules_completion)
           ):
     """
     This command builds images.
 
     Per default it builds all images. Optionally, you can specify a single image to build.
-
-    If you want to use experimental features like platform tag, use the flag -e to indicate it.
     """
     logging.info(f"Docker registry: {docker_registry}")
     os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "

@@ -27,9 +27,10 @@ def _import_plugin_commands(extensions):
         try:
             importlib.import_module(f'{extension}.cli.commands')
         except ImportError:
-            logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "
-                            f"{extension}.\n"
-                            "This error will be ignored, but some cli commands may be missing.")
+            pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
+            #logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "
+            #                f"{extension}.\n"
+            #                "This error will be ignored, but some cli commands may be missing.")
 
 
 if __name__ == '__main__':
