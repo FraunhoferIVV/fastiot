@@ -81,7 +81,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     """
     logging.info(f"Docker registry: {docker_registry}")
     os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
-              "docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64; "
+              "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
               "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
               "docker buildx inspect --bootstrap; ")
 
