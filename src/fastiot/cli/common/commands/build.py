@@ -43,10 +43,10 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                                          "layers."),
           platform: str = typer.Option(None, '-p', '--platform',
                                        help="The platform to compile for given as a comma ',' separated list. Possible "
-                                            "values are 'amd64', 'arm64', 'armv6' and 'armv7'. Currently, it is only "
-                                            "supported in combination with the '--push' flag. Per default, the "
-                                            "platform of the current OS is used. If multiple platforms are specified, "
-                                            "they will be included into the resulting image. \n"
+                                            "values are 'amd64' and 'arm64'. Currently, it is only supported in "
+                                            "combination with the '--push' flag. Per default, the platform of the "
+                                            "current OS is used. If multiple platforms are specified, they will be "
+                                            "included into the resulting image.\n"
                                             "It will also look in the manifest.yaml and check if each module can be "
                                             "built for the selected platform. If not, the platform builds will be "
                                             "skipped where unspecified. If nothing can be built, it will exit with 2."),
@@ -58,7 +58,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
-          modules: List[str] = typer.Argument(..., help="The modules to build. Default: all modules")
+          modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules")
           ):
     """
     This command builds images.
@@ -73,6 +73,11 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
               "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
               "docker buildx inspect --bootstrap; ")
 
+    # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
+    # to check
+    if not modules:
+        modules = None
+
     project_config = get_default_context().project_config
     create_all_docker_files(project_config, build_mode=mode, modules=modules)
     tags = tag.split(',')
@@ -82,10 +87,10 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
 def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
     for module_package in project_config.module_packages:
-        if module_package.module_names is None:
+        if not module_package.module_names:
             module_package.module_names = find_modules(module_package.package_name, project_config.project_root_dir)
         for module_name in module_package.module_names:
-            if modules is None or module_name in modules:
+            if not modules or module_name in modules:
                 create_docker_file(module_package.package_name, module_name, project_config, build_mode)
 
 
@@ -135,8 +140,6 @@ def docker_bake(project_config: ProjectConfig,
 
     targets = list()
     for module_package in project_config.module_packages:
-        if module_package.module_names is None:
-            module_package.module_names = find_modules(module_package.package_name, project_config.project_root_dir)
         module_package.cache_name = module_package.cache_name or f"{project_config.project_namespace}:latest"
         for module_name in module_package.module_names:
             if modules is not None and module_name not in modules:
