@@ -4,13 +4,14 @@ import importlib
 import logging
 import os
 
+from fastiot import cli
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app
 
 
 def _import_commands():
-    for f in os.listdir(os.path.join(os.path.dirname(__file__), 'common', 'commands')):
+    for f in os.listdir(os.path.join(os.path.dirname(cli.__file__), 'common', 'commands')):
         if f.startswith('_'):
             continue
         f, _ = os.path.splitext(f)
