@@ -21,10 +21,23 @@ def _import_commands():
             logging.exception(f"Import error raised during import of module {mod}")
 
 
+def _import_plugin_commands(extensions):
+    for extension in extensions:
+        try:
+            importlib.import_module(f'{extension}.cli.commands')
+        except ImportError:
+            logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "
+                            f"{extension}.\n"
+                            "This error will be ignored, but some cli commands may be missing.")
+
+
 if __name__ == '__main__':
     # entry point for fastiot command
     logging.basicConfig(level=logging.INFO)
     default_context = get_default_context()
     default_context.project_config = import_configure()
     _import_commands()
+    if default_context.project_config.extensions is not None:
+        _import_plugin_commands(default_context.project_config.extensions)
+
     app()

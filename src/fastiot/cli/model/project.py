@@ -43,3 +43,4 @@ class ProjectConfig(BaseModel):
     imports_for_test_config_environment_variables: Optional[List[str]] = None
     npm_test_dir: Optional[str] = ''
     build_dir: str = 'build'
+    extensions: Optional[List[str]] = None

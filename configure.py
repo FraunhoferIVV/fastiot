@@ -1,6 +1,6 @@
 from fastiot.cli.model import ModulePackageConfig
 
-#extensions = ['fastiot.ext.print']
+extensions = ['fastiot_ivv_tools']
 
 project_namespace = 'fastiot'
 module_packages = [ModulePackageConfig(package_name='fastiot_sample_services',
