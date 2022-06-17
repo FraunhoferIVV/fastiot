@@ -33,7 +33,7 @@ class TestServiceImports(unittest.TestCase):
 
     def test_import_extension_with_service(self):
         """ Test importing services from actual module file """
-        sys.modules['fastiot_test_module.cli.services'] = service_test
+        sys.modules['fastiot_test_module.extension'] = service_test
 
         project_config = ProjectConfig(project_namespace='fastiot_test', extensions=['fastiot_test_module'])
         services = get_services_list(project_config)

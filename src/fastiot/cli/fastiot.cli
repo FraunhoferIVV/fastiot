@@ -4,15 +4,14 @@ import importlib
 import logging
 import os
 
-from fastiot import cli
 from fastiot.cli.external_service_helper import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import app
+from fastiot.cli import typer_app
 
 
 def _import_commands():
-    for f in os.listdir(os.path.join(os.path.dirname(cli.__file__), 'common', 'commands')):
+    for f in os.listdir(os.path.join(os.path.dirname(typer_app.__file__), 'common', 'commands')):
         if f.startswith('_'):
             continue
         f, _ = os.path.splitext(f)
@@ -26,7 +25,7 @@ def _import_commands():
 def _import_plugin_commands(extensions):
     for extension in extensions:
         try:
-            importlib.import_module(f'{extension}.cli.commands')
+            importlib.import_module(f'{extension}.extension')
         except ImportError:
             pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
             #logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "
@@ -44,4 +43,4 @@ if __name__ == '__main__':
     if default_context.project_config.extensions is not None:
         _import_plugin_commands(default_context.project_config.extensions)
 
-    app()
+    typer_app.app()

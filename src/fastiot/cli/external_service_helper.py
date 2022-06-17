@@ -15,7 +15,7 @@ def get_services_list(project_config: Optional[ProjectConfig] = None) -> Dict[st
     if project_config is not None:
         for extension in project_config.extensions:
             try:
-                importlib.import_module(f'{extension}.cli.services')
+                importlib.import_module(f'{extension}.extension')
             except ImportError:  # Extension does not provide any services
                 logging.debug("Could not import service under %s.cli.services from extension %s", extension, extension)
 
