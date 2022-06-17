@@ -1,12 +1,13 @@
 from typing import Dict, Any, List, Optional
 
 from fastiot.cli.constants import CONFIG_KEY_EXTENSIONS
-from fastiot.cli.model import ProjectConfig
+from fastiot.cli.model import ProjectConfig, ExternalService
 
 
 class Context:
     def __init__(self):
         self.project_config: Optional[ProjectConfig] = None
+        self.external_services: Optional[List[ExternalService]] = None
 
 
 __default_context = None
