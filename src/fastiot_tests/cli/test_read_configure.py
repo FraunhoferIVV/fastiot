@@ -33,7 +33,7 @@ class TestConfigurationImport(unittest.TestCase):
             config = import_configure(f.name)
 
             self.assertEqual(config.project_namespace, 'fastiot_unittest')
-            self.assertTrue(type(config.module_packages), ModulePackageConfig)
+            self.assertIsInstance(config.module_packages, ModulePackageConfig)
             self.assertEqual(config.module_packages[0].package_name, "fastiot_samples")
 
 

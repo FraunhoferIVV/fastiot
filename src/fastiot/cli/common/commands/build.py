@@ -1,30 +1,41 @@
 import logging
 import os.path
 import subprocess
+from enum import Enum
 from typing import List, Optional
 
 import typer
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
-from fastiot.cli.helper_fn import get_jinja_env, find_modules
+from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectConfig, ModuleManifest
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
-def mode_callback(mode: str):
-    if mode != 'debug' and mode != 'release':
-        raise typer.BadParameter(f"Mode must be 'debug' or 'release'. But it is {mode}")
-    return mode
+class Mode(str, Enum):
+    debug = 'debug'
+    release = 'release'
+
+
+def _get_modules_enum():
+    default_context = get_default_context()
+    modules_dict = {
+        module: module for module in default_context.project_config.all_modules()
+    }
+    return Enum('Modules', modules_dict)
+
+
+Modules = _get_modules_enum()
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def build(mode: str = typer.Option('debug', '-m', '--mode',
-                                   callback=mode_callback,
-                                   help="The build mode for docker images. Can be 'debug' or 'release'. "
-                                        "No compilation of python code will happen if chosen 'debug'. Nuitka "
-                                        "compilation will be applied if chosen 'release'."),
+def build(modules: List[Modules] = typer.Argument(None, help="The modules to build. Default: all modules"),
+          mode: Mode = typer.Option(Mode.debug.value, '-m', '--mode',
+                                    help="The build mode for docker images. "
+                                         "No compilation of python code will happen if chosen 'debug'. Nuitka "
+                                         "compilation will be applied if chosen 'release'."),
           tag: str = typer.Option('latest', '-t', '--tag',
                                   help="The tags to use for building as a comma ',' separated list."),
           docker_registry: str = typer.Option(None, '-r', '--docker_registry',
@@ -57,8 +68,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                     help="Instead of using --load for buildx, it uses --push which outputs the image "
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
-                                         "intermediate image layers."),
-          modules: List[str] = typer.Argument(..., help="The modules to build. Default: all modules")
+                                         "intermediate image layers.")
           ):
     """
     This command builds images.
@@ -82,8 +92,6 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
 def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
     for module_package in project_config.module_packages:
-        if module_package.module_names is None:
-            module_package.module_names = find_modules(module_package.package_name, project_config.project_root_dir)
         for module_name in module_package.module_names:
             if modules is None or module_name in modules:
                 create_docker_file(module_package.package_name, module_name, project_config, build_mode)
@@ -135,8 +143,6 @@ def docker_bake(project_config: ProjectConfig,
 
     targets = list()
     for module_package in project_config.module_packages:
-        if module_package.module_names is None:
-            module_package.module_names = find_modules(module_package.package_name, project_config.project_root_dir)
         module_package.cache_name = module_package.cache_name or f"{project_config.project_namespace}:latest"
         for module_name in module_package.module_names:
             if modules is not None and module_name not in modules:

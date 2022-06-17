@@ -15,7 +15,7 @@ def _import_commands():
         mod = f'fastiot.cli.common.commands.{f}'
         try:
             importlib.import_module(mod)
-        except ImportError:
+        except Exception:
             logging.exception(f"Import error raised during import of module {mod}")
 
 

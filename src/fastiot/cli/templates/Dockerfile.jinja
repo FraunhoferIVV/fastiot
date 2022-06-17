@@ -50,8 +50,8 @@ COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.li
 {% endif %}
 COPY src/{{ module_package_name }} /opt/fastiot/src/{{ module_package_name }}
 COPY src/{{ module_package_name }}/{{ manifest.name }}/manifest.yaml /opt/fastiot/manifest.yaml
+CMD ["python",  "/opt/fastiot/src/{{ module_package_name }}/{{ manifest.name }}/run.py"]
 
-{% if build_mode == 'release' %}
 
 ### Stage: Compile ###
 FROM base as compile_lib
@@ -75,7 +75,6 @@ COPY --from=compile_lib /opt/fastiot/src/{{ module_package_name }}/{{ manifest.n
 {% for module_dir_to_copy in manifest.copy_dirs_to_container %}
 COPY --from=compile_lib /opt/fastiot/src/{{ module_package_name }}/{{ manifest.name }}/{{ module_dir_to_copy }} /opt/fastiot/src/{{ module_package_name }}/{{ manifest.name }}/{{ module_dir_to_copy }}
 {% endfor %}
-{% endif %}
 
 {% if manifest.vue %}
 COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module_package_name }}/{{ manifest.name }}/{{ vue.dst }}

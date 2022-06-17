@@ -12,6 +12,9 @@ from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 def clean(do_clean_all: bool = typer.Option(False, '-a', '--all', help="If specified, it will also cleanup local "
                                                                        "docker instance.")
           ):
+    """
+    This command cleans up all generated files and removes all container and images from docker daemon.
+    """
     project_config = get_default_context().project_config
     _clean_generated_files(project_config=project_config)
     if do_clean_all:

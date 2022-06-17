@@ -1,11 +1,13 @@
+import importlib
 import logging
 import os
 from glob import glob
-from typing import Dict
+from typing import Dict, Optional, List
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from fastiot.cli.constants import TEMPLATES_DIR
+from fastiot.cli.model import ModuleConfig
 
 
 def get_cli_logger():
@@ -45,6 +47,14 @@ def get_jinja_env():
     return _jinja_env
 
 
-def find_modules(package_name: str, project_root_dir: str):
-    package_dir = os.path.join(project_root_dir, 'src', package_name)
+def find_modules(package: str, module_names: Optional[List[str]] = None) -> List[ModuleConfig]:
+    p = importlib.import_module(package)
+    package_dir = os.path.dirname(p.__file__)
     return [os.path.basename(m) for m in glob(package_dir + "/*") if os.path.isfile(os.path.join(m, 'manifest.yaml'))]
+
+
+def import_module(name: str, package: Optional[str] = None) -> ModuleConfig:
+    if package:
+        name = package + '.' + name
+
+    n = importlib.import_module()
