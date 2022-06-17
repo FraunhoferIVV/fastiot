@@ -9,7 +9,7 @@ from pydantic.main import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env, find_modules
-from fastiot.cli.model import ProjectConfig, ModuleManifest
+from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -162,7 +162,7 @@ def docker_bake(project_config: ProjectConfig,
                 if platform not in manifest.platforms:
                     logging.warning("Platform %s not in platforms specified for module %s. Trying to build module, "
                                     "but chances to fail are high!", platform, module_name)
-                manifest.platforms = platform
+                manifest.platforms = [CPUPlatform(platform)]
             elif not push:
                 manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
             if manifest.docker_cache_image is None:  # Set cache from module level if not defined otherwise

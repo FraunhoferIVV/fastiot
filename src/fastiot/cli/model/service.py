@@ -1,10 +1,6 @@
-import importlib
-import logging
-from typing import Dict, Union, Optional, List
+from typing import Dict, Union, Optional
 
 from pydantic import BaseModel
-
-from fastiot.cli.model import ProjectConfig
 
 
 class ExternalService(BaseModel):
@@ -14,6 +10,8 @@ class ExternalService(BaseModel):
     port: int  # Default port of the service exposed by its docker image
     port_env_var: str
     """ Environment variable to read the port number, as for internal purposes the port number may change """
+    password_env_var: Optional[str]  # If the service needs a password use this env
     additional_env: Optional[Dict[str, Union[str, int]]] = None
     """ Provide any additional environment variables to be set here as a dictionary with the variable name and a 
     sensible default. """
+
