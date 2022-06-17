@@ -19,8 +19,7 @@ class TestServiceImports(unittest.TestCase):
     def test_find_integrated_services(self):
 
         services = get_services_list()
-        service_names = [s.name for s in services]
-        self.assertIn('mariadb', service_names)
+        self.assertIn('mariadb', services.keys())
 
     def test_import_extension_without_service(self):
         """ Test listing services when importing extension without additional services"""
@@ -38,10 +37,9 @@ class TestServiceImports(unittest.TestCase):
 
         project_config = ProjectConfig(project_namespace='fastiot_test', extensions=['fastiot_test_module'])
         services = get_services_list(project_config)
-        service_names = [s.name for s in services]
 
-        self.assertIn('test_service', service_names)
-        self.assertIn('mariadb', service_names)
+        self.assertIn('test_service', services.keys())
+        self.assertIn('mariadb', services.keys())
 
 
 if __name__ == '__main__':

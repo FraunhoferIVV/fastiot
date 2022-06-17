@@ -1,12 +1,12 @@
 import importlib
 import logging
-from typing import Optional, List
+from typing import Optional, Dict
 
-from fastiot.cli.model import ProjectConfig, ExternalService
 from fastiot.cli.configuration import external_services  # noqa  # pylint: disable=unused-import
+from fastiot.cli.model import ProjectConfig, ExternalService
 
 
-def get_services_list(project_config: Optional[ProjectConfig] = None) -> List[ExternalService]:
+def get_services_list(project_config: Optional[ProjectConfig] = None) -> Dict[str, ExternalService]:
     """ Method to get a list of all available services as instantiated :class:fastiot.cli.model:FastIoTService`.
 
     To append own services you simply have to inherit from :class:fastiot.cli.model:FastIoTService` and put them into
@@ -21,4 +21,4 @@ def get_services_list(project_config: Optional[ProjectConfig] = None) -> List[Ex
 
     service_classes = ExternalService.__subclasses__()
     services = [s() for s in service_classes]
-    return services
+    return {s.name: s for s in services}

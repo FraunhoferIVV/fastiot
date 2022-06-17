@@ -39,7 +39,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     default_context = get_default_context()
     default_context.project_config = import_configure()
-    default_context.external_services = get_services_list()
+    default_context.external_services = get_services_list(default_context.project_config)
     _import_commands()
     if default_context.project_config.extensions is not None:
         _import_plugin_commands(default_context.project_config.extensions)
