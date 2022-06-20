@@ -40,14 +40,14 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                         "compilation will be applied if chosen 'release'."),
           tag: str = typer.Option('latest', '-t', '--tag',
                                   help="The tags to use for building as a comma ',' separated list."),
-          docker_registry: str = typer.Option(None, '-r', '--docker_registry',
+          docker_registry: str = typer.Option(None, '-r', '--docker-registry',
                                               envvar=FASTIOT_DOCKER_REGISTRY,
                                               help="The docker registry to be used for tagging. If docker_registry is "
                                                    "unspecified, it will look for a process environment variable "
                                                    "SAM_DOCKER_REGISTRY. If docker registry is not empty, the built "
                                                    "image names will begin with the docker registry followed by a "
                                                    "slash."),
-          docker_registry_cache: str = typer.Option(None, '-c', '--docker_registry_cache',
+          docker_registry_cache: str = typer.Option(None, '-c', '--docker-registry-cache',
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
@@ -144,7 +144,7 @@ def docker_bake(project_config: ProjectConfig,
     if docker_registry_cache is None:
         docker_registry_cache = os.environ.get('FASTIOT_DOCKER_REGISTRY_CACHE')
 
-    targets = list()
+    targets = []
     for module in project_config.get_all_modules():
         if modules is not None and module.name not in modules:
             continue
@@ -192,7 +192,7 @@ def _run_docker_bake_cmd(project_config, push):
 
 
 def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):
-    caches_from = list()
+    caches_from = []
     if docker_registry_cache is not None:
         caches_from.append(f'"type=registry,src={docker_registry_cache}/{docker_cache_image}"')
         if extra_caches is not None:
