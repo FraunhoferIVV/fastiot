@@ -8,8 +8,8 @@ import typer
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
-from fastiot.cli.helper_fn import get_jinja_env, find_modules
-from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform
+from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform, ModuleConfiguration
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -98,31 +98,25 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
 
 def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
-    for module_package in project_config.module_packages:
-        if not module_package.module_names:
-            module_package.module_names = find_modules(module_package.package_name, project_config.project_root_dir)
-        for module_name in module_package.module_names:
-            if not modules or module_name in modules:
-                create_docker_file(module_package.package_name, module_name, project_config, build_mode)
+    for module in project_config.get_all_modules():
+        if modules is None or module.name in modules:
+            create_docker_file(module, project_config, build_mode)
 
 
-def create_docker_file(module_package_name: str, module_name: str, project_config: ProjectConfig,
-                       build_mode: str):
+def create_docker_file(module: ModuleConfiguration, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     try:
         os.mkdir(build_dir)
     except FileExistsError:
         pass  # No need to create directory twice
 
-    docker_filename = os.path.join(build_dir, 'Dockerfile.' + module_name)
-    manifest_path = _get_manifest_path(module_name, module_package_name, project_config)
-    manifest = ModuleManifest.from_yaml_file(manifest_path, check_module_name=module_name)
+    docker_filename = os.path.join(build_dir, 'Dockerfile.' + module.name)
+    manifest = module.read_manifest(check_module_name=module.name)
 
     with open(docker_filename, "w") as dockerfile:
         dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
-        dockerfile.write(dockerfile_template.render(module_package_name=module_package_name,
+        dockerfile.write(dockerfile_template.render(module=module,
                                                     project_config=project_config,
-                                                    manifest=manifest,
                                                     extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                               "www.piwheels.org/simple/"),
                                                     build_mode=build_mode))
@@ -151,30 +145,28 @@ def docker_bake(project_config: ProjectConfig,
         docker_registry_cache = os.environ.get('FASTIOT_DOCKER_REGISTRY_CACHE')
 
     targets = list()
-    for module_package in project_config.module_packages:
+    for module in project_config.get_all_modules():
+        if modules is not None and module.name not in modules:
+            continue
+        manifest = module.read_manifest()
+
+        module_package = project_config.get_module_package_by_name(module.module_package_name)
         module_package.cache_name = module_package.cache_name or f"{project_config.project_namespace}:latest"
-        for module_name in module_package.module_names:
-            if modules is not None and module_name not in modules:
-                continue
-            manifest_path = _get_manifest_path(module_name, module_package.package_name, project_config)
-            manifest = ModuleManifest.from_yaml_file(manifest_path)
-            if platform is not None:  # Overwrite platform from manifest with manual setting
-                if platform not in manifest.platforms:
-                    logging.warning("Platform %s not in platforms specified for module %s. Trying to build module, "
-                                    "but chances to fail are high!", platform, module_name)
-                manifest.platforms = [CPUPlatform(platform)]
-            elif not push:
-                manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
-            if manifest.docker_cache_image is None:  # Set cache from module level if not defined otherwise
-                manifest.docker_cache_image = module_package.cache_name
 
-            cache_from, cache_to = _set_caches(docker_registry_cache, manifest.docker_cache_image,
-                                               module_package.extra_caches, push)
+        if platform is not None:  # Overwrite platform from manifest with manual setting
+            if platform not in manifest.platforms:
+                logging.warning("Platform %s not in platforms specified for module %s. Trying to build module, "
+                                "but chances to fail are high!", platform, module.name)
+            manifest.platforms = [CPUPlatform(platform)]
+        elif not push:
+            manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
+        if manifest.docker_cache_image is None:  # Set cache from module level if not defined otherwise
+            manifest.docker_cache_image = module_package.cache_name
 
-            targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
+        cache_from, cache_to = _set_caches(docker_registry_cache, manifest.docker_cache_image,
+                                           module_package.extra_caches, push)
 
-    if not os.path.exists(os.path.join(project_config.project_root_dir, project_config.build_dir)):
-        os.mkdir(os.path.join(project_config.project_root_dir, project_config.build_dir))
+        targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
     with open(os.path.join(project_config.project_root_dir, project_config.build_dir, 'docker-bake.hcl'),
               "w") as docker_bake_hcl:
@@ -185,20 +177,18 @@ def docker_bake(project_config: ProjectConfig,
                                                          docker_registry=docker_registry))
 
     if not dry:
-        docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
-        if push:
-            docker_cmd += " --push"
-        else:
-            docker_cmd += " --load"
-        exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
-        if exit_code != 0:
-            raise RuntimeError("docker buildx bake failed with exit code " + str(exit_code))
+        _run_docker_bake_cmd(project_config, push)
 
 
-def _get_manifest_path(module_name: str, module_package_name: str, project_config: ProjectConfig):
-    manifest_path = os.path.join(project_config.project_root_dir, 'src', module_package_name, module_name,
-                                 'manifest.yaml')
-    return manifest_path
+def _run_docker_bake_cmd(project_config, push):
+    docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
+    if push:
+        docker_cmd += " --push"
+    else:
+        docker_cmd += " --load"
+    exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
+    if exit_code != 0:
+        raise RuntimeError("docker buildx bake failed with exit code " + str(exit_code))
 
 
 def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):

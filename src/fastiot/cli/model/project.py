@@ -3,6 +3,9 @@ from typing import List, Optional
 
 from pydantic.main import BaseModel
 
+from fastiot.cli.helper_fn import find_modules
+from fastiot.cli.model.module import ModuleConfiguration
+
 
 class ModulePackageConfig(BaseModel):
     """
@@ -34,13 +37,31 @@ class ProjectConfig(BaseModel):
 
     project_root_dir: str = os.getcwd()
     project_namespace: str
-    library_package: Optional[str]
+    library_package: Optional[str] = None
     library_setup_py_dir: str = os.getcwd()
     module_packages: Optional[List[ModulePackageConfig]] = None
     deploy_configs: Optional[List[str]] = None
     test_config: Optional[str]
     test_package: Optional[str]
     imports_for_test_config_environment_variables: Optional[List[str]] = None
-    npm_test_dir: Optional[str] = ''
+    npm_test_dir: Optional[str] = None
     build_dir: str = 'build'
     extensions: Optional[List[str]] = None
+
+    def get_all_modules(self) -> List[ModuleConfiguration]:
+        """ Returns a list of all modules configured in the project """
+        modules = list()
+        for module_package in self.module_packages:
+            if not module_package.module_names:
+                module_package.module_names = find_modules(module_package.package_name, self.project_root_dir)
+            for module_name in module_package.module_names:
+                modules.append(ModuleConfiguration(name=module_name, module_package_name=module_package.package_name))
+
+        return modules
+
+    def get_module_package_by_name(self, package_name: str) -> ModulePackageConfig:
+        for module_package in self.module_packages:
+            if module_package.package_name == package_name:
+                return module_package
+
+        raise ValueError(f"Module Package {package_name} not found in project configuration.")
