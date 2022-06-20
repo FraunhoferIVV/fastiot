@@ -25,7 +25,7 @@ def _import_commands():
 def _import_plugin_commands(extensions):
     for extension in extensions:
         try:
-            importlib.import_module(f'{extension}.extension')
+            importlib.import_module(f'{extension}')
         except ImportError:
             pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
             #logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "

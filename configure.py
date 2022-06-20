@@ -1,6 +1,6 @@
 from fastiot.cli.model import ModulePackageConfig
 
-extensions = ['fastiot_ivv_tools']
+extensions = ['fastiot_ivv_tools.extension']
 
 project_namespace = 'fastiot'
 
