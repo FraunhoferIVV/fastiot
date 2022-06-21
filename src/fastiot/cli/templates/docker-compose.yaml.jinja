@@ -1,0 +1,13 @@
+version: "2.4"
+
+services:
+  nats:
+    image: "nats:latest"
+    ports:
+      - "4222:4222"
+    networks:
+      - {{docker_net_name}}
+    restart: always
+
+networks:
+  {{docker_net_name}}:
