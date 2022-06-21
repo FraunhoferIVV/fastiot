@@ -1,8 +1,9 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 import typer
 
+from fastiot.cli.external_service_helper import get_services_list
 from fastiot.cli.model import ProjectConfig
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
@@ -18,7 +19,9 @@ class ToPrint(str, Enum):
     npm_test_dir = 'npm_test_dir'
     test_config = 'test_config'
     test_package = 'test_package'
-
+    external_services = 'external_services'
+    external_services_port_vars = 'external_services_port_vars'
+    project_namespace = 'project_namespace'
 
 _name_help = """
 Name can be any of:\n
@@ -47,8 +50,14 @@ def check_name(name: str):
     return name
 
 
+def _name_completion() -> List[str]:
+    return [e.value for e in ToPrint]
+
+
+
+
 @app.command('print', context_settings=DEFAULT_CONTEXT_SETTINGS)
-def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_name),
+def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_name, autocompletion=_name_completion),
               config: Optional[str] = typer.Option(None,
                                                    help="Only applicable if <name> is modules_to_build. If specified, "
                                                         "it doesn't print modules which are not needed for the "
@@ -66,44 +75,36 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
     elif name == 'deploy_configs':
         _print_deploy_configs(project_config=project_config)
     elif name == 'library_package':
-        if project_config.library_package != '':
+        if project_config.library_package:
             print(project_config.library_package)
     elif name == 'library_setup_py_dir':
-        if project_config.library_setup_py_dir != '':
+        if project_config.library_setup_py_dir:
             print(project_config.library_setup_py_dir)
     elif name == 'module_package_names':
         for package in project_config.module_packages:
             print(package.package_name)
     elif name == 'modules_to_build':
-        if config is not None:
-            # It doesn't make a difference which parameters are given here. You may refactor make_context's
-            # get_config function to not use these variables always.
-            config = project_config.get_config(
-                config_name=config,
-                docker_registry=None,
-                tag=None,
-                do_override_configs_with_env_variables=False
-            )
-            module_names_to_build = project_config.get_module_names_to_build_specified_by_config(config=config)
-        else:
-            module_names_to_build = project_config.all_module_names
-
-        for module_name in module_names_to_build:
+        for module in project_config.get_all_modules():
             if len(platforms) > 0:
-                manifest = project_config.read_manifest(module_name=module_name)
+                manifest = module.read_manifest()
                 platforms_in_manifest = [p.value for p in manifest.platforms]
                 if len([p for p in platforms if p in platforms_in_manifest]) == 0:
                     continue
-            print(module_name)
+            print(module.name)
     elif name == 'npm_test_dir':
-        if project_config.npm_test_dir != '':
+        if project_config.npm_test_dir:
             print(project_config.npm_test_dir)
     elif name == 'test_config':
         _print_test_config(project_config=project_config)
     elif name == 'test_package':
         if project_config.test_package != '':
             print(project_config.test_package)
-
+    elif name == 'external_services':
+        print("\n".join(list(get_services_list(project_config).keys())))
+    elif name == 'external_services_port_vars':
+        print("\n".join([s.port_env_var for s in get_services_list(project_config).values()]))
+    elif name == 'project_namespace':
+        print(project_config.project_namespace)
 
 def _print_deploy_configs(project_config: ProjectConfig):
     for config in [*project_config.deploy_configs]:

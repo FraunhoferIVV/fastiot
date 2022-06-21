@@ -1,8 +1,10 @@
 import os
+from glob import glob
 from typing import List, Optional
 
 from pydantic.main import BaseModel
 
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import find_modules
 from fastiot.cli.model.module import ModuleConfiguration
 
@@ -65,3 +67,10 @@ class ProjectConfig(BaseModel):
                 return module_package
 
         raise ValueError(f"Module Package {package_name} not found in project configuration.")
+
+    def get_all_deployment_names(self) -> List[str]:
+        if self.deploy_configs is not None:
+            return self.deploy_configs
+        else:
+            deployments = (os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR))
+            return [d for d in deployments if os.path.isdir(d)]

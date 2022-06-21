@@ -12,7 +12,7 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
     """ Imports the :file:`configure.py` in the project root (if not specified otherwise) and returns  """
     config = _import_configure_py(file_name)
 
-    deploy_configs = glob.glob(os.path.join(os.getcwd(), 'deployments'))
+    deploy_configs = glob.glob(os.path.join(os.getcwd(), 'deployments', '*'))
     deploy_configs = [os.path.basename(d) for d in deploy_configs]
 
     data = dict()

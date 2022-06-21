@@ -7,7 +7,7 @@ from typing import Any, Callable, Coroutine, Dict, Union, Generator, AsyncIterat
 import nats
 from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscription, Msg as BrokerMsg
 from ormsgpack import ormsgpack
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 from fastiot.core.serialization import model_from_bin, model_to_bin
 from fastiot.core.subject import Subject
