@@ -84,13 +84,17 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
         for package in project_config.module_packages:
             print(package.package_name)
     elif name == 'modules_to_build':
-        for module in project_config.get_all_modules():
-            if len(platforms) > 0:
-                manifest = module.read_manifest()
-                platforms_in_manifest = [p.value for p in manifest.platforms]
-                if len([p for p in platforms if p in platforms_in_manifest]) == 0:
-                    continue
-            print(module.name)
+        if config is not None:
+            deployment = project_config.get_deployment_by_name(config)
+            print("\n".join(deployment.modules))
+        else:
+            for module in project_config.get_all_modules():
+                if len(platforms) > 0:
+                    manifest = module.read_manifest()
+                    platforms_in_manifest = [p.value for p in manifest.platforms]
+                    if len([p for p in platforms if p in platforms_in_manifest]) == 0:
+                        continue
+                print(module.name)
     elif name == 'npm_test_dir':
         if project_config.npm_test_dir:
             print(project_config.npm_test_dir)

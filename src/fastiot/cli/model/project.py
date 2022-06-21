@@ -4,8 +4,9 @@ from typing import List, Optional
 
 from pydantic.main import BaseModel
 
-from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.helper_fn import find_modules
+from fastiot.cli.model import DeploymentConfig
 from fastiot.cli.model.module import ModuleConfiguration
 
 
@@ -74,3 +75,8 @@ class ProjectConfig(BaseModel):
         else:
             deployments = (os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR))
             return [d for d in deployments if os.path.isdir(d)]
+
+    def get_deployment_by_name(self, deployment_name: str) -> DeploymentConfig:
+        deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
+                                       deployment_name, DEPLOYMENTS_CONFIG_FILE)
+        return DeploymentConfig.from_yaml_file(deployment_file)

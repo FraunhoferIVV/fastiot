@@ -80,7 +80,7 @@ class DeploymentConfig(BaseModel):
     """
 
     deployment_config_version: int = 1
-    modules: Dict[str, Optional[ModuleDeploymentConfig]]
+    modules: Dict[str, Optional[ModuleDeploymentConfig]] = []
     """ List of modules to integrate in the deployment."""
     services: Optional[List[str]] = list()
     """ List of services to integrate """
