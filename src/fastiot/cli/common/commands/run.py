@@ -31,7 +31,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
     cmd = []
     cmd.append("docker-compose")
     project_name = project_name or project_config.project_namespace + "__" + environment_name
-    cmd.append("--project-name" + project_name)
+    cmd.append("--project-name=" + project_name)
 
     cmd.append("up")
     if detach:
