@@ -35,7 +35,9 @@ def _import_plugin_commands(extensions):
 
 if __name__ == '__main__':
     # entry point for fastiot command
-    logging.basicConfig(level=logging.INFO)
+    LOGLEVEL = os.environ.get('FASTIOT_LOGLEVEL', 'INFO').upper()
+
+    logging.basicConfig(level=LOGLEVEL)
     default_context = get_default_context()
     default_context.project_config = import_configure()
     default_context.external_services = get_services_list(default_context.project_config)
