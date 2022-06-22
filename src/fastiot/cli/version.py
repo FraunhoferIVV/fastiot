@@ -70,7 +70,7 @@ def _git_version() -> str:
         return GIT_UNSPECIFIED
 
     if branch == 'HEAD':
-        branch = os.environ.get('GIT_BRANCH', 'master')
+        branch = os.environ.get('GIT_BRANCH', 'main')
 
     for c in ['/', '-', '_']:  # Replace common separators by those accepted in PEP 440
         branch = branch.replace(c, '.')
@@ -103,7 +103,7 @@ def _git_version() -> str:
         patch = _get_number_of_commits()
 
     version = f"{major}.{minor}"
-    if branch == 'master':
+    if branch == 'master' || branch == 'main':
         if patch > 0:
             version += f'.{patch}'
     else:
