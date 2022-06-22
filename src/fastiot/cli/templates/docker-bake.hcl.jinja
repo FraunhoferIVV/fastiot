@@ -12,7 +12,7 @@ target "{{ target.manifest.name }}" {
     dockerfile= "./build/Dockerfile.{{ target.manifest.name }}"
     tags= [
     {% for tag in tags %}
-      "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}"
+      "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}",
     {% endfor %}
     ]
     cache-from= [ {{ target.cache_from }} ]
