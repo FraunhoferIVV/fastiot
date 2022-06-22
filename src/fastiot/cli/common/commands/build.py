@@ -5,7 +5,7 @@ from glob import glob
 from typing import List, Optional
 
 import typer
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env

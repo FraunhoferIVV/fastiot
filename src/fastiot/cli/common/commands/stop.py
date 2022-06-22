@@ -2,6 +2,7 @@
 import logging
 import os
 import subprocess
+import sys
 from typing import Optional, List
 
 import typer
@@ -28,8 +29,8 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
 
     cmd = "docker-compose "
 
-    if service_names is not None:
-        cmd += "stop" + " ".join(service_names)
+    if service_names is not None and len(service_names) > 0:
+        cmd += "stop " + " ".join(service_names)
     else:
         cmd += "down"
 
@@ -39,4 +40,11 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
     os.environ['COMPOSE_HTTP_TIMEOUT'] = '300'
     exit_code = subprocess.call(f"{cmd}".split(), cwd=cwd)
     if exit_code != 0:
-        logging.error("Running the environment failed with exit code %s", str(exit_code))
+        logging.error("Stopping the environment failed with exit code %s", str(exit_code))
+        sys.exit(exit_code)
+    if service_names is not None and len(service_names) > 0:
+        cmd = "docker-compose rm -f " + " ".join(service_names)
+        exit_code = subprocess.call(cmd.split(), cwd=cwd)
+        if exit_code != 0:
+            logging.error("Stopping the environment failed with exit code %s", str(exit_code))
+            sys.exit(exit_code)

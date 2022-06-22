@@ -28,8 +28,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
     Be aware, that the configuration needs to be built manually before using `fastiot.cli configure`."""
     project_config = get_default_context().project_config
 
-    cmd = []
-    cmd.append("docker-compose")
+    cmd = ["docker-compose"]
     project_name = project_name or project_config.project_namespace + "__" + environment_name
     cmd.append("--project-name=" + project_name)
 
