@@ -2,6 +2,7 @@ import importlib
 import logging
 import os.path
 import subprocess
+import sys
 from importlib.util import find_spec
 
 import typer
@@ -50,4 +51,4 @@ def nuitka_compile(package_name: str = typer.Argument(default=None, help='The pa
 
     logging.info(nuitka_cmd)
     exit_code = subprocess.call(f"{nuitka_cmd}".split(), cwd=src_dir)
-    exit(exit_code)
+    sys.exit(exit_code)

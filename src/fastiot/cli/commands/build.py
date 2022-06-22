@@ -1,6 +1,7 @@
 import logging
 import os.path
 import subprocess
+import sys
 from glob import glob
 from typing import List, Optional
 
@@ -207,7 +208,8 @@ def _run_docker_bake_cmd(project_config, push):
         docker_cmd += " --load"
     exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
     if exit_code != 0:
-        raise RuntimeError("docker buildx bake failed with exit code " + str(exit_code))
+        logging.error("docker buildx bake failed with exit code " + str(exit_code))
+        sys.exit(exit_code)
 
 
 def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):

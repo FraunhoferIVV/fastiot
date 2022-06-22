@@ -10,10 +10,12 @@ from fastiot.cli.model.context import get_default_context
 
 
 def get_services_list(project_config: Optional[ProjectConfig] = None) -> Dict[str, ExternalService]:
-    """ Method to get a list of all available services as instantiated :class:fastiot.cli.model:FastIoTService`.
+    """ Method to get a list of all available services as instantiated
+    :class:`fastiot.cli.model.service.ExternalService`.
 
-    To append own services you simply have to inherit from :class:fastiot.cli.model:FastIoTService` and put them into
-    your project as `project.cli.services`. This method will try to import anything from there and for services.
+    To append own services you simply have to inherit from :class:`fastiot.cli.model.service.ExternalService` and put
+    them into your project. Then import those parts using :attr:`fastiot.cli.model.project.ProjectConfig.extensions`.
+    This method will try to import anything from there and for services.
     """
     if project_config is not None:
         for extension in project_config.extensions:
@@ -37,8 +39,8 @@ def set_external_service_port_environment(offset: int = 1024, random: bool = Fal
     :param random: Set to random to find a free service for each port. On very busy machines this may to reuse of ports,
                    if another service takes the port betweening determining its free status and acutally starting the
                    service.
-    :param services:  List of services as service name or instance of :class:`fastiot.cli.model.ExternalService`
-    :return: dict with the environment variables set and the coresponding port numbers
+    :param services:  List of services as service name or instance of :class:`fastiot.cli.model.service.ExternalService`
+    :return: dict with the environment variables set and the corresponding port numbers
     """
 
     open_ports = {}

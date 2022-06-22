@@ -45,20 +45,44 @@ class CompileSettingsEnum(str, Enum):
     # Provide compiled and source version of the library
 
 class ProjectConfig(BaseModel):
-    """ This class holds all variables reade from :file:`configure.py` in the project root directory. """
+    """
+    This class holds all variables reade from :file:`configure.py` in the project root directory. """
+    project_namespace: str
+    """ Namespace of the project used e.g. on the docker registry. This should be your project name."""
 
     project_root_dir: str = os.getcwd()
-    project_namespace: str
+    """ Project root directory. As the cli is intended to be run from the project root directory the default using the 
+    current working directory should be fine."""
+
     library_package: Optional[str] = None
+    """ Define a python package within your :file:`src` directory containing library methods to be shared between your 
+    services. If not specified no library will be built. """
     library_setup_py_dir: str = os.getcwd()
+    """ Path where to find the :file:`setup.py` to build your library for exporting. The default with the current
+     working directory should be fine, if you put your :file:`setup.py` at the toplevel of your project (common)."""
     module_packages: Optional[List[ModulePackageConfig]] = []
+    """ Define a list of :class:`fastiot.cli.model.project.ModulePackageConfig` where to find your services. Most 
+    projects will most probably only contain a single ModulePackage. This is optional if you, for example, only want 
+    to build a library using the framework."""
     deploy_configs: Optional[List[str]] = []
+    """ Manually define a list of deployments to actually build using the command 
+    :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path 
+    :file:`deployments` will be used."""
     test_config: Optional[str]
+    """ If you need any services to be started for automatic testing your project you may define the name of this 
+    special deployment found within the :attr:`fastiot.cli.model.project.ProjectConfig.deploy_configs`."""
     test_package: Optional[str]
+    """ Name of the package in the :file:`src` directory where unittests are stored. Common is to use something like 
+    :file:`myproject_tests`."""
     imports_for_test_config_environment_variables: Optional[List[str]] = None
     npm_test_dir: Optional[str] = None
     build_dir: str = 'build'
+    """ If you do not want to store generated build files (Dockerfiles, …) in the directory :file:`build` in your 
+    project root, please change!"""
     extensions: Optional[List[str]] = []
+    """ Use to add own extensions to the fastapi CLI. The CLI will try to import your modules. Make sure importing 
+    this module will import further commands and :class:`fastiot.cli.model.service.ExternalService`. Most of the times 
+    this is done filling the :file:`__init__.py` correspondingly."""
     compile_lib: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from 
     :class:`fastiot.cli.model.project.CompileSettingsEnum` """
@@ -75,6 +99,7 @@ class ProjectConfig(BaseModel):
         return modules
 
     def get_module_package_by_name(self, package_name: str) -> ModulePackageConfig:
+        """ Get a :class:`fastiot.cli.model.project.ModulePackageConfig` by its name."""
         for module_package in self.module_packages:
             if module_package.package_name == package_name:
                 return module_package
@@ -82,6 +107,8 @@ class ProjectConfig(BaseModel):
         raise ValueError(f"Module Package {package_name} not found in project configuration.")
 
     def get_all_deployment_names(self) -> List[str]:
+        """ Returns a list of all deployment names configured by configuration
+        (:attr:`fastiot.cli.model.project.ProjectConfig.deploy_configs`) or by convention."""
         if self.deploy_configs is not None:
             return self.deploy_configs
         else:
@@ -89,6 +116,7 @@ class ProjectConfig(BaseModel):
             return [d for d in deployments if os.path.isdir(d)]
 
     def get_deployment_by_name(self, deployment_name: str) -> DeploymentConfig:
+        """ Returns a specific deployment by its name. """
         deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
                                        deployment_name, DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
