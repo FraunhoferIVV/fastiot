@@ -46,9 +46,10 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
 
     cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
                        environment_name)
-    logging.debug("Running command to stop the environment: %s", cmd)
-    os.environ['COMPOSE_HTTP_TIMEOUT'] = '300'
-    exit_code = subprocess.call(f"{cmd}".split(), cwd=cwd)
+    logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)
+    env = os.environ.copy()
+    env['COMPOSE_HTTP_TIMEOUT'] = '300'
+    exit_code = subprocess.call(f"{cmd}".split(), cwd=cwd, env=env)
     if exit_code != 0:
         logging.error("Stopping the environment failed with exit code %s", str(exit_code))
         sys.exit(exit_code)
