@@ -8,18 +8,7 @@ from fastiot.cli.external_service_helper import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli import typer_app
-
-
-def _import_commands():
-    for f in os.listdir(os.path.join(os.path.dirname(typer_app.__file__), 'common', 'commands')):
-        if f.startswith('_'):
-            continue
-        f, _ = os.path.splitext(f)
-        mod = f'fastiot.cli.common.commands.{f}'
-        try:
-            importlib.import_module(mod)
-        except ImportError:
-            logging.exception(f"Import error raised during import of module {mod}")
+from fastiot.cli.common.commands import *
 
 
 def _import_plugin_commands(extensions):
@@ -41,7 +30,6 @@ if __name__ == '__main__':
     default_context = get_default_context()
     default_context.project_config = import_configure()
     default_context.external_services = get_services_list(default_context.project_config)
-    _import_commands()
     if default_context.project_config.extensions is not None:
         _import_plugin_commands(default_context.project_config.extensions)
 
