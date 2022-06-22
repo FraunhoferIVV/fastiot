@@ -42,14 +42,16 @@ class ProjectConfig(BaseModel):
     project_namespace: str
     library_package: Optional[str] = None
     library_setup_py_dir: str = os.getcwd()
-    module_packages: Optional[List[ModulePackageConfig]] = None
-    deploy_configs: Optional[List[str]] = None
+    module_packages: Optional[List[ModulePackageConfig]] = []
+    deploy_configs: Optional[List[str]] = []
     test_config: Optional[str]
     test_package: Optional[str]
     imports_for_test_config_environment_variables: Optional[List[str]] = None
     npm_test_dir: Optional[str] = None
     build_dir: str = 'build'
-    extensions: Optional[List[str]] = None
+    extensions: Optional[List[str]] = []
+    compile_lib: Optional[bool] = True
+    # Set to false if you do not want your library to be compiled (and obfuscated)
 
     def get_all_modules(self) -> List[ModuleConfiguration]:
         """ Returns a list of all modules configured in the project """

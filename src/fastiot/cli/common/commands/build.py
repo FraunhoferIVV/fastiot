@@ -71,6 +71,9 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
+          test_env_only: Optional[bool] = typer.Option(False,
+                                                       help="Build only modules defined in the test environment. "
+                                                            "This is especially useful in the CI-runner"),
           modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules",
                                                         autocompletion=_modules_completion)
           ):
@@ -91,6 +94,18 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
         modules = None
 
     project_config = get_default_context().project_config
+
+    if test_env_only:
+        if project_config.test_config is None:
+            logging.info("No modules to build for test environment as no test environment is specified.")
+            return
+        deployment = project_config.get_deployment_by_name(project_config.test_config)
+        modules = list(deployment.modules.keys())
+        if len(modules) == 0:
+            logging.info("No modules to build if selecting only test environment.")
+            return
+        logging.info("Building modules %s for testing", ", ".join(modules))
+
     create_all_docker_files(project_config, build_mode=mode, modules=modules)
     tags = tag.split(',')
     docker_bake(project_config, tags=tags, modules=modules, dry=dry, push=push, docker_registry=docker_registry,

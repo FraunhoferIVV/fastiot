@@ -15,12 +15,18 @@ def config(deployment_name: Optional[str] = typer.Argument(default=None, autocom
                                                            help="Select the environment to start."),
            tag: Optional[str] = typer.Option("latest"),
            docker_net_name: Optional[str] = typer.Option("fastiot_net"),
-           mount_service_ports: Optional[bool] = typer.Option(False)):
+           mount_service_ports: Optional[bool] = typer.Option(False),
+           test_env_only: Optional[bool] = typer.Option(False,
+                                                        help="Create only configuration defined in the test "
+                                                             "environment. This is especially useful in the CI-runner"),
+           ):
     """ TODO: This implements only the very basics to get the build pipeline started. Actual implementation needed. """
 
     project_config = get_default_context().project_config
 
-    if deployment_name is None:
+    if test_env_only:
+        deployment_names = [project_config.test_config]
+    elif deployment_name is None:
         deployment_names = project_config.get_all_deployment_names()
     else:
         deployment_names = [deployment_name]

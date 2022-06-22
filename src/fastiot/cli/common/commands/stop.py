@@ -20,12 +20,22 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
                                                                     help="Optionally specify services to be stopped "
                                                                          "from the environment. This will only stop "
                                                                          "the services but not remove the containers."
-                                                                         "(docker-compose stop instead of down)")
+                                                                         "(docker-compose stop instead of down)"),
+                stop_test_env: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
+                                                                         "test environment specified in the project. "
+                                                                         "Useful for the CI runner")
                 ):
     """
     Stops up the selected environment.
     """
     project_config = get_default_context().project_config
+
+    if stop_test_env:
+        environment_name = project_config.test_config
+
+    if environment_name is None:
+        logging.error("You have to define an environment to start or use the optional --run-test-env!")
+        sys.exit(-1)
 
     cmd = "docker-compose "
 

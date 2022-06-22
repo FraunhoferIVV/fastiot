@@ -99,7 +99,8 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
         if project_config.npm_test_dir:
             print(project_config.npm_test_dir)
     elif name == 'test_config':
-        _print_test_config(project_config=project_config)
+        if project_config.test_config:
+            _print_test_config(project_config=project_config)
     elif name == 'test_package':
         if project_config.test_package != '':
             print(project_config.test_package)
