@@ -21,6 +21,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
                                                                          "from the environment. This will only stop "
                                                                          "the services but not remove the containers."
                                                                          "(docker-compose stop instead of down)"),
+                project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
                 stop_test_env: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
                                                                          "test environment specified in the project. "
                                                                          "Useful for the CI runner")
@@ -37,15 +38,20 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
         logging.error("You have to define an environment to start or use the optional --run-test-env!")
         sys.exit(-1)
 
-    cmd = "docker-compose "
-
-    if service_names is not None and len(service_names) > 0:
-        cmd += "stop " + " ".join(service_names)
-    else:
-        cmd += "down"
-
     cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
                        environment_name)
+
+    cmd = f"docker-compose "
+
+    project_name = project_name or project_config.project_namespace + "__" + environment_name
+    cmd += "--project-name=" + project_name
+
+    if service_names is not None and len(service_names) > 0:
+        cmd += " stop " + " ".join(service_names)
+    else:
+        cmd += " down"
+
+
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)
     env = os.environ.copy()
     env['COMPOSE_HTTP_TIMEOUT'] = '300'
