@@ -65,6 +65,10 @@ def tests():
 
     project_config = get_default_context().project_config
 
+    if project_config.test_package is None:
+        logging.info("No test_package defined in configure.py. Skipping unittests.")
+        sys.exit(0)
+
     env = os.environ.copy()
     env['PYTHONPATH'] = os.path.join(project_config.project_root_dir, 'src')
 

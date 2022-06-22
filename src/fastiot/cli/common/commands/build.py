@@ -183,6 +183,10 @@ def docker_bake(project_config: ProjectConfig,
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
+    if len(targets) == 0:
+        logging.warning("No modules selected to build, aborting build of modules.")
+        return
+
     with open(os.path.join(project_config.project_root_dir, project_config.build_dir, 'docker-bake.hcl'),
               "w") as docker_bake_hcl:
         dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
