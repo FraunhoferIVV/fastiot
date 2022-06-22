@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from glob import glob
 from typing import List, Optional
 
@@ -16,17 +17,17 @@ class ModulePackageConfig(BaseModel):
     in the list, but are in the package are ignored.
     """
     package_name: str
-    """The package name of the modules"""
+    """ The package name of the modules"""
     module_names: Optional[List[str]] = None
-    """The module names as a list of strings. Leave empty to use all modules found in the package."""
+    """ The module names as a list of strings. Leave empty to use all modules found in the package."""
     cache_name: Optional[str] = None
-    """
+    """ 
     The name to use as the cache on the set docker cache registry. If not defined and a cache registry is configured 
     the `project_namespace:latest` will be used.  
     Example: mypackage-cache:latest
     """
     extra_caches: Optional[List[str]] = None
-    """
+    """ 
     A list of extra caches used to speed up building. It is intended if you want to read from other caches or different 
     tags. Each extra cache must match a cache name extended by ':' followed by the tag for the cache. Per default no
     extra caches are used. You might find it useful to always include the cache name of the current module package 
@@ -34,6 +35,14 @@ class ModulePackageConfig(BaseModel):
     Examples: mypackage-cache:latest, fastiot-cache:latest, fastiot-cache:mybranch
     """
 
+
+class CompileSettingsEnum(str, Enum):
+    only_compiled = 'only_compiled'
+    # Only provide a compiled version of the library
+    only_source = 'only_source'
+    # Only provide a source-version (.tar.gz and .whl)
+    all_variants = 'all_variants'
+    # Provide compiled and source version of the library
 
 class ProjectConfig(BaseModel):
     """ This class holds all variables reade from :file:`configure.py` in the project root directory. """
@@ -50,8 +59,9 @@ class ProjectConfig(BaseModel):
     npm_test_dir: Optional[str] = None
     build_dir: str = 'build'
     extensions: Optional[List[str]] = []
-    compile_lib: Optional[bool] = True
-    # Set to false if you do not want your library to be compiled (and obfuscated)
+    compile_lib: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
+    """ Set to false if you do not want your library to be compiled (and obfuscated), use options from 
+    :class:`fastiot.cli.model.project.CompileSettingsEnum` """
 
     def get_all_modules(self) -> List[ModuleConfiguration]:
         """ Returns a list of all modules configured in the project """

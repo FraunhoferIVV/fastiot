@@ -11,3 +11,5 @@ module_packages = [ModulePackageConfig(package_name='fastiot_sample_services',
 
 test_package = 'fastiot_test'
 test_config = 'fastiot_test_env'
+
+compile_lib = 'only_source'

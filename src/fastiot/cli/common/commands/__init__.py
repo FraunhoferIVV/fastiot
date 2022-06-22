@@ -5,3 +5,4 @@ from fastiot.cli.common.commands.nuitka_compile import *
 from fastiot.cli.common.commands.print import *
 from fastiot.cli.common.commands.run import *
 from fastiot.cli.common.commands.stop import *
+from fastiot.cli.common.commands.build_lib import *
