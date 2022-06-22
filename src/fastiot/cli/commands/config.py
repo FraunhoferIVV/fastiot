@@ -3,7 +3,7 @@ from typing import Optional
 
 import typer
 
-from fastiot.cli.common.commands.run import _environment_completion
+from fastiot.cli.commands.run import _environment_completion
 from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context

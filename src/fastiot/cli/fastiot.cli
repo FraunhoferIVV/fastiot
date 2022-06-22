@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-
 import importlib
 import logging
 import os
 
+from fastiot.cli import typer_app
+from fastiot.cli.commands import *  # noqa  # pylint: disable=unused-import
 from fastiot.cli.external_service_helper import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli import typer_app
-from fastiot.cli.common.commands import *
 
 
 def _import_plugin_commands(extensions):

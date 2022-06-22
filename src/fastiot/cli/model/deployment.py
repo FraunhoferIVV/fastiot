@@ -1,8 +1,9 @@
+""" Data models for deployment configurations """
 from typing import Dict, List, Optional
 
 import yaml
+from pydantic import BaseModel
 from pydantic.class_validators import root_validator, validator
-from pydantic.main import BaseModel
 
 
 class ModuleDeploymentConfig(BaseModel):

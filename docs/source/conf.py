@@ -44,7 +44,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_automodapi.automodapi',
               'sphinx_autodoc_typehints',
               'sphinx.ext.autosectionlabel',
-              'myst_parser']
+              #'myst_parser',
+              'sphinx_click']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
