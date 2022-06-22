@@ -103,7 +103,7 @@ def _git_version() -> str:
         patch = _get_number_of_commits()
 
     version = f"{major}.{minor}"
-    if branch == 'master' || branch == 'main':
+    if branch == 'master' or branch == 'main':
         if patch > 0:
             version += f'.{patch}'
     else:
