@@ -12,10 +12,12 @@ class ModuleConfiguration(BaseModel):
     manifest: Optional[ModuleManifest] = None
 
     def read_manifest(self, check_module_name: str = "") -> ModuleManifest:
-        from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
+        """ Reads out the module manifest, if not run before using the yaml-file otherwise just ``self.manifest``"""
+        if self.manifest is None:
+            from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
 
-        default_context = get_default_context()
-        manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
-                                     self.module_package_name, self.name, 'manifest.yaml')
-        self.manifest = ModuleManifest.from_yaml_file(manifest_path, check_module_name=check_module_name)
+            default_context = get_default_context()
+            manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
+                                         self.module_package_name, self.name, 'manifest.yaml')
+            self.manifest = ModuleManifest.from_yaml_file(manifest_path, check_module_name=check_module_name)
         return self.manifest

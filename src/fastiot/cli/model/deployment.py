@@ -7,8 +7,6 @@ import yaml
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator, validator
 
-#from fastiot.cli.external_service_helper import get_services_list
-
 
 class ModuleDeploymentConfig(BaseModel):
     """

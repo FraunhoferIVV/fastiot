@@ -117,6 +117,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
     for module in project_config.get_all_modules():
         if modules is None or module.name in modules:
+            module.read_manifest()
             create_docker_file(module, project_config, build_mode)
 
 

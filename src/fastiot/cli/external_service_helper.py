@@ -22,7 +22,7 @@ def get_services_list() -> Dict[str, ExternalService]:
     global _services_imported
 
     if not _services_imported:
-        from fastiot.cli.model.context import get_default_context
+        from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
 
         project_config = get_default_context().project_config
 
