@@ -76,6 +76,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
           test_env_only: Optional[bool] = typer.Option(False,
                                                        help="Build only modules defined in the test environment. "
                                                             "This is especially useful in the CI-runner"),
+          no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build."),
           modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules",
                                                         autocompletion=_modules_completion)
           ):
@@ -85,10 +86,12 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     Per default it builds all images. Optionally, you can specify a single image to build.
     """
     logging.info("Using Docker registry: %s", docker_registry)
-    os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
-              "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
-              "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
-              "docker buildx inspect --bootstrap; ")
+
+    if not dry:
+        os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
+                  "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
+                  "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
+                  "docker buildx inspect --bootstrap; ")
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
@@ -111,7 +114,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     create_all_docker_files(project_config, build_mode=mode, modules=modules)
     tags = tag.split(',')
     docker_bake(project_config, tags=tags, modules=modules, dry=dry, push=push, docker_registry=docker_registry,
-                docker_registry_cache=docker_registry_cache, platform=platform)
+                docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
 
 
 def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
@@ -146,7 +149,8 @@ def docker_bake(project_config: ProjectConfig,
                 platform: Optional[str] = None,
                 docker_registry: Optional[str] = None,
                 docker_registry_cache: Optional[str] = None,
-                push: bool = False):
+                push: bool = False,
+                no_cache: bool = False):
     """ Method to create a :file:`docker-bake.hcl` file and invoke the docker bake command """
 
     class TargetConfiguration(BaseModel):
@@ -198,19 +202,24 @@ def docker_bake(project_config: ProjectConfig,
                                                          docker_registry=docker_registry))
 
     if not dry:
-        _run_docker_bake_cmd(project_config, push)
+        _run_docker_bake_cmd(project_config, push, no_cache)
 
 
-def _run_docker_bake_cmd(project_config, push):
+def _run_docker_bake_cmd(project_config, push, no_cache):
     docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
     if push:
         docker_cmd += " --push"
     else:
         docker_cmd += " --load"
+    if no_cache:
+        docker_cmd += " --no-cache"
     exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
     if exit_code != 0:
         logging.error("docker buildx bake failed with exit code %s", str(exit_code))
-        sys.exit(exit_code)
+        if not no_cache:
+            docker_cmd += " --no-cache"
+            exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
+            sys.exit(exit_code)
 
 
 def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):
@@ -220,7 +229,7 @@ def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: b
         if extra_caches is not None:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,src={docker_registry_cache}/{cache}"')
-    if push is not None:  # We are most probably in a local environment, so try to use this cache as well
+    if not push:  # We are most probably in a local environment, so try to use this cache as well
         caches_from.append('"type=local,src=.docker-cache"')
 
     if push and docker_registry_cache is not None:
@@ -230,5 +239,5 @@ def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: b
     else:
         cache_to = ""
 
-    cache_from = ",\n".join(caches_from)
+    cache_from = ",\n                  ".join(caches_from)
     return cache_from, cache_to
