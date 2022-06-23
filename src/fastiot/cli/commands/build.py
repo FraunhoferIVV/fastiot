@@ -36,7 +36,7 @@ def _platform_completion() -> List[str]:
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build(mode: str = typer.Option('debug', '-m', '--mode',
-                                   callback=_mode_callback, autocompletion=_mode_completion,
+                                   callback=_mode_callback, shell_complete=_mode_completion,
                                    help="The build mode for docker images. Can be 'debug' or 'release'. "
                                         "No compilation of python code will happen if chosen 'debug'. Nuitka "
                                         "compilation will be applied if chosen 'release'."),
@@ -56,7 +56,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                                          "SAM_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
                                                          "empty, it will use it as a cache for intermediate image "
                                                          "layers."),
-          platform: str = typer.Option(None, '-p', '--platform', autocompletion=_platform_completion,
+          platform: str = typer.Option(None, '-p', '--platform', shell_complete=_platform_completion,
                                        help="The platform to compile for given as a comma ',' separated list. Possible "
                                             "values are 'amd64' and 'arm64'. Currently, it is only supported in "
                                             "combination with the '--push' flag. Per default, the platform of the "
@@ -78,7 +78,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                                             "This is especially useful in the CI-runner"),
           no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build."),
           modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules",
-                                                        autocompletion=_modules_completion)
+                                                        shell_complete=_modules_completion)
           ):
     """
     This command builds images.

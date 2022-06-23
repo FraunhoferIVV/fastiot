@@ -57,7 +57,7 @@ def _name_completion() -> List[str]:
 
 
 @app.command('print', context_settings=DEFAULT_CONTEXT_SETTINGS)
-def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_name, autocompletion=_name_completion),
+def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_name, shell_complete=_name_completion),
               config: Optional[str] = typer.Option(None,
                                                    help="Only applicable if <name> is modules_to_build. If specified, "
                                                         "it doesn't print modules which are not needed for the "

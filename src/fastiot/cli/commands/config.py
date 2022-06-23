@@ -11,7 +11,7 @@ from fastiot.cli.typer_app import app
 
 
 @app.command()
-def config(deployment_name: Optional[str] = typer.Argument(default=None, autocompletion=_environment_completion,
+def config(deployment_name: Optional[str] = typer.Argument(default=None, shell_complete=_environment_completion,
                                                            help="Select the environment to start."),
            tag: Optional[str] = typer.Option("latest"),
            docker_net_name: Optional[str] = typer.Option("fastiot_net"),

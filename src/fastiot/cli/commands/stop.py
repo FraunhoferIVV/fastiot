@@ -14,7 +14,7 @@ from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
 
 
 @stop_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def environment(environment_name: Optional[str] = typer.Argument(default=None, autocompletion=_environment_completion,
+def environment(environment_name: Optional[str] = typer.Argument(default=None, shell_complete=_environment_completion,
                                                                  help="Select the environment to stop."),
                 service_names: Optional[List[str]] = typer.Argument(default=None,
                                                                     help="Optionally specify services to be stopped "
