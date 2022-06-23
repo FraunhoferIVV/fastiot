@@ -158,12 +158,7 @@ def docker_bake(project_config: ProjectConfig,
         cache_from: str
         cache_to: str
 
-    if docker_registry is None:
-        docker_registry = os.environ.get('FASTIOT_DOCKER_REGISTRY', "")
     docker_registry = docker_registry + "/" if docker_registry != "" else docker_registry
-
-    if docker_registry_cache is None:
-        docker_registry_cache = os.environ.get('FASTIOT_DOCKER_REGISTRY_CACHE')
 
     targets = []
     for module in project_config.get_all_modules():

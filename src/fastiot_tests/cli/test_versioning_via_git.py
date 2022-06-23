@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from fastiot.cli.version import get_version, create_version_file
 
 
-class MyTestCase(unittest.TestCase):
+class TestGitVersioning(unittest.TestCase):
 
     def setUp(self) -> None:
         self.test_dir = TemporaryDirectory()

@@ -60,8 +60,8 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
         sys.exit(exit_code)
 
 
-@run_cmd.command()
-def tests():
+@run_cmd.command(name='tests')
+def run_unittests():
 
     project_config = get_default_context().project_config
 

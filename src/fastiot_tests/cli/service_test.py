@@ -1,7 +1,7 @@
 from fastiot.cli.model import ExternalService
 
 
-class TestService(ExternalService):
+class SomeTestService(ExternalService):
     name = 'test_service'
     docker_image = 'test'
     port = 1
