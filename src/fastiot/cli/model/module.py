@@ -12,7 +12,7 @@ class ModuleConfiguration(BaseModel):
     manifest: Optional[ModuleManifest] = None
 
     def read_manifest(self, check_module_name: str = "") -> ModuleManifest:
-        from fastiot.cli.model.context import get_default_context
+        from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
 
         default_context = get_default_context()
         manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',

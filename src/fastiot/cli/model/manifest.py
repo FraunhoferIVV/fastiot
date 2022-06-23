@@ -1,3 +1,4 @@
+""" Data model for module manifests """
 import os
 import tempfile
 from dataclasses import dataclass
@@ -34,8 +35,8 @@ class Volume(BaseModel):
 
     location: str
     """
-    The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as 
-    file:`opt/mydata` in  your container. 
+    The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as
+    file:`opt/mydata` in  your container.
     """
     env_variable: str
     """
@@ -88,16 +89,16 @@ class Vue(BaseModel):
     src: str  # Source path relative to your application where the vue.js code is located
     dst: str  # Destination path where the build static files will be placed, e.g. 'static'
     configured_dist: str = 'dist'
-    """ Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files 
-    in the `<vue-path>/dist` which is also the default here. 
-    If you have something like 
-    ``  
+    """ Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
+    in the `<vue-path>/dist` which is also the default here.
+    If you have something like
+    ``
     module.exports = {
       outputDir:"../flask_server/static",
       assetsDir: "static"
     }
     ``
-    in your :file:`vue.config.js` use the `outputDir` variable as relative path here. 
+    in your :file:`vue.config.js` use the `outputDir` variable as relative path here.
     """
 
 
@@ -108,18 +109,18 @@ class ModuleManifest(BaseModel):
     name: str  # Name needs to comply with the modules name
     ports: Optional[Dict[str, Port]] = None
     """
-    Provide a list with some name for the service and a port that this container will open, e.g. when operating 
+    Provide a list with some name for the service and a port that this container will open, e.g. when operating
     as a webserver.`
     """
     docker_base_image: str = DOCKER_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
-    :const:`fastiot.cli.configuration.constants.DOCKER_BASE_IMAGE` will be used. 
+    :const:`fastiot.cli.configuration.constants.DOCKER_BASE_IMAGE` will be used.
     Be aware, that the further Dockerfile will be unchanged, thus your base image should be based on some Debian-style.
-    If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be 
+    If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be
     used.
     """
     docker_cache_image: Optional[str] = None
-    """ If set this will override the per module package configuration for a docker registry cache. The full cache name 
+    """ If set this will override the per module package configuration for a docker registry cache. The full cache name
     will be constructed from the docker cache registry set and this name. """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
     devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
@@ -130,7 +131,7 @@ class ModuleManifest(BaseModel):
     Enable if this module needs privileged permissions inside docker, e.g. for hardware access
     """
     platforms: List[CPUPlatform] = [CPUPlatform.amd64]
-    """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one 
+    """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one
     specified (or amd64 if none) will be used to build the image. """
 
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
@@ -173,18 +174,9 @@ class ModuleManifest(BaseModel):
         with tempfile.TemporaryDirectory() as tempdir:
             tempfile_name = f"{tempdir}/manifest.yaml"
             export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/manifest.yaml > {tempfile_name}"
-            get_cli_logger().info(f'Exporting manifest from docker image command: "{export_cmd}"')
+            get_cli_logger().info('Exporting manifest from docker image command: %s', export_cmd)
             ret = os.system(shlex_quote(export_cmd))
             if ret != 0:
                 raise OSError(f"Could not read manifest.yaml file from docker image {docker_image_name}")
 
             return cls.from_yaml_file(filename=tempfile_name)
-
-
-def read_manifest(filename: str, check_module_name: str = '') -> ModuleManifest:
-    """ Does the magic of import yaml to pydantic model"""
-    return ModuleManifest.from_yaml_file(filename, check_module_name)
-
-
-def read_manifest_from_docker_image(docker_image_name: str) -> ModuleManifest:
-    return ModuleManifest.from_docker_image(docker_image_name)

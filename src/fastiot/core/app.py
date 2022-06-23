@@ -35,7 +35,6 @@ class FastIoTApp:
     def main(cls, **kwargs):
         async def run_main():
             broker_connection = await BrokerConnectionImpl.connect()
-            #broker_connection = None
             try:
                 app = cls(broker_connection=broker_connection, **kwargs)
                 await app.run()

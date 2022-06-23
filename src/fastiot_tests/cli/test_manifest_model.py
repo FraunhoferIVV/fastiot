@@ -1,7 +1,7 @@
 import unittest
 from tempfile import NamedTemporaryFile
 
-from fastiot.cli.model.manifest import read_manifest, ModuleManifest
+from fastiot.cli.model.manifest import ModuleManifest
 
 MANIFEST = """
 fastiot_module:

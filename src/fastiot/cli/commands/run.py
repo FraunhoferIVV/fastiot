@@ -48,7 +48,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, a
         cmd.append("-d")
 
     if service_names is not None:
-            cmd += service_names
+        cmd += service_names
 
     cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
                        environment_name)

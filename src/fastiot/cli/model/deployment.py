@@ -1,9 +1,13 @@
 """ Data models for deployment configurations """
+# pylint: disable=no-self-argument
+
 from typing import Dict, List, Optional
 
 import yaml
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator, validator
+
+#from fastiot.cli.external_service_helper import get_services_list
 
 
 class ModuleDeploymentConfig(BaseModel):
@@ -14,13 +18,13 @@ class ModuleDeploymentConfig(BaseModel):
     image_name: str
     """The name defines which module is taken. Contains namespace identifier as a prefix, e.g. fastiot/time_series """
     service_name: Optional[str]
-    """The service name defines how this module is named in compose file. Useful if one image is used many times within 
+    """The service name defines how this module is named in compose file. Useful if one image is used many times within
     on deployment. Will be set to image_name if not specified. """
     docker_registry: Optional[str] = None
     """The specified docker registry"""
     tag: Optional[str] = 'latest'
     """The specified tag, defaults to `latest` if not specified."""
-    environment: Optional[Dict[str, str]] = dict()
+    environment: Optional[Dict[str, str]] = {}
     """Includes all environment variables for the module"""
     environment_modifications: Optional[Dict[str, str]]
     """Includes all environment variables which are specified for this module specifically"""
@@ -38,8 +42,8 @@ class ModuleDeploymentConfig(BaseModel):
     def docker_registry_image_prefix(self) -> str:
         if self.is_local_docker_registry:
             return ""
-        else:
-            return f"{self.docker_registry}/"
+
+        return f"{self.docker_registry}/"
 
     @property
     def docker_image_name(self) -> str:
@@ -54,7 +58,7 @@ class AnsibleHost(BaseModel):
     name: str
     """ Readable name of the host"""
     ip: str
-    """ IP-Address (or DNS-resolvable hostname) where to find the host. 
+    """ IP-Address (or DNS-resolvable hostname) where to find the host.
 
     You may also add additional parameters to be placed in the inventory (hosts) file for ansible like
      ``ansible_user=some_special_user``."""
@@ -69,7 +73,7 @@ class DeploymentTargetSetup(BaseModel):
     remote_user: Optional[str] = 'ubuntu'
     """ The remote user to use to logins for all hosts, defaults to ``ubuntu``"""
     link_prometheus: bool = False
-    """ Set to ``True`` to enable automatically link the Prometheus-Client configuration copied by Ansible to host to 
+    """ Set to ``True`` to enable automatically link the Prometheus-Client configuration copied by Ansible to host to
     the current project. Only works if you do *not* have :file:`docker-compose.override.yaml` in your deployment
      already."""
 
@@ -83,11 +87,11 @@ class DeploymentConfig(BaseModel):
     deployment_config_version: int = 1
     modules: Dict[str, Optional[ModuleDeploymentConfig]] = {}
     """ List of modules to integrate in the deployment."""
-    services: Optional[List[str]] = list()
+    services: Optional[List[str]] = []
     """ List of services to integrate """
-    services_external: Optional[List[str]] = list()
-    """ Allows to mention services running on external servers and configured manually. This will avoid warnings in the 
-    setup process if services specified by the modules as dependency could not be found. 
+    services_external: Optional[List[str]] = []
+    """ Allows to mention services running on external servers and configured manually. This will avoid warnings in the
+    setup process if services specified by the modules as dependency could not be found.
     """
     deployment_target: Optional[DeploymentTargetSetup]
     """ A deployment configuration to auto-generate Ansible Playbooks
@@ -107,12 +111,12 @@ class DeploymentConfig(BaseModel):
 
     @root_validator
     def check_services(cls, values):
+        from fastiot.cli.external_service_helper import get_services_list
+        services = get_services_list()
         for service_list in [values.get("services"), values.get("services_external")]:
             for service in service_list:
-                # TODO: Reference to context to find available services.
-                pass
-                #if service not in context.services:
-                #    raise()
+                if service not in services.keys():
+                    raise ValueError(f"Service {service} not found in service list!")
         return values
 
     @staticmethod

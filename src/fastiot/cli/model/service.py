@@ -1,3 +1,4 @@
+""" data model for external services """
 from typing import Dict, Union, Optional
 
 from pydantic import BaseModel
@@ -12,6 +13,6 @@ class ExternalService(BaseModel):
     """ Environment variable to read the port number, as for internal purposes the port number may change """
     password_env_var: Optional[str]  # If the service needs a password use this env
     additional_env: Optional[Dict[str, Union[str, int]]] = None
-    """ Provide any additional environment variables to be set here as a dictionary with the variable name and a 
+    """ Provide any additional environment variables to be set here as a dictionary with the variable name and a
     sensible default. """
 

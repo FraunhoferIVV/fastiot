@@ -1,3 +1,4 @@
+""" Command to compile modules and packages with Nuitka """
 import importlib
 import logging
 import os.path
@@ -30,8 +31,9 @@ def nuitka_compile(package_name: str = typer.Argument(default=None, help='The pa
     try:
         importlib.import_module("nuitka")
     except ImportError:
-        raise RuntimeError("You have to install the package nuitka manually using `pip install nuitka` for this command"
-                           " to be working or try using the option `--install-nuitka`")
+        logging.error("You have to install the package nuitka manually using `pip install nuitka` for this command "
+                      "to be working or try using the option `--install-nuitka`")
+        sys.exit(3)
 
     if package_name is None:
         raise NameError("No package_name set.")

@@ -1,3 +1,4 @@
+""" Build command """
 import logging
 import os.path
 import subprocess
@@ -83,7 +84,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
     Per default it builds all images. Optionally, you can specify a single image to build.
     """
-    logging.info(f"Docker registry: {docker_registry}")
+    logging.info("Using Docker registry: %s", docker_registry)
     os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
               "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
               "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
@@ -127,7 +128,6 @@ def create_docker_file(module: ModuleConfiguration, project_config: ProjectConfi
         pass  # No need to create directory twice
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + module.name)
-    manifest = module.read_manifest(check_module_name=module.name)
 
     with open(docker_filename, "w") as dockerfile:
         dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
@@ -208,7 +208,7 @@ def _run_docker_bake_cmd(project_config, push):
         docker_cmd += " --load"
     exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
     if exit_code != 0:
-        logging.error("docker buildx bake failed with exit code " + str(exit_code))
+        logging.error("docker buildx bake failed with exit code %s", str(exit_code))
         sys.exit(exit_code)
 
 

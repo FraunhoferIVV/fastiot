@@ -3,11 +3,14 @@ import unittest
 from unittest.mock import Mock
 
 from fastiot.cli.external_service_helper import get_services_list
-from fastiot.cli.model import ProjectConfig
+from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli import service_test
 
 
 class TestServiceImports(unittest.TestCase):
+
+    def setUp(self):
+        init_default_context()
 
     def tearDown(self):
         for mod in ["fastiot_test", "fastiot_test.cli", "fastiot_test.cli.services"]:
@@ -25,18 +28,15 @@ class TestServiceImports(unittest.TestCase):
         """ Test listing services when importing extension without additional services"""
         sys.modules['fastiot_test_module'] = Mock()  # Empty module => Nothing to import
 
-        project_config = ProjectConfig(project_namespace='fastiot_test',
-                                       extensions=['fastiot_test_module'])
         services_integrated = get_services_list()
-        services_after_import = get_services_list(project_config)
+        services_after_import = get_services_list()
         self.assertEqual(len(services_integrated), len(services_after_import))
 
     def test_import_extension_with_service(self):
         """ Test importing services from actual module file """
         sys.modules['fastiot_test_module.extension'] = service_test
 
-        project_config = ProjectConfig(project_namespace='fastiot_test', extensions=['fastiot_test_module'])
-        services = get_services_list(project_config)
+        services = get_services_list()
 
         self.assertIn('test_service', services.keys())
         self.assertIn('mariadb', services.keys())

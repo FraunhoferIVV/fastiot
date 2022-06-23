@@ -105,9 +105,9 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
         if project_config.test_package != '':
             print(project_config.test_package)
     elif name == 'external_services':
-        print("\n".join(list(get_services_list(project_config).keys())))
+        print("\n".join(list(get_services_list().keys())))
     elif name == 'external_services_port_vars':
-        print("\n".join([s.port_env_var for s in get_services_list(project_config).values()]))
+        print("\n".join([s.port_env_var for s in get_services_list().values()]))
     elif name == 'project_namespace':
         print(project_config.project_namespace)
 

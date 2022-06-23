@@ -53,8 +53,8 @@ def _call_git_describe() -> Optional[str]:
         result = p.stdout.readlines()
         if not result:
             return None
-        else:
-            return result[0].decode('ascii').strip()
+
+        return result[0].decode('ascii').strip()
 
 
 def _call_git_branch() -> str:
@@ -103,7 +103,7 @@ def _git_version() -> str:
         patch = _get_number_of_commits()
 
     version = f"{major}.{minor}"
-    if branch == 'master' or branch == 'main':
+    if branch in ['master', 'main']:
         if patch > 0:
             version += f'.{patch}'
     else:
@@ -116,7 +116,7 @@ def _git_version() -> str:
 def _version_file_version() -> Optional[str]:
 
     def get_file():
-        for root, dirs, files in os.walk(os.getcwd()):
+        for root, _, files in os.walk(os.getcwd()):
             if "__version__.py" in files:
                 return os.path.join(root, "__version__.py")
 

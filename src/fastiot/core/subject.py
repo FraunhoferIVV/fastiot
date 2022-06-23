@@ -1,11 +1,12 @@
 import random
-from enum import Enum
 from typing import Type
 
 from pydantic import BaseModel, root_validator
 
 
 class Subject(BaseModel):
+    # pylint: disable=no-self-argument
+
     name: str
     msg_cls: Type[BaseModel]
     reply_cls: Type[BaseModel] = None

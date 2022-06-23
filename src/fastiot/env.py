@@ -14,15 +14,15 @@ class BrokerEnv:
 
     @property
     def port(self) -> int:
-        return int(os.getenv(FASTIOT_BROKER_PORT, 4222))
+        return int(os.getenv(FASTIOT_BROKER_PORT, '4222'))
 
     @property
     def default_timeout(self) -> float:
-        return float(os.getenv(FASTIOT_BROKER_DEFAULT_TIMEOUT, 30))
+        return float(os.getenv(FASTIOT_BROKER_DEFAULT_TIMEOUT, '30'))
 
     @property
     def stream_timeout(self) -> float:
-        return float(os.getenv(FASTIOT_BROKER_STREAM_TIMEOUT, 10))
+        return float(os.getenv(FASTIOT_BROKER_STREAM_TIMEOUT, '10'))
 
 
 fastiot_broker_env = BrokerEnv()
