@@ -130,6 +130,10 @@ show_related = True
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['static']
 
+html_css_files = [
+    'fastiot.css',
+]
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
