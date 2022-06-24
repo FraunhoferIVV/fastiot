@@ -53,20 +53,18 @@ class AnsibleHost(BaseModel):
     Represents a host for Ansible based deployments, used by
     :class:`fastiot.cli.models.deployment.DeploymentTargetSetup`
     """
-    name: str
-    """ Readable name of the host"""
     ip: str
     """ IP-Address (or DNS-resolvable hostname) where to find the host.
 
     You may also add additional parameters to be placed in the inventory (hosts) file for ansible like
-     ``ansible_user=some_special_user``."""
+     ``ansible_user=some_special_user`` directly following the string."""
 
 
 class DeploymentTargetSetup(BaseModel):
     """
     Configuration options to generate ansible playbooks on the fly to deploy your project
     """
-    hosts: List[AnsibleHost]
+    hosts: Dict[str, AnsibleHost]
     """ A list with ansible hosts to deploy the setup to"""
     remote_user: Optional[str] = 'ubuntu'
     """ The remote user to use to logins for all hosts, defaults to ``ubuntu``"""

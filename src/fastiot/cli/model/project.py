@@ -1,6 +1,7 @@
 """ data model for project configuration """
 import os
 from enum import Enum
+from glob import glob
 from typing import List, Optional
 
 from pydantic.main import BaseModel
@@ -45,6 +46,7 @@ class CompileSettingsEnum(str, Enum):
     # Only provide a source-version (.tar.gz and .whl)
     all_variants = 'all_variants'
     # Provide compiled and source version of the library
+
 
 class ProjectConfig(BaseModel):
     """
@@ -111,11 +113,11 @@ class ProjectConfig(BaseModel):
     def get_all_deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration
         (:attr:`fastiot.cli.model.project.ProjectConfig.deploy_configs`) or by convention."""
-        if self.deploy_configs is not None:
+        if not self.deploy_configs is not None and self.deploy_configs != []:
             return self.deploy_configs
 
-        deployments = (os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR))
-        return [d for d in deployments if os.path.isdir(d)]
+        deployments = glob(os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, '*', 'deployment.yaml'))
+        return [os.path.basename(os.path.dirname(d)) for d in deployments]
 
     def get_deployment_by_name(self, deployment_name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """

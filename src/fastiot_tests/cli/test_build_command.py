@@ -1,6 +1,7 @@
 import os.path
 import tempfile
 import unittest
+from typing import Optional
 
 from typer.testing import CliRunner
 
@@ -11,12 +12,13 @@ from fastiot.testlib.cli import init_default_context
 from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-def _write_configure(path: str, no_modules: bool):
+def _write_configure(path: str, no_modules: bool, project_root_dir: Optional[str]):
     configure_file = os.path.join(path, 'configure.py')
+    project_root_dir = project_root_dir or os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
     with open(configure_file, 'w') as file:
         file.write("from fastiot.cli.model import ModulePackageConfig\n"
                    "project_namespace = 'fastiot'\n"
-                   f"project_root_dir = '{os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))}'\n"
+                   f"project_root_dir = '{project_root_dir}'\n"
                    f"build_dir='{path}'\n"
                    "test_config = 'fastiot_test_env'\n")
         if not no_modules:
@@ -24,8 +26,8 @@ def _write_configure(path: str, no_modules: bool):
         file.seek(0)
 
 
-def _prepare_env(tempdir, no_modules=False):
-    _write_configure(tempdir, no_modules)
+def _prepare_env(tempdir, no_modules=False, project_root_dir:str = None):
+    _write_configure(tempdir, no_modules, project_root_dir)
     os.environ['FASTIOT_CONFIGURE_FILE'] = os.path.join(tempdir, 'configure.py')
     default_context = get_default_context()
     default_context.project_config = import_configure(os.environ.get('FASTIOT_CONFIGURE_FILE'))
