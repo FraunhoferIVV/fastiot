@@ -70,11 +70,17 @@ class CPUPlatform(str, Enum):
     """ Definition of the CPU platform the container will be built for """
 
     amd64 = "amd64"  # The most common architecture for servers, desktop and laptop computers with Intel or AMD CPUs.
+    amd64_2 = "amd64_2"  # Use more CPU features, s. https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
     arm64 = "arm64"  # Modern architecture for e.g. Raspberry Pi 3 and 4 if a 64 Bit OS is used like Ubuntu 20.04
+    armv7 = 'armv7'  # 32bit ARM like RasPi with 32 bit OS
 
     def as_docker_platform(self):
         """ Returns a member (accessed by self in this case!) as docker-style platform. This usually means e.g.
-        `linux/amd64`, but for some this may vary, so we can add additional manipulations here."""
+        `linux/amd64`"""
+        if self == self.amd64_2:
+            return "linux/amd64/2"
+        elif self == self.armv7:
+            return 'linux/arm/v7'
         return "linux/" + self
 
 

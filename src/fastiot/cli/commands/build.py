@@ -31,7 +31,7 @@ def _modules_completion() -> List[str]:
 
 
 def _platform_completion() -> List[str]:
-    return ['amd64', 'arm64']
+    return [p.value for p in CPUPlatform]
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
