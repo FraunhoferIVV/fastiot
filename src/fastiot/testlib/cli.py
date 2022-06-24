@@ -1,4 +1,5 @@
 """ Some helpers to write CLI tests """
+import logging
 import os
 from typing import Optional
 
@@ -15,8 +16,9 @@ def init_default_context(configure_filename: Optional[str] = None):
     try:
         _ = os.getcwd()
     except FileNotFoundError:
-        # This is some nasty workaround as it is unclear at the moment why, when running tests, os.getcwd() may fail.
-        # This is working ok when running one testfile but not when running all of them :-/
+        logging.warning(f"Most probably some other test changed the working directory to "
+                        f"`{os.readlink('/proc/self/cwd')}` and did move back.\n This is a bad practice and you should "
+                        f"find the test that’s using `os.chdir`. We will try change back to the project root dir.")
         os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
     if configure_filename is None:
