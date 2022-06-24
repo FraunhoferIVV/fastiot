@@ -12,7 +12,7 @@ purposes and manage local deployments.
 Setting environment variables
 *****************************
 
-You need to specify the environment variables :envvar:`FASTIOT_EXTRA_PYPI` and :envvar:`SAM_DOCKER_REGISTRY` before running ``fastiot.cli``. You can do
+You need to specify the environment variables :envvar:`FASTIOT_EXTRA_PYPI` and :envvar:`FASTIOT_DOCKER_REGISTRY` before running ``fastiot.cli``. You can do
 so by calling following commands if you are an ivv-dd employee and not using a centrally administrated Linux system within Fraunhofer IVV.
 On these systems this is configured already::
 
@@ -24,10 +24,10 @@ You can also put these lines in a Bash Script in a file inside :file:`/etc/profi
 This should work on pretty much any Linux.
 
 Or by passing it before each call like:
-``SAM_EXTRA_PYPI=pypi.dev.ivv-dd.fhg.de SAM_DOCKER_REGISTRY=docker.dev.ivv-dd.fhg.de:5000 fastiot.cli <args>``
+``FASTIOT_EXTRA_PYPI=pypi.dev.ivv-dd.fhg.de FASTIOT_DOCKER_REGISTRY=docker.dev.ivv-dd.fhg.de:5000 fastiot.cli <args>``
 
-The environment variable :envvar:`SAM_EXTRA_PYPI` specifies the pypi repository where additional libraries can be pulled. The
-environment variable :envvar:`SAM_DOCKER_REGISTRY` is optional, but recommended to always tag built images with the docker
+The environment variable :envvar:`FASTIOT_EXTRA_PYPI` specifies the pypi repository where additional libraries can be pulled. The
+environment variable :envvar:`FASTIOT_DOCKER_REGISTRY` is optional, but recommended to always tag built images with the docker
 registry and generated configs also with the docker registry as image name.
 
 *********************
