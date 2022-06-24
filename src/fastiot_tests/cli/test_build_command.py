@@ -11,30 +11,31 @@ from fastiot.testlib.cli import init_default_context
 from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-def _write_configure(path: str):
+def _write_configure(path: str, no_modules: bool):
     configure_file = os.path.join(path, 'configure.py')
     with open(configure_file, 'w') as file:
         file.write("from fastiot.cli.model import ModulePackageConfig\n"
                    "project_namespace = 'fastiot'\n"
                    f"project_root_dir = '{os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))}'\n"
-                   "module_packages = [ModulePackageConfig(package_name='fastiot_sample_services')]\n"
                    f"build_dir='{path}'\n"
                    "test_config = 'fastiot_test_env'\n")
+        if not no_modules:
+            file.write("module_packages = [ModulePackageConfig(package_name='fastiot_sample_services')]\n")
         file.seek(0)
 
-def _prepare_env(tempdir):
-    _write_configure(tempdir)
+
+def _prepare_env(tempdir, no_modules=False):
+    _write_configure(tempdir, no_modules)
     os.environ['FASTIOT_CONFIGURE_FILE'] = os.path.join(tempdir, 'configure.py')
     default_context = get_default_context()
     default_context.project_config = import_configure(os.environ.get('FASTIOT_CONFIGURE_FILE'))
-        
+
+
 class TestBuildCommand(unittest.TestCase):
 
     def setUp(self):
         init_default_context()
         self.runner = CliRunner()
-
-
 
     def test_single_module(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -107,6 +108,16 @@ class TestBuildCommand(unittest.TestCase):
             result = self.runner.invoke(app, ["build", "--dry", "--test-env-only"])
             self.assertEqual(result.exit_code, 0)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
+
+    def test_empty_build(self):
+        with tempfile.TemporaryDirectory() as tempdir:
+            _prepare_env(tempdir, no_modules=True)
+
+            result = self.runner.invoke(app, ["build", "--dry"])
+            self.assertEqual(result.exit_code, 0)
+            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
+            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
+            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
 
 
 if __name__ == '__main__':
