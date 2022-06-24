@@ -113,10 +113,10 @@ class ProjectConfig(BaseModel):
     def get_all_deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration
         (:attr:`fastiot.cli.model.project.ProjectConfig.deploy_configs`) or by convention."""
-        if not self.deploy_configs is not None and self.deploy_configs != []:
+        if self.deploy_configs:
             return self.deploy_configs
 
-        deployments = glob(os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, '*', 'deployment.yaml'))
+        deployments = glob(os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE))
         return [os.path.basename(os.path.dirname(d)) for d in deployments]
 
     def get_deployment_by_name(self, deployment_name: str) -> DeploymentConfig:

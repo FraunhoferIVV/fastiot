@@ -25,14 +25,13 @@ def deploy(deployment_name: str = typer.Argument(default=None, shell_complete=_e
     project_config = get_default_context().project_config
 
     if deployment_name not in project_config.get_all_deployment_names():
-        logging.error("Deployment %s not in project deployments.", deployment_name)
+        typer.echo(f"Deployment {deployment_name} not in project deployments.")
         raise typer.Exit(code=1)
 
     deployment = project_config.get_deployment_by_name(deployment_name)
     if deployment.deployment_target is None:
-        logging.error("Deployment %s does not have a deployment_target configured.", deployment_name)
+        typer.echo(f"Deployment {deployment_name} does not have a deployment_target configured.")
         raise typer.Exit(code=2)
-
 
     _write_ansible_playbook(deployment_name, deployment)
 
