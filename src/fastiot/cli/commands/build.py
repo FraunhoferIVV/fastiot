@@ -83,15 +83,9 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     """
     This command builds images.
 
-    Per default it builds all images. Optionally, you can specify a single image to build.
+    Per default, it builds all images. Optionally, you can specify a single image to build.
     """
     logging.info("Using Docker registry: %s", docker_registry)
-
-    if not dry:
-        os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
-                  "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
-                  "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
-                  "docker buildx inspect --bootstrap; ")
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
@@ -101,15 +95,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     project_config = get_default_context().project_config
 
     if test_env_only:
-        if project_config.test_config is None:
-            logging.info("No modules to build for test environment as no test environment is specified.")
-            return
-        deployment = project_config.get_deployment_by_name(project_config.test_config)
-        modules = list(deployment.modules.keys())
-        if len(modules) == 0:
-            logging.info("No modules to build if selecting only test environment.")
-            return
-        logging.info("Building modules %s for testing", ", ".join(modules))
+        modules = _find_test_env_modules(project_config)
 
     create_all_docker_files(project_config, build_mode=mode, modules=modules)
     tags = tag.split(',')
@@ -126,10 +112,7 @@ def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modu
 
 def create_docker_file(module: ModuleConfiguration, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
-    try:
-        os.mkdir(build_dir)
-    except FileExistsError:
-        pass  # No need to create directory twice
+    os.makedirs(build_dir, exist_ok=True)
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + module.name)
 
@@ -186,7 +169,7 @@ def docker_bake(project_config: ProjectConfig,
 
     if len(targets) == 0:
         logging.warning("No modules selected to build, aborting build of modules.")
-        return
+        raise typer.Exit()
 
     with open(os.path.join(project_config.project_root_dir, project_config.build_dir, 'docker-bake.hcl'),
               "w") as docker_bake_hcl:
@@ -200,7 +183,29 @@ def docker_bake(project_config: ProjectConfig,
         _run_docker_bake_cmd(project_config, push, no_cache)
 
 
+def _find_test_env_modules(project_config: ProjectConfig) -> List[str]:
+    """ Builds a list of modules based on the test env project configuration. May exit the program if no modules are to
+    be built."""
+    if project_config.test_config is None:
+        logging.info("No modules to build for test environment as no test environment is specified.")
+        raise typer.Exit()
+    deployment = project_config.get_deployment_by_name(project_config.test_config)
+    modules = list(deployment.modules.keys())
+    if len(modules) == 0:
+        logging.info("No modules to build if selecting only test environment.")
+        raise typer.Exit()
+    logging.info("Building modules %s for testing", ", ".join(modules))
+    return modules
+
+
 def _run_docker_bake_cmd(project_config, push, no_cache):
+
+    # Prepare system for multi-arch builds
+    os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
+              "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
+              "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
+              "docker buildx inspect --bootstrap; ")
+
     docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
     if push:
         docker_cmd += " --push"
