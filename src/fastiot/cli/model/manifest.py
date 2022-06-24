@@ -104,7 +104,8 @@ class Vue(BaseModel):
 
 class ModuleManifest(BaseModel):
     """
-    Manifest files should consist of these variables.
+    Manifest files may contain these variables.
+    :any:`fastiot.cli.model.manifest.ModuleManifest.name` is needed, others are mostly optional!
     """
     name: str  # Name needs to comply with the modules name
     ports: Optional[Dict[str, Port]] = None
@@ -114,7 +115,8 @@ class ModuleManifest(BaseModel):
     """
     docker_base_image: str = DOCKER_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
-    :const:`fastiot.cli.configuration.constants.DOCKER_BASE_IMAGE` will be used.
+    :const:`fastiot.cli.constants.DOCKER_BASE_IMAGE` will be used.
+    
     Be aware, that the further Dockerfile will be unchanged, thus your base image should be based on some Debian-style.
     If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be
     used.

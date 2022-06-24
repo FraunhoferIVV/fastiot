@@ -50,6 +50,7 @@ class FastIoTApp:
         self.__loop_fns = []
         self.__tasks: List[asyncio.Task] = []
         self.__subs = []
+        self.module_id = None  # Use to separate between different modules instantiated
 
         for name in dir(self):
             if name.startswith('__'):

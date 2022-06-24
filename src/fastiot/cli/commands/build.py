@@ -46,14 +46,14 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                               envvar=FASTIOT_DOCKER_REGISTRY,
                                               help="The docker registry to be used for tagging. If docker_registry is "
                                                    "unspecified, it will look for a process environment variable "
-                                                   "SAM_DOCKER_REGISTRY. If docker registry is not empty, the built "
-                                                   "image names will begin with the docker registry followed by a "
-                                                   "slash."),
+                                                   "FASTIOT_DOCKER_REGISTRY. If docker registry is not empty, the "
+                                                   "built image names will begin with the docker registry followed by "
+                                                   "a slash."),
           docker_registry_cache: str = typer.Option(None, '-c', '--docker-registry-cache',
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
-                                                         "SAM_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
+                                                         "FASTIOT_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
                                                          "empty, it will use it as a cache for intermediate image "
                                                          "layers."),
           platform: str = typer.Option(None, '-p', '--platform', shell_complete=_platform_completion,
@@ -97,20 +97,20 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
     if test_env_only:
         modules = _find_test_env_modules(project_config)
 
-    create_all_docker_files(project_config, build_mode=mode, modules=modules)
+    _create_all_docker_files(project_config, build_mode=mode, modules=modules)
     tags = tag.split(',')
-    docker_bake(project_config, tags=tags, modules=modules, dry=dry, push=push, docker_registry=docker_registry,
-                docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
+    _docker_bake(project_config, tags=tags, modules=modules, dry=dry, push=push, docker_registry=docker_registry,
+                 docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
 
 
-def create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
+def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
     for module in project_config.get_all_modules():
         if modules is None or module.name in modules:
             module.read_manifest()
-            create_docker_file(module, project_config, build_mode)
+            _create_docker_file(module, project_config, build_mode)
 
 
-def create_docker_file(module: ModuleConfiguration, project_config: ProjectConfig, build_mode: str):
+def _create_docker_file(module: ModuleConfiguration, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     os.makedirs(build_dir, exist_ok=True)
 
@@ -125,15 +125,15 @@ def create_docker_file(module: ModuleConfiguration, project_config: ProjectConfi
                                                     build_mode=build_mode))
 
 
-def docker_bake(project_config: ProjectConfig,
-                tags: List[str],
-                modules: Optional[List[str]] = None,
-                dry: bool = False,
-                platform: Optional[str] = None,
-                docker_registry: Optional[str] = None,
-                docker_registry_cache: Optional[str] = None,
-                push: bool = False,
-                no_cache: bool = False):
+def _docker_bake(project_config: ProjectConfig,
+                 tags: List[str],
+                 modules: Optional[List[str]] = None,
+                 dry: bool = False,
+                 platform: Optional[str] = None,
+                 docker_registry: Optional[str] = None,
+                 docker_registry_cache: Optional[str] = None,
+                 push: bool = False,
+                 no_cache: bool = False):
     """ Method to create a :file:`docker-bake.hcl` file and invoke the docker bake command """
 
     class TargetConfiguration(BaseModel):

@@ -25,13 +25,13 @@ def get_services_list() -> Dict[str, ExternalService]:
         from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
 
         project_config = get_default_context().project_config
-
-        for extension in project_config.extensions:
-            try:
-                importlib.import_module(f'{extension}')
-            except ImportError:  # Extension does not provide any services
-                logging.debug("Could not import external service from extension %s", extension)
-        _services_imported = True
+        if project_config.extensions:
+            for extension in project_config.extensions:
+                try:
+                    importlib.import_module(f'{extension}')
+                except ImportError:  # Extension does not provide any services
+                    logging.debug("Could not import external service from extension %s", extension)
+            _services_imported = True
 
     service_classes = ExternalService.__subclasses__()
     services = [s() for s in service_classes]
