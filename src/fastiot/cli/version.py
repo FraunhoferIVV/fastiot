@@ -53,8 +53,8 @@ def _call_git_describe() -> Optional[str]:
         result = p.stdout.readlines()
         if not result:
             return None
-        else:
-            return result[0].decode('ascii').strip()
+
+        return result[0].decode('ascii').strip()
 
 
 def _call_git_branch() -> str:
@@ -70,7 +70,7 @@ def _git_version() -> str:
         return GIT_UNSPECIFIED
 
     if branch == 'HEAD':
-        branch = os.environ.get('GIT_BRANCH', 'master')
+        branch = os.environ.get('GIT_BRANCH', 'main')
 
     for c in ['/', '-', '_']:  # Replace common separators by those accepted in PEP 440
         branch = branch.replace(c, '.')
@@ -103,7 +103,7 @@ def _git_version() -> str:
         patch = _get_number_of_commits()
 
     version = f"{major}.{minor}"
-    if branch == 'master':
+    if branch in ['master', 'main']:
         if patch > 0:
             version += f'.{patch}'
     else:
@@ -116,7 +116,7 @@ def _git_version() -> str:
 def _version_file_version() -> Optional[str]:
 
     def get_file():
-        for root, dirs, files in os.walk(os.getcwd()):
+        for root, _, files in os.walk(os.getcwd()):
             if "__version__.py" in files:
                 return os.path.join(root, "__version__.py")
 
@@ -124,10 +124,10 @@ def _version_file_version() -> Optional[str]:
     if file is None:
         return None  # We did not find anything better
     try:
-        file_contents = open(file).read()
-        regex = r"__version__ ?= ?[\"\'](.*)[\"\']"
-        version = re.search(regex, file_contents, re.MULTILINE)[1]
-        return version
+        with open(file).read() as file_contents:
+            regex = r"__version__ ?= ?[\"\'](.*)[\"\']"
+            version = re.search(regex, file_contents, re.MULTILINE)[1]
+            return version
     except:  # Could not open file or find a suiting match
         return None
 

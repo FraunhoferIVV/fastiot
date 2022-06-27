@@ -1,9 +1,13 @@
-from fastiot.cli.model import ModulePackageConfig
+from fastiot.cli.model import find_modules
 
-#extensions = ['fastiot.ext.print']
+extensions = ['fastiot_ivv_tools.extension']
 
 project_namespace = 'fastiot'
-module_packages = [ModulePackageConfig(package_name='fastiot_sample_services',
-                                       cache_name='fastiot:latest',
-                                       extra_caches=['fastiot-dev:latest'])]
 
+library_package = 'fastiot'
+modules = [*find_modules(package='fastiot_sample_services')]
+
+test_package = 'fastiot_test'
+test_config = 'fastiot_test_env'
+
+compile_lib = 'only_source'

@@ -7,11 +7,11 @@ from typing import Any, Callable, Coroutine, Dict, Union, Generator, AsyncIterat
 import nats
 from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscription, Msg as BrokerMsg
 from ormsgpack import ormsgpack
-from pydantic.main import BaseModel
+from pydantic import BaseModel
 
 from fastiot.core.serialization import model_from_bin, model_to_bin
 from fastiot.core.subject import Subject
-from fastiot.env import fastiot_broker_env
+from fastiot.env import env_broker
 
 
 class Subscription(ABC):
@@ -72,7 +72,7 @@ class SubscriptionImpl(Subscription):
     async def _stream_helper_task_main(self):
         while self._stream_helper_task_shutdown.is_set() is False:
             to_stop = []
-            stop_time = self._get_time_in_s() + fastiot_broker_env.stream_timeout
+            stop_time = self._get_time_in_s() + env_broker.stream_timeout
             for key in self._current_stream_tasks:
                 if self._current_stream_tasks[key].time < stop_time:
                     to_stop.append(key)
@@ -178,7 +178,7 @@ class BrokerConnection(ABC):
             raise ValueError("Publish only allowed for empty reply_cls")
         await self.send(subject=subject, msg=msg)
 
-    async def request(self, subject: Subject, msg: Any, timeout: float = fastiot_broker_env.default_timeout) -> Any:
+    async def request(self, subject: Subject, msg: Any, timeout: float = env_broker.default_timeout) -> Any:
         if subject.reply_cls is None:
             raise ValueError("Expected reply cls for request")
         if subject.stream_mode is True:
@@ -203,7 +203,7 @@ class BrokerConnectionImpl(BrokerConnection):
 
     @classmethod
     async def connect(cls) -> "BrokerConnectionImpl":
-        client = await nats.connect(f"nats://{fastiot_broker_env.host}:{fastiot_broker_env.port}")
+        client = await nats.connect(f"nats://{env_broker.host}:{env_broker.port}")
         return cls(
             client=client
         )

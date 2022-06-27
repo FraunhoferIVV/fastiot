@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import importlib
+import logging
+import os
+
+from fastiot.cli import typer_app
+from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
+from fastiot.cli.external_service_helper import get_services_list
+from fastiot.cli.import_configure import import_configure
+from fastiot.cli.model.context import get_default_context
+
+
+def _import_plugin_commands(extensions):
+    for extension in extensions:
+        try:
+            importlib.import_module(f'{extension}')
+        except ImportError:
+            pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
+            #logging.warning(f"Import error raised during import '{extension}.cli.commands from extension module "
+            #                f"{extension}.\n"
+            #                "This error will be ignored, but some cli commands may be missing.")
+
+
+if __name__ == '__main__':
+    # entry point for fastiot command
+    LOGLEVEL = os.environ.get('FASTIOT_LOGLEVEL', 'INFO').upper()
+
+    logging.basicConfig(level=LOGLEVEL)
+    default_context = get_default_context()
+    default_context.project_config = import_configure(os.environ.get('FASTIOT_CONFIGURE_FILE'))
+    default_context.external_services = get_services_list()
+    if default_context.project_config.extensions is not None:
+        _import_plugin_commands(default_context.project_config.extensions)
+
+    typer_app.app()

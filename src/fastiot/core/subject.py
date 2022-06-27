@@ -1,11 +1,12 @@
 import random
-from enum import Enum
 from typing import Type
 
 from pydantic import BaseModel, root_validator
 
 
 class Subject(BaseModel):
+    # pylint: disable=no-self-argument
+
     name: str
     msg_cls: Type[BaseModel]
     reply_cls: Type[BaseModel] = None
@@ -16,6 +17,7 @@ class Subject(BaseModel):
         if 'stream_mode' in values and values['stream_mode'] is True:
             if 'reply_cls' not in values or values['reply_cls'] is None:
                 raise ValueError("Stream mode only with reply_cls allowed")
+        return values
 
     def make_generic_reply_inbox(self) -> "Subject":
         if self.reply_cls is None:

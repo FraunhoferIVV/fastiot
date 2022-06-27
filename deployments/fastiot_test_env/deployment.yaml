@@ -1,0 +1,3 @@
+deployment_name: fastiot_test_env
+
+services: [nats]

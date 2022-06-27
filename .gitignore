@@ -6,3 +6,5 @@ build/
 deployments/
 __pycache__/
 .docker-cache/
+.pytest_cache
+/generated/

@@ -1,5 +1,6 @@
-sphinx>3.5
+sphinx>=5
 sphinx-automodapi
 sphinx-autodoc-typehints
 recommonmark
 myst-parser
+autodoc_pydantic

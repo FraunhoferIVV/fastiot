@@ -7,16 +7,17 @@ from tempfile import TemporaryDirectory
 from fastiot.cli.version import get_version, create_version_file
 
 
-class MyTestCase(unittest.TestCase):
+class TestGitVersioning(unittest.TestCase):
 
     def setUp(self) -> None:
         self.test_dir = TemporaryDirectory()
         self.git_path = self.test_dir.name
-
+        self._old_cwd = os.getcwd()
         os.chdir(self.git_path)
 
     def tearDown(self) -> None:
         self.test_dir.cleanup()
+        os.chdir(self._old_cwd)
 
     @staticmethod
     def _init_git_repo():

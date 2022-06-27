@@ -50,11 +50,24 @@ def get_jinja_env():
 def find_modules(package: str, module_names: Optional[List[str]] = None) -> List[ModuleConfig]:
     p = importlib.import_module(package)
     package_dir = os.path.dirname(p.__file__)
-    return [os.path.basename(m) for m in glob(package_dir + "/*") if os.path.isfile(os.path.join(m, 'manifest.yaml'))]
+    modules = []
+    for m in glob(package_dir + "/*"):
+        if os.path.isfile(os.path.join(m, 'manifest.yaml')):
+            if module_names is None or m in module_names:
+                module = import_module(name=os.path.basename(m), package=package)
+                modules.append(module)
+    return modules
 
 
 def import_module(name: str, package: Optional[str] = None) -> ModuleConfig:
     if package:
         name = package + '.' + name
 
-    n = importlib.import_module()
+    m = importlib.import_module(name)
+    package_dir = os.path.dirname(m.__file__)
+    if not os.path.isfile(os.path.join(package_dir, 'manifest.yaml')):
+        raise RuntimeError("")
+    return ModuleConfig(
+        module_name=name,
+        module_package=package
+    )

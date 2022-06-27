@@ -2,6 +2,7 @@ import unittest
 from tempfile import NamedTemporaryFile
 
 from fastiot.cli.model.deployment import DeploymentConfig
+from fastiot.testlib.cli import init_default_context
 
 DEPLOYMENT_CONFIG = """
 x-env1: &env_machine1
@@ -39,6 +40,9 @@ docker_registry: "docker.dev.ivv-dd.fhg.de"
 
 
 class TestDeployment(unittest.TestCase):
+
+    def setUp(self):
+        init_default_context()
 
     def test_yaml_parsing(self):
         with NamedTemporaryFile(mode="w") as file:

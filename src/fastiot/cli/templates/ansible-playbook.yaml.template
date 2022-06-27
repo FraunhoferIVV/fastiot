@@ -1,0 +1,40 @@
+---
+- name: Install {{ deployment_name }} docker-compose
+  hosts: all
+  remote_user: {{ deployment_target.remote_user }}
+
+  tasks:
+{% raw %}
+    - name: 'Copy configuration'
+      synchronize:
+        delete: yes
+        src: "{{ playbook_dir }}"
+        dest: "{{ ansible_env.HOME }}"
+        recursive: yes
+      become: no
+      tags: [ docker-compose ]
+{% endraw %}
+{% if deployment_target.link_prometheus %}
+{% raw %}
+    - name: 'Check for local docker-compose override'
+      delegate_to: localhost
+      stat:
+        path: "{{ playbook_dir }}/docker-compose.override.yaml"
+      register: override_exists
+      tags: [ docker-compose ]
+{% endraw %}
+    - name: 'Activate prometheus monitoring'
+      file:
+        src: "/home/{{ deployment_target.remote_user }}/docker-compose.override.yml"
+        dest: "/home/{{ deployment_target.remote_user }}/{{config_name}}/docker-compose.override.yaml"
+        state: link
+      when: override_exists.stat.exists == false
+      tags: [ docker-compose ]
+{% endif %}
+    - name: 'Start docker-compose'
+      community.docker.docker_compose:
+        project_src: /home/{{ deployment_target.remote_user }}/{{deployment_name}}
+        state: present
+        pull: yes
+        remove_orphans: yes
+      tags: [ docker-compose ]
