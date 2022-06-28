@@ -1,4 +1,5 @@
 """ Build command """
+import importlib
 import logging
 import os.path
 import subprocess
@@ -11,7 +12,7 @@ from pydantic import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform, ModuleConfiguration
+from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform, ModuleConfig
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -42,14 +43,14 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                         "compilation will be applied if chosen 'release'."),
           tag: str = typer.Option('latest', '-t', '--tag',
                                   help="The tags to use for building as a comma ',' separated list."),
-          docker_registry: str = typer.Option(None, '-r', '--docker-registry',
+          docker_registry: str = typer.Option('', '-r', '--docker-registry',
                                               envvar=FASTIOT_DOCKER_REGISTRY,
                                               help="The docker registry to be used for tagging. If docker_registry is "
                                                    "unspecified, it will look for a process environment variable "
                                                    "FASTIOT_DOCKER_REGISTRY. If docker registry is not empty, the "
                                                    "built image names will begin with the docker registry followed by "
                                                    "a slash."),
-          docker_registry_cache: str = typer.Option(None, '-c', '--docker-registry-cache',
+          docker_registry_cache: str = typer.Option('', '-c', '--docker-registry-cache',
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
@@ -104,13 +105,13 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
 
 def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
-    for module in project_config.get_all_modules():
+    for module in project_config.modules:
         if modules is None or module.name in modules:
             module.read_manifest()
             _create_docker_file(module, project_config, build_mode)
 
 
-def _create_docker_file(module: ModuleConfiguration, project_config: ProjectConfig, build_mode: str):
+def _create_docker_file(module: ModuleConfig, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     os.makedirs(build_dir, exist_ok=True)
 
@@ -144,13 +145,10 @@ def _docker_bake(project_config: ProjectConfig,
     docker_registry = docker_registry + "/" if docker_registry != "" else docker_registry
 
     targets = []
-    for module in project_config.get_all_modules():
+    for module in project_config.modules:
         if modules is not None and module.name not in modules:
             continue
         manifest = module.read_manifest()
-
-        module_package = project_config.get_module_package_by_name(module.module_package_name)
-        module_package.cache_name = module_package.cache_name or f"{project_config.project_namespace}:latest"
 
         if platform is not None:  # Overwrite platform from manifest with manual setting
             if platform not in manifest.platforms:
@@ -160,10 +158,10 @@ def _docker_bake(project_config: ProjectConfig,
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
         if manifest.docker_cache_image is None:  # Set cache from module level if not defined otherwise
-            manifest.docker_cache_image = module_package.cache_name
+            manifest.docker_cache_image = module.cache
 
         cache_from, cache_to = _set_caches(docker_registry_cache, manifest.docker_cache_image,
-                                           module_package.extra_caches, push)
+                                           module.extra_caches, push)
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 

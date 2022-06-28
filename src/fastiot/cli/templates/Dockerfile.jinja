@@ -25,9 +25,9 @@ HEALTHCHECK --retries=1 CMD if [ -s "/var/fastiot/logs/error.log" ]; then; exit 
 ### Stage: vue.js ###
 FROM node:14-buster-slim as build-vue
 WORKDIR /opt/vue_app
-COPY src/{{ module.module_package_name }}/{{ module.name }}/{{vue.src}}/package*.json /opt/vue_app/
+COPY src/{{ module.package }}/{{ module.name }}/{{vue.src}}/package*.json /opt/vue_app/
 RUN npm install
-COPY src/{{ module.module_package_name }}/{{ module.name }}/{{vue.src}} /opt/vue_app/
+COPY src/{{ module.package }}/{{ module.name }}/{{vue.src}} /opt/vue_app/
 RUN npm run build
 {% endif %}
 
@@ -35,14 +35,14 @@ RUN npm run build
 FROM base as debug
 # In debug mode we just want to copy everything from source to make it easier.
 {% if module.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module.module_package_name }}/{{ module.name }}/{{ vue.dst }}
+COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module.package }}/{{ module.name }}/{{ vue.dst }}
 {% endif %}
 {% if project_config.library_package %}
 COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.library_package}}
 {% endif %}
-COPY src/{{ module.module_package_name }} /opt/fastiot/src/{{ module.module_package_name }}
-COPY src/{{ module.module_package_name }}/{{ module.name }}/manifest.yaml /opt/fastiot/manifest.yaml
-CMD ["python",  "/opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/run.py"]
+COPY src/{{ module.package }} /opt/fastiot/src/{{ module.package }}
+COPY src/{{ module.package }}/{{ module.name }}/manifest.yaml /opt/fastiot/manifest.yaml
+CMD ["python",  "/opt/fastiot/src/{{ module.package }}/{{ module.name }}/run.py"]
 
 
 ### Stage: Compile ###
@@ -59,8 +59,8 @@ COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.li
 RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
 {% endif %}
 
-COPY src/{{ module.module_package_name }} /opt/fastiot/src/{{ module.module_package_name }}
-RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ module.module_package_name }}
+COPY src/{{ module.package }} /opt/fastiot/src/{{ module.package }}
+RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ module.package }}
 
 
 ### Stage: Release ###
@@ -68,14 +68,14 @@ FROM base
 
 # Nuitka compiles "__file__"-variable relative to current location. So we have to place everything inside "/opt/fastiot/src".
 COPY --from=compile_lib /opt/fastiot/output/*.so /opt/fastiot/src/
-COPY --from=compile_lib /opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/run.py /opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/run.py
+COPY --from=compile_lib /opt/fastiot/src/{{ module.package }}/{{ module.name }}/run.py /opt/fastiot/src/{{ module.package }}/{{ module.name }}/run.py
 {% for module_dir_to_copy in module.manifest.copy_dirs_to_container %}
-COPY --from=compile_lib /opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/{{ module_dir_to_copy }} /opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/{{ module_dir_to_copy }}
+COPY --from=compile_lib /opt/fastiot/src/{{ module.package }}/{{ module.name }}/{{ module_dir_to_copy }} /opt/fastiot/src/{{ module.package }}/{{ module.name }}/{{ module_dir_to_copy }}
 {% endfor %}
 
 {% if module.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module.module_package_name }}/{{ module.name }}/{{ vue.dst }}
+COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ module.package }}/{{ module.name }}/{{ vue.dst }}
 {% endif %}
 
-COPY src/{{ module.module_package_name }}/{{ module.name }}/manifest.yaml /opt/fastiot/manifest.yaml
-CMD ["python",  "/opt/fastiot/src/{{ module.module_package_name }}/{{ module.name }}/run.py"]
+COPY src/{{ module.package }}/{{ module.name }}/manifest.yaml /opt/fastiot/manifest.yaml
+CMD ["python",  "/opt/fastiot/src/{{ module.package }}/{{ module.name }}/run.py"]

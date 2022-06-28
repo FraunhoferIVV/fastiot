@@ -7,28 +7,7 @@ from glob import glob
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
-from fastiot.cli.helper_fn import find_modules
-from fastiot.cli.model import DeploymentConfig
-from fastiot.cli.model.module import ModuleConfiguration
-
-
-class ModuleConfig(BaseModel):
-    model_name: str
-    package_name: str
-    cache_name: str = None
-    """
-    The name to use as the cache on the set docker cache registry. If not defined and a cache registry is configured
-    the `project_namespace:latest` will be used.
-    Example: mypackage-cache
-    """
-    extra_caches: List[str] = []
-    """
-    A list of extra caches used to speed up building. It is intended if you want to read from other caches or different
-    tags. Each extra cache must match a cache name extended by ':' followed by the tag for the cache. Per default no
-    extra caches are used. You might find it useful to always include the cache name of the current module package
-    followed by tag latest to always use latest cache for feature branches.
-    Examples: mypackage-cache:latest, fastiot-cache:latest, fastiot-cache:mybranch
-    """
+from fastiot.cli.model import DeploymentConfig, ModuleConfig
 
 
 class CompileSettingsEnum(str, Enum):
@@ -84,25 +63,6 @@ class ProjectConfig(BaseModel):
     compile_lib: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from
     :class:`fastiot.cli.model.project.CompileSettingsEnum` """
-
-    def get_all_modules(self) -> List[ModuleConfiguration]:
-        """ Returns a list of all modules configured in the project """
-        modules = []
-        for module_package in self.module_packages:
-            if not module_package.module_names:
-                module_package.module_names = find_modules(module_package.package_name, self.project_root_dir)
-            for module_name in module_package.module_names:
-                modules.append(ModuleConfiguration(name=module_name, module_package_name=module_package.package_name))
-
-        return modules
-
-    def get_module_package_by_name(self, package_name: str) -> ModulePackageConfig:
-        """ Get a :class:`fastiot.cli.model.project.ModulePackageConfig` by its name."""
-        for module_package in self.module_packages:
-            if module_package.package_name == package_name:
-                return module_package
-
-        raise ValueError(f"Module Package {package_name} not found in project configuration.")
 
     def get_all_deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration

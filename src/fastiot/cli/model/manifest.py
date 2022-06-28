@@ -10,7 +10,7 @@ import yaml
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import DOCKER_BASE_IMAGE
-from fastiot.cli.helper_fn import get_cli_logger
+from fastiot.cli.logging import get_cli_logger
 
 
 class Port(BaseModel):
@@ -127,7 +127,7 @@ class ModuleManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be
     used.
     """
-    docker_cache_image: Optional[str] = None
+    docker_cache_image: str = ''
     """ If set this will override the per module package configuration for a docker registry cache. The full cache name
     will be constructed from the docker cache registry set and this name. """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
@@ -143,7 +143,7 @@ class ModuleManifest(BaseModel):
     specified (or amd64 if none) will be used to build the image. """
 
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
-    copy_dirs_to_container: List[str] = ()
+    copy_dirs_to_container: List[str] = []
     """
     Directories which shall be copied to container. They must be specified relative to manifest.yaml.
     """

@@ -16,13 +16,13 @@ def _write_configure(path: str, no_modules: bool, project_root_dir: Optional[str
     configure_file = os.path.join(path, 'configure.py')
     project_root_dir = project_root_dir or os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
     with open(configure_file, 'w') as file:
-        file.write("from fastiot.cli.model import ModulePackageConfig\n"
+        file.write("from fastiot.cli import find_modules\n"
                    "project_namespace = 'fastiot'\n"
                    f"project_root_dir = '{project_root_dir}'\n"
-                   f"build_dir='{path}'\n"
+                   f"build_dir = '{path}'\n"
                    "test_config = 'fastiot_test_env'\n")
         if not no_modules:
-            file.write("module_packages = [ModulePackageConfig(package_name='fastiot_sample_services')]\n")
+            file.write("modules = [*find_modules(package='fastiot_sample_services')]\n")
         file.seek(0)
 
 
@@ -43,7 +43,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry", "producer"])
+            result = self.runner.invoke(app, ["build", "--dry", "producer"], catch_exceptions=False)
 
             self.assertEqual(result.exit_code, 0)
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
@@ -54,7 +54,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry"])
+            result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
 
             self.assertEqual(result.exit_code, 0)
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
@@ -65,7 +65,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
             os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
 
-            result = self.runner.invoke(app, ["build", "--dry"])
+            result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
 
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
@@ -76,7 +76,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
             # os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
 
-            result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"])
+            result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
@@ -85,7 +85,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--push"])
+            result = self.runner.invoke(app, ["build", "--dry", "--push"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
@@ -96,7 +96,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry"])
+            result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
@@ -107,7 +107,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--test-env-only"])
+            result = self.runner.invoke(app, ["build", "--dry", "--test-env-only"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
 
@@ -115,7 +115,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, no_modules=True)
 
-            result = self.runner.invoke(app, ["build", "--dry"])
+            result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(result.exit_code, 0)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))

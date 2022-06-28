@@ -1,4 +1,4 @@
-from fastiot.cli.model import find_modules
+from fastiot.cli import find_modules
 
 extensions = ['fastiot_ivv_tools.extension']
 

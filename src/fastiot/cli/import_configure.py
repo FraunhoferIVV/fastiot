@@ -24,10 +24,6 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
         else:
             data[field] = options.default
 
-    if 'module_packages' in data:
-        for module_package in data:
-            if module_package.
-
     # Use all available configs if not specified otherwise
     data['deploy_configs'] = data['deploy_configs'] or deploy_configs
     return ProjectConfig(**data)
