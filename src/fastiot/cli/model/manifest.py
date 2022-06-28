@@ -10,7 +10,7 @@ import yaml
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import DOCKER_BASE_IMAGE
-from fastiot.cli.logging import get_cli_logger
+from fastiot.cli.cli_logging import get_cli_logger
 
 
 class Port(BaseModel):

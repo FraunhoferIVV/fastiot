@@ -7,11 +7,10 @@ Basically your commands will be decorated with an `@app.command()`. Replace `app
 `stop_cmd` if you want to create subcommands of create, run or stop.
 """
 import importlib
+import logging
 import os
 
 import typer
-
-from fastiot.cli import logging
 
 DEFAULT_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 

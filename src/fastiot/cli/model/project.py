@@ -1,8 +1,8 @@
 """ data model for project configuration """
 import os
-from typing import List, Optional, Dict
 from enum import Enum
 from glob import glob
+from typing import List, Optional
 
 from pydantic.main import BaseModel
 
