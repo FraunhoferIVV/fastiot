@@ -234,12 +234,12 @@ def _make_caches(docker_registry_cache: Optional[str],
             caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}:{tag}"')
         if extra_caches is not None:
             for cache in extra_caches:
-                caches_from.append(f'"type=registry,src={docker_registry_cache}/{cache}"')
+                caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
     if not push:  # We are most probably in a local environment, so try to use this cache as well
         caches_from.append('"type=local,src=.docker-cache"')
 
     if push and docker_registry_cache is not None:
-        cache_to = f'"type=registry,mode=max,ref={docker_registry_cache}/{docker_cache_image}:{tags[0]}"'
+        cache_to = f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}:{tags[0]},mode=max"'
     elif not push:
         cache_to = '"type=local,dest=.docker-cache,mode=max"'
     else:
