@@ -50,7 +50,8 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
         cmd += " stop " + " ".join(service_names)
     else:
         cmd += " down"
-
+    if stop_test_env:
+        cmd += " --volumes"  # Remove test volumes right away
 
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)
     env = os.environ.copy()
