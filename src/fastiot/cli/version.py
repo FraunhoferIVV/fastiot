@@ -124,7 +124,8 @@ def _version_file_version() -> Optional[str]:
     if file is None:
         return None  # We did not find anything better
     try:
-        with open(file).read() as file_contents:
+        with open(file) as file:
+            file_contents = file.read()
             regex = r"__version__ ?= ?[\"\'](.*)[\"\']"
             version = re.search(regex, file_contents, re.MULTILINE)[1]
             return version
