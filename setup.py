@@ -24,8 +24,8 @@ if _python_src_dir not in sys.path:
     sys.path.append(_python_src_dir)
 
 # See upper comment. Most likely your IDE will mark these imports as missing which you can ignore.
-from constants import TEMPLATES_DIR
-from version import create_version_file, get_version
+from constants import TEMPLATES_DIR  # noqa
+from version import create_version_file, get_version  # noqa
 
 
 create_version_file(destination='src/fastiot/__version__.py')
