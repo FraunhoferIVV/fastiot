@@ -44,22 +44,31 @@ def get_jinja_env():
 
 
 def find_modules(package: str,
-                 module_names: Optional[List[str]] = None,
+                 modules: Optional[List[str]] = None,
                  cache: str = '',
-                 extra_caches: List[str] = None) -> List[ModuleConfig]:
+                 extra_caches: Optional[List[str]] = None) -> List[ModuleConfig]:
+    """
+    Find modules in a package
+
+    :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
+    :param modules: Optional; if specified it will only include the listed modules
+    :param cache: Optional; specify a cache for all modules. Cache reuse can be potentially dangerous because it might
+                  not work
+    :param extra_caches: Optional, specify additional extra caches which are read-only
+    """
     p = importlib.import_module(package)
     package_dir = os.path.dirname(p.__file__)
-    modules = []
+    configs = []
     for m in os.listdir(package_dir):
         if os.path.isfile(os.path.join(package_dir, m, 'manifest.yaml')):
-            if module_names is None or m in module_names:
+            if modules is None or m in modules:
                 module = import_module(name=m, package=package, cache=cache, extra_caches=extra_caches)
-                modules.append(module)
-    return modules
+                configs.append(module)
+    return configs
 
 
 def import_module(name: str,
-                  package: Optional[str] = None,
+                  package: str = '',
                   cache: str = '',
                   extra_caches: List[str] = None) -> ModuleConfig:
     if package:
@@ -74,6 +83,17 @@ def import_module(name: str,
     return ModuleConfig(
         name=name,
         package=package,
-        cache=cache,
-        extra_caches=extra_caches if extra_caches is not None else []
+        cache=cache if cache else _default_cache(module=name, package=package),
+        extra_caches=extra_caches if extra_caches is not None else _default_extra_caches(module=name, package=package)
     )
+
+
+def _default_cache(module: str, package: str = '') -> str:
+    package_prefix = ''
+    if package:
+        package_prefix = package + '-'
+    return f"{package_prefix}{module}-cache"
+
+
+def _default_extra_caches(module: str, package: str = '') -> List[str]:
+    return [_default_cache(module=module, package=package) + ':latest']

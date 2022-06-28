@@ -157,11 +157,8 @@ def _docker_bake(project_config: ProjectConfig,
             manifest.platforms = [CPUPlatform(platform)]
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
-        if manifest.docker_cache_image == '':  # Set cache from module level if not defined otherwise
-            manifest.docker_cache_image = module.cache
 
-        cache_from, cache_to = _make_caches(docker_registry_cache, manifest.docker_cache_image,
-                                            module.extra_caches, push)
+        cache_from, cache_to = _make_caches(docker_registry_cache, module.cache, module.extra_caches, push)
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
@@ -220,7 +217,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
             sys.exit(exit_code)
 
 
-def _make_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):
+def _make_caches(docker_registry_cache: Optional[str], docker_cache_image: str, extra_caches: List[str], push: bool):
     caches_from = []
     if docker_registry_cache is not None:
         caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}"')

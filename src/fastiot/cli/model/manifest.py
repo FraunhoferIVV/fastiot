@@ -127,9 +127,6 @@ class ModuleManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be
     used.
     """
-    docker_cache_image: str = ''
-    """ If set this will override the per module package configuration for a docker registry cache. The full cache name
-    will be constructed from the docker cache registry set and this name. """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
     devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
