@@ -43,7 +43,10 @@ def get_jinja_env():
     return _jinja_env
 
 
-def find_modules(package: str, module_names: Optional[List[str]] = None) -> List[ModuleConfig]:
+def find_modules(package: str,
+                 module_names: Optional[List[str]] = None,
+                 cache: str = '',
+                 extra_caches: List[str] = None) -> List[ModuleConfig]:
     p = importlib.import_module(package)
     package_dir = os.path.dirname(p.__file__)
     modules = []
@@ -55,7 +58,10 @@ def find_modules(package: str, module_names: Optional[List[str]] = None) -> List
     return modules
 
 
-def import_module(name: str, package: Optional[str] = None) -> ModuleConfig:
+def import_module(name: str,
+                  package: Optional[str] = None,
+                  cache: str = '',
+                  extra_caches: List[str] = None) -> ModuleConfig:
     if package:
         full_name = package + '.' + name
     else:
@@ -67,5 +73,7 @@ def import_module(name: str, package: Optional[str] = None) -> ModuleConfig:
         raise RuntimeError(f"Expected a manifest file at '{os.path.join(package_dir, 'manifest.yaml')}'")
     return ModuleConfig(
         name=name,
-        package=package
+        package=package,
+        cache=cache,
+        extra_caches=extra_caches if extra_caches is not None else []
     )
