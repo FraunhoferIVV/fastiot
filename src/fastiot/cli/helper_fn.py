@@ -53,7 +53,7 @@ def find_modules(package: str,
     for m in os.listdir(package_dir):
         if os.path.isfile(os.path.join(package_dir, m, 'manifest.yaml')):
             if module_names is None or m in module_names:
-                module = import_module(name=m, package=package)
+                module = import_module(name=m, package=package, cache=cache, extra_caches=extra_caches)
                 modules.append(module)
     return modules
 

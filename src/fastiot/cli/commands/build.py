@@ -43,14 +43,14 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                         "compilation will be applied if chosen 'release'."),
           tag: str = typer.Option('latest', '-t', '--tag',
                                   help="The tags to use for building as a comma ',' separated list."),
-          docker_registry: str = typer.Option('', '-r', '--docker-registry',
+          docker_registry: str = typer.Option(None, '-r', '--docker-registry',
                                               envvar=FASTIOT_DOCKER_REGISTRY,
                                               help="The docker registry to be used for tagging. If docker_registry is "
                                                    "unspecified, it will look for a process environment variable "
                                                    "FASTIOT_DOCKER_REGISTRY. If docker registry is not empty, the "
                                                    "built image names will begin with the docker registry followed by "
                                                    "a slash."),
-          docker_registry_cache: str = typer.Option('', '-c', '--docker-registry-cache',
+          docker_registry_cache: str = typer.Option(None, '-c', '--docker-registry-cache',
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
@@ -142,7 +142,7 @@ def _docker_bake(project_config: ProjectConfig,
         cache_from: str
         cache_to: str
 
-    docker_registry = docker_registry + "/" if docker_registry != "" else docker_registry
+    docker_registry = docker_registry + "/" if docker_registry is not None else docker_registry
 
     targets = []
     for module in project_config.modules:
@@ -157,11 +157,11 @@ def _docker_bake(project_config: ProjectConfig,
             manifest.platforms = [CPUPlatform(platform)]
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
-        if manifest.docker_cache_image is None:  # Set cache from module level if not defined otherwise
+        if manifest.docker_cache_image == '':  # Set cache from module level if not defined otherwise
             manifest.docker_cache_image = module.cache
 
-        cache_from, cache_to = _set_caches(docker_registry_cache, manifest.docker_cache_image,
-                                           module.extra_caches, push)
+        cache_from, cache_to = _make_caches(docker_registry_cache, manifest.docker_cache_image,
+                                            module.extra_caches, push)
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
@@ -220,7 +220,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
             sys.exit(exit_code)
 
 
-def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):
+def _make_caches(docker_registry_cache, docker_cache_image, extra_caches, push: bool):
     caches_from = []
     if docker_registry_cache is not None:
         caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}"')

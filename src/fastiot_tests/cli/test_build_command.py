@@ -22,7 +22,7 @@ def _write_configure(path: str, no_modules: bool, project_root_dir: Optional[str
                    f"build_dir = '{path}'\n"
                    "test_config = 'fastiot_test_env'\n")
         if not no_modules:
-            file.write("modules = [*find_modules(package='fastiot_sample_services')]\n")
+            file.write("modules = [*find_modules(package='fastiot_sample_services', cache='fastiot-cache', extra_caches=['fastiot-cache:latest'])]\n")
         file.seek(0)
 
 
@@ -85,7 +85,7 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--push"], catch_exceptions=False)
+            result = self.runner.invoke(app, ["build", "--dry", "--push", "--docker-registry", "test_registry", "--docker-registry-cache", "test_cache_registry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
