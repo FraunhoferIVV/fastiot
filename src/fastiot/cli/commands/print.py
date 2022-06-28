@@ -54,8 +54,6 @@ def _name_completion() -> List[str]:
     return [e.value for e in ToPrint]
 
 
-
-
 @app.command('print', context_settings=DEFAULT_CONTEXT_SETTINGS)
 def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_name, shell_complete=_name_completion),
               config: Optional[str] = typer.Option(None,
