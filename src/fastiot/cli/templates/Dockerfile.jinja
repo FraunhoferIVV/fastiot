@@ -50,7 +50,7 @@ FROM base as compile_lib
 # In release mode we want to compile everything and only copy compiled artifacts into release container.
 # The compilation takes place in this stage, so we need to compile it accordingly.
 #RUN apt-get update -y && apt-get install -y gcc make build-essential
-RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} --no-cache-dir nuitka "fastiot>=0.1.48" ordered-set
+RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} --no-cache-dir nuitka "fastiot>=0.1.81" ordered-set
 
 COPY configure.py /opt/fastiot/
 
