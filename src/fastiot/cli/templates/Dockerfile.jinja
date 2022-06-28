@@ -54,12 +54,12 @@ RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-h
 
 COPY configure.py /opt/fastiot/
 
+COPY src /opt/fastiot/src
+
 {% if project_config.library_package %}
-COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.library_package}}
 RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
 {% endif %}
 
-COPY src /opt/fastiot/src
 RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ module.package }}
 
 
