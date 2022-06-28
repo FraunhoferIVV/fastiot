@@ -15,22 +15,21 @@ import typer
 
 DEFAULT_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
+# Main typer app to add new commands to.
 app = typer.Typer(
     context_settings=DEFAULT_CONTEXT_SETTINGS
 )
-# Main typer app to add new commands to.
 
-create_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 # Use this command to create any subcommand of create, like `fastiot.cli create my-special-file`
-
+create_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 app.add_typer(create_cmd, name='create')
 
-run_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 # Use this command to create any subcommand of `run`, like `fastiot.cli run my_special_test`
+run_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 app.add_typer(run_cmd, name='run')
 
-stop_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 # Use this command to create any subcommand of `stop`, like `fastiot.cli stop environment`
+stop_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 app.add_typer(stop_cmd, name='stop')
 
 
