@@ -8,20 +8,20 @@ group "default" {
 
 {% for target in targets %}
 target "{{ target.manifest.name }}" {
-    context= "."
-    dockerfile= "./build/Dockerfile.{{ target.manifest.name }}"
-    tags= [
+    context = "."
+    dockerfile = "./build/Dockerfile.{{ target.manifest.name }}"
+    tags = [
     {% for tag in tags %}
       "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}",
     {% endfor %}
     ]
-    cache-from= [ {{ target.cache_from }} ]
-    cache-to= [ {{ target.cache_to }} ]
-    platforms= [
+    cache-from = [ {{ target.cache_from }} ]
+    cache-to = [ {{ target.cache_to }} ]
+    platforms = [
     {% for platform in target.manifest.platforms %}
       "{{ platform.as_docker_platform() }}",
     {% endfor %}
     ]
-    pull= true
+    pull = true
 }
 {% endfor %}

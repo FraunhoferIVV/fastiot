@@ -90,7 +90,7 @@ class TestBuildCommand(unittest.TestCase):
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertFalse('"type=local,src=.docker-cache"' in contents)
-                self.assertTrue('cache-to= [ "type=registry,' in contents)
+                self.assertTrue('cache-to = [ "type=registry,' in contents)
 
     def test_local_cache_if_not_pushing(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -101,7 +101,7 @@ class TestBuildCommand(unittest.TestCase):
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertTrue('"type=local,src=.docker-cache"' in contents)
-                self.assertFalse('cache-to= [ "type=registry,' in contents)
+                self.assertFalse('cache-to = [ "type=registry,' in contents)
 
     def test_build_empty_test_env(self):
         with tempfile.TemporaryDirectory() as tempdir:
