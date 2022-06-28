@@ -233,7 +233,7 @@ def _set_caches(docker_registry_cache, docker_cache_image, extra_caches, push: b
     if push and docker_registry_cache is not None:
         cache_to = f'"type=registry,mode=max,ref={docker_registry_cache}/{docker_cache_image}"'
     elif not push:
-        cache_to = '"type=local,dest=.docker-cache,mode="max""'
+        cache_to = '"type=local,dest=.docker-cache,mode=max"'
     else:
         cache_to = ""
 
