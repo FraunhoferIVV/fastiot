@@ -80,14 +80,14 @@ class TestYAMLReader(unittest.TestCase):
 
     def test_no_config(self):
         result = read_config(self.module)
-        self.assertEqual(result, {})
+        self.assertEqual({}, result)
 
     def test_no_content(self):
         config_file = os.path.join(env_basic.config_dir, 'SimpleModule_1.yaml')
         self.create_yaml_file(config_file, content="")
 
         result = read_config(self.module)
-        self.assertEqual(result, {})
+        self.assertEqual({}, result)
 
 
 if __name__ == '__main__':

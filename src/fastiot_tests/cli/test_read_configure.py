@@ -14,8 +14,8 @@ class TestConfigurationImport(unittest.TestCase):
 
             config = import_configure(f.name)
 
-            self.assertEqual(config.project_namespace, 'fastiot_unittest')
-            self.assertEqual(config.project_root_dir, os.getcwd())
+            self.assertEqual('fastiot_unittest', config.project_namespace)
+            self.assertEqual(os.getcwd(), config.project_root_dir)
             self.assertIsNone(config.library_package)
 
     def test_missing_configuration_option(self):
@@ -32,9 +32,9 @@ class TestConfigurationImport(unittest.TestCase):
 
             config = import_configure(f.name)
 
-            self.assertEqual(config.project_namespace, 'fastiot_unittest')
+            self.assertEqual('fastiot_unittest', config.project_namespace)
             self.assertIsInstance(config.modules[0], ModuleConfig)
-            self.assertEqual(config.modules[0].package, "fastiot_sample_services")
+            self.assertEqual("fastiot_sample_services", config.modules[0].package)
 
 
 if __name__ == '__main__':

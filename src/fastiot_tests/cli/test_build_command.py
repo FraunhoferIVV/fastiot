@@ -45,7 +45,7 @@ class TestBuildCommand(unittest.TestCase):
 
             result = self.runner.invoke(app, ["build", "--dry", "producer"], catch_exceptions=False)
 
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
@@ -56,7 +56,7 @@ class TestBuildCommand(unittest.TestCase):
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
 
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
 
@@ -66,7 +66,7 @@ class TestBuildCommand(unittest.TestCase):
             os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
 
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
@@ -77,7 +77,7 @@ class TestBuildCommand(unittest.TestCase):
             # os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
 
             result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
 
@@ -86,7 +86,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
 
             result = self.runner.invoke(app, ["build", "--dry", "--push"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertFalse('"type=local,src=.docker-cache"' in contents)
@@ -97,7 +97,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertTrue('"type=local,src=.docker-cache"' in contents)
@@ -108,7 +108,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
 
             result = self.runner.invoke(app, ["build", "--dry", "--test-env-only"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
 
     def test_empty_build(self):
@@ -116,7 +116,7 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir, no_modules=True)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))

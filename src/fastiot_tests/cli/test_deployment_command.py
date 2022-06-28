@@ -28,7 +28,7 @@ class TestDeploymentCommand(unittest.TestCase):
             _prepare_env(tempdir, project_root_dir=tempdir)
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
-            self.assertEqual(result.exit_code, 1)
+            self.assertEqual(1, result.exit_code)
             self.assertTrue('not in project deployments' in result.stdout)
 
     def test_no_target(self):
@@ -41,7 +41,7 @@ class TestDeploymentCommand(unittest.TestCase):
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
 
-            self.assertEqual(result.exit_code, 2)
+            self.assertEqual(2, result.exit_code)
             self.assertTrue('does not have a deployment_target' in result.stdout)
 
     def test_single_module(self):
@@ -54,7 +54,7 @@ class TestDeploymentCommand(unittest.TestCase):
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
 
-            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(0, result.exit_code)
 
             generated_path = os.path.join(tempdir, GENERATED_DEPLOYMENTS_DIR, "fastiot_unittest")
             for file in ['ansible-playbook.yaml', 'hosts']:

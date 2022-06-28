@@ -30,7 +30,7 @@ class TestServiceImports(unittest.TestCase):
 
         services_integrated = get_services_list()
         services_after_import = get_services_list()
-        self.assertEqual(len(services_integrated), len(services_after_import))
+        self.assertEqual(len(services_after_import), len(services_integrated))
 
     def test_import_extension_with_service(self):
         """ Test importing services from actual module file """
