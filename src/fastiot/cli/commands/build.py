@@ -158,7 +158,13 @@ def _docker_bake(project_config: ProjectConfig,
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
 
-        cache_from, cache_to = _make_caches(docker_registry_cache, module.cache, module.extra_caches, push)
+        cache_from, cache_to = _make_caches(
+            docker_registry_cache=docker_registry_cache,
+            docker_cache_image=module.cache,
+            extra_caches=module.extra_caches,
+            push=push,
+            tags=tags
+        )
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
@@ -217,10 +223,15 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
             sys.exit(exit_code)
 
 
-def _make_caches(docker_registry_cache: Optional[str], docker_cache_image: str, extra_caches: List[str], push: bool):
+def _make_caches(docker_registry_cache: Optional[str],
+                 docker_cache_image: str,
+                 extra_caches: List[str],
+                 push: bool,
+                 tags: List[str]):
     caches_from = []
     if docker_registry_cache is not None:
-        caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}"')
+        for tag in tags:
+            caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}:{tag}"')
         if extra_caches is not None:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,src={docker_registry_cache}/{cache}"')
@@ -228,7 +239,7 @@ def _make_caches(docker_registry_cache: Optional[str], docker_cache_image: str, 
         caches_from.append('"type=local,src=.docker-cache"')
 
     if push and docker_registry_cache is not None:
-        cache_to = f'"type=registry,mode=max,ref={docker_registry_cache}/{docker_cache_image}"'
+        cache_to = f'"type=registry,mode=max,ref={docker_registry_cache}/{docker_cache_image}:{tags[0]}"'
     elif not push:
         cache_to = '"type=local,dest=.docker-cache,mode=max"'
     else:
