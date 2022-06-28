@@ -59,7 +59,7 @@ COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.li
 RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
 {% endif %}
 
-COPY src/{{ module.package }} /opt/fastiot/src/{{ module.package }}
+COPY src /opt/fastiot/src
 RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ module.package }}
 
 
