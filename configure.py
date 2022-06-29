@@ -9,7 +9,7 @@ modules = [
     *find_modules(package='fastiot_sample_services', cache=f"{project_namespace}:latest")
 ]
 
-test_package = 'fastiot_test'
+test_package = 'fastiot_tests'
 test_config = 'fastiot_test_env'
 
 compile_lib = 'only_source'
