@@ -4,7 +4,7 @@ import os
 import sys
 from typing import Optional
 
-from fastiot.cli.constants import CONFIGURE_FILE_NAME, DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.constants import CONFIGURE_FILE_NAME, DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model import ProjectConfig
 
 
@@ -12,8 +12,8 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
     """ Imports the :file:`configure.py` in the project root (if not specified otherwise) and returns  """
     config = _import_configure_py(file_name)
 
-    deploy_configs = glob.glob(os.path.join(os.getcwd(), DEPLOYMENTS_CONFIG_DIR, '*'))
-    deploy_configs = [os.path.basename(d) for d in deploy_configs]
+    deploy_configs = glob.glob(os.path.join(os.getcwd(), DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE))
+    deploy_configs = [os.path.basename(os.path.dirname(d)) for d in deploy_configs]
 
     data = dict()
     for field, options in ProjectConfig.__dict__['__fields__'].items():
