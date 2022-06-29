@@ -4,6 +4,8 @@ import os
 import subprocess
 import sys
 from enum import Enum
+from glob import glob
+from shutil import rmtree
 from typing import Optional, List
 
 import typer
@@ -50,8 +52,8 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
 
     env = os.environ.copy()
     env['MAKEFLAGS'] = f"-j{len(os.sched_getaffinity(0))}"
-    command_args = {BuildLibStyles.wheel: 'bdist_wheel',
-                    BuildLibStyles.sdist: 'sdist',
+    command_args = {BuildLibStyles.wheel: 'bdist_wheel -q',
+                    BuildLibStyles.sdist: 'sdist -q',
                     BuildLibStyles.compiled: 'bdist_nuitka'}
 
     setup_py = os.path.join(project_config.library_setup_py_dir, 'setup.py')
@@ -59,6 +61,13 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         cmd = f"{sys.executable} {setup_py} {command_args.get(style)}"
         exit_code = subprocess.call(cmd.split(), env=env, cwd=project_config.project_root_dir)
 
+        try:
+            for file in glob(os.path.join(project_config.project_root_dir, 'src', '*.egg-info')):
+                rmtree(file)
+        except FileNotFoundError:
+            pass
+
         if exit_code != 0:
             logging.error("Building library with style %s failed with exit code %s", str(style.value), str(exit_code))
-            sys.exit(exit_code)
+            raise typer.Exit(exit_code)
+
