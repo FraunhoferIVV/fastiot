@@ -3,7 +3,6 @@ import importlib
 import logging
 import os.path
 import subprocess
-import sys
 from glob import glob
 from typing import List, Optional
 
@@ -158,13 +157,16 @@ def _docker_bake(project_config: ProjectConfig,
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
 
-        cache_from, cache_to = _make_caches(
-            docker_registry_cache=docker_registry_cache,
-            docker_cache_image=module.cache,
-            extra_caches=module.extra_caches,
-            push=push,
-            tags=tags
-        )
+        if not no_cache:
+            cache_from, cache_to = _make_caches(
+                docker_registry_cache=docker_registry_cache,
+                docker_cache_image=module.cache,
+                extra_caches=module.extra_caches,
+                push=push,
+                tags=tags
+            )
+        else:
+            cache_from, cache_to = '', ''
 
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
@@ -200,12 +202,12 @@ def _find_test_env_modules(project_config: ProjectConfig) -> List[str]:
 
 
 def _run_docker_bake_cmd(project_config, push, no_cache):
-
     # Prepare system for multi-arch builds
-    os.system("export DOCKER_CLI_EXPERIMENTAL=enabled; "
-              "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; "
-              "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use; "
-              "docker buildx inspect --bootstrap; ")
+    os.environ['DOCKER_CLI_EXPERIMENTAL'] = 'enabled'
+    for cmd in ["docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;",
+                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use;",
+                "docker buildx inspect --bootstrap; "]:
+        subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
     if push:
@@ -220,7 +222,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
         if not no_cache:
             docker_cmd += " --no-cache"
             exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
-            sys.exit(exit_code)
+            raise typer.Exit(exit_code)
 
 
 def _make_caches(docker_registry_cache: Optional[str],

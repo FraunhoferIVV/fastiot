@@ -15,4 +15,3 @@ class ExternalService(BaseModel):
     additional_env: Optional[Dict[str, Union[str, int]]] = None
     """ Provide any additional environment variables to be set here as a dictionary with the variable name and a
     sensible default. """
-
