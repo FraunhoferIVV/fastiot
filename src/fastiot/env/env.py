@@ -64,5 +64,67 @@ class BrokerEnv:
         return float(os.getenv(FASTIOT_BROKER_STREAM_TIMEOUT, '10'))
 
 
+class MongoDBEnv:
+    """
+    Environment variables for mongodb
+
+    Use the properties from :func:`fastiot.env.fastiot_mongo_env` to read the values in an easy manner within your
+    code.
+    """
+
+    @property
+    def host(self) -> str:
+        """ ..envvar:: FASTIOT_MONGO_DB_HOST
+        Use to get/set the mongo database host. This is usually either ``mongodb`` within the docker network or
+        ``localhost`` when developing against a local mongodb.
+        """
+        return os.getenv(FASTIOT_MONGO_DB_HOST, '127.0.0.1')
+
+    @property
+    def port(self) -> int:
+        """ .. envvar:: FASTIOT_MONGO_DB_PORT
+        Use to get/set the mongodb port, defaults to 27017. """
+        return int(os.getenv(FASTIOT_MONGO_DB_PORT, '27017'))
+
+    @property
+    def user(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_MONGO_DB_USER
+        Use to get/set the mongodb user.
+        """
+        return os.getenv(FASTIOT_MONGO_DB_USER)
+
+    @property
+    def password(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_MONGO_DB_USER
+        Use to get/set the mongodb password.
+        """
+        return os.getenv(FASTIOT_MONGO_DB_PASSWORD)
+
+    @property
+    def auth_source(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_MONGO_DB_AUTH_SOURCE
+        Use to get/set the mongodb auth source, which is a database name which is needed for authentication.
+        """
+        return os.getenv(FASTIOT_MONGO_DB_AUTH_SOURCE)
+
+    @property
+    def name(self) -> str:
+        """ .. envvar:: FASTIOT_MONGO_DB_NAME
+        Use to get/set the name of mongodb database.
+        """
+        return os.getenv(FASTIOT_MONGO_DB_NAME)
+
+    @property
+    def is_configured(self) -> bool:
+        """
+        Use to indicate if the mongodb is configured, it is not bound to any environment variable
+        """
+        if FASTIOT_MONGO_DB_HOST in os.environ.keys():
+            return True
+        return False
+
+
 env_basic = BasicEnv()
 env_broker = BrokerEnv()
+env_mongodb = MongoDBEnv()
+
