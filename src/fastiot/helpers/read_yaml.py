@@ -7,7 +7,7 @@ from typing import Optional, Dict, Union, Type
 import yaml
 
 from fastiot.core.app import FastIoTApp
-from fastiot.env import env_basic
+from fastiot.env.env import env_basic
 
 
 def get_config_file_name(module: Union[FastIoTApp, str]) -> Optional[str]:

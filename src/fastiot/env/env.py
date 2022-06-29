@@ -1,12 +1,8 @@
 """ Module to hold basic environment variables """
 import os
+from typing import Optional
 
-FASTIOT_BROKER_HOST = 'FASTIOT_BROKER_HOST'
-FASTIOT_BROKER_PORT = 'FASTIOT_BROKER_PORT'
-FASTIOT_BROKER_DEFAULT_TIMEOUT = 'FASTIOT_BROKER_DEFAULT_TIMEOUT'
-FASTIOT_BROKER_STREAM_TIMEOUT = 'FASTIOT_BROKER_STREAM_TIMEOUT'
-
-FASTIOT_CONFIG_DIR = 'FASTIOT_CONFIG_DIR'
+from fastiot.env.env_constants import *
 
 
 class BasicEnv:
