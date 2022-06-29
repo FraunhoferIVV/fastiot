@@ -12,7 +12,8 @@ class ModuleConfig(BaseModel):
     cache: str = ''
     """
     The name to use as the cache on the set docker cache registry. If not defined and a cache registry is configured
-    the `project_namespace:latest` will be used.
+    the `project_namespace:latest` will be used. The tag will be appended automatically, please do not specify it 
+    yourself.
     Example: mypackage-cache
     """
     extra_caches: List[str] = []

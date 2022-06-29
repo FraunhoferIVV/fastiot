@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+import sys
 from glob import glob
 from typing import Dict, Optional, List
 
@@ -53,9 +54,14 @@ def find_modules(package: str,
     :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
     :param modules: Optional; if specified it will only include the listed modules
     :param cache: Optional; specify a cache for all modules. Cache reuse can be potentially dangerous because it might
-                  not work
+                  not work. Don’t use a tag like ```myprojects-cache:latest``` but just ```myprojects-cache```.
     :param extra_caches: Optional, specify additional extra caches which are read-only
     """
+    if ':' in cache:
+        logging.error("Please provide a cache without a `:`, this will be added automatically according to the tag to "
+                      "build!")
+        sys.exit(10)
+
     p = importlib.import_module(package)
     package_dir = os.path.dirname(p.__file__)
     configs = []
