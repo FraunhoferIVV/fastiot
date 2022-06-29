@@ -204,9 +204,10 @@ def _find_test_env_modules(project_config: ProjectConfig) -> List[str]:
 def _run_docker_bake_cmd(project_config, push, no_cache):
     # Prepare system for multi-arch builds
     os.environ['DOCKER_CLI_EXPERIMENTAL'] = 'enabled'
-    for cmd in ["docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;",
-                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use;",
-                "docker buildx inspect --bootstrap; "]:
+    qemu_platforms = {p.as_qemu_platform() for p in CPUPlatform}
+    for cmd in [f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
+                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use",
+                "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"

@@ -83,6 +83,14 @@ class CPUPlatform(str, Enum):
             return 'linux/arm/v7'
         return "linux/" + self
 
+    def as_qemu_platform(self):
+        """ Returns the platform according the qemu emulator """
+        if self == self.armv7:
+            return 'arm'
+        if self == 'amd64_2':
+            return 'amd64'
+        return self.value
+
 
 class Healthcheck(str, Enum):
     """ TODO: Add some description here! """
