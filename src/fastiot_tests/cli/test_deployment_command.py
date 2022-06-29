@@ -4,7 +4,7 @@ import unittest
 
 from typer.testing import CliRunner
 
-from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR, DEPLOYMENTS_CONFIG_FILE
+from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR, DEPLOYMENTS_CONFIG_FILE, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.typer_app import app
 from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli.test_build_command import _prepare_env
@@ -20,8 +20,14 @@ deployment_target:
 
 class TestDeploymentCommand(unittest.TestCase):
     def setUp(self):
-        init_default_context()
+        self._old_cwd = os.getcwd()
+        # Change to some arbitrary path where :func:`fastiot.cli.import_configure.import_configure` will not directly
+        # find some deployments (s. #16795 for more details)
+        os.chdir('/tmp')
         self.runner = CliRunner()
+
+    def tearDown(self):
+        os.chdir(self._old_cwd)
 
     def test_no_module(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -34,7 +40,7 @@ class TestDeploymentCommand(unittest.TestCase):
     def test_no_target(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, project_root_dir=tempdir)
-            deployments_dir = os.path.join(tempdir, 'deployments', 'fastiot_unittest')
+            deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
                 file.write("services: []")
@@ -47,7 +53,7 @@ class TestDeploymentCommand(unittest.TestCase):
     def test_single_module(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, project_root_dir=tempdir)
-            deployments_dir = os.path.join(tempdir, 'deployments', 'fastiot_unittest')
+            deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
                 file.write(DEPLOYMENT_EXAMPLE)

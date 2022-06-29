@@ -70,13 +70,14 @@ def run_unittests():
         sys.exit(0)
 
     env = os.environ.copy()
-    env['PYTHONPATH'] = os.path.join(project_config.project_root_dir, 'src')
+    src_dir = os.path.join(project_config.project_root_dir, 'src')
+    env['PYTHONPATH'] = src_dir
 
-    cmd = sys.executable + " -m pytest --rootdir=. --junitxml=pytest_report.xml " \
-                           f"--cov={os.path.join(project_config.project_root_dir, 'src')} " \
-                           "--cov-report=xml --cov-branch"
+    cmd = sys.executable + f" -m pytest --rootdir={src_dir} --junitxml=pytest_report.xml " \
+                           f"--cov={src_dir} --cov-report=xml --cov-branch"
+
     exit_code = subprocess.call(cmd.split(),
-                                cwd=os.path.join(project_config.project_root_dir, 'src', project_config.test_package),
+                                cwd=project_config.project_root_dir,
                                 env=env)
     if exit_code != 0:
         logging.error("Running unittests failed with exit code %s", str(exit_code))
