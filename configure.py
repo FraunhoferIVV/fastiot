@@ -6,7 +6,7 @@ project_namespace = 'fastiot'
 
 library_package = 'fastiot'
 modules = [
-    *find_modules(package='fastiot_sample_services', cache=f"{project_namespace}:latest")
+    *find_modules(package='fastiot_sample_services', cache=f"{project_namespace}")
 ]
 
 test_package = 'fastiot_tests'
