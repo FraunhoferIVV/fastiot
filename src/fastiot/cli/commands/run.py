@@ -74,7 +74,7 @@ def run_unittests():
     env['PYTHONPATH'] = src_dir
 
     cmd = sys.executable + f" -m pytest --rootdir={src_dir} --junitxml=pytest_report.xml " \
-                           f"--cov={src_dir} --cov-report=xml --cov-branch"
+                           f"--cov={src_dir} --cov-report=xml --cov-branch -p no:cacheprovider"
 
     exit_code = subprocess.call(cmd.split(),
                                 cwd=project_config.project_root_dir,

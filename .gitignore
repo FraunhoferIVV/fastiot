@@ -8,3 +8,6 @@ __pycache__/
 .docker-cache/
 .pytest_cache
 /generated/
+coverage.xml
+pytest_report.xml
+.coverage
