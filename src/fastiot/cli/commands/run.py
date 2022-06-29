@@ -72,7 +72,9 @@ def run_unittests():
     env = os.environ.copy()
     env['PYTHONPATH'] = os.path.join(project_config.project_root_dir, 'src')
 
-    cmd = sys.executable + " -m pytest --rootdir=. --junitxml=pytest_report.xml --cov=. --cov-report=xml --cov-branch"
+    cmd = sys.executable + " -m pytest --rootdir=. --junitxml=pytest_report.xml " \
+                           f"--cov={os.path.join(project_config.project_root_dir, 'src')} " \
+                           "--cov-report=xml --cov-branch"
     exit_code = subprocess.call(cmd.split(),
                                 cwd=os.path.join(project_config.project_root_dir, 'src', project_config.test_package),
                                 env=env)
