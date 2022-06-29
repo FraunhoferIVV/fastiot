@@ -62,7 +62,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
 
 @run_cmd.command(name='tests')
 def run_unittests():
-    os.environ['PYTHONDONTWRITEBYTECODE'] = 1
+    os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
     project_config = get_default_context().project_config
 
