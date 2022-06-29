@@ -1,0 +1,39 @@
+version: "2.4"
+
+services:
+  mongodb:
+      image: "mongo:4.4-bionic"
+      ports:
+        - "17017:27017"
+      networks:
+        - fastiot-net
+      environment:
+        - "MONGO_INITDB_ROOT_USERNAME=root"
+        - "MONGO_INITDB_ROOT_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+      env_file:
+        - .env
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/mongodb:/data/db"
+      restart: always
+
+  mariadb:
+      image: "mariadb:10.4"
+      ports:
+        - "3307:3306"
+      networks:
+        - fastiot-net
+      environment:
+        - "MYSQL_ROOT_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+        - "MYSQL_DATABASE=fastiot_fastiotlib"
+        # Causes timezone information import to be skipped as this seems to take quite some time as of 10/2019 and MariaDB 10.4
+        # Check if this can be removed at a later point
+        - "MYSQL_INITDB_SKIP_TZINFO=yes"
+      env_file:
+        - .env
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/mariadb:/var/lib/mysql"
+      restart: always
+
+
+networks:
+  fastiot-net:
