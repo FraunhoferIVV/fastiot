@@ -77,11 +77,6 @@ def run_unittests():
     cmd = sys.executable + f" -m pytest --rootdir={src_dir} --junitxml=pytest_report.xml " \
                            f"--cov={src_dir} --cov-report=xml --cov-branch -p no:cacheprovider"
 
-    python3 - Bc
-    "for p in __import__('pathlib').Path('.').rglob('*.py[co]'): p.unlink()"
-    python3 - Bc
-    "for p in __import__('pathlib').Path('.').rglob('__pycache__'): p.rmdir()"
-
     exit_code = subprocess.call(cmd.split(),
                                 cwd=project_config.project_root_dir,
                                 env=env)
