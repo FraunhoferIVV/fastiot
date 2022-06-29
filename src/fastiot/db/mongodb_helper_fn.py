@@ -5,8 +5,8 @@ from bson.codec_options import CodecOptions
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
-from fastiot.env.env import env_mongodb
-from fastiot.exceptions.exceptions import ServiceError
+from fastiot.env import env_mongodb
+from fastiot.exceptions import ServiceError
 
 
 class CustomMongoClient:

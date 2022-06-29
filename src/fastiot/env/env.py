@@ -2,7 +2,7 @@
 import os
 from typing import Optional
 
-from fastiot.env.env_constants import *
+from fastiot.env import *
 
 
 class BasicEnv:
