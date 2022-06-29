@@ -68,7 +68,7 @@ class MongoDBEnv:
     """
     Environment variables for mongodb
 
-    Use the properties from :func:`fastiot.env.fastiot_mongo_env` to read the values in an easy manner within your
+    Use the properties from :func:`fastiot.env.env.env_mongodb` to read the values in an easy manner within your
     code.
     """
 
@@ -124,7 +124,59 @@ class MongoDBEnv:
         return False
 
 
+class MariaDBEnv:
+    """
+    Environment variables for mariadb
+
+    Use the properties from :func:`fastiot.env.env.env_mariadb` to read the values in an easy manner within your
+    code.
+    """
+
+    @property
+    def host(self) -> str:
+        """ ..envvar:: FASTIOT_MARIA_DB_HOST
+        Use to get/set the maria database host. This is usually either ``mariadb`` within the docker network or
+        ``localhost`` when developing against a local mariadb.
+        """
+        return os.getenv(FASTIOT_MARIA_DB_HOST, '127.0.0.1')
+
+    @property
+    def port(self) -> int:
+        """ .. envvar:: FASTIOT_MARIA_DB_PORT
+        Use to get/set the mariadb port, defaults to 3306. """
+        return int(os.getenv(FASTIOT_MARIA_DB_PORT, 3306))
+
+    @property
+    def user(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_MARIA_DB_USER
+        Use to get/set the mariadb user.
+        """
+        return os.getenv(FASTIOT_MARIA_DB_USER)
+
+    @property
+    def password(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_MARIA_DB_PASSWORD
+        Use to get/set the mariadb password.
+        """
+        return os.getenv(FASTIOT_MARIA_DB_PASSWORD)
+
+    @property
+    def schema_fastiotlib(self) -> str:
+        """ .. envvar:: FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB
+        Use to get/set the mariadb schema.
+        """
+        return str(os.getenv(FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB))
+
+    @property
+    def is_configured(self) -> bool:
+        if FASTIOT_MARIA_DB_HOST in os.environ.keys():
+            return True
+        return False
+
+
+
 env_basic = BasicEnv()
 env_broker = BrokerEnv()
 env_mongodb = MongoDBEnv()
+env_mariadb = MariaDBEnv()
 
