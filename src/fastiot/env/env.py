@@ -174,9 +174,32 @@ class MariaDBEnv:
         return False
 
 
+class InfluxDBEnv:
+    @property
+    def host(self) -> str:
+        """ ..envvar:: FASTIOT_INFLUX_DB_HOST
+        Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
+        ``localhost`` when developing against a local influxdb.
+        """
+        return os.getenv(FASTIOT_INFLUX_DB_HOST, '127.0.0.1')
+
+    @property
+    def port(self) -> int:
+        """ .. envvar:: FASTIOT_INFLUX_DB_PORT
+        Use to get/set the influxdb port, defaults to 8086. """
+        return os.getenv(FASTIOT_INFLUX_DB_PORT, 8086)
+
+    @property
+    def token(self) -> str:
+        """.. envvar:: FASTIOT_INFLUX_DB_TOKEN
+        InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices
+        """
+        return os.getenv(FASTIOT_INFLUX_DB_TOKEN)
+
 
 env_basic = BasicEnv()
 env_broker = BrokerEnv()
 env_mongodb = MongoDBEnv()
 env_mariadb = MariaDBEnv()
+env_influxdb = InfluxDBEnv()
 

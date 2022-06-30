@@ -34,6 +34,26 @@ services:
         - "/var/fastiot/volumes/fastiot_dev/mariadb:/var/lib/mysql"
       restart: always
 
+  influxdb:
+      image: "influxdb:2.0"
+      ports:
+        - "8087:8086"
+      networks:
+        - fastiot-net
+      environment:
+        - "DOCKER_INFLUXDB_INIT_MODE=setup"
+        - "DOCKER_INFLUXDB_INIT_USERNAME=influxdb_admin"
+        - "DOCKER_INFLUXDB_INIT_PASSWORD=mf9ZXfeLKuaL3HL7w"
+        - "DOCKER_INFLUXDB_INIT_ORG=IVVDD"
+        - "DOCKER_INFLUXDB_INIT_BUCKET=sensors"
+        - "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ndExs0Yws4zBCtBs"
+      env_file:
+        - .env
+      volumes:
+        - "/var/odiwip/influxdb2:/var/lib/influxdb2"
+      restart: always
+
+
 
 networks:
   fastiot-net:
