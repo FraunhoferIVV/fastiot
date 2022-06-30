@@ -22,7 +22,7 @@ def _write_configure(path: str, no_modules: bool, project_root_dir: Optional[str
                    f"build_dir = '{path}'\n"
                    "test_config = 'fastiot_test_env'\n")
         if not no_modules:
-            file.write("modules = [*find_modules(package='fastiot_sample_services', cache='fastiot-cache', extra_caches=['fastiot-cache:latest'])]\n")
+            file.write("modules = [*find_modules(package='fastiot_sample_services')]\n")
         file.seek(0)
 
 
