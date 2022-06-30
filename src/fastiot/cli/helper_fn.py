@@ -46,37 +46,41 @@ def get_jinja_env():
 
 def find_modules(package: str,
                  modules: Optional[List[str]] = None,
-                 cache: str = '',
-                 extra_caches: Optional[List[str]] = None) -> List[ModuleConfig]:
+                 use_per_module_cache: bool = False) -> List[ModuleConfig]:
     """
     Find modules in a package
 
     :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
     :param modules: Optional; if specified it will only include the listed modules
-    :param cache: Optional; specify a cache for all modules. Cache reuse can be potentially dangerous because it might
-                  not work. Don’t use a tag like ```myprojects-cache:latest``` but just ```myprojects-cache```.
-    :param extra_caches: Optional, specify additional extra caches which are read-only
+    :param use_per_module_cache: If enabled, it will use per module caches. This is useful if different modules use
+                                 different Dockerfiles.
     """
-    if ':' in cache:
-        logging.error("Please provide a cache without a `:`, this will be added automatically according to the tag to "
-                      "build!")
-        sys.exit(10)
-
     p = importlib.import_module(package)
     package_dir = os.path.dirname(p.__file__)
     configs = []
     for m in os.listdir(package_dir):
         if os.path.isfile(os.path.join(package_dir, m, 'manifest.yaml')):
             if modules is None or m in modules:
-                module = import_module(name=m, package=package, cache=cache, extra_caches=extra_caches)
+                module = import_module(
+                    package=package,
+                    name=m,
+                    use_per_module_cache=use_per_module_cache
+                )
                 configs.append(module)
     return configs
 
 
-def import_module(name: str,
-                  package: str = '',
-                  cache: str = '',
-                  extra_caches: List[str] = None) -> ModuleConfig:
+def import_module(package: str,
+                  name: str,
+                  use_per_module_cache: bool = False) -> ModuleConfig:
+    """
+    Import a module
+
+    :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
+    :param name: The name of the module
+    :param use_per_module_cache: If enabled, it will include the module name into the caches; therefore using per module
+                                 caches. This is useful if different modules use different Dockerfiles.
+    """
     if package:
         full_name = package + '.' + name
     else:
@@ -89,17 +93,17 @@ def import_module(name: str,
     return ModuleConfig(
         name=name,
         package=package,
-        cache=cache if cache else _default_cache(module=name, package=package),
-        extra_caches=extra_caches if extra_caches is not None else _default_extra_caches(module=name, package=package)
+        cache=default_cache(module=name, package=package, use_per_module_cache=use_per_module_cache),
+        extra_caches=default_extra_caches(module=name, package=package, use_per_module_cache=use_per_module_cache)
     )
 
 
-def _default_cache(module: str, package: str = '') -> str:
-    package_prefix = ''
-    if package:
-        package_prefix = package + '-'
-    return f"{package_prefix}{module}-cache"
+def default_cache(package: str, module: str, use_per_module_cache: bool) -> str:
+    if use_per_module_cache:
+        return f"{package}-{module}-cache"
+    else:
+        return f"{package}-cache"
 
 
-def _default_extra_caches(module: str, package: str = '') -> List[str]:
-    return [_default_cache(module=module, package=package) + ':latest']
+def default_extra_caches(package: str, module: str, use_per_module_cache: bool) -> List[str]:
+    return [default_cache(package=package, module=module, use_per_module_cache=use_per_module_cache) + ':latest']

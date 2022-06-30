@@ -9,20 +9,19 @@ from fastiot.cli.model import ModuleManifest
 class ModuleConfig(BaseModel):
     name: str
     package: str
-    cache: str = ''
+    cache: str
     """
-    The name to use as the cache on the set docker cache registry. If not defined and a cache registry is configured
-    the `project_namespace:latest` will be used. The tag will be appended automatically, please do not specify it 
-    yourself.
+    The name to use as the cache on the set docker cache registry. The tag will be appended automatically, please do not 
+    specify it.
     Example: mypackage-cache
     """
-    extra_caches: List[str] = []
+    extra_caches: List[str]
     """
-    A list of extra caches used to speed up building. It is intended if you want to read from other caches or different
-    tags. Each extra cache must match a cache name extended by ':' followed by the tag for the cache. Per default no
-    extra caches are used. You might find it useful to always include the cache name of the current module package
-    followed by tag latest to always use latest cache for feature branches.
-    Examples: mypackage-cache:latest, fastiot-cache:latest, fastiot-cache:mybranch
+    A list of extra caches used to speed up building which will all be read-only. It is intended if you want to read 
+    from other caches or different tags. Each extra cache must match a cache name extended by ':' followed by the tag 
+    for the cache. It is useful to always include the cache name followed by tag latest to always use latest cache for 
+    feature branches.
+    Examples: mypackage-cache:latest, mypackage-cache:my-feature
     """
     manifest: Optional[ModuleManifest] = None
 
