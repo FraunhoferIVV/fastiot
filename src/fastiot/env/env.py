@@ -175,6 +175,12 @@ class MariaDBEnv:
 
 
 class InfluxDBEnv:
+    """
+    Environment variables for influxdb
+
+    Use the properties from :func:`fastiot.env.env.env_influxdb` to read the values in an easy manner within your
+    code.
+    """
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_INFLUX_DB_HOST
@@ -197,9 +203,55 @@ class InfluxDBEnv:
         return os.getenv(FASTIOT_INFLUX_DB_TOKEN)
 
 
+class TimeScaleDBEnv:
+    """
+    Environment variables for timescaledb
+
+    Use the properties from :func:`fastiot.env.env.env_timescaledb` to read the values in an easy manner within your
+    code.
+    """
+
+    @property
+    def host(self) -> str:
+        """ ..envvar:: FASTIOT_TIME_SCALE_DB_HOST
+        Use to get/set the time scale database host. This is usually either ``timescaledb`` within the docker
+        network or ``localhost`` when developing against a local time_scale_db.
+        """
+        return os.getenv(FASTIOT_TIME_SCALE_DB_HOST, '127.0.0.1')
+
+    @property
+    def port(self) -> int:
+        """ ..envvar:: FASTIOT_TIME_SCALE_DB_PORT
+        Use to get/set the time scale database port.
+        Use to get/set the time scale db port, defaults to 5432.
+        """
+        return os.getenv(FASTIOT_TIME_SCALE_DB_PORT, 5432)
+
+    @property
+    def user(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_TIME_SCALE_DB_USER
+        Use to get/set the time scale db user.
+        """
+        return os.getenv(FASTIOT_TIME_SCALE_DB_USER)
+
+    @property
+    def password(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_TIME_SCALE_DB_PASSWORD
+        Use to get/set the time scale db password.
+        """
+        return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD)
+
+    @property
+    def database(self) -> str:
+        """ .. envvar:: FASTIOT_TIME_SCALE_DB_DATABASE
+        Use to get/set the time scale db database.
+        """
+        return str(os.getenv(FASTIOT_TIME_SCALE_DB_DATABASE))
+
+
 env_basic = BasicEnv()
 env_broker = BrokerEnv()
 env_mongodb = MongoDBEnv()
 env_mariadb = MariaDBEnv()
 env_influxdb = InfluxDBEnv()
-
+env_timescaledb = TimeScaleDBEnv()

@@ -50,9 +50,22 @@ services:
       env_file:
         - .env
       volumes:
-        - "/var/odiwip/influxdb2:/var/lib/influxdb2"
+        - "/var/fastiot/volumes/fastiot_dev/influxdb2:/var/lib/influxdb2"
       restart: always
 
+  timescaledb:
+      image: "timescale/timescaledb:latest-pg14"
+      ports:
+        - "54332:5432"
+      networks:
+        - fastiot-net
+      environment:
+        - "POSTGRES_USER=postgres"
+        - "POSTGRES_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+        - "POSTGRES_DB=fastiot_db"
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/timescaledb:/var/lib/postgresql/data"
+      restart: always
 
 
 networks:
