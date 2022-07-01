@@ -1,10 +1,4 @@
 import time
-from typing import Dict, List, Union, Any, Tuple
-
-import influxdb_client
-from influxdb_client import InfluxDBClient
-from influxdb_client.client.exceptions import InfluxDBError
-from influxdb_client.client.write_api import SYNCHRONOUS
 
 from fastiot.env.env import env_influxdb
 from fastiot.exceptions import ServiceError
@@ -12,6 +6,10 @@ from fastiot.exceptions import ServiceError
 
 class CustomInfluxClient:
     def __init__(self, db_host: str, db_port: int, db_token: str):
+
+        from influxdb_client import InfluxDBClient
+        from influxdb_client.client.exceptions import InfluxDBError
+
         sleep_time = 0.2
         num_tries = 300 / sleep_time
         while num_tries > 0:
@@ -40,8 +38,3 @@ def get_influxdb_client_from_env() -> CustomInfluxClient:
         db_token=env_influxdb.token,
     )
     return db_client
-
-
-if __name__ == '__main__':
-    db_client = get_influxdb_client_from_env()
-    print(db_client.health_check())

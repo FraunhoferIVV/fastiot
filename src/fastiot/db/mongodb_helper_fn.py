@@ -1,10 +1,5 @@
 import logging
 
-from bson.binary import UUID_SUBTYPE
-from bson.codec_options import CodecOptions
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
 
@@ -16,6 +11,12 @@ class CustomMongoClient:
         Constructor for a customer mongo client. Please note, that it will also set the feature compatibility version to
         the current mongodb version which may cause the database to be harder to downgrade.
         """
+
+        from bson.binary import UUID_SUBTYPE
+        from bson.codec_options import CodecOptions
+        from pymongo import MongoClient
+        from pymongo.errors import ConnectionFailure
+
         mongo_client_kwargs = {
             "host": db_host,
             "port": db_port,
@@ -48,6 +49,12 @@ class CustomMongoClient:
         version = f"{version_array[0]}.{version_array[1]}"
         self._db_client.admin.command({"setFeatureCompatibilityVersion": version})
 
+    def health_check(self) -> bool:
+        connected_nodes = self._db_client.nodes
+        if connected_nodes is not None:
+            return True
+        return False
+
     def get_database(self, name):
         if name is None:
             raise ValueError('database name is None, please assign a value')
@@ -60,6 +67,9 @@ class CustomMongoClient:
 
     def fsync(self):
         self._db_client.admin.command('fsync', lock=True)
+
+    def close(self):
+        self._db_client.close()
 
 
 def get_mongodb_client_from_env() -> CustomMongoClient:

@@ -2,9 +2,6 @@
 # --------- apt-get install libpq-dev first to install psycopg2 !!! -----------
 import time
 
-import psycopg2
-from psycopg2 import OperationalError
-
 from fastiot.env.env import env_timescaledb
 from fastiot.exceptions import ServiceError
 
@@ -22,6 +19,8 @@ def open_timescaledb_connection_from_env():
 
 def open_timescaledb_connection(host: str, port: int, user: str, password: str,
                                 database: str = None):
+    import psycopg2
+    from psycopg2 import OperationalError
 
     connection_parameters = {"user": user, "password": password, "host": host,
                              "port": port, "database": database}
@@ -38,8 +37,3 @@ def open_timescaledb_connection(host: str, port: int, user: str, password: str,
             time.sleep(sleep_time)
         num_tries -= 1
     raise ServiceError("Could not connect to TimeScaleDB")
-
-
-if __name__ == '__main__':
-    db_connection = open_timescaledb_connection_from_env()
-    print(db_connection.server_version)

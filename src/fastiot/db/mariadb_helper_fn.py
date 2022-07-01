@@ -1,16 +1,13 @@
 import logging
 import time
 
-import pymysql
-from pymysql.connections import Connection
-import pymysql.cursors
 from typing import List, Tuple, Optional
 
 from fastiot.env.env import env_mariadb
 from fastiot.exceptions.exceptions import ServiceError
 
 
-def open_mariadb_connection_from_env(schema: Optional[str] = None) -> Connection:
+def open_mariadb_connection_from_env(schema: Optional[str] = None):
     """
     Establishes a connection to a MariaDB instance and returns a Connection object.
 
@@ -27,9 +24,12 @@ def open_mariadb_connection_from_env(schema: Optional[str] = None) -> Connection
 
 
 def open_mariadb_connection(host: str, port: int, schema: Optional[str],
-                            user: str, password: str) -> Connection:
+                            user: str, password: str):
     # We found that mariadb initial start time takes very long in some environments. Therefore we need a timeout much
     # greater then two minutes.
+
+    import pymysql.cursors
+
     sleep_time = 0.2
     num_tries = 300 / sleep_time
     while num_tries > 0:
@@ -47,8 +47,3 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
             time.sleep(sleep_time)
         num_tries -= 1
     raise ServiceError("Could not connect to MariaDB")
-
-
-if __name__ == '__main__':
-    maria_db_connection = open_mariadb_connection_from_env('fastiot_fastiotlib')
-    print(maria_db_connection)
