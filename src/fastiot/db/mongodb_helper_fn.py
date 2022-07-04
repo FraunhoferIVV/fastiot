@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
@@ -10,12 +11,20 @@ class CustomMongoClient:
         """
         Constructor for a customer mongo client. Please note, that it will also set the feature compatibility version to
         the current mongodb version which may cause the database to be harder to downgrade.
-        """
 
-        from bson.binary import UUID_SUBTYPE
-        from bson.codec_options import CodecOptions
-        from pymongo import MongoClient
-        from pymongo.errors import ConnectionFailure
+        *Note:* You have to manually install ``pymongo>=4.1,<5`` using your :file:`requirements.txt` to make use of this
+        helper. Database clients are not automatically installed to keep the containers smaller.
+        """
+        try:
+            # pylint: disable=import-outside-toplevel
+            from bson.binary import UUID_SUBTYPE
+            from bson.codec_options import CodecOptions
+            from pymongo import MongoClient
+            from pymongo.errors import ConnectionFailure
+        except (ImportError, ModuleNotFoundError):
+            logging.error("You have to manually install `pymongo>=4.1,<5` using your `requirements.txt` to make use of "
+                          "this helper.")
+            sys.exit(5)
 
         mongo_client_kwargs = {
             "host": db_host,
@@ -81,4 +90,3 @@ def get_mongodb_client_from_env() -> CustomMongoClient:
         db_auth_source=env_mongodb.auth_source
     )
     return db_client
-
