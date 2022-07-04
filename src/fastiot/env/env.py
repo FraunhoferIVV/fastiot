@@ -47,7 +47,7 @@ class BrokerEnv:
 
     @property
     def port(self) -> int:
-        """ .. envvar:: FASTIOT_BROKER_HOST
+        """ .. envvar:: FASTIOT_BROKER_PORT
         Use to get/set the broker port, defaults to 4222. """
         return int(os.getenv(FASTIOT_BROKER_PORT, '4222'))
 

@@ -8,6 +8,17 @@ Welcome to fastIoT's documentation.
    :maxdepth: 2
    :caption: Contents:
 
+**********************
+Framework architecture
+**********************
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   architecture/*
+
+
 *********
 Tutorials
 *********

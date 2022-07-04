@@ -4,3 +4,4 @@ sphinx-autodoc-typehints
 recommonmark
 myst-parser
 autodoc_pydantic
+git+https://github.com/bashtage/sphinx-material.git

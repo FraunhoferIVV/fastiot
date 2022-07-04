@@ -64,7 +64,7 @@ autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
     'special-members': '__init__',
-    'undoc-members': True,
+    'undoc-members': False,
     'exclude-members': '__weakref__'
 }
 # The suffix(es) of source filenames.
@@ -115,8 +115,8 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'nature'
-
+html_theme = 'sphinx_material'
+html_theme_options = {'color_primary': 'teal', 'color_accent': 'orange'}
 show_related = True
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -129,7 +129,9 @@ show_related = True
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['static']
-
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+}
 html_css_files = [
     'fastiot.css',
 ]

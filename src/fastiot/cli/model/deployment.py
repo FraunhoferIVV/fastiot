@@ -71,7 +71,7 @@ class DeploymentTargetSetup(BaseModel):
     link_prometheus: bool = False
     """ Set to ``True`` to enable automatically link the Prometheus-Client configuration copied by Ansible to host to
     the current project. Only works if you do *not* have :file:`docker-compose.override.yaml` in your deployment
-     already."""
+    already."""
 
 
 class DeploymentConfig(BaseModel):

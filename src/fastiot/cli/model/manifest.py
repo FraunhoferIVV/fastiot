@@ -103,15 +103,17 @@ class Vue(BaseModel):
     src: str  # Source path relative to your application where the vue.js code is located
     dst: str  # Destination path where the build static files will be placed, e.g. 'static'
     configured_dist: str = 'dist'
-    """ Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
+    """
+    Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
     in the `<vue-path>/dist` which is also the default here.
-    If you have something like
-    ``
-    module.exports = {
-      outputDir:"../flask_server/static",
-      assetsDir: "static"
-    }
-    ``
+    If you have something like::
+    
+        module.exports = {
+          outputDir:"../flask_server/static",
+          assetsDir: "static"
+        }
+
+    
     in your :file:`vue.config.js` use the `outputDir` variable as relative path here.
     """
 
@@ -150,13 +152,13 @@ class ModuleManifest(BaseModel):
     healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
     copy_dirs_to_container: List[str] = []
     """
-    Directories which shall be copied to container. They must be specified relative to manifest.yaml.
+    Directories which shall be copied to container. They must be specified relative to :file:`manifest.yaml`.
     """
 
     vue: Optional[Vue] = None
     """
     If your project contains a vue.js application you can automatically build it here. For required configuration
-    s ::class:`Vue`
+    s :class:`fastiot.cli.model.manifest.Vue`
     """
 
     @staticmethod

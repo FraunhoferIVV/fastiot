@@ -5,3 +5,7 @@
 .sig-name {
   font-size: 1em;
 }
+
+span.sig-name.descname > span {
+  font-weight: bold;
+}

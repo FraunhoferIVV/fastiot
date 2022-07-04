@@ -206,7 +206,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
     os.environ['DOCKER_CLI_EXPERIMENTAL'] = 'enabled'
     qemu_platforms = {p.as_qemu_platform() for p in CPUPlatform}
     for cmd in [f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
-                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:master --use",
+                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:latest --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
@@ -231,18 +231,26 @@ def _make_caches(docker_registry_cache: Optional[str],
                  extra_caches: List[str],
                  push: bool,
                  tags: List[str]):
+    project_namespace = get_default_context().project_config.project_namespace
     caches_from = []
-    if docker_registry_cache is not None:
+
+    # Sort the tags: If we have a `latest` we want this to be first for the push the cache.
+    if 'latest' in tags:
+        tags = ['latest'] + [t for t in tags if t != 'latest']
+
+    if docker_registry_cache:
         for tag in tags:
-            caches_from.append(f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}:{tag}"')
-        if extra_caches is not None:
+            caches_from.append(f'"type=registry,ref={docker_registry_cache}/{project_namespace}/'
+                               f'{docker_cache_image}:{tag}"')
+        if extra_caches:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
     if not push:  # We are most probably in a local environment, so try to use this cache as well
         caches_from.append('"type=local,src=.docker-cache"')
 
-    if push and docker_registry_cache is not None:
-        cache_to = f'"type=registry,ref={docker_registry_cache}/{docker_cache_image}:{tags[0]},mode=max"'
+    if push and docker_registry_cache:
+        cache_to = f'"type=registry,ref={docker_registry_cache}/{project_namespace}/' \
+                   f'{docker_cache_image}:{tags[0]},mode=max"'
     elif not push:
         cache_to = '"type=local,dest=.docker-cache,mode=max"'
     else:
