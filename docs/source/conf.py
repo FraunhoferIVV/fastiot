@@ -41,6 +41,7 @@ from fastiot import __version__
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.viewcode',
+              'sphinx.ext.coverage',
               'sphinx_automodapi.automodapi',
               'sphinx_autodoc_typehints',
               'sphinx.ext.autosectionlabel',
@@ -64,7 +65,7 @@ autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
     'special-members': '__init__',
-    'undoc-members': False,
+    'undoc-members': True,
     'exclude-members': '__weakref__'
 }
 # The suffix(es) of source filenames.

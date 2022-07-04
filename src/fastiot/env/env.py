@@ -40,27 +40,37 @@ class BrokerEnv:
 
     @property
     def host(self) -> str:
-        """ .. envvar:: FASTIOT_BROKER_HOST
+        """
+        .. envvar:: FASTIOT_BROKER_HOST
+
         Use to get/set the broker host. This is usually either ``nats`` within the docker network or ``localhost``
-        when developing against a local broker."""
+        when developing against a local broker.
+        """
         return os.environ[FASTIOT_BROKER_HOST]
 
     @property
     def port(self) -> int:
-        """ .. envvar:: FASTIOT_BROKER_PORT
-        Use to get/set the broker port, defaults to 4222. """
+        """
+        .. envvar:: FASTIOT_BROKER_PORT
+
+        Use to get/set the broker port, defaults to 4222.
+        """
         return int(os.getenv(FASTIOT_BROKER_PORT, '4222'))
 
     @property
     def default_timeout(self) -> float:
         """ .. envvar:: FASTIOT_BROKER_DEFAULT_TIMEOUT
-        Use to get/set the broker timeout in seconds, defaults to 30. """
+
+        Use to get/set the broker timeout in seconds, defaults to 30.
+        """
         return float(os.getenv(FASTIOT_BROKER_DEFAULT_TIMEOUT, '30'))
 
     @property
     def stream_timeout(self) -> float:
         """ .. envvar::FASTIOT_BROKER_STREAM_TIMEOUT
-        Use to get/set  the broker stream timeout in seconds, defaults to 10. """
+
+        Use to get/set  the broker stream timeout in seconds, defaults to 10.
+        """
         return float(os.getenv(FASTIOT_BROKER_STREAM_TIMEOUT, '10'))
 
 
@@ -75,6 +85,7 @@ class MongoDBEnv:
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_MONGO_DB_HOST
+
         Use to get/set the mongo database host. This is usually either ``mongodb`` within the docker network or
         ``localhost`` when developing against a local mongodb.
         """
@@ -83,19 +94,22 @@ class MongoDBEnv:
     @property
     def port(self) -> int:
         """ .. envvar:: FASTIOT_MONGO_DB_PORT
+
         Use to get/set the mongodb port, defaults to 27017. """
         return int(os.getenv(FASTIOT_MONGO_DB_PORT, '27017'))
 
     @property
     def user(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_MONGO_DB_USER
+
         Use to get/set the mongodb user.
         """
         return os.getenv(FASTIOT_MONGO_DB_USER)
 
     @property
     def password(self) -> Optional[str]:
-        """ .. envvar:: FASTIOT_MONGO_DB_USER
+        """ .. envvar:: FASTIOT_MONGO_DB_PASSWORD
+
         Use to get/set the mongodb password.
         """
         return os.getenv(FASTIOT_MONGO_DB_PASSWORD)
@@ -103,6 +117,7 @@ class MongoDBEnv:
     @property
     def auth_source(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_MONGO_DB_AUTH_SOURCE
+
         Use to get/set the mongodb auth source, which is a database name which is needed for authentication.
         """
         return os.getenv(FASTIOT_MONGO_DB_AUTH_SOURCE)
@@ -110,6 +125,7 @@ class MongoDBEnv:
     @property
     def name(self) -> str:
         """ .. envvar:: FASTIOT_MONGO_DB_NAME
+
         Use to get/set the name of mongodb database.
         """
         return os.getenv(FASTIOT_MONGO_DB_NAME)
@@ -135,6 +151,7 @@ class MariaDBEnv:
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_MARIA_DB_HOST
+
         Use to get/set the maria database host. This is usually either ``mariadb`` within the docker network or
         ``localhost`` when developing against a local mariadb.
         """
@@ -143,12 +160,14 @@ class MariaDBEnv:
     @property
     def port(self) -> int:
         """ .. envvar:: FASTIOT_MARIA_DB_PORT
+
         Use to get/set the mariadb port, defaults to 3306. """
         return int(os.getenv(FASTIOT_MARIA_DB_PORT, 3306))
 
     @property
     def user(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_MARIA_DB_USER
+
         Use to get/set the mariadb user.
         """
         return os.getenv(FASTIOT_MARIA_DB_USER)
@@ -156,6 +175,7 @@ class MariaDBEnv:
     @property
     def password(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_MARIA_DB_PASSWORD
+
         Use to get/set the mariadb password.
         """
         return os.getenv(FASTIOT_MARIA_DB_PASSWORD)
@@ -163,6 +183,7 @@ class MariaDBEnv:
     @property
     def schema_fastiotlib(self) -> str:
         """ .. envvar:: FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB
+
         Use to get/set the mariadb schema.
         """
         return str(os.getenv(FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB))
@@ -184,6 +205,7 @@ class InfluxDBEnv:
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_INFLUX_DB_HOST
+
         Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
         ``localhost`` when developing against a local influxdb.
         """
@@ -192,12 +214,14 @@ class InfluxDBEnv:
     @property
     def port(self) -> int:
         """ .. envvar:: FASTIOT_INFLUX_DB_PORT
+
         Use to get/set the influxdb port, defaults to 8086. """
         return os.getenv(FASTIOT_INFLUX_DB_PORT, 8086)
 
     @property
     def token(self) -> str:
         """.. envvar:: FASTIOT_INFLUX_DB_TOKEN
+
         InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices
         """
         return os.getenv(FASTIOT_INFLUX_DB_TOKEN)
@@ -214,6 +238,7 @@ class TimeScaleDBEnv:
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_TIME_SCALE_DB_HOST
+
         Use to get/set the time scale database host. This is usually either ``timescaledb`` within the docker
         network or ``localhost`` when developing against a local time_scale_db.
         """
@@ -222,6 +247,7 @@ class TimeScaleDBEnv:
     @property
     def port(self) -> int:
         """ ..envvar:: FASTIOT_TIME_SCALE_DB_PORT
+
         Use to get/set the time scale database port.
         Use to get/set the time scale db port, defaults to 5432.
         """
@@ -230,6 +256,7 @@ class TimeScaleDBEnv:
     @property
     def user(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_TIME_SCALE_DB_USER
+
         Use to get/set the time scale db user.
         """
         return os.getenv(FASTIOT_TIME_SCALE_DB_USER)
@@ -237,6 +264,7 @@ class TimeScaleDBEnv:
     @property
     def password(self) -> Optional[str]:
         """ .. envvar:: FASTIOT_TIME_SCALE_DB_PASSWORD
+
         Use to get/set the time scale db password.
         """
         return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD)
@@ -244,6 +272,7 @@ class TimeScaleDBEnv:
     @property
     def database(self) -> str:
         """ .. envvar:: FASTIOT_TIME_SCALE_DB_DATABASE
+
         Use to get/set the time scale db database.
         """
         return str(os.getenv(FASTIOT_TIME_SCALE_DB_DATABASE))
