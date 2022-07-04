@@ -1,4 +1,4 @@
-# fastIoT modules
+# FastIoT services
 
 ## Data dashboard
 

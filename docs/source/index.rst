@@ -24,19 +24,19 @@ Tutorials
 *********
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
 
-   tutorials/*/*
+   tutorials/*
  
-*******
-Modules
-*******
+********
+Services
+********
 
 .. toctree::
     :maxdepth: 2
 
-    modules
+    Services
 
 *********
 Changelog

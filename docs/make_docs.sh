@@ -12,7 +12,7 @@ EXTENSIONS="--module-first --ext-autodoc --ext-coverage --ext-todo"
 
 sphinx-apidoc ${EXTENSIONS} -o source/api/fastiot_sample_services ../src/fastiot_sample_services
 sphinx-apidoc ${EXTENSIONS} --separate -o source/api/fastiot_core_services ../src/fastiot_core_services
-sphinx-apidoc ${EXTENSIONS} -o source/api/fastiot ../src/fastiot
+sphinx-apidoc ${EXTENSIONS} --separate -o source/api/fastiot ../src/fastiot
 
 
 make html

@@ -37,7 +37,7 @@ class ProjectConfig(BaseModel):
 
     library_package: Optional[str] = None
     """ Define a python package within your :file:`src` directory containing library methods to be shared between your
-    services. If not specified no library will be built. """
+    services. If not specified no library will be built."""
 
     library_setup_py_dir: str = os.getcwd()
     """ Path where to find the :file:`setup.py` to build your library for exporting. The default with the current
@@ -49,15 +49,15 @@ class ProjectConfig(BaseModel):
     package a FastIoT Service. Be aware of this when creating a :file:`manifest.py` somewhere, e.g. in your tests. This
     may bring the system to fail!
     
-    *Hint:* If you want to override this configuration you may use :func:`fastiot.cli.find_services` to create a list of
-    services to build by package."""
+    *Hint:* If you want to override this configuration you may use :func:`fastiot.cli.helper_fn.find_services` to create
+    a list of services to build by package."""
 
     deploy_configs: Optional[List[DeploymentConfig]] = []
     """ Manually define a list of deployments as :class:`fastiot.cli.model.DeploymentConfig` to actually build using the
     command :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path
     :file:`deployments` will be used.
     
-    *Hint:* You may use :func:`fastiot.cli.find_deployments` to create a list of deployments according to your special
+    *Hint:* You may use :func:`fastiot.cli.helper_fn.find_deployments` to create a list of deployments according to your special
     needs."""
 
     test_config: Optional[str]
