@@ -46,7 +46,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_autodoc_typehints',
               'sphinx.ext.autosectionlabel',
               'myst_parser',
-              'sphinx_click',
               #'sphinxcontrib.autodoc_pydantic'
               ]
 
