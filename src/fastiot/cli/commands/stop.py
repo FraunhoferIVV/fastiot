@@ -14,36 +14,36 @@ from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
 
 
 @stop_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def environment(environment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
-                                                                 help="Select the environment to stop."),
-                service_names: Optional[List[str]] = typer.Argument(default=None,
+def deployment(deployment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
+                                                               help="Select the environment to stop."),
+               service_names: Optional[List[str]] = typer.Argument(default=None,
                                                                     help="Optionally specify services to be stopped "
                                                                          "from the environment. This will only stop "
                                                                          "the services but not remove the containers."
                                                                          "(docker-compose stop instead of down)"),
-                project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
-                stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
+               project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
+               stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
                                                                          "test environment specified in the project. "
                                                                          "Useful for the CI runner")
-                ):
+               ):
     """
     Stops up the selected environment.
     """
     project_config = get_default_context().project_config
 
     if stop_test_deployment:
-        environment_name = project_config.test_config
+        deployment_name = project_config.test_config
 
-    if environment_name is None:
+    if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
         sys.exit(-1)
 
     cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
-                       environment_name)
+                       deployment_name)
 
     cmd = f"docker-compose "
 
-    project_name = project_name or project_config.project_namespace + "__" + environment_name
+    project_name = project_name or project_config.project_namespace + "__" + deployment_name
     cmd += "--project-name=" + project_name
 
     if service_names is not None and len(service_names) > 0:
