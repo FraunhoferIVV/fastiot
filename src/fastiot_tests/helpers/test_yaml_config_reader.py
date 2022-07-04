@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import unittest
 
-from fastiot.core.app import FastIoTApp
+from fastiot.core.app import FastIoTService
 from fastiot.core.broker_connection import BrokerConnectionTestImpl
 from fastiot.env import env_basic
 from fastiot.env.env_constants import FASTIOT_CONFIG_DIR
@@ -23,7 +23,7 @@ expected_result = {'config item 1': {'foo': 'bar', 'key': 'value'},
                    'config item 2': {'the answer': 42}}
 
 
-class SimpleModule(FastIoTApp):
+class SimpleService(FastIoTService):
     """ No methods implemented """
 
 
@@ -45,8 +45,8 @@ class TestYAMLReader(unittest.TestCase):
         self.test_dir = tempfile.mkdtemp()
         os.environ[FASTIOT_CONFIG_DIR] = self.test_dir
 
-        self.module = SimpleModule(MyBroker())
-        self.module.module_id = 1
+        self.service = SimpleService(MyBroker())
+        self.service.service_id = 1
 
     def tearDown(self):
         # Remove the directory after the test
@@ -58,17 +58,17 @@ class TestYAMLReader(unittest.TestCase):
         file.write(content)
         file.close()
 
-    def test_config_per_module(self):
-        config_file = os.path.join(env_basic.config_dir, 'SimpleModule.yaml')
+    def test_config_per_service(self):
+        config_file = os.path.join(env_basic.config_dir, 'SimpleService.yaml')
         self.create_yaml_file(config_file)
-        result = read_config(self.module)
+        result = read_config(self.service)
 
         self.assertEqual(expected_result, result)
 
     def test_config_per_instance(self):
-        config_file = os.path.join(env_basic.config_dir, 'SimpleModule_1.yaml')
+        config_file = os.path.join(env_basic.config_dir, 'SimpleService_1.yaml')
         self.create_yaml_file(config_file)
-        result = read_config(self.module)
+        result = read_config(self.service)
 
         self.assertEqual(expected_result, result)
 
@@ -80,14 +80,14 @@ class TestYAMLReader(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_no_config(self):
-        result = read_config(self.module)
+        result = read_config(self.service)
         self.assertEqual({}, result)
 
     def test_no_content(self):
-        config_file = os.path.join(env_basic.config_dir, 'SimpleModule_1.yaml')
+        config_file = os.path.join(env_basic.config_dir, 'SimpleService_1.yaml')
         self.create_yaml_file(config_file, content="")
 
-        result = read_config(self.module)
+        result = read_config(self.service)
         self.assertEqual({}, result)
 
 

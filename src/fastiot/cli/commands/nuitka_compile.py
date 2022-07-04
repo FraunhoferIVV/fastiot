@@ -1,4 +1,4 @@
-""" Command to compile modules and packages with Nuitka """
+""" Command to compile services and packages with Nuitka """
 import importlib
 import logging
 import os.path

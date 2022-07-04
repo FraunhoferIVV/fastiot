@@ -1,4 +1,4 @@
-""" Data model for module manifests """
+""" Data model for fastiot service manifests """
 import os
 import tempfile
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ from fastiot.cli.cli_logging import get_cli_logger
 
 class Port(BaseModel):
     """
-    A port entry represents one port used by the module which should be mounted outside the container.
+    A port entry represents one port used by the service which should be mounted outside the container.
     """
 
     location: int
@@ -30,7 +30,7 @@ class Port(BaseModel):
 
 class Volume(BaseModel):
     """
-    A volume entry represents one directory used by the module which should be mounted outside the container.
+    A volume entry represents one directory used by the service which should be mounted outside the container.
     """
 
     location: str
@@ -47,7 +47,7 @@ class Volume(BaseModel):
 @dataclass
 class Device:
     """
-    A device entry represents one device used by the module which should be mounted outside the container.
+    A device entry represents one device used by the service which should be mounted outside the container.
     """
 
     location: str
@@ -108,7 +108,7 @@ class Vue(BaseModel):
     in the `<vue-path>/dist` which is also the default here.
     If you have something like::
     
-        module.exports = {
+        service.exports = {
           outputDir:"../flask_server/static",
           assetsDir: "static"
         }
@@ -118,12 +118,12 @@ class Vue(BaseModel):
     """
 
 
-class ModuleManifest(BaseModel):
+class ServiceManifest(BaseModel):
     """
     Manifest files may contain these variables.
-    :any:`fastiot.cli.model.manifest.ModuleManifest.name` is needed, others are mostly optional!
+    :any:`fastiot.cli.model.manifest.serviceManifest.name` is needed, others are mostly optional!
     """
-    name: str  # Name needs to comply with the modules name
+    name: str  # Name needs to comply with the services name
     ports: Optional[Dict[str, Port]] = None
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating
@@ -134,7 +134,7 @@ class ModuleManifest(BaseModel):
     :const:`fastiot.cli.constants.DOCKER_BASE_IMAGE` will be used.
     
     Be aware, that the further Dockerfile will be unchanged, thus your base image should be based on some Debian-style.
-    If this does not work for you, you may also provide a :file:`Dockerfile` in your module which will automatically be
+    If this does not work for you, you may also provide a :file:`Dockerfile` in your service which will automatically be
     used.
     """
     volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
@@ -143,7 +143,7 @@ class ModuleManifest(BaseModel):
     # depends_on: List[ServiceEnum] = ()
     privileged: bool = False
     """
-    Enable if this module needs privileged permissions inside docker, e.g. for hardware access
+    Enable if this service needs privileged permissions inside docker, e.g. for hardware access
     """
     platforms: List[CPUPlatform] = [CPUPlatform.amd64]
     """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one
@@ -162,21 +162,21 @@ class ModuleManifest(BaseModel):
     """
 
     @staticmethod
-    def from_yaml_file(filename: str, check_module_name: str = '') -> "ModuleManifest":
+    def from_yaml_file(filename: str, check_service_name: str = '') -> "ServiceManifest":
         """ Does the magic of import yaml to pydantic model"""
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
-        manifest = ModuleManifest(**config['fastiot_module'])
+        manifest = ServiceManifest(**config['fastiot_service'])
 
-        if check_module_name and manifest.name != check_module_name:
+        if check_service_name and manifest.name != check_service_name:
             raise ValueError(f'Error raised during parsing of file "{filename}": '
-                             f'Module name in manifest file "{manifest.name}" differs from expected module '
-                             f'name "{check_module_name}".')
+                             f'service name in manifest file "{manifest.name}" differs from expected service '
+                             f'name "{check_service_name}".')
 
         return manifest
 
     @classmethod
-    def from_docker_image(cls, docker_image_name: str) -> "ModuleManifest":
+    def from_docker_image(cls, docker_image_name: str) -> "ServiceManifest":
         # The manifest file is always located inside the container and has the name '/opt/fastiot/manifest.yaml'.
         # We have to mount a volume and copy the file into the volume. If we mounted a file directly, we sometimes get
         # errors overwriting the file from inside the container. To avoid trouble, we mount a directory.

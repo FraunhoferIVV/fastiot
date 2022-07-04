@@ -58,6 +58,9 @@ autosectionlabel_prefix_document = True
 
 cmd_line_template = "sphinx-apidoc --module-first -f -o {outputdir} {moduledir}"
 
+coverage_show_missing_items = True
+
+
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 autosummary_generate = True
 # May be extended by also using 'special-members',

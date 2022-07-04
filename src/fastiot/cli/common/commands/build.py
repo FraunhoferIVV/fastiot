@@ -9,7 +9,7 @@ from pydantic.main import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.model import ProjectConfig, ModuleManifest
+from fastiot.cli.model import ProjectConfig, ServiceManifest
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -19,15 +19,15 @@ class Mode(str, Enum):
     release = 'release'
 
 
-def _get_modules_enum():
+def _get_services_enum():
     default_context = get_default_context()
-    modules_dict = {
-        module: module for module in default_context.project_config.all_modules()
+    services_dict = {
+        service: service for service in default_context.project_config.services
     }
-    return Enum('Modules', modules_dict)
+    return Enum('Services', services_dict)
 
 
-Modules = _get_modules_enum()
+Modules = _get_services_enum()
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -107,7 +107,7 @@ def create_docker_file(module_package_name: str, module_name: str, project_confi
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + module_name)
     manifest_path = _get_manifest_path(module_name, module_package_name, project_config)
-    manifest = ModuleManifest.from_yaml_file(manifest_path, check_module_name=module_name)
+    manifest = ServiceManifest.from_yaml_file(manifest_path, check_service_name=module_name)
 
     with open(docker_filename, "w") as dockerfile:
         dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
@@ -130,7 +130,7 @@ def docker_bake(project_config: ProjectConfig,
     """ Method to create a :file:`docker-bake.hcl` file and invoke the docker bake command """
 
     class TargetConfiguration(BaseModel):
-        manifest: ModuleManifest
+        manifest: ServiceManifest
         cache_from: str
         cache_to: str
 
@@ -148,7 +148,7 @@ def docker_bake(project_config: ProjectConfig,
             if modules is not None and module_name not in modules:
                 continue
             manifest_path = _get_manifest_path(module_name, module_package.package_name, project_config)
-            manifest = ModuleManifest.from_yaml_file(manifest_path)
+            manifest = ServiceManifest.from_yaml_file(manifest_path)
             if platform is not None:  # Overwrite platform from manifest with manual setting
                 if platform not in manifest.platforms:
                     logging.warning("Platform %s not in platforms specified for module %s. Trying to build module, "

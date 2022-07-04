@@ -3,7 +3,7 @@ import unittest
 from tempfile import NamedTemporaryFile
 
 from fastiot.cli.import_configure import import_configure
-from fastiot.cli.model import ModuleConfig
+from fastiot.cli.model import ServiceConfig
 
 
 class TestConfigurationImport(unittest.TestCase):
@@ -23,18 +23,18 @@ class TestConfigurationImport(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _ = import_configure(f.name)
 
-    def test_with_module_packages(self):
+    def test_with_service_packages(self):
         with NamedTemporaryFile(suffix='.py') as f:
-            f.write(b"from fastiot.cli import find_modules\n"
+            f.write(b"from fastiot.cli import find_services\n"
                     b"project_namespace = 'fastiot_unittest'\n"
-                    b"modules = [*find_modules(package='fastiot_sample_services')]")
+                    b"services = find_services(package='fastiot_sample_services')")
             f.seek(0)
 
             config = import_configure(f.name)
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
-            self.assertIsInstance(config.modules[0], ModuleConfig)
-            self.assertEqual("fastiot_sample_services", config.modules[0].package)
+            self.assertIsInstance(config.services[0], ServiceConfig)
+            self.assertEqual("fastiot_sample_services", config.services[0].package)
 
 
 if __name__ == '__main__':

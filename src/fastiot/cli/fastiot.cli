@@ -5,7 +5,7 @@ import os
 
 from fastiot.cli import typer_app
 from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
-from fastiot.cli.external_service_helper import get_services_list
+from fastiot.cli.infrastructure_service_helper import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
 

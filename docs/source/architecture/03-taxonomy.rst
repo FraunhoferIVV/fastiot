@@ -9,13 +9,14 @@ Package
 In Python and fastIoT a package is a directory containing at least a :file:`__init__.py` and various other Python-files
 mostly referred to as Python-Module.
 
-Service
--------
-A microservice written for and with the fastIoT Framework. In the former framework `SAM` this used to be called
+FastIoT Service
+---------------
+A microservice written for and with the fastIoT Framework. Often this may only be called `Service` as shorthand.
+In the former framework `SAM` this used to be called
 `Module`.
 
-Third Party Service
--------------------
+Infrastructure Service
+----------------------
 Services written by others to load into the project. Mostly this concerns message broker, database, …
 
 Deployment

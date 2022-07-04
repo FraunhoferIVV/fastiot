@@ -14,9 +14,9 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 
 
 @create_cmd.command()
-def new_module(module_name: str = typer.Argument(None, help="The project name to generate"),
-               module_package: Optional[str] = typer.Option(default=None, help="Specify the package to create the "
-                                                                               "module in. If left empty the first "
+def new_service(service_name: str = typer.Argument(None, help="The project name to generate"),
+                service_package: Optional[str] = typer.Option(default=None, help="Specify the package to create the "
+                                                                               "service in. If left empty the first "
                                                                                "package configured will be used.")):
     logging.error("This method has not yet been implemented")
     sys.exit(-1)

@@ -7,7 +7,8 @@ from typing import List, Optional
 from pydantic.main import BaseModel
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
-from fastiot.cli.model import DeploymentConfig, ModuleConfig
+from fastiot.cli.model.deployment import DeploymentConfig
+from fastiot.cli.model.service import ServiceConfig
 
 
 class CompileSettingsEnum(str, Enum):
@@ -37,10 +38,8 @@ class ProjectConfig(BaseModel):
     library_setup_py_dir: str = os.getcwd()
     """ Path where to find the :file:`setup.py` to build your library for exporting. The default with the current
      working directory should be fine, if you put your :file:`setup.py` at the toplevel of your project (common)."""
-    modules: List[ModuleConfig] = []
-    """ Define a list of :class:`fastiot.cli.model.project.ModulePackageConfig` where to find your services. Most
-    projects will most probably only contain a single ModulePackage. This is optional if you, for example, only want
-    to build a library using the framework."""
+    services: List[ServiceConfig] = []
+    """ Define a list of :class:`fastiot.cli.model.service:ServiceConfig`."""
     deploy_configs: Optional[List[str]] = []
     """ Manually define a list of deployments to actually build using the command
     :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path
@@ -51,14 +50,14 @@ class ProjectConfig(BaseModel):
     test_package: Optional[str]
     """ Name of the package in the :file:`src` directory where unittests are stored. Common is to use something like
     :file:`myproject_tests`."""
-    imports_for_test_config_environment_variables: Optional[List[str]] = None
+    imports_for_test_deployment_env_vars: Optional[List[str]] = None
     npm_test_dir: Optional[str] = None
     build_dir: str = 'build'
     """ If you do not want to store generated build files (Dockerfiles, …) in the directory :file:`build` in your
     project root, please change!"""
     extensions: Optional[List[str]] = []
-    """ Use to add own extensions to the fastapi CLI. The CLI will try to import your modules. Make sure importing
-    this module will import further commands and :class:`fastiot.cli.model.service.ExternalService`. Most of the times
+    """ Use to add own extensions to the fastapi CLI. The CLI will try to import your services. Make sure importing
+    this service will import further commands and :class:`fastiot.cli.model.service.ExternalService`. Most of the times
     this is done filling the :file:`__init__.py` correspondingly."""
     compile_lib: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from

@@ -1,14 +1,11 @@
 import importlib
-import logging
 import os
-import sys
-from glob import glob
 from typing import Dict, Optional, List
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from fastiot.cli.constants import TEMPLATES_DIR
-from fastiot.cli.model import ModuleConfig
+from fastiot.cli.model import ServiceConfig
 
 
 def parse_env_file(env_filename: str) -> Dict[str, str]:
@@ -44,15 +41,15 @@ def get_jinja_env():
     return _jinja_env
 
 
-def find_modules(package: str,
-                 modules: Optional[List[str]] = None,
-                 use_per_module_cache: bool = False) -> List[ModuleConfig]:
+def find_services(package: str,
+                  services: Optional[List[str]] = None,
+                  use_per_service_cache: bool = False) -> List[ServiceConfig]:
     """
-    Find modules in a package
+    Find services in a package
 
     :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
-    :param modules: Optional; if specified it will only include the listed modules
-    :param use_per_module_cache: If enabled, it will use per module caches. This is useful if different modules use
+    :param services: Optional; if specified it will only include the listed services
+    :param use_per_service_cache: If enabled, it will use per service caches. This is useful if different services use
                                  different Dockerfiles.
     """
     p = importlib.import_module(package)
@@ -60,25 +57,25 @@ def find_modules(package: str,
     configs = []
     for m in os.listdir(package_dir):
         if os.path.isfile(os.path.join(package_dir, m, 'manifest.yaml')):
-            if modules is None or m in modules:
-                module = import_module(
+            if services is None or m in services:
+                service = import_service(
                     package=package,
                     name=m,
-                    use_per_module_cache=use_per_module_cache
+                    use_per_service_cache=use_per_service_cache
                 )
-                configs.append(module)
+                configs.append(service)
     return configs
 
 
-def import_module(package: str,
-                  name: str,
-                  use_per_module_cache: bool = False) -> ModuleConfig:
+def import_service(package: str,
+                   name: str,
+                   use_per_service_cache: bool = False) -> ServiceConfig:
     """
     Import a module
 
     :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
     :param name: The name of the module
-    :param use_per_module_cache: If enabled, it will include the module name into the caches; therefore using per module
+    :param use_per_service_cache: If enabled, it will include the module name into the caches; therefore using per module
                                  caches. This is useful if different modules use different Dockerfiles.
     """
     if package:
@@ -90,20 +87,19 @@ def import_module(package: str,
     package_dir = os.path.dirname(m.__file__)
     if not os.path.isfile(os.path.join(package_dir, 'manifest.yaml')):
         raise RuntimeError(f"Expected a manifest file at '{os.path.join(package_dir, 'manifest.yaml')}'")
-    return ModuleConfig(
+    return ServiceConfig(
         name=name,
         package=package,
-        cache=default_cache(module=name, package=package, use_per_module_cache=use_per_module_cache),
-        extra_caches=default_extra_caches(module=name, package=package, use_per_module_cache=use_per_module_cache)
+        cache=default_cache(service=name, package=package, use_per_service_cache=use_per_service_cache),
+        extra_caches=default_extra_caches(service=name, package=package, use_per_service_cache=use_per_service_cache)
     )
 
 
-def default_cache(package: str, module: str, use_per_module_cache: bool) -> str:
-    if use_per_module_cache:
-        return f"{package}-{module}-cache"
-    else:
-        return f"{package}-cache"
+def default_cache(package: str, service: str, use_per_service_cache: bool) -> str:
+    if use_per_service_cache:
+        return f"{package}-{service}-cache"
+    return f"{package}-cache"
 
 
-def default_extra_caches(package: str, module: str, use_per_module_cache: bool) -> List[str]:
-    return [default_cache(package=package, module=module, use_per_module_cache=use_per_module_cache) + ':latest']
+def default_extra_caches(package: str, service: str, use_per_service_cache: bool) -> List[str]:
+    return [default_cache(package=package, service=service, use_per_service_cache=use_per_service_cache) + ':latest']

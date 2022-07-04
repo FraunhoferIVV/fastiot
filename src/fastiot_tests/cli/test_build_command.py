@@ -12,22 +12,22 @@ from fastiot.testlib.cli import init_default_context
 from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-def _write_configure(path: str, no_modules: bool, project_root_dir: Optional[str]):
+def _write_configure(path: str, no_services: bool, project_root_dir: Optional[str]):
     configure_file = os.path.join(path, 'configure.py')
     project_root_dir = project_root_dir or os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
     with open(configure_file, 'w') as file:
-        file.write("from fastiot.cli import find_modules\n"
+        file.write("from fastiot.cli import find_services\n"
                    "project_namespace = 'fastiot'\n"
                    f"project_root_dir = '{project_root_dir}'\n"
                    f"build_dir = '{path}'\n"
-                   "test_config = 'fastiot_test_env'\n")
-        if not no_modules:
-            file.write("modules = [*find_modules(package='fastiot_sample_services')]\n")
+                   "test_config = 'integration_test'\n")
+        if not no_services:
+            file.write("services = find_services(package='fastiot_sample_services')\n")
         file.seek(0)
 
 
-def _prepare_env(tempdir, no_modules=False, project_root_dir:str = None):
-    _write_configure(tempdir, no_modules, project_root_dir)
+def _prepare_env(tempdir, no_services=False, project_root_dir:str = None):
+    _write_configure(tempdir, no_services, project_root_dir)
     os.environ['FASTIOT_CONFIGURE_FILE'] = os.path.join(tempdir, 'configure.py')
     default_context = get_default_context()
     default_context.project_config = import_configure(os.environ.get('FASTIOT_CONFIGURE_FILE'))
@@ -39,7 +39,7 @@ class TestBuildCommand(unittest.TestCase):
         init_default_context()
         self.runner = CliRunner()
 
-    def test_single_module(self):
+    def test_single_service(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
@@ -50,7 +50,7 @@ class TestBuildCommand(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
 
-    def test_all_modules(self):
+    def test_all_services(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
@@ -107,13 +107,13 @@ class TestBuildCommand(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--test-env-only"], catch_exceptions=False)
+            result = self.runner.invoke(app, ["build", "--dry", "--test-deployment-only"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
             self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
 
     def test_empty_build(self):
         with tempfile.TemporaryDirectory() as tempdir:
-            _prepare_env(tempdir, no_modules=True)
+            _prepare_env(tempdir, no_services=True)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)

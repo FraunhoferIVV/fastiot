@@ -1,13 +1,13 @@
-from fastiot.cli import find_modules
+from fastiot.cli import find_services
 
 extensions = ['fastiot_ivv_tools.extension']
 
 project_namespace = 'fastiot'
 
 library_package = 'fastiot'
-modules = find_modules(package='fastiot_sample_services')
+modules = find_services(package='fastiot_sample_services')
 
 test_package = 'fastiot_tests'
-test_config = 'fastiot_test_env'
+test_config = 'integration_test'
 
 compile_lib = 'only_source'

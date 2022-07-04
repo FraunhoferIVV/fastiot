@@ -1,3 +1,3 @@
-from fastiot_sample_services.consumer.main import MyApp
+from fastiot_sample_services.consumer.main import MyService
 
-MyApp.main()
+MyService.main()

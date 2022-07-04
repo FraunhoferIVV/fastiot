@@ -1,3 +1,3 @@
-from fastiot_sample_services.producer.main import MyApp
+from fastiot_sample_services.producer.main import MyService
 
-MyApp.main()
+MyService.main()

@@ -1,7 +1,7 @@
 """ Helpers to make writing tests easier """
 import os
 
-from fastiot.cli.external_service_helper import set_external_service_port_environment
+from fastiot.cli.infrastructure_service_helper import set_external_service_port_environment
 from fastiot.env.env_constants import FASTIOT_BROKER_HOST
 from fastiot.testlib.cli import init_default_context
 

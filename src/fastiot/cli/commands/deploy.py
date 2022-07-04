@@ -6,7 +6,7 @@ from typing import Optional
 import jinja2
 import typer
 
-from fastiot.cli.commands.run import _environment_completion
+from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context
@@ -14,7 +14,7 @@ from fastiot.cli.typer_app import app
 
 
 @app.command()
-def deploy(deployment_name: str = typer.Argument(default=None, shell_complete=_environment_completion,
+def deploy(deployment_name: str = typer.Argument(default=None, shell_complete=_deployment_completion,
                                                  help="Select the environment to deploy."),
            ask_pass: Optional[bool] = typer.Option(False, '--ask-pass', '-k',
                                                    help="Use password instead of SSH publickey to connect to targets"),

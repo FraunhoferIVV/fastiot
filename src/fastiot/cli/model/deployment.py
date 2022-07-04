@@ -8,24 +8,24 @@ from pydantic import BaseModel
 from pydantic.class_validators import root_validator, validator
 
 
-class ModuleDeploymentConfig(BaseModel):
+class ServiceDeploymentConfig(BaseModel):
     """
-    The config for a module
+    The config for a service
     """
 
     image_name: str
-    """The name defines which module is taken. Contains namespace identifier as a prefix, e.g. fastiot/time_series """
+    """The name defines which service is taken. Contains namespace identifier as a prefix, e.g. fastiot/time_series """
     service_name: Optional[str]
-    """The service name defines how this module is named in compose file. Useful if one image is used many times within
+    """The service name defines how this service is named in compose file. Useful if one image is used many times within
     on deployment. Will be set to image_name if not specified. """
     docker_registry: Optional[str] = None
     """The specified docker registry"""
     tag: Optional[str] = 'latest'
     """The specified tag, defaults to `latest` if not specified."""
     environment: Optional[Dict[str, str]] = {}
-    """Includes all environment variables for the module"""
+    """Includes all environment variables for the service"""
     environment_modifications: Optional[Dict[str, str]]
-    """Includes all environment variables which are specified for this module specifically"""
+    """Includes all environment variables which are specified for this service specifically"""
 
     @root_validator
     def check_create_service_name(cls, values):
@@ -81,13 +81,13 @@ class DeploymentConfig(BaseModel):
     """
 
     deployment_config_version: int = 1
-    modules: Dict[str, Optional[ModuleDeploymentConfig]] = {}
-    """ List of modules to integrate in the deployment."""
-    services: Optional[List[str]] = []
+    fastiot_services: Dict[str, Optional[ServiceDeploymentConfig]] = {}
+    """ List of services to integrate in the deployment."""
+    infrastructure_services: Optional[List[str]] = []
     """ List of services to integrate """
-    services_external: Optional[List[str]] = []
+    infrastructure_services_external: Optional[List[str]] = []
     """ Allows to mention services running on external servers and configured manually. This will avoid warnings in the
-    setup process if services specified by the modules as dependency could not be found.
+    setup process if services specified by the services as dependency could not be found.
     """
     deployment_target: Optional[DeploymentTargetSetup]
     """ A deployment configuration to auto-generate Ansible Playbooks
@@ -97,19 +97,19 @@ class DeploymentConfig(BaseModel):
     """ Define the tag to use for all docker images, defaults to ``latest``."""
     config_dir: Optional[str]
 
-    @validator('modules')
-    def module_defaults(cls, v):
-        for module_name, module in v.items():
-            if module is None:
+    @validator('fastiot_services')
+    def service_defaults(cls, v):
+        for service_name, service in v.items():
+            if service is None:
                 # TODO: Don't do this: Validate function should not manipulate objects
-                v[module_name] = ModuleDeploymentConfig(image_name=module_name)
+                v[service_name] = ServiceDeploymentConfig(image_name=service_name)
         return v
 
     @root_validator
     def check_services(cls, values):
-        from fastiot.cli.external_service_helper import get_services_list
+        from fastiot.cli.infrastructure_service_helper import get_services_list
         services = get_services_list()
-        for service_list in [values.get("services"), values.get("services_external")]:
+        for service_list in [values.get("infrastructure_services"), values.get("infrastructure_services_external")]:
             for service in service_list:
                 if service not in services.keys():
                     raise ValueError(f"Service {service} not found in service list!")

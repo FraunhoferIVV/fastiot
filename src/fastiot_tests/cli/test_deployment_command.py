@@ -29,7 +29,7 @@ class TestDeploymentCommand(unittest.TestCase):
     def tearDown(self):
         os.chdir(self._old_cwd)
 
-    def test_no_module(self):
+    def test_no_service(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, project_root_dir=tempdir)
 
@@ -43,14 +43,14 @@ class TestDeploymentCommand(unittest.TestCase):
             deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
-                file.write("services: []")
+                file.write("fastiot_services: []")
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
 
             self.assertEqual(2, result.exit_code)
             self.assertTrue('does not have a deployment_target' in result.stdout)
 
-    def test_single_module(self):
+    def test_single_service(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, project_root_dir=tempdir)
             deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')

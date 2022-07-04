@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.model import ProjectConfig, ModuleManifest, CPUPlatform, ModuleConfig
+from fastiot.cli.model import ProjectConfig, ServiceManifest, CPUPlatform, ServiceConfig
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -26,7 +26,7 @@ def _mode_callback(mode: str):
     return mode
 
 
-def _modules_completion() -> List[str]:
+def _services_completion() -> List[str]:
     return [os.path.basename(os.path.dirname(m)) for m in list(glob("src/*/*/manifest.yaml"))]
 
 
@@ -62,7 +62,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                             "combination with the '--push' flag. Per default, the platform of the "
                                             "current OS is used. If multiple platforms are specified, they will be "
                                             "included into the resulting image.\n"
-                                            "It will also look in the manifest.yaml and check if each module can be "
+                                            "It will also look in the manifest.yaml and check if each service can be "
                                             "built for the selected platform. If not, the platform builds will be "
                                             "skipped where unspecified. If nothing can be built, it will exit with 2."),
           dry: bool = typer.Option(False, '-d', '--dry',
@@ -73,12 +73,13 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
-          test_env_only: Optional[bool] = typer.Option(False,
-                                                       help="Build only modules defined in the test environment. "
-                                                            "This is especially useful in the CI-runner"),
+          test_deployment_only: Optional[bool] = typer.Option(False,
+                                                              help="Build only services defined in the integration test "
+                                                                   "deployment. This is especially useful in the "
+                                                                   "CI-runner"),
           no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build."),
-          modules: Optional[List[str]] = typer.Argument(None, help="The modules to build. Default: all modules",
-                                                        shell_complete=_modules_completion)
+          services: Optional[List[str]] = typer.Argument(None, help="The services to build. Default: all services",
+                                                         shell_complete=_services_completion)
           ):
     """
     This command builds images.
@@ -89,36 +90,36 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
-    if not modules:
-        modules = None
+    if not services:
+        services = None
 
     project_config = get_default_context().project_config
 
-    if test_env_only:
-        modules = _find_test_env_modules(project_config)
+    if test_deployment_only:
+        services = _find_test_deployment_services(project_config)
 
-    _create_all_docker_files(project_config, build_mode=mode, modules=modules)
+    _create_all_docker_files(project_config, build_mode=mode, services=services)
     tags = tag.split(',')
-    _docker_bake(project_config, tags=tags, modules=modules, dry=dry, push=push, docker_registry=docker_registry,
+    _docker_bake(project_config, tags=tags, services=services, dry=dry, push=push, docker_registry=docker_registry,
                  docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
 
 
-def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, modules: Optional[List[str]] = None):
-    for module in project_config.modules:
-        if modules is None or module.name in modules:
-            module.read_manifest()
-            _create_docker_file(module, project_config, build_mode)
+def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, services: Optional[List[str]] = None):
+    for service in project_config.services:
+        if services is None or service.name in services:
+            service.read_manifest()
+            _create_docker_file(service, project_config, build_mode)
 
 
-def _create_docker_file(module: ModuleConfig, project_config: ProjectConfig, build_mode: str):
+def _create_docker_file(service: ServiceConfig, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     os.makedirs(build_dir, exist_ok=True)
 
-    docker_filename = os.path.join(build_dir, 'Dockerfile.' + module.name)
+    docker_filename = os.path.join(build_dir, 'Dockerfile.' + service.name)
 
     with open(docker_filename, "w") as dockerfile:
         dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
-        dockerfile.write(dockerfile_template.render(module=module,
+        dockerfile.write(dockerfile_template.render(service=service,
                                                     project_config=project_config,
                                                     extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                               "www.piwheels.org/simple/"),
@@ -127,7 +128,7 @@ def _create_docker_file(module: ModuleConfig, project_config: ProjectConfig, bui
 
 def _docker_bake(project_config: ProjectConfig,
                  tags: List[str],
-                 modules: Optional[List[str]] = None,
+                 services: Optional[List[str]] = None,
                  dry: bool = False,
                  platform: Optional[str] = None,
                  docker_registry: Optional[str] = None,
@@ -137,22 +138,22 @@ def _docker_bake(project_config: ProjectConfig,
     """ Method to create a :file:`docker-bake.hcl` file and invoke the docker bake command """
 
     class TargetConfiguration(BaseModel):
-        manifest: ModuleManifest
+        manifest: ServiceManifest
         cache_from: str
         cache_to: str
 
     docker_registry = docker_registry + "/" if docker_registry is not None else docker_registry
 
     targets = []
-    for module in project_config.modules:
-        if modules is not None and module.name not in modules:
+    for service in project_config.services:
+        if services is not None and service.name not in services:
             continue
-        manifest = module.read_manifest()
+        manifest = service.read_manifest()
 
         if platform is not None:  # Overwrite platform from manifest with manual setting
             if platform not in manifest.platforms:
-                logging.warning("Platform %s not in platforms specified for module %s. Trying to build module, "
-                                "but chances to fail are high!", platform, module.name)
+                logging.warning("Platform %s not in platforms specified for service %s. Trying to build service, "
+                                "but chances to fail are high!", platform, service.name)
             manifest.platforms = [CPUPlatform(platform)]
         elif not push:
             manifest.platforms = [manifest.platforms[0]]  # For local builds only one platform can be used. Using 1.
@@ -160,8 +161,8 @@ def _docker_bake(project_config: ProjectConfig,
         if not no_cache:
             cache_from, cache_to = _make_caches(
                 docker_registry_cache=docker_registry_cache,
-                docker_cache_image=module.cache,
-                extra_caches=module.extra_caches,
+                docker_cache_image=service.cache,
+                extra_caches=service.extra_caches,
                 push=push,
                 tags=tags
             )
@@ -171,7 +172,7 @@ def _docker_bake(project_config: ProjectConfig,
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
     if len(targets) == 0:
-        logging.warning("No modules selected to build, aborting build of modules.")
+        logging.warning("No services selected to build, aborting build of services.")
         raise typer.Exit()
 
     with open(os.path.join(project_config.project_root_dir, project_config.build_dir, 'docker-bake.hcl'),
@@ -186,19 +187,19 @@ def _docker_bake(project_config: ProjectConfig,
         _run_docker_bake_cmd(project_config, push, no_cache)
 
 
-def _find_test_env_modules(project_config: ProjectConfig) -> List[str]:
-    """ Builds a list of modules based on the test env project configuration. May exit the program if no modules are to
-    be built."""
+def _find_test_deployment_services(project_config: ProjectConfig) -> List[str]:
+    """ Builds a list of services based on the test env project configuration. May exit the program if no services are
+    to be built."""
     if project_config.test_config is None:
-        logging.info("No modules to build for test environment as no test environment is specified.")
+        logging.info("No services to build for test environment as no test environment is specified.")
         raise typer.Exit()
     deployment = project_config.get_deployment_by_name(project_config.test_config)
-    modules = list(deployment.modules.keys())
-    if len(modules) == 0:
-        logging.info("No modules to build if selecting only test environment.")
+    services = list(deployment.fastiot_services.keys())
+    if len(services) == 0:
+        logging.info("No services to build if selecting only test environment.")
         raise typer.Exit()
-    logging.info("Building modules %s for testing", ", ".join(modules))
-    return modules
+    logging.info("Building services %s for testing", ", ".join(services))
+    return services
 
 
 def _run_docker_bake_cmd(project_config, push, no_cache):

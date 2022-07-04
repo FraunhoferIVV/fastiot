@@ -1,4 +1,4 @@
-fastiot_module:
+fastiot_service:
   name: producer
 
   platforms:

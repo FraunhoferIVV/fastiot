@@ -7,14 +7,14 @@ from typing import Optional, List
 
 import typer
 
-from fastiot.cli.commands.run import _environment_completion
+from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
 
 
 @stop_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def environment(environment_name: Optional[str] = typer.Argument(default=None, shell_complete=_environment_completion,
+def environment(environment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
                                                                  help="Select the environment to stop."),
                 service_names: Optional[List[str]] = typer.Argument(default=None,
                                                                     help="Optionally specify services to be stopped "
@@ -22,7 +22,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
                                                                          "the services but not remove the containers."
                                                                          "(docker-compose stop instead of down)"),
                 project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
-                stop_test_env: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
+                stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
                                                                          "test environment specified in the project. "
                                                                          "Useful for the CI runner")
                 ):
@@ -31,11 +31,11 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
     """
     project_config = get_default_context().project_config
 
-    if stop_test_env:
+    if stop_test_deployment:
         environment_name = project_config.test_config
 
     if environment_name is None:
-        logging.error("You have to define an environment to start or use the optional --run-test-env!")
+        logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
         sys.exit(-1)
 
     cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
@@ -50,7 +50,7 @@ def environment(environment_name: Optional[str] = typer.Argument(default=None, s
         cmd += " stop " + " ".join(service_names)
     else:
         cmd += " down"
-    if stop_test_env:
+    if stop_test_deployment:
         cmd += " --volumes"  # Remove test volumes right away
 
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)

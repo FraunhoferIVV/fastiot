@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastiot.cli.model import ProjectConfig, ExternalService
+from fastiot.cli.model import ProjectConfig, InfrastructureService
 
 
 class Context:
@@ -8,7 +8,7 @@ class Context:
     # pylint: disable=too-few-public-methods
     def __init__(self):
         self.project_config: Optional[ProjectConfig] = None
-        self.external_services: Optional[List[ExternalService]] = None
+        self.external_services: Optional[List[InfrastructureService]] = None
 
 
 __default_context = None

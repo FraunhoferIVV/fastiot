@@ -104,7 +104,7 @@ def config_cmd(make_context: MakeContext,
             os.makedirs(output_dir)
 
         module_manifests: Dict[ModuleManifestId, ModuleManifest] = {}
-        for module in config.modules:
+        for module in config.fastiot_services:
             module_manifest_id, module_manifest = make_context.get_manifest_with_module_config(
                 module=module,
                 do_pull_always=do_pull_always
@@ -126,7 +126,7 @@ def config_cmd(make_context: MakeContext,
         )
 
         if make_context.do_use_generated_py and config_name == make_context.test_config:
-            imports_for_test_config_environment_variables = make_context.imports_for_test_config_environment_variables
+            imports_for_test_config_environment_variables = make_context.imports_for_test_deployment_env_vars
             generate_test_env(
                 output_dir_of_config=output_dir,
                 test_environment_name=config_name,

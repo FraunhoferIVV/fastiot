@@ -6,12 +6,12 @@ from socket import socket
 from typing import Optional, Dict, List, Union
 
 from fastiot.cli.configuration import external_services  # noqa  # pylint: disable=unused-import
-from fastiot.cli.model import ExternalService
+from fastiot.cli.model import InfrastructureService
 
 _services_imported = False
 
 
-def get_services_list() -> Dict[str, ExternalService]:
+def get_services_list() -> Dict[str, InfrastructureService]:
     """ Method to get a list of all available services as instantiated
     :class:`fastiot.cli.model.service.ExternalService`.
 
@@ -33,13 +33,13 @@ def get_services_list() -> Dict[str, ExternalService]:
                     logging.debug("Could not import external service from extension %s", extension)
             _services_imported = True
 
-    service_classes = ExternalService.__subclasses__()
+    service_classes = InfrastructureService.__subclasses__()
     services = [s() for s in service_classes]
     return {s.name: s for s in services}
 
 
 def set_external_service_port_environment(offset: int = 1024, random: bool = False,
-                                          services: Optional[List[Union[str, ExternalService]]] = None) -> \
+                                          services: Optional[List[Union[str, InfrastructureService]]] = None) -> \
         Dict[str, int]:
     """
     Sets up the local environment with environment variables for all ports.
