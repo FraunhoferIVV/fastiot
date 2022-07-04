@@ -1,16 +1,15 @@
 from enum import Enum
 
-from pymysql.connections import Connection
-
 from fastiot.exceptions import SQLSchemaCheckError
 
 
-def check_is_enum_represented(connection: Connection, sql_query: str, enum: type(Enum)):
+def check_is_enum_represented(connection, sql_query: str, enum: type(Enum)):
     """
     Checks if enum values are in database table. The query must select a single column table with the enum values.
 
     :raises SQLSchemaCheckError: raised if an enum is missing.
     """
+
     with connection.cursor() as cursor:
         cursor.execute(sql_query)
         result = cursor.fetchall()

@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 
 from typing import List, Tuple, Optional
@@ -27,8 +28,13 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
                             user: str, password: str):
     # We found that mariadb initial start time takes very long in some environments. Therefore we need a timeout much
     # greater then two minutes.
-
-    import pymysql.cursors
+    try:
+        # pylint: disable=import-outside-toplevel
+        import pymysql.cursors
+    except (ImportError, ModuleNotFoundError):
+        logging.error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
+                      "to make use of this helper.")
+        sys.exit(5)
 
     sleep_time = 0.2
     num_tries = 300 / sleep_time
