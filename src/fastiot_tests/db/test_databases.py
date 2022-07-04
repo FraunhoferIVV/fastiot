@@ -9,6 +9,7 @@ from fastiot_tests.test_env import populate_db_test_env
 
 class TestMongoDB(unittest.TestCase):
 
+    @unittest.skip('Waiting for corresponding docker-compose')
     def test_connection(self):
         populate_db_test_env()
 
@@ -18,6 +19,7 @@ class TestMongoDB(unittest.TestCase):
 
 class TestMariaDB(unittest.TestCase):
 
+    @unittest.skip('Waiting for corresponding docker-compose')
     def test_connection(self):
         populate_db_test_env()
 
@@ -26,6 +28,8 @@ class TestMariaDB(unittest.TestCase):
 
 
 class TestInfluxDB(unittest.TestCase):
+
+    @unittest.skip('Waiting for corresponding docker-compose')
     def test_connection(self):
         populate_db_test_env()
 
@@ -34,6 +38,8 @@ class TestInfluxDB(unittest.TestCase):
 
 
 class TestTimeScaleDB(unittest.TestCase):
+
+    @unittest.skip('Waiting for corresponding docker-compose')
     def test_connection(self):
         populate_db_test_env()
 
