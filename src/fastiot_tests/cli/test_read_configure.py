@@ -24,10 +24,9 @@ class TestConfigurationImport(unittest.TestCase):
                 _ = import_configure(f.name)
 
     def test_with_service_packages(self):
-        with NamedTemporaryFile(suffix='.py') as f:
-            f.write(b"from fastiot.cli import find_services\n"
-                    b"project_namespace = 'fastiot_unittest'\n"
-                    b"services = find_services(package='fastiot_sample_services')")
+        with NamedTemporaryFile(suffix='.py', encoding='utf8', mode="w") as f:
+            f.write("project_namespace = 'fastiot_unittest'\n")
+            f.write(f"project_root_dir = '{os.path.abspath(os.path.join(__file__, '../../../..'))}'\n")
             f.seek(0)
 
             config = import_configure(f.name)

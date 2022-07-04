@@ -14,15 +14,16 @@ from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,un
 
 def _write_configure(path: str, no_services: bool, project_root_dir: Optional[str]):
     configure_file = os.path.join(path, 'configure.py')
-    project_root_dir = project_root_dir or os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
+    if no_services:
+        project_root_dir = '/tmp'
+    else:
+        project_root_dir = project_root_dir or os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
     with open(configure_file, 'w') as file:
-        file.write("from fastiot.cli import find_services\n"
-                   "project_namespace = 'fastiot'\n"
+        file.write("project_namespace = 'fastiot'\n"
                    f"project_root_dir = '{project_root_dir}'\n"
                    f"build_dir = '{path}'\n"
                    "test_config = 'integration_test'\n")
-        if not no_services:
-            file.write("services = find_services(package='fastiot_sample_services')\n")
+
         file.seek(0)
 
 

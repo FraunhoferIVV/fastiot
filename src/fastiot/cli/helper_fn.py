@@ -1,11 +1,12 @@
-import importlib
+import glob
 import os
-from typing import Dict, Optional, List
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from fastiot.cli.constants import TEMPLATES_DIR
-from fastiot.cli.model import ServiceConfig
+from fastiot.cli.constants import TEMPLATES_DIR, DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME
+from fastiot.cli.model import ServiceConfig, DeploymentConfig
 
 
 def parse_env_file(env_filename: str) -> Dict[str, str]:
@@ -41,65 +42,63 @@ def get_jinja_env():
     return _jinja_env
 
 
-def find_services(package: str,
+def find_services(package: Optional[str] = None,
+                  path: Optional[str] = None,
                   services: Optional[List[str]] = None,
                   use_per_service_cache: bool = False) -> List[ServiceConfig]:
     """
     Find services in a package
 
-    :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
+    :param package: The package name within your :file:`src`. If not defined the whole :path:`src` will be searched for
+                    suitable services containing a :file:`manifest.yaml` and a :file:`run.py`
+    :param path: Optional, specify a search path, uses ``os.getcwd()`` as default
     :param services: Optional; if specified it will only include the listed services
     :param use_per_service_cache: If enabled, it will use per service caches. This is useful if different services use
                                  different Dockerfiles.
     """
-    p = importlib.import_module(package)
-    package_dir = os.path.dirname(p.__file__)
-    configs = []
-    for m in os.listdir(package_dir):
-        if os.path.isfile(os.path.join(package_dir, m, 'manifest.yaml')):
-            if services is None or m in services:
-                service = import_service(
-                    package=package,
-                    name=m,
-                    use_per_service_cache=use_per_service_cache
-                )
-                configs.append(service)
-    return configs
+    path = path or os.getcwd()
+    package = package or '*'
+
+    services = []
+    for manifest_filename in glob.glob(os.path.join(path, 'src', package, '*', MANIFEST_FILENAME)):
+        manifest_path = Path(manifest_filename)
+        service_directory = manifest_path.parent
+        service_name = service_directory.name
+        package_name = service_directory.parent.name
+        if not os.path.isfile(os.path.join(service_directory.absolute(), 'run.py')):
+            continue
+
+        services.append(ServiceConfig(name=service_name,
+                                      package=package_name,
+                                      cache=_default_cache(service=service_name, package=package_name,
+                                                           use_per_service_cache=use_per_service_cache),
+                                      extra_caches=_default_extra_caches(service=service_name, package=package_name,
+                                                                         use_per_service_cache=use_per_service_cache)))
+    return services
 
 
-def import_service(package: str,
-                   name: str,
-                   use_per_service_cache: bool = False) -> ServiceConfig:
+def find_deployments(deployments: Optional[List[str]] = None, path: Optional[str] = None) -> List[DeploymentConfig]:
     """
-    Import a module
+    Creates a list of all deployments found the projects :file:`deployments` path.
 
-    :param package: The package name. Can be a nestet namespace, e.g. 'mypackage.modules'
-    :param name: The name of the module
-    :param use_per_service_cache: If enabled, it will include the module name into the caches; therefore using per module
-                                 caches. This is useful if different modules use different Dockerfiles.
+    :param deployments: Optional, specify a list of deployments to be exclusively included
+    :param path: Optional, specify a search path, uses ``os.getcwd()`` as default
     """
-    if package:
-        full_name = package + '.' + name
-    else:
-        full_name = name
+    path = path or os.getcwd()
 
-    m = importlib.import_module(full_name)
-    package_dir = os.path.dirname(m.__file__)
-    if not os.path.isfile(os.path.join(package_dir, 'manifest.yaml')):
-        raise RuntimeError(f"Expected a manifest file at '{os.path.join(package_dir, 'manifest.yaml')}'")
-    return ServiceConfig(
-        name=name,
-        package=package,
-        cache=default_cache(service=name, package=package, use_per_service_cache=use_per_service_cache),
-        extra_caches=default_extra_caches(service=name, package=package, use_per_service_cache=use_per_service_cache)
-    )
+    deploy_configs = []
+    for config_filename in glob.glob(os.path.join(path, DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE)):
+        deployment_name = os.path.basename(os.path.dirname(config_filename))
+        if not deployments or deployment_name in deployments:
+            deploy_configs.append(DeploymentConfig.from_yaml_file(config_filename))
+    return deploy_configs
 
 
-def default_cache(package: str, service: str, use_per_service_cache: bool) -> str:
+def _default_cache(package: str, service: str, use_per_service_cache: bool) -> str:
     if use_per_service_cache:
         return f"{package}-{service}-cache"
     return f"{package}-cache"
 
 
-def default_extra_caches(package: str, service: str, use_per_service_cache: bool) -> List[str]:
-    return [default_cache(package=package, service=service, use_per_service_cache=use_per_service_cache) + ':latest']
+def _default_extra_caches(package: str, service: str, use_per_service_cache: bool) -> List[str]:
+    return [_default_cache(package=package, service=service, use_per_service_cache=use_per_service_cache) + ':latest']

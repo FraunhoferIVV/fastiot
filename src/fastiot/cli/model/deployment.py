@@ -1,6 +1,6 @@
 """ Data models for deployment configurations """
 # pylint: disable=no-self-argument
-
+import os
 from typing import Dict, List, Optional
 
 import yaml
@@ -79,6 +79,9 @@ class DeploymentConfig(BaseModel):
     Represents an imported config. All fields are already overwritten specified command line parameters, currently
     including environment, docker_registry and tag
     """
+    deployment_name: str
+    """ Name of the deployment. This should always be the directory name where the corresponding :file:`deployment.yaml`
+    is located. """
 
     deployment_config_version: int = 1
     fastiot_services: Dict[str, Optional[ServiceDeploymentConfig]] = {}
@@ -107,8 +110,11 @@ class DeploymentConfig(BaseModel):
 
     @root_validator
     def check_services(cls, values):
-        from fastiot.cli.infrastructure_service_helper import get_services_list
-        services = get_services_list()
+        try:
+            from fastiot.cli.infrastructure_service_helper import get_services_list
+            services = get_services_list()
+        except AttributeError:
+            return values  # If the project is not configured completly this will fail
         for service_list in [values.get("infrastructure_services"), values.get("infrastructure_services_external")]:
             for service in service_list:
                 if service not in services.keys():
@@ -119,4 +125,4 @@ class DeploymentConfig(BaseModel):
     def from_yaml_file(filename) -> "DeploymentConfig":
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
-        return DeploymentConfig(**config)
+        return DeploymentConfig(**{'deployment_name': os.path.basename(os.path.dirname(filename)), **config})

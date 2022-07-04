@@ -131,7 +131,7 @@ def config_cmd(make_context: MakeContext,
                 output_dir_of_config=output_dir,
                 test_environment_name=config_name,
                 gen_filename=make_context.generated_py_filename,
-                environment=config.environment,
+                environment=config.deployment,
                 imports_for_test_config_environment_variables=imports_for_test_config_environment_variables,
                 config_dir=config.config_dir
             )

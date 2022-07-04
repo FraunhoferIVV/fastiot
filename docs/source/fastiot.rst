@@ -9,7 +9,7 @@ fastIoT Library (fastiot)
    api/fastiot/*
 
 fastIoT Core Services (fastiot_core_services)
-=====================
+=============================================
 
 .. toctree::
    :maxdepth: 1
@@ -18,7 +18,7 @@ fastIoT Core Services (fastiot_core_services)
    api/fastiot_core_services/*
 
 fastIoT Sample Services (fastiot_sample_services)
-=====================
+=================================================
 
 .. toctree::
    :maxdepth: 1

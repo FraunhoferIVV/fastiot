@@ -39,11 +39,12 @@ class TestDeploymentCommand(unittest.TestCase):
 
     def test_no_target(self):
         with tempfile.TemporaryDirectory() as tempdir:
-            _prepare_env(tempdir, project_root_dir=tempdir)
+            os.chdir(tempdir)
             deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
                 file.write("fastiot_services: []")
+            _prepare_env(tempdir, project_root_dir=tempdir)
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
 
@@ -52,11 +53,11 @@ class TestDeploymentCommand(unittest.TestCase):
 
     def test_single_service(self):
         with tempfile.TemporaryDirectory() as tempdir:
-            _prepare_env(tempdir, project_root_dir=tempdir)
             deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
                 file.write(DEPLOYMENT_EXAMPLE)
+            _prepare_env(tempdir, project_root_dir=tempdir)
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
 
