@@ -3,11 +3,10 @@ venv/
 docs/source/api/
 docs/build/
 build/
-deployments/
 __pycache__/
 .docker-cache/
 .pytest_cache
-/generated/
+generated/
 coverage.xml
 pytest_report.xml
 .coverage

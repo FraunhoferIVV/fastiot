@@ -1,0 +1,72 @@
+version: "2.4"
+
+services:
+  mongodb:
+      image: "mongo:4.4-bionic"
+      ports:
+        - "17017:27017"
+      networks:
+        - fastiot-net
+      environment:
+        - "MONGO_INITDB_ROOT_USERNAME=root"
+        - "MONGO_INITDB_ROOT_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+      env_file:
+        - .env
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/mongodb:/data/db"
+      restart: always
+
+  mariadb:
+      image: "mariadb:10.4"
+      ports:
+        - "3307:3306"
+      networks:
+        - fastiot-net
+      environment:
+        - "MYSQL_ROOT_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+        - "MYSQL_DATABASE=fastiot_fastiotlib"
+        # Causes timezone information import to be skipped as this seems to take quite some time as of 10/2019 and MariaDB 10.4
+        # Check if this can be removed at a later point
+        - "MYSQL_INITDB_SKIP_TZINFO=yes"
+      env_file:
+        - .env
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/mariadb:/var/lib/mysql"
+      restart: always
+
+  influxdb:
+      image: "influxdb:2.0"
+      ports:
+        - "8087:8086"
+      networks:
+        - fastiot-net
+      environment:
+        - "DOCKER_INFLUXDB_INIT_MODE=setup"
+        - "DOCKER_INFLUXDB_INIT_USERNAME=influxdb_admin"
+        - "DOCKER_INFLUXDB_INIT_PASSWORD=mf9ZXfeLKuaL3HL7w"
+        - "DOCKER_INFLUXDB_INIT_ORG=IVVDD"
+        - "DOCKER_INFLUXDB_INIT_BUCKET=sensors"
+        - "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ndExs0Yws4zBCtBs"
+      env_file:
+        - .env
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/influxdb2:/var/lib/influxdb2"
+      restart: always
+
+  timescaledb:
+      image: "timescale/timescaledb:latest-pg14"
+      ports:
+        - "54332:5432"
+      networks:
+        - fastiot-net
+      environment:
+        - "POSTGRES_USER=postgres"
+        - "POSTGRES_PASSWORD=ADFvs33fFAf3#FDfe3fdve3-df"
+        - "POSTGRES_DB=fastiot_db"
+      volumes:
+        - "/var/fastiot/volumes/fastiot_dev/timescaledb:/var/lib/postgresql/data"
+      restart: always
+
+
+networks:
+  fastiot-net:
