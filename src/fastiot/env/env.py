@@ -145,7 +145,8 @@ class MariaDBEnv:
     Environment variables for mariadb
 
     Use the properties from :func:`fastiot.env.env.env_mariadb` to read the values in an easy manner within your
-    code.
+    code. This will provide the environment variables needed for
+    :func:`fastiot.db.mariadb_helper_fn.open_mariadb_connection_from_env`
     """
 
     @property
@@ -162,7 +163,7 @@ class MariaDBEnv:
         """ .. envvar:: FASTIOT_MARIA_DB_PORT
 
         Use to get/set the mariadb port, defaults to 3306. """
-        return int(os.getenv(FASTIOT_MARIA_DB_PORT, 3306))
+        return int(os.getenv(FASTIOT_MARIA_DB_PORT, '3306'))
 
     @property
     def user(self) -> Optional[str]:
@@ -216,7 +217,7 @@ class InfluxDBEnv:
         """ .. envvar:: FASTIOT_INFLUX_DB_PORT
 
         Use to get/set the influxdb port, defaults to 8086. """
-        return os.getenv(FASTIOT_INFLUX_DB_PORT, 8086)
+        return int(os.getenv(FASTIOT_INFLUX_DB_PORT, '8086'))
 
     @property
     def token(self) -> str:
@@ -251,7 +252,7 @@ class TimeScaleDBEnv:
         Use to get/set the time scale database port.
         Use to get/set the time scale db port, defaults to 5432.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_PORT, 5432)
+        return int(os.getenv(FASTIOT_TIME_SCALE_DB_PORT, '5432'))
 
     @property
     def user(self) -> Optional[str]:
