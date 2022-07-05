@@ -8,6 +8,6 @@ library_package = 'fastiot'
 services = find_services(package='fastiot_sample_services')
 
 test_package = 'fastiot_tests'
-test_config = 'integration_test'
+integration_test_deployment = 'integration_test'
 
 compile_lib = 'only_source'

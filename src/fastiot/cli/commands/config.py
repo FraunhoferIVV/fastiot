@@ -4,7 +4,7 @@ from typing import Optional, List
 import typer
 
 from fastiot.cli.commands.run import _deployment_completion
-from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR, FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
+from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, FASTIOT_NO_PORT_MOUNTS, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context

@@ -16,7 +16,7 @@ class TestConfigurationImport(unittest.TestCase):
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
             self.assertEqual(os.getcwd(), config.project_root_dir)
-            self.assertIsNone(config.library_package)
+            self.assertEqual('', config.library_package)
 
     def test_missing_configuration_option(self):
         with NamedTemporaryFile(suffix='.py') as f:

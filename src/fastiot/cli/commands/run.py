@@ -6,13 +6,12 @@ from typing import Optional, List
 
 import typer
 
-from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import run_cmd, DEFAULT_CONTEXT_SETTINGS
 
 
 def _deployment_completion() -> List[str]:
-    return get_default_context().project_config.get_all_deployment_names()
+    return get_default_context().project_config.deployment_names
 
 
 @run_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)

@@ -105,10 +105,9 @@ class DeploymentConfig(BaseModel):
             services = get_services_list()
         except AttributeError:
             return values  # If the project is not configured completely this will fail
-        for service_list in [values.get("infrastructure_services"), values.get("infrastructure_services_external")]:
-            for service in service_list:
-                if service not in services.keys():
-                    raise ValueError(f"Service {service} not found in service list!")
+        for service in values.get("infrastructure_services"):
+            if service not in services.keys():
+                raise ValueError(f"Service {service} not found in service list!")
         return values
 
     @staticmethod

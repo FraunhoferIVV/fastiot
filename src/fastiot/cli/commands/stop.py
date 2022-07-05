@@ -8,7 +8,7 @@ from typing import Optional, List
 import typer
 
 from fastiot.cli.commands.run import _deployment_completion
-from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
 
@@ -32,13 +32,13 @@ def deployment(deployment_name: Optional[str] = typer.Argument(default=None, she
     project_config = get_default_context().project_config
 
     if stop_test_deployment:
-        deployment_name = project_config.test_config
+        deployment_name = project_config.integration_test_deployment
 
     if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
         sys.exit(-1)
 
-    cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
+    cwd = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
                        deployment_name)
 
     cmd = f"docker-compose "

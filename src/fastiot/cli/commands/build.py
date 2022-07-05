@@ -189,11 +189,11 @@ def _docker_bake(project_config: ProjectConfig,
 def _find_test_deployment_services(project_config: ProjectConfig) -> List[str]:
     """ Builds a list of services based on the test env project configuration. May exit the program if no services are
     to be built."""
-    if project_config.test_config is None:
+    if project_config.integration_test_deployment is None:
         logging.info("No services to build for test environment as no test environment is specified.")
         raise typer.Exit()
-    deployment = project_config.get_deployment_by_name(project_config.test_config)
-    services = list(deployment.fastiot_services.keys())
+    deployment = project_config.deployment_by_name(project_config.integration_test_deployment)
+    services = list(deployment.services.keys())
     if len(services) == 0:
         logging.info("No services to build if selecting only test environment.")
         raise typer.Exit()

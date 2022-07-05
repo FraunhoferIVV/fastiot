@@ -91,10 +91,10 @@ class ProjectConfig(BaseModel):
         (:attr:`fastiot.cli.model.project.ProjectConfig.deployments`) or by convention in deployments dir."""
         return [d.name for d in self.deployments]
 
-    def deployment_by_name(self, deployment: str) -> DeploymentConfig:
+    def deployment_by_name(self, name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """
         deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
-                                       deployment_name, DEPLOYMENTS_CONFIG_FILE)
+                                       name, DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
 
     def get_all_service_names(self) -> List[str]:

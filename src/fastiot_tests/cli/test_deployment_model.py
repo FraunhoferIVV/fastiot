@@ -16,17 +16,20 @@ x-env2: &env_machine2
 services:
   fastiot/time_series:
   ml_module1:
-    image_name: fastiot/machine_learning
+    image: fastiot/machine_learning
     environment:
       <<: *env_machine1
     tag: latest
   ml_module2:
-    image_name: fastiot/machine_learning
+    image: fastiot/machine_learning
     environment:
       <<: *env_machine2
       FASTIOT_LOG_LEVEL_NO: 20 # DEBUG
 
-infrastructure_services: [nats, mongodb, mariadb]
+infrastructure_services:
+  nats:
+  mongodb:
+  mariadb:
 
 config_dir: ./config_dir
 

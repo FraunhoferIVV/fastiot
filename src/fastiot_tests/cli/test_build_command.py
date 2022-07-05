@@ -22,7 +22,7 @@ def _write_configure(path: str, no_services: bool, project_root_dir: Optional[st
         file.write("project_namespace = 'fastiot'\n"
                    f"project_root_dir = '{project_root_dir}'\n"
                    f"build_dir = '{path}'\n"
-                   "test_config = 'integration_test'\n")
+                   "integration_test_deployment = 'integration_test'\n")
 
         file.seek(0)
 

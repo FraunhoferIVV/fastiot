@@ -4,7 +4,8 @@ import unittest
 
 from typer.testing import CliRunner
 
-from fastiot.cli.constants import GENERATED_DEPLOYMENTS_DIR, DEPLOYMENTS_CONFIG_FILE, DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_FILE, DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app
 from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli.test_build_command import _prepare_env
@@ -43,7 +44,7 @@ class TestDeploymentCommand(unittest.TestCase):
             deployments_dir = os.path.join(tempdir, DEPLOYMENTS_CONFIG_DIR, 'fastiot_unittest')
             os.makedirs(deployments_dir, exist_ok=True)
             with open(os.path.join(deployments_dir, DEPLOYMENTS_CONFIG_FILE), 'w') as file:
-                file.write("fastiot_services: []")
+                file.write("services: {}")
             _prepare_env(tempdir, project_root_dir=tempdir)
 
             result = self.runner.invoke(app, ["deploy", "--dry", "fastiot_unittest"])
@@ -63,7 +64,8 @@ class TestDeploymentCommand(unittest.TestCase):
 
             self.assertEqual(0, result.exit_code)
 
-            generated_path = os.path.join(tempdir, GENERATED_DEPLOYMENTS_DIR, "fastiot_unittest")
+            generated_path = os.path.join(tempdir, get_default_context().project_config.build_dir,
+                                          DEPLOYMENTS_CONFIG_DIR, "fastiot_unittest")
             for file in ['ansible-playbook.yaml', 'hosts']:
                 self.assertTrue(os.path.isfile(os.path.join(generated_path, file)))
 
