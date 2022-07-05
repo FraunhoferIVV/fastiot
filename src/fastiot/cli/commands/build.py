@@ -44,21 +44,21 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
                                         "compilation will be applied if chosen 'release'."),
           tag: str = typer.Option('latest', '-t', '--tag',
                                   help="The tags to use for building as a comma ',' separated list."),
-          docker_registry: str = typer.Option(None, '-r', '--docker-registry',
+          docker_registry: str = typer.Option('', '-r', '--docker-registry',
                                               envvar=FASTIOT_DOCKER_REGISTRY,
                                               help="The docker registry to be used for tagging. If docker_registry is "
                                                    "unspecified, it will look for a process environment variable "
                                                    "FASTIOT_DOCKER_REGISTRY. If docker registry is not empty, the "
                                                    "built image names will begin with the docker registry followed by "
                                                    "a slash."),
-          docker_registry_cache: str = typer.Option(None, '-c', '--docker-registry-cache',
+          docker_registry_cache: str = typer.Option('', '-c', '--docker-registry-cache',
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
                                                          "FASTIOT_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
                                                          "empty, it will use it as a cache for intermediate image "
                                                          "layers."),
-          platform: str = typer.Option(None, '-p', '--platform', shell_complete=_platform_completion,
+          platform: str = typer.Option('', '-p', '--platform', shell_complete=_platform_completion,
                                        help="The platform to compile for given as a comma ',' separated list. Possible "
                                             "values are 'amd64' and 'arm64'. Currently, it is only supported in "
                                             "combination with the '--push' flag. Per default, the platform of the "
@@ -129,9 +129,9 @@ def _docker_bake(project_config: ProjectConfig,
                  tags: List[str],
                  services: Optional[List[str]] = None,
                  dry: bool = False,
-                 platform: Optional[str] = None,
-                 docker_registry: Optional[str] = None,
-                 docker_registry_cache: Optional[str] = None,
+                 platform: str = '',
+                 docker_registry: str = '',
+                 docker_registry_cache: str = '',
                  push: bool = False,
                  no_cache: bool = False):
     """ Method to create a :file:`docker-bake.hcl` file and invoke the docker bake command """
@@ -141,7 +141,7 @@ def _docker_bake(project_config: ProjectConfig,
         cache_from: str
         cache_to: str
 
-    docker_registry = docker_registry + "/" if docker_registry is not None else docker_registry
+    docker_registry = docker_registry + "/" if docker_registry else docker_registry
 
     targets = []
     for service in project_config.services:
@@ -149,7 +149,7 @@ def _docker_bake(project_config: ProjectConfig,
             continue
         manifest = service.read_manifest()
 
-        if platform is not None:  # Overwrite platform from manifest with manual setting
+        if platform:  # Overwrite platform from manifest with manual setting
             if platform not in manifest.platforms:
                 logging.warning("Platform %s not in platforms specified for service %s. Trying to build service, "
                                 "but chances to fail are high!", platform, service.name)
@@ -226,7 +226,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
             raise typer.Exit(exit_code)
 
 
-def _make_caches(docker_registry_cache: Optional[str],
+def _make_caches(docker_registry_cache: str,
                  docker_cache_image: str,
                  extra_caches: List[str],
                  push: bool,
