@@ -10,4 +10,4 @@ services = find_services(package='fastiot_sample_services')
 test_package = 'fastiot_tests'
 integration_test_deployment = 'integration_test'
 
-compile_lib = 'only_source'
+lib_compilation_mode = 'only_source'
