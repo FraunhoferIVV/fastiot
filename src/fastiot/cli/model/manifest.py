@@ -1,7 +1,6 @@
 """ Data model for fastiot service manifests """
 import os
 import tempfile
-from dataclasses import dataclass
 from enum import Enum
 from shlex import quote as shlex_quote
 from typing import List, Dict, Optional
@@ -9,8 +8,8 @@ from typing import List, Dict, Optional
 import yaml
 from pydantic.main import BaseModel
 
-from fastiot.cli.constants import DOCKER_BASE_IMAGE
 from fastiot.cli.cli_logging import get_cli_logger
+from fastiot.cli.constants import DOCKER_BASE_IMAGE
 
 
 class Port(BaseModel):
@@ -36,7 +35,7 @@ class Volume(BaseModel):
     location: str
     """
     The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as
-    file:`opt/mydata` in  your container.
+    :file:`opt/mydata` in  your container.
     """
     env_variable: str
     """
@@ -44,8 +43,7 @@ class Volume(BaseModel):
     """
 
 
-@dataclass
-class Device:
+class Device(BaseModel):
     """
     A device entry represents one device used by the service which should be mounted outside the container.
     """
@@ -121,9 +119,10 @@ class Vue(BaseModel):
 class ServiceManifest(BaseModel):
     """
     Manifest files may contain these variables.
-    :any:`fastiot.cli.model.manifest.serviceManifest.name` is needed, others are mostly optional!
+    :attr:`fastiot.cli.model.manifest.ServiceManifest.name` is needed, others are mostly optional!
     """
-    name: str  # Name needs to comply with the services name
+    name: str
+    """ Name needs to comply with the services name (Mandatory) """
     ports: Optional[Dict[str, Port]] = None
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating

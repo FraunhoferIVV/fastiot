@@ -1,3 +1,4 @@
+.. _first_project_setup:
 #####################################
 Setting up your first fastIoT Project
 #####################################
@@ -12,7 +13,7 @@ Following prerequisites are needed on a development machine:
 
  * Python Version 3.10.x installed (should work with Python 3.8+ as well though not tested)
  * Docker installed
- * `docker-compose` installed
+ * ``docker-compose`` installed
  * Internet access for
    * Public Docker Repository _Docker Hub_
    * apt-Repository (for Linux Debian Stretch to install Packages in Docker Images)

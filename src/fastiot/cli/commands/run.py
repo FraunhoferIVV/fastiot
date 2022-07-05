@@ -62,7 +62,12 @@ def deployment(deployment_name: Optional[str] = typer.Argument(default=None, she
 
 @run_cmd.command(name='tests')
 def run_unittests():
-    os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+    """
+    This command will trigger all unittests found in the configured test package. Be aware that this will not
+    automatically start your integration test deployment with e.g. a message broker. You may start this using the
+    command ``fastiot.cli run deployment --run-test-deployment`` (:func:`fastiot.cli.commands.run.deployment`)
+    """
+    os.environ['PYTHONDONTWRITEBYTECODE'] = '1'  # Stop writing an __pycache__ for clean containers afterwards
 
     project_config = get_default_context().project_config
 
