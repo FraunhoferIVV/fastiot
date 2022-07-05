@@ -6,6 +6,7 @@ from typing import Optional, List
 
 import typer
 
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import run_cmd, DEFAULT_CONTEXT_SETTINGS
 
@@ -32,7 +33,7 @@ def deployment(deployment_name: Optional[str] = typer.Argument(default=None, she
     project_config = get_default_context().project_config
 
     if run_test_deployment:
-        deployment_name = project_config.test_config
+        deployment_name = project_config.integration_test_deployment
 
     if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
@@ -49,7 +50,7 @@ def deployment(deployment_name: Optional[str] = typer.Argument(default=None, she
     if service_names is not None:
         cmd += service_names
 
-    cwd = os.path.join(project_config.project_root_dir, GENERATED_DEPLOYMENTS_DIR,
+    cwd = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
                        deployment_name)
     logging.debug("Running command to start the environment: %s", " ".join(cmd))
     os.environ['COMPOSE_HTTP_TIMEOUT'] = '300'
