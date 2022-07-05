@@ -24,8 +24,8 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
 
     # Use all available configs if not specified otherwise
     project_config = ProjectConfig(**data)
-    project_config.deploy_configs = find_deployments(deployments=data['deploy_configs'],
-                                                     path=project_config.project_root_dir)
+    project_config.deployments = find_deployments(deployments=data['deployments'],
+                                                  path=project_config.project_root_dir)
     if not project_config.services:
         project_config.services = find_services(path=project_config.project_root_dir)
 

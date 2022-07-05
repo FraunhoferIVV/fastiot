@@ -8,29 +8,28 @@ from pydantic import BaseModel
 from pydantic.class_validators import root_validator, validator
 
 
-class ServiceDeploymentConfig(BaseModel):
+class InfrastructureServiceConfig(BaseModel):
+    external: bool = False
+    """ 
+    Allows to mention services running on external servers and configured manually. This will avoid warnings in the
+    setup process if services specified by the services as dependency could not be found.
+    """
+
+
+class ServiceConfig(BaseModel):
     """
     The config for a service
     """
 
-    image_name: str
-    """The name defines which service is taken. Contains namespace identifier as a prefix, e.g. fastiot/time_series """
-    service_name: Optional[str]
-    """The service name defines how this service is named in compose file. Useful if one image is used many times within
-    on deployment. Will be set to image_name if not specified. """
-    docker_registry: Optional[str] = None
-    """The specified docker registry"""
-    tag: Optional[str] = 'latest'
-    """The specified tag, defaults to `latest` if not specified."""
-    environment: Optional[Dict[str, str]] = {}
-    """Includes all environment variables for the service"""
-    environment_modifications: Optional[Dict[str, str]]
-    """Includes all environment variables which are specified for this service specifically"""
-
-    @root_validator
-    def check_create_service_name(cls, values):
-        values['service_name'] = values['service_name'] or values['image_name']
-        return values
+    image: str
+    """ The name defines which service is taken. Must contain possible namespace identifiers as a prefix, 
+    e.g. fastiot/time_series """
+    docker_registry: str = ''
+    """ The specified docker registry. If given it will override the docker_registry for the service """
+    tag: str = ''
+    """ The specified tag. If given it will override the tag for the service """
+    environment: Dict[str, str] = {}
+    """ Includes all environment variables for the service """
 
     @property
     def is_local_docker_registry(self) -> bool:
@@ -44,8 +43,8 @@ class ServiceDeploymentConfig(BaseModel):
         return f"{self.docker_registry}/"
 
     @property
-    def docker_image_name(self) -> str:
-        return f"{self.docker_registry_image_prefix}{self.image_name}:{self.tag}"
+    def full_image_name(self) -> str:
+        return f"{self.docker_registry_image_prefix}{self.image}:{self.tag}"
 
 
 class AnsibleHost(BaseModel):
@@ -79,34 +78,25 @@ class DeploymentConfig(BaseModel):
     Represents an imported config. All fields are already overwritten specified command line parameters, currently
     including environment, docker_registry and tag
     """
-    deployment_name: str
+    name: str
     """ Name of the deployment. This should always be the directory name where the corresponding :file:`deployment.yaml`
     is located. """
-
-    deployment_config_version: int = 1
-    fastiot_services: Dict[str, Optional[ServiceDeploymentConfig]] = {}
-    """ List of services to integrate in the deployment."""
-    infrastructure_services: Optional[List[str]] = []
-    """ List of services to integrate """
-    infrastructure_services_external: Optional[List[str]] = []
-    """ Allows to mention services running on external servers and configured manually. This will avoid warnings in the
-    setup process if services specified by the services as dependency could not be found.
-    """
+    version: int = 1
+    services: Dict[str, Optional[ServiceConfig]] = {}
+    """ List of services for the deployment """
+    infrastructure_services: Dict[str, Optional[InfrastructureServiceConfig]] = []
+    """ List of infrastructure services for the deployment """
     deployment_target: Optional[DeploymentTargetSetup]
     """ A deployment configuration to auto-generate Ansible Playbooks
     """
-    docker_registry: Optional[str] = ""
-    tag: Optional[str] = 'latest'
-    """ Define the tag to use for all docker images, defaults to ``latest``."""
-    config_dir: Optional[str]
-
-    @validator('fastiot_services')
-    def service_defaults(cls, v):
-        for service_name, service in v.items():
-            if service is None:
-                # TODO: Don't do this: Validate function should not manipulate objects
-                v[service_name] = ServiceDeploymentConfig(image_name=service_name)
-        return v
+    docker_registry: str = ''
+    """ Specify a docker registry which acts as a default registry for all services (not infrastructure services). 
+    Overrides any docker registry specified by CLI. """
+    tag: str = ''
+    """ Specify a docker tag which acts as a default tag for all services (not infrastructure services). Overrides any
+    docker tag specified by CLI """
+    config_dir: str = ''
+    """ Specify a config dir. The config dir will get mounted to /etc/fastiot """
 
     @root_validator
     def check_services(cls, values):
@@ -114,7 +104,7 @@ class DeploymentConfig(BaseModel):
             from fastiot.cli.infrastructure_service_helper import get_services_list
             services = get_services_list()
         except AttributeError:
-            return values  # If the project is not configured completly this will fail
+            return values  # If the project is not configured completely this will fail
         for service_list in [values.get("infrastructure_services"), values.get("infrastructure_services_external")]:
             for service in service_list:
                 if service not in services.keys():
@@ -125,4 +115,4 @@ class DeploymentConfig(BaseModel):
     def from_yaml_file(filename) -> "DeploymentConfig":
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
-        return DeploymentConfig(**{'deployment_name': os.path.basename(os.path.dirname(filename)), **config})
+        return DeploymentConfig(**{'name': os.path.basename(os.path.dirname(filename)), **config})

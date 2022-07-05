@@ -35,7 +35,9 @@ def _platform_completion() -> List[str]:
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def build(mode: str = typer.Option('debug', '-m', '--mode',
+def build(services: Optional[List[str]] = typer.Argument(None, help="The services to build. Default: all services",
+                                                         shell_complete=_services_completion),
+          mode: str = typer.Option('debug', '-m', '--mode',
                                    callback=_mode_callback, shell_complete=_mode_completion,
                                    help="The build mode for docker images. Can be 'debug' or 'release'. "
                                         "No compilation of python code will happen if chosen 'debug'. Nuitka "
@@ -77,10 +79,7 @@ def build(mode: str = typer.Option('debug', '-m', '--mode',
                                                               help="Build only services defined in the integration test "
                                                                    "deployment. This is especially useful in the "
                                                                    "CI-runner"),
-          no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build."),
-          services: Optional[List[str]] = typer.Argument(None, help="The services to build. Default: all services",
-                                                         shell_complete=_services_completion)
-          ):
+          no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build.")):
     """
     This command builds images.
 

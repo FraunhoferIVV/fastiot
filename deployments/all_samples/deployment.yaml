@@ -1,12 +1,12 @@
-deployment_name: fastiot_test_env
+name: fastiot_test_env
 
-modules:
+services:
   producer:
   consumer:
 
-services: [nats]
+infrastructure-services: [nats]
 
-deployment_target:
+deployment-target:
   hosts:
     localhost:
       ip: 127.0.0.1
