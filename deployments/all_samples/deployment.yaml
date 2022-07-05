@@ -1,4 +1,4 @@
-name: fastiot_test_env
+name: sample
 
 services:
   producer:
