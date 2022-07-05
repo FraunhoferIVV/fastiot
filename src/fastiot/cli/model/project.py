@@ -69,7 +69,7 @@ class ProjectConfig(BaseModel):
     like :file:`myproject_tests`."""
 
     imports_for_test_deployment_env_vars: Optional[List[str]] = None
-    npm_test_dir: Optional[str] = None
+    npm_test_dir: str = ''
 
     build_dir: str = 'build'
     """ The dir where generated build files (Dockerfiles, Docker-compose files, etc.) are stored. This dir is relative
