@@ -41,9 +41,9 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
 
     styles = []
     if build_style == BuildLibStyles.all:
-        if project_config.compile_lib == CompileSettingsEnum.only_compiled:
+        if project_config.lib_compilation_mode == CompileSettingsEnum.only_compiled:
             styles.append(BuildLibStyles.compiled)
-        elif project_config.compile_lib == CompileSettingsEnum.only_source:
+        elif project_config.lib_compilation_mode == CompileSettingsEnum.only_source:
             styles += [BuildLibStyles.wheel, BuildLibStyles.sdist]
         else:
             styles += [BuildLibStyles.wheel, BuildLibStyles.sdist, BuildLibStyles.compiled]
