@@ -46,12 +46,11 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     build one or more deployments you have to be logged in and connected to the corresponding docker registries or build
     the images locally.
     """
-
     project_config = get_default_context().project_config
 
     if deployments:
         deployment_names = []
-        for deployment in deployment_names:
+        for deployment in deployments:
             if deployment not in project_config.deployment_names:
                 raise ValueError(f"Deployment '{deployment}' is not in project specified.")
             if deployment not in deployment_names:
