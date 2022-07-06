@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from fastiot.cli.model import ServiceManifest
 
 
-class ServiceConfig(BaseModel):
+class Service(BaseModel):
     name: str
     package: str
     cache: str

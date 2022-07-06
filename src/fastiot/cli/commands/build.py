@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.model import ProjectConfig, ServiceManifest, CPUPlatform, ServiceConfig
+from fastiot.cli.model import ProjectConfig, ServiceManifest, CPUPlatform, Service
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -110,7 +110,7 @@ def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, ser
             _create_docker_file(service, project_config, build_mode)
 
 
-def _create_docker_file(service: ServiceConfig, project_config: ProjectConfig, build_mode: str):
+def _create_docker_file(service: Service, project_config: ProjectConfig, build_mode: str):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     os.makedirs(build_dir, exist_ok=True)
 

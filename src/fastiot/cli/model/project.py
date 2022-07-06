@@ -7,7 +7,7 @@ from pydantic.main import BaseModel
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model.deployment import DeploymentConfig
-from fastiot.cli.model.service import ServiceConfig
+from fastiot.cli.model.service import Service
 
 
 class CompileSettingsEnum(str, Enum):
@@ -43,7 +43,7 @@ class ProjectConfig(BaseModel):
     """ Path where to find the :file:`setup.py` to build your library for exporting. The default with the current
      working directory should be fine, if you put your :file:`setup.py` at the toplevel of your project (common)."""
 
-    services: List[ServiceConfig] = []
+    services: List[Service] = []
     """ Define a list of :class:`fastiot.cli.model.service.ServiceConfig`. If not defined the cli will look for python
     packages containing a :file:`manifest.yaml` and a `run.py` with the pattern :file:`src/*/*/manifest.yaml` and call 
     this package a FastIoT Service. Be aware of this when creating a :file:`manifest.yaml` somewhere, e.g. in your

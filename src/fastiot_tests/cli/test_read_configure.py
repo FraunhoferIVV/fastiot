@@ -3,7 +3,7 @@ import unittest
 from tempfile import NamedTemporaryFile
 
 from fastiot.cli.import_configure import import_configure
-from fastiot.cli.model import ServiceConfig
+from fastiot.cli.model import Service
 
 
 class TestConfigurationImport(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestConfigurationImport(unittest.TestCase):
             config = import_configure(f.name)
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
-            self.assertIsInstance(config.services[0], ServiceConfig)
+            self.assertIsInstance(config.services[0], Service)
             self.assertEqual("fastiot_sample_services", config.services[0].package)
 
 

@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from fastiot.cli.constants import TEMPLATES_DIR, DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME
-from fastiot.cli.model import ServiceConfig, DeploymentConfig
+from fastiot.cli.model import Service, DeploymentConfig
 
 
 def parse_env_file(env_filename: str) -> Dict[str, str]:
@@ -45,7 +45,7 @@ def get_jinja_env():
 def find_services(package: Optional[str] = None,
                   path: Optional[str] = None,
                   services: Optional[List[str]] = None,
-                  use_per_service_cache: bool = False) -> List[ServiceConfig]:
+                  use_per_service_cache: bool = False) -> List[Service]:
     """
     Find services in a package
 
@@ -68,11 +68,11 @@ def find_services(package: Optional[str] = None,
         if not os.path.isfile(os.path.join(service_directory.absolute(), 'run.py')):
             continue
 
-        services.append(ServiceConfig(name=service_name,
-                                      package=package_name,
-                                      cache=_default_cache(service=service_name, package=package_name,
+        services.append(Service(name=service_name,
+                                package=package_name,
+                                cache=_default_cache(service=service_name, package=package_name,
                                                            use_per_service_cache=use_per_service_cache),
-                                      extra_caches=_default_extra_caches(service=service_name, package=package_name,
+                                extra_caches=_default_extra_caches(service=service_name, package=package_name,
                                                                          use_per_service_cache=use_per_service_cache)))
     return services
 
