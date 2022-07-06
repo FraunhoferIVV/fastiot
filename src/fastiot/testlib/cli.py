@@ -6,6 +6,7 @@ from typing import Optional
 from fastiot.cli.infrastructure_service_fn import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
+from fastiot.cli.typer_app import _import_infrastructure_services
 
 
 def init_default_context(configure_filename: Optional[str] = None):
@@ -30,3 +31,4 @@ def init_default_context(configure_filename: Optional[str] = None):
     default_context = get_default_context()
     default_context.project_config = import_configure(configure_filename)
     default_context.external_services = get_services_list()
+    _import_infrastructure_services()

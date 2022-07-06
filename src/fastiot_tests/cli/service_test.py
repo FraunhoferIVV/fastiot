@@ -1,8 +1,16 @@
+from typing import List
+
 from fastiot.cli.model import InfrastructureService
+from fastiot.cli.model.service import InfrastructureServicePort
 
 
 class SomeTestService(InfrastructureService):
     name = 'test_service'
-    docker_image = 'test'
-    port = 1
-    port_env_var = 'TEST_PORT'
+    image = 'test'
+    ports: List[InfrastructureServicePort] = [
+        InfrastructureServicePort(
+            container_port=1,
+            default_port_mount=1,
+            env_var='TEST_PORT'
+        )
+    ]

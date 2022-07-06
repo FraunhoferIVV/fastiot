@@ -9,7 +9,7 @@ import yaml
 from pydantic.main import BaseModel
 
 from fastiot.cli.cli_logging import get_cli_logger
-from fastiot.cli.constants import DOCKER_BASE_IMAGE
+from fastiot.cli.constants import DEFAULT_BASE_IMAGE
 
 
 class Port(BaseModel):
@@ -128,9 +128,9 @@ class ServiceManifest(BaseModel):
     Provide a list with some name for the service and a port that this container will open, e.g. when operating
     as a webserver.`
     """
-    base_image: str = DOCKER_BASE_IMAGE
+    base_image: str = DEFAULT_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
-    :const:`fastiot.cli.constants.DOCKER_BASE_IMAGE` will be used.
+    :const:`fastiot.cli.constants.DEFAULT_BASE_IMAGE` will be used.
     
     Be aware, that the further Dockerfile will be unchanged, thus your base image should be based on some Debian-style.
     If this does not work for you, you may also provide a :file:`Dockerfile` in your service which will automatically be

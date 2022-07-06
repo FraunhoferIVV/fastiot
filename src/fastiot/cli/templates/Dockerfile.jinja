@@ -2,7 +2,7 @@
 
 ### Stage: Base ###
 
-FROM {{ service.manifest.docker_base_image }} as base
+FROM {{ service.manifest.base_image }} as base
 RUN apt-get update -y && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # As a convention, the workdir should always be the project root dir inside the container.

@@ -34,7 +34,7 @@ class Service(BaseModel):
             default_context = get_default_context()
             manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
                                          self.package, self.name, 'manifest.yaml')
-            self.manifest = ServiceManifest.fom_yaml_file(manifest_path, check_service_name=check_service_name)
+            self.manifest = ServiceManifest.from_yaml_file(manifest_path, check_service_name=check_service_name)
         return self.manifest
 
 
