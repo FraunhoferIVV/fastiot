@@ -84,7 +84,7 @@ class DeploymentConfig(BaseModel):
     version: int = 1
     services: Dict[str, Optional[ServiceConfig]] = {}
     """ List of services for the deployment """
-    infrastructure_services: Dict[str, Optional[InfrastructureServiceConfig]] = []
+    infrastructure_services: Dict[str, InfrastructureServiceConfig] = {}
     """ List of infrastructure services for the deployment """
     deployment_target: Optional[DeploymentTargetSetup]
     """ A deployment configuration to auto-generate Ansible Playbooks
@@ -114,4 +114,11 @@ class DeploymentConfig(BaseModel):
     def from_yaml_file(filename) -> "DeploymentConfig":
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
+            if "infrastructure-services" in config:
+                config["infrastructure_services"] = config["infrastructure-services"]
+                del config["infrastructure-services"]
+            if "infrastructure_services" in config:
+                for item, value in config["infrastructure_services"].items():
+                    if value is None:
+                        config["infrastructure_services"][item] = InfrastructureServiceConfig()
         return DeploymentConfig(**{'name': os.path.basename(os.path.dirname(filename)), **config})

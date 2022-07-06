@@ -34,18 +34,45 @@ class Service(BaseModel):
             default_context = get_default_context()
             manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
                                          self.package, self.name, 'manifest.yaml')
-            self.manifest = ServiceManifest.from_yaml_file(manifest_path, check_service_name=check_service_name)
+            self.manifest = ServiceManifest.fom_yaml_file(manifest_path, check_service_name=check_service_name)
         return self.manifest
+
+
+class InfrastructureServiceEnvVar(BaseModel):
+    name: str
+    """ The name of the infrastructure service env var """
+    default: str
+    """ THe default value for the infrastructure service env var """
+    env_var: str = ''
+    """ The env var which can be used for modification. If empty it cannot be modified, therefore is static for the 
+    infrastructure service """
+
+
+class InfrastructureServicePort(BaseModel):
+    container_port: int
+    """ The port inside the container """
+    default_port_mount: int
+    """ The default port for mounting """
+    env_var: str = ''
+    """ The env var which can be used for port mount modification. If given, this env var will also be provided to all
+    services with the given container port so they can connect to the service """
+
+
+class InfrastructureServiceVolume(BaseModel):
+    container_volume: str
+    """ The volume inside the container """
+    default_volume_mount: str = ''
+    """ The default location to mount the volume to. If empty, it will always use the given env var """
+    env_var: str
+    """ The env var which can be used for volume mount modification """
 
 
 class InfrastructureService(BaseModel):
     """ Class to describe external services to be integrated in the deployments. """
-    name: str  # Name of the external service, e.g. mariadb. Per convention these names should be in lower case
-    docker_image: str  # Name of the docker image to be put in the :file:`docker-compose.yaml`
-    port: int  # Default port of the service exposed by its docker image
-    port_env_var: str
-    """ Environment variable to read the port number, as for internal purposes the port number may change """
-    password_env_var: Optional[str]  # If the service needs a password use this env
-    additional_env: Optional[Dict[str, Union[str, int]]] = None
-    """ Provide any additional environment variables to be set here as a dictionary with the variable name and a
-    sensible default. """
+    name: str
+    """ Name of the external service, e.g. mariadb. Per convention these names should be in lower case """
+    image: str
+    """ Name of the image """
+    environment: List[InfrastructureServiceEnvVar] = []
+    ports: List[InfrastructureServicePort] = []
+    volumes: List[InfrastructureServiceVolume] = []

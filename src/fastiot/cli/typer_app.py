@@ -45,4 +45,9 @@ def _import_commands():
             logging.exception(f"Import error raised during import of module {mod}")
 
 
+def _import_infrastructure_services():
+    importlib.import_module('fastiot.cli.common.infrastructure_services')
+
+
 _import_commands()
+_import_infrastructure_services()

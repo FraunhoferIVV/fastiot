@@ -123,12 +123,12 @@ class ServiceManifest(BaseModel):
     """
     name: str
     """ Name needs to comply with the services name (Mandatory) """
-    ports: Optional[Dict[str, Port]] = None
+    ports: Dict[str, Port] = {}
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating
     as a webserver.`
     """
-    docker_base_image: str = DOCKER_BASE_IMAGE
+    base_image: str = DOCKER_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
     :const:`fastiot.cli.constants.DOCKER_BASE_IMAGE` will be used.
     
@@ -136,8 +136,8 @@ class ServiceManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your service which will automatically be
     used.
     """
-    volumes: Optional[Dict[str, Volume]] = None  # Volumes to be mounted in the container
-    devices: Optional[Dict[str, Device]] = None  # Devices, e.g. serial devices, to be mounted in the container
+    volumes: Dict[str, Volume] = {}  # Volumes to be mounted in the container
+    devices: Dict[str, Device] = {}  # Devices, e.g. serial devices, to be mounted in the container
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
     # depends_on: List[ServiceEnum] = ()
     privileged: bool = False

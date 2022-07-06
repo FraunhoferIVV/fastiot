@@ -7,6 +7,9 @@ from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, FASTIOT_NO_PORT_MOUNTS, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.infrastructure_service_fn import get_services_list
+from fastiot.cli.model import DeploymentConfig
+from fastiot.cli.model.compose_info import InfrastructureServiceComposeInfo
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -48,15 +51,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     """
     project_config = get_default_context().project_config
 
-    if deployments:
-        deployment_names = []
-        for deployment in deployments:
-            if deployment not in project_config.deployment_names:
-                raise ValueError(f"Deployment '{deployment}' is not in project specified.")
-            if deployment not in deployment_names:
-                deployment_names.append(deployment)
-    else:
-        deployment_names = project_config.deployment_names
+    deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
 
     for deployment_name in deployment_names:
         deployment_dir = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
@@ -66,6 +61,62 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
         except FileExistsError:
             pass  # No need to create directory twice
 
+        deployment_config = project_config.deployment_by_name(name=deployment_name)
+        infrastructure_services = _create_infrastructure_service_compose_infos(deployment_config=deployment_config)
+
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
-            docker_compose_file.write(docker_compose_template.render(docker_net_name=net))
+            docker_compose_file.write(docker_compose_template.render(
+                docker_net_name=net,
+                environment_for_docker_compose_file=[],
+                infrastructure_services=infrastructure_services
+            ))
+
+
+def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
+    project_config = get_default_context().project_config
+    if deployments:
+        deployment_names = []
+        for deployment in deployments:
+            if deployment not in project_config.deployment_names:
+                raise ValueError(f"Deployment '{deployment}' is not in project specified.")
+            if deployment not in deployment_names:
+                deployment_names.append(deployment)
+    else:
+        deployment_names = project_config.deployment_names
+    return deployment_names
+
+
+def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig
+                                                 ) -> List[InfrastructureServiceComposeInfo]:
+    services_map = get_services_list()
+    result = []
+    for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
+        if name not in services_map:
+            raise RuntimeError(f"Service with name '{name}' was not found in service list: {', '. join(services_map)}")
+        service = services_map[name]
+
+        if infrastructure_service_config.external is True:
+            # External services should be skipped
+            continue
+
+        environment: List[str] = []
+        for env_var in service.environment:
+            environment.append(f'{env_var.name}="{env_var.default}"')
+
+        ports: List[str] = []
+        for port in service.ports:
+            ports.append(f'{port.default_port_mount}:{port.container_port}')
+
+        volumes: List[str] = []
+        for volume in service.volumes:
+            ports.append(f'{volume.default_volume_mount}:{volume.container_volume}')
+
+        result.append(InfrastructureServiceComposeInfo(
+            name=service.name,
+            image=service.image,
+            environment=environment,
+            ports=ports,
+            volumes=volumes
+        ))
+    return result

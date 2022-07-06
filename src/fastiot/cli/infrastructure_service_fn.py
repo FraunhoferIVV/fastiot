@@ -1,11 +1,8 @@
 """ Some helpers to work with external services: importing, port handling, … """
-import importlib
-import logging
 import os
 from socket import socket
 from typing import Optional, Dict, List, Union
 
-from fastiot.cli.configuration import external_services  # noqa  # pylint: disable=unused-import
 from fastiot.cli.model import InfrastructureService
 
 
@@ -43,13 +40,14 @@ def set_external_service_port_environment(offset: int = 1024, random: bool = Fal
         if services is not None and service.name not in services and service in services:
             continue
 
-        if not random:
-            os.environ[service.port_env_var] = str(offset + service_nr)
-        else:
-            with socket() as temp_socket:
-                temp_socket.bind(('', 0))
-                os.environ[service.port_env_var] = temp_socket.getsockname()[1]
+        for port in service.ports:
+            if not random:
+                os.environ[port.env_var] = str(offset + service_nr)
+            else:
+                with socket() as temp_socket:
+                    temp_socket.bind(('', 0))
+                    os.environ[port.env_var] = temp_socket.getsockname()[1]
 
-        open_ports[service.port_env_var] = int(os.environ.get(service.port_env_var))
+            open_ports[port.env_var] = int(os.environ.get(port.env_var))
 
     return open_ports

@@ -4,7 +4,8 @@ services:
   producer:
   consumer:
 
-infrastructure-services: [nats]
+infrastructure-services:
+  nats:
 
 deployment-target:
   hosts:
