@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest.mock import Mock
 
-from fastiot.cli.infrastructure_service_helper import get_services_list
+from fastiot.cli.infrastructure_service_fn import get_services_list
 from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli import service_test
 

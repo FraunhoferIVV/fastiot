@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Optional
 
-from fastiot.cli.infrastructure_service_helper import get_services_list
+from fastiot.cli.infrastructure_service_fn import get_services_list
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
 

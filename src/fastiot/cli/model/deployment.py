@@ -101,7 +101,7 @@ class DeploymentConfig(BaseModel):
     @root_validator
     def check_services(cls, values):
         try:
-            from fastiot.cli.infrastructure_service_helper import get_services_list
+            from fastiot.cli.infrastructure_service_fn import get_services_list
             services = get_services_list()
         except AttributeError:
             return values  # If the project is not configured completely this will fail
