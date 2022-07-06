@@ -1,16 +1,16 @@
 """ Data models for deployment configurations """
 # pylint: disable=no-self-argument
 import os
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import yaml
 from pydantic import BaseModel
-from pydantic.class_validators import root_validator, validator
+from pydantic.class_validators import root_validator
 
 
 class InfrastructureServiceConfig(BaseModel):
     external: bool = False
-    """ 
+    """
     Allows to mention services running on external servers and configured manually. This will avoid warnings in the
     setup process if services specified by the services as dependency could not be found.
     """
@@ -22,7 +22,7 @@ class ServiceConfig(BaseModel):
     """
 
     image: str
-    """ The name defines which service is taken. Must contain possible namespace identifiers as a prefix, 
+    """ The name defines which service is taken. Must contain possible namespace identifiers as a prefix,
     e.g. fastiot/time_series """
     docker_registry: str = ''
     """ The specified docker registry. If given it will override the docker_registry for the service """

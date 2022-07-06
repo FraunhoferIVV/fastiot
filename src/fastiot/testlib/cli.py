@@ -17,9 +17,10 @@ def init_default_context(configure_filename: Optional[str] = None):
     try:
         _ = os.getcwd()
     except FileNotFoundError:
-        logging.warning(f"Most probably some other test changed the working directory to "
-                        f"`{os.readlink('/proc/self/cwd')}` and did move back.\n This is a bad practice and you should "
-                        f"find the test that’s using `os.chdir`. We will try change back to the project root dir.")
+        logging.warning("Most probably some other test changed the working directory to "
+                        "%s and did move back.\n This is a bad practice and you should "
+                        "find the test that’s using `os.chdir`. We will try change back to the project root dir.",
+                        os.readlink('/proc/self/cwd'))
         os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
     if configure_filename is None:

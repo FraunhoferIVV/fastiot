@@ -1,5 +1,4 @@
 """ Build command """
-import importlib
 import logging
 import os.path
 import subprocess

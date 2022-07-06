@@ -42,7 +42,7 @@ def _import_commands():
         try:
             importlib.import_module(mod)
         except Exception:
-            logging.exception(f"Import error raised during import of module {mod}")
+            logging.exception("Import error raised during import of module %s", mod)
 
 
 def _import_infrastructure_services():

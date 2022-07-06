@@ -1,11 +1,10 @@
-import glob
 import importlib.util
 import os
 import sys
 from typing import Optional
 
 from fastiot.cli import find_deployments, find_services
-from fastiot.cli.constants import CONFIGURE_FILE_NAME, DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
+from fastiot.cli.constants import CONFIGURE_FILE_NAME
 from fastiot.cli.model import ProjectConfig
 
 

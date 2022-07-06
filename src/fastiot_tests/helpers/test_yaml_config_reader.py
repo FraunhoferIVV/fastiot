@@ -28,10 +28,10 @@ class SimpleService(FastIoTService):
 
 
 class MyBroker(BrokerConnectionTestImpl):
-    def subscribe(self):
+    async def subscribe(self, _, __):
         pass
 
-    def send(self):
+    async def send(self, _, __, ___=None):
         pass
 
 
@@ -54,9 +54,8 @@ class TestYAMLReader(unittest.TestCase):
 
     @staticmethod
     def create_yaml_file(filename, content=BASIC_YAML):
-        file = open(filename, 'w')
-        file.write(content)
-        file.close()
+        with open(filename, 'w') as file:
+            file.write(content)
 
     def test_config_per_service(self):
         config_file = os.path.join(env_basic.config_dir, 'SimpleService.yaml')
