@@ -11,7 +11,7 @@ fastiot_service:
 
   ports:
     http:
-      location: 5802
+      port_nr: 5802
       env_variable: SAM_DASHBOARD_PORT
 
   depends_on:
