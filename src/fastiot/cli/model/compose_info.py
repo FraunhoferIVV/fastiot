@@ -3,7 +3,7 @@ from typing import List
 from pydantic.main import BaseModel
 
 
-class InfrastructureServiceComposeInfo(BaseModel):
+class ServiceComposeInfo(BaseModel):
     name: str
     image: str
     environment: List[str]

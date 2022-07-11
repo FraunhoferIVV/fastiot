@@ -97,6 +97,13 @@ class ProjectConfig(BaseModel):
                                        name, DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
 
+    def get_service_by_name(self, name: str) -> Service:
+        """ Get a configured service from the project by name """
+        for service in self.services:
+            if service.name == name:
+                return service
+        raise ValueError(f"Service {name} not found in project services!")
+
     def get_all_service_names(self) -> List[str]:
         """ Returns a list of all configured services """
         if self.services:

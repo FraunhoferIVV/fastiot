@@ -44,6 +44,7 @@ class ServiceConfig(BaseModel):
 
     @property
     def full_image_name(self) -> str:
+        # TODO: Check case if local docker registry is set somewhere else (CLI, env var)
         return f"{self.docker_registry_image_prefix}{self.image}:{self.tag}"
 
 

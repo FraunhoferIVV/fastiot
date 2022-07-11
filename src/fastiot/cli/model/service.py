@@ -1,6 +1,6 @@
 """ data model for external services """
 import os
-from typing import Dict, Union, Optional, List
+from typing import Optional, List
 
 from pydantic import BaseModel
 

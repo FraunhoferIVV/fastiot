@@ -17,7 +17,7 @@ class Port(BaseModel):
     A port entry represents one port used by the service which should be mounted outside the container.
     """
 
-    location: int
+    port_nr: int
     """
     The default port location.
     """
@@ -175,7 +175,7 @@ class ServiceManifest(BaseModel):
         return manifest
 
     @classmethod
-    def from_docker_image(cls, docker_image_name: str) -> "ServiceManifest":
+    def from_docker_image(cls, docker_image_name: str, pull_always: bool = False) -> "ServiceManifest":
         # The manifest file is always located inside the container and has the name '/opt/fastiot/manifest.yaml'.
         # We have to mount a volume and copy the file into the volume. If we mounted a file directly, we sometimes get
         # errors overwriting the file from inside the container. To avoid trouble, we mount a directory.
@@ -184,6 +184,12 @@ class ServiceManifest(BaseModel):
         dangerous_chars = [' ', ';', '&', '<', '>', '|']
         if True in [char in dangerous_chars for char in docker_image_name]:
             raise ValueError(f"Image name {docker_image_name} seems to be invalid. Aborting action.")
+
+        if pull_always:
+            cmd = f"docker pull {docker_image_name}"
+            ret = os.system(shlex_quote(cmd))
+            if ret != 0:
+                raise OSError(f"Could not pull image {docker_image_name} from registry.")
 
         with tempfile.TemporaryDirectory() as tempdir:
             tempfile_name = f"{tempdir}/manifest.yaml"
