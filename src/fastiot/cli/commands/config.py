@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 import typer
 
@@ -64,13 +64,13 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
         deployment_config = project_config.deployment_by_name(name=deployment_name)
 
         services = _create_fastiot_services_compose_infos(deployment_config, docker_registry, tag, pull_always)
-        infrastructure_services = _create_infrastructure_service_compose_infos(deployment_config=deployment_config)
+        infrastructure_services, fastiot_env = _create_infrastructure_service_compose_infos(deployment_config=deployment_config)
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
             docker_compose_file.write(docker_compose_template.render(
                 docker_net_name=net,
-                environment_for_docker_compose_file=[],
+                environment_for_docker_compose_file=fastiot_env,
                 infrastructure_services=services + infrastructure_services
             ))
 
@@ -87,7 +87,6 @@ def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
     else:
         deployment_names = project_config.deployment_names
     return deployment_names
-
 
 
 def _create_fastiot_services_compose_infos(deployment_config: DeploymentConfig,
@@ -151,6 +150,7 @@ def _create_ports(manifest: ServiceManifest) -> List[str]:
         ports.append(f"{external_port}:{port.port_nr}")
     return ports
 
+
 def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], List[str]]:
     volumes = []
     env = []
@@ -160,8 +160,9 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], List[str]]:
 
     return volumes, env
 
+
 def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig
-                                                 ) -> List[ServiceComposeInfo]:
+                                                 ) -> Tuple[List[ServiceComposeInfo], Dict[str, str]]:
     services_map = get_services_list()
     result = []
     for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
@@ -173,17 +174,27 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             # External services should be skipped
             continue
 
-        environment: List[str] = []
+        environment: Dict[str, str] = {}
+        fastiot_environment: Dict[str, str] = {}
         for env_var in service.environment:
-            environment.append(f'{env_var.name}="{env_var.default}"')
+            if env_var.env_var:
+                value = os.environ.get(env_var.env_var, env_var.default)
+                fastiot_environment[env_var.env_var] = value
+            else:
+                value = env_var.default
+            environment[env_var.name] = value
+
 
         ports: List[str] = []
         for port in service.ports:
-            ports.append(f'{port.default_port_mount}:{port.container_port}')
+            external_port = os.environ.get(port.env_var, str(port.default_port_mount))
+            fastiot_environment[port.env_var] = str(port.container_port)
+            environment[port.]
+            ports.append(f'{external_port}:{port.container_port}')
 
         volumes: List[str] = []
         for volume in service.volumes:
-            ports.append(f'{volume.default_volume_mount}:{volume.container_volume}')
+            volumes.append(f'{volume.default_volume_mount}:{volume.container_volume}')
 
         result.append(ServiceComposeInfo(
             name=service.name,
@@ -192,4 +203,4 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             ports=ports,
             volumes=volumes
         ))
-    return result
+    return result, fastiot_environment

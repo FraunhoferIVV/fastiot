@@ -21,10 +21,13 @@ services:
 {% for infrastructure_service in infrastructure_services %}
   {{ infrastructure_service.name }}:
     image: "{{ infrastructure_service.image }}"
-{% if infrastructure_service.environment|length > 0 %}
+{% if infrastructure_service.environment|length > 0 or environment_for_docker_compose_file|length > 0 %}
     environment:
+{% if environment_for_docker_compose_file|length > 0 %}
+      <<: *env_var
+{% endif %}
 {% for item in infrastructure_service.environment %}
-      - "{{ item }}"
+      {{item}}: "{{infrastructure_service.environment[item]}}"
 {% endfor %}
 {% endif %}
 {% if infrastructure_service.ports|length > 0 %}
