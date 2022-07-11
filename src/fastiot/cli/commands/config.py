@@ -12,6 +12,7 @@ from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
+from fastiot.env import FASTIOT_CONFIG_DIR
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -102,7 +103,7 @@ def _create_fastiot_services_compose_infos(deployment_config: DeploymentConfig,
         manifest = _get_service_manifest(name, image_name=full_image_name, pull_always=pull_always)
 
         volumes, environment = _create_volumes(manifest)
-        environment += [f"{k}={v}" for k, v in service_config.environment]
+        environment = {**environment, **service_config.environment}
 
         result.append(ServiceComposeInfo(name=name,
                                          image=full_image_name,
@@ -151,12 +152,16 @@ def _create_ports(manifest: ServiceManifest) -> List[str]:
     return ports
 
 
-def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], List[str]]:
+def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str]]:
     volumes = []
-    env = []
+    env = {}
     for volume in manifest.volumes.values():
         volumes.append(f"{volume.location}:{volume.location}")
-        env.append(f"{volume.env_variable}={volume.location}")
+        env[volume.env_variable] = volume.location
+
+    if manifest.mount_config_dir:
+        volumes.append(f"./config:/etc/fastiot")
+        env[FASTIOT_CONFIG_DIR] = "/etc/fastiot"
 
     return volumes, env
 
@@ -165,6 +170,8 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
                                                  ) -> Tuple[List[ServiceComposeInfo], Dict[str, str]]:
     services_map = get_services_list()
     result = []
+    environment: Dict[str, str] = {}
+    fastiot_environment: Dict[str, str] = {}
     for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
         if name not in services_map:
             raise RuntimeError(f"Service with name '{name}' was not found in service list: {', '. join(services_map)}")
@@ -174,8 +181,6 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             # External services should be skipped
             continue
 
-        environment: Dict[str, str] = {}
-        fastiot_environment: Dict[str, str] = {}
         for env_var in service.environment:
             if env_var.env_var:
                 value = os.environ.get(env_var.env_var, env_var.default)
@@ -189,7 +194,6 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
         for port in service.ports:
             external_port = os.environ.get(port.env_var, str(port.default_port_mount))
             fastiot_environment[port.env_var] = str(port.container_port)
-            environment[port.]
             ports.append(f'{external_port}:{port.container_port}')
 
         volumes: List[str] = []
