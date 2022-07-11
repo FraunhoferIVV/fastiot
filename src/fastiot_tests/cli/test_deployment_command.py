@@ -7,7 +7,6 @@ from typer.testing import CliRunner
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_FILE, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app
-from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli.test_build_command import _prepare_env
 
 DEPLOYMENT_EXAMPLE = """

@@ -7,7 +7,7 @@ from fastiot.testlib.cli import init_default_context
 from fastiot_tests.cli import service_test
 
 
-class TestServiceImports(unittest.TestCase):
+class TestInfrastructureServiceImports(unittest.TestCase):
 
     def setUp(self):
         init_default_context()
