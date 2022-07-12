@@ -19,8 +19,8 @@ def get_services_list() -> Dict[str, InfrastructureService]:
     return {s.name: s for s in services}
 
 
-def set_external_service_port_environment(offset: int = 1024, random: bool = False,
-                                          services: Optional[List[Union[str, InfrastructureService]]] = None) -> \
+def set_infrastructure_service_port_environment(offset: int = 1024, random: bool = False,
+                                                services: Optional[List[Union[str, InfrastructureService]]] = None) -> \
         Dict[str, int]:
     """
     Sets up the local environment with environment variables for all ports.
@@ -34,19 +34,20 @@ def set_external_service_port_environment(offset: int = 1024, random: bool = Fal
     """
 
     open_ports = {}
-
-    for service_nr, service in enumerate(get_services_list().values()):
+    port_counter = 0
+    for service in get_services_list().values():
 
         if services is not None and service.name not in services and service in services:
             continue
 
         for port in service.ports:
             if not random:
-                os.environ[port.env_var] = str(offset + service_nr)
+                os.environ[port.env_var] = str(offset + port_counter)
+                port_counter += 1
             else:
                 with socket() as temp_socket:
                     temp_socket.bind(('', 0))
-                    os.environ[port.env_var] = temp_socket.getsockname()[1]
+                    os.environ[port.env_var] = str(temp_socket.getsockname()[1])
 
             open_ports[port.env_var] = int(os.environ.get(port.env_var))
 

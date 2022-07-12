@@ -7,7 +7,7 @@ from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, FASTIOT_NO_PORT_MOUNTS, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.infrastructure_service_fn import get_services_list
+from fastiot.cli.infrastructure_service_fn import get_services_list, set_infrastructure_service_port_environment
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
 from fastiot.cli.model.context import get_default_context
@@ -32,6 +32,16 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                             help="If given, it will always use 'docker pull' command to pull images "
                                                  "from specified docker registries before reading manifest.yaml "
                                                  "files."),
+           test_deployment_only: bool = typer.Option(False, help="Create only the configuration for the integration "
+                                                                 "test deployment."),
+           service_port_offset: Optional[int] = typer.Option(None, help="Set this to create a docker-compose file with "
+                                                                        "custom ports for infrastructure services. "
+                                                                        "Especially when running multiple deployments "
+                                                                        "(e.g. on a CI runner) this comes handy. The "
+                                                                        "first service will have the selected port, "
+                                                                        "every following service one port number "
+                                                                        "higher.\n You may set this to -1 to get "
+                                                                        "random, available ports instead."),
            no_port_mounts: bool = typer.Option(False, '--no-port-mounts',
                                                help="If true, it will skip mounts for infrastructure services.",
                                                envvar=FASTIOT_NO_PORT_MOUNTS),
@@ -51,6 +61,15 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     the images locally.
     """
     project_config = get_default_context().project_config
+
+    if test_deployment_only:
+        deployments = project_config.integration_test_deployment
+
+    if service_port_offset is not None:
+        if service_port_offset == -1:
+            set_infrastructure_service_port_environment(random=True)
+        else:
+            set_infrastructure_service_port_environment(offset=service_port_offset)
 
     deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
 
