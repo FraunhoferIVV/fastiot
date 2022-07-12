@@ -18,29 +18,32 @@ x-logging: &logging_var
       max-file: "10"
 
 services:
-{% for infrastructure_service in infrastructure_services %}
-  {{ infrastructure_service.name }}:
-    image: "{{ infrastructure_service.image }}"
-{% if infrastructure_service.environment|length > 0 or environment_for_docker_compose_file|length > 0 %}
+{% for service in services %}
+  {{ service.name }}:
+    image: "{{ service.image }}"
+{% if service.environment|length > 0 or environment_for_docker_compose_file|length > 0 %}
     environment:
 {% if environment_for_docker_compose_file|length > 0 %}
       <<: *env_var
 {% endif %}
-{% for item in infrastructure_service.environment %}
-      {{item}}: "{{infrastructure_service.environment[item]}}"
+{% for item in service.environment %}
+      {{item}}: "{{service.environment[item]}}"
 {% endfor %}
 {% endif %}
-{% if infrastructure_service.ports|length > 0 %}
+{% if service.ports|length > 0 %}
     ports:
-{% for item in infrastructure_service.ports %}
+{% for item in service.ports %}
       - "{{ item }}"
 {% endfor %}
 {% endif %}
-{% if infrastructure_service.volumes|length > 0 %}
+{% if service.volumes|length > 0 %}
     volumes:
-{% for item in infrastructure_service.volumes %}
+{% for item in service.volumes %}
       - "{{ item }}"
 {% endfor %}
+{% if service.privileged %}
+    privileged: true
+{% endif %}
 {% endif %}
     networks:
       - "{{ docker_net_name }}"

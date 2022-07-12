@@ -72,7 +72,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
             docker_compose_file.write(docker_compose_template.render(
                 docker_net_name=net,
                 environment_for_docker_compose_file=fastiot_env,
-                infrastructure_services=services + infrastructure_services
+                services=services + infrastructure_services
             ))
 
 
@@ -109,7 +109,8 @@ def _create_fastiot_services_compose_infos(deployment_config: DeploymentConfig,
                                          image=full_image_name,
                                          environment=environment,
                                          ports=_create_ports(manifest),
-                                         volumes=volumes))
+                                         volumes=volumes,
+                                         privileged=manifest.privileged))
 
     return result
 
@@ -146,9 +147,12 @@ def _get_service_manifest(service_name: str, image_name: str, pull_always: bool)
 
 def _create_ports(manifest: ServiceManifest) -> List[str]:
     ports = []
+    env = {}
     for port in manifest.ports.values():
         external_port = int(os.environ.get(port.env_variable, str(port.port_nr)))
         ports.append(f"{external_port}:{port.port_nr}")
+        env[port.env_variable] = str(port.port_nr)
+
     return ports
 
 
@@ -188,7 +192,6 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             else:
                 value = env_var.default
             environment[env_var.name] = value
-
 
         ports: List[str] = []
         for port in service.ports:
