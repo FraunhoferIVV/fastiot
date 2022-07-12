@@ -63,7 +63,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     project_config = get_default_context().project_config
 
     if test_deployment_only:
-        deployments = project_config.integration_test_deployment
+        deployments = [project_config.integration_test_deployment]
 
     if service_port_offset is not None:
         if service_port_offset == -1:
