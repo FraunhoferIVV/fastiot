@@ -43,12 +43,14 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                                                         "every following service one port number "
                                                                         "higher.\n You may set this to -1 to get "
                                                                         "random, available ports instead."),
-           no_env_var_overrides: bool = typer.Option(False, '--no-env-var',
-                                                     help="Per default, it will override environment variables for "
-                                                          "services with current process environment variables. "
-                                                          "Using this flag this behavior can be disabled. Environment "
-                                                          "variables configured on modules level will never be "
-                                                          "overridden.")):
+           generated_py_with_internal_hostnames: Optional[bool] = typer.Option(False,
+                                                                               help="This is especially for the CI "
+                                                                                    "runner. It will create the "
+                                                                                    "generated.py to set up env vars "
+                                                                                    "for tests with docker-internal "
+                                                                                    "hostnames, e.g. nats for the "
+                                                                                    "broker.")
+           ):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
@@ -98,7 +100,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
 
         services = _create_fastiot_services_compose_infos(deployment_config, docker_registry, tag, pull_always)
         infrastructure_services, fastiot_env, tests_env = _create_infrastructure_service_compose_infos(
-            deployment_config=deployment_config)
+            deployment_config=deployment_config,
+            generated_py_with_internal_hostnames=generated_py_with_internal_hostnames)
 
         deployment_source_dir = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
         shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
@@ -219,7 +222,8 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str
     return volumes, env
 
 
-def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig
+def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig,
+generated_py_with_internal_hostnames: bool,
                                                  ) -> Tuple[List[ServiceComposeInfo], Dict[str, str], Dict[str, str]]:
     services_map = get_services_list()
     result = []
@@ -244,14 +248,20 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             else:
                 value = env_var.default
             service_environment[env_var.name] = value
-        tests_environment[service.host_name_env_var] = 'localhost'
+        if generated_py_with_internal_hostnames:
+            tests_environment[service.host_name_env_var] = name
+        else:
+            tests_environment[service.host_name_env_var] = 'localhost'
 
         ports: List[str] = []
         for port in service.ports:
             external_port = os.environ.get(port.env_var, str(port.default_port_mount))
             fastiot_environment[port.env_var] = str(port.container_port)
-            tests_environment[port.env_var] = str(external_port)
             ports.append(f'{external_port}:{port.container_port}')
+            if generated_py_with_internal_hostnames:
+                tests_environment[port.env_var] = str(port.container_port)
+            else:
+                tests_environment[port.env_var] = str(external_port)
 
         volumes: List[str] = []
         for volume in service.volumes:
