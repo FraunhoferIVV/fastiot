@@ -3,8 +3,6 @@ import tempfile
 import unittest
 from glob import glob
 
-import compose as compose
-import docker as docker
 from typer.testing import CliRunner
 
 from fastiot.cli import find_deployments
