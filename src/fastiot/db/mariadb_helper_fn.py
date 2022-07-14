@@ -1,8 +1,7 @@
 import logging
 import sys
 import time
-
-from typing import List, Tuple, Optional
+from typing import Optional
 
 from fastiot.env.env import env_mariadb
 from fastiot.exceptions.exceptions import ServiceError
@@ -36,9 +35,8 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
                       "to make use of this helper.")
         sys.exit(5)
 
-    sleep_time = 0.2
-    num_tries = 300 / sleep_time
-    while num_tries > 0:
+
+    for _ in range(10):
         try:
             db_connection = pymysql.connect(
                 host=host,
@@ -49,7 +47,7 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
                 cursorclass=pymysql.cursors.DictCursor
             )
             return db_connection
-        except pymysql.err.OperationalError:
-            time.sleep(sleep_time)
-        num_tries -= 1
-    raise ServiceError("Could not connect to MariaDB")
+        except pymysql.err.OperationalError as exception:
+            logging.error("Error connecting to MariaDB: %s", str(exception))
+            time.sleep(1)
+    raise ServiceError("Giving up trials to connect to MariaDB")

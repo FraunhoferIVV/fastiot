@@ -1,12 +1,13 @@
 import os
+import shutil
 from typing import Optional, List, Tuple, Dict
 
 import typer
 
 from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
-    FASTIOT_NET, FASTIOT_NO_PORT_MOUNTS, DEPLOYMENTS_CONFIG_DIR
-from fastiot.cli.helper_fn import get_jinja_env
+    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.helper_fn import get_jinja_env, parse_env_file
 from fastiot.cli.infrastructure_service_fn import get_services_list, set_infrastructure_service_port_environment
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
@@ -34,7 +35,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                                  "files."),
            test_deployment_only: bool = typer.Option(False, help="Create only the configuration for the integration "
                                                                  "test deployment."),
-           service_port_offset: Optional[int] = typer.Option(None, help="Set this to create a docker-compose file with "
+           service_port_offset: Optional[int] = typer.Option(0, help="Set this to create a docker-compose file with "
                                                                         "custom ports for infrastructure services. "
                                                                         "Especially when running multiple deployments "
                                                                         "(e.g. on a CI runner) this comes handy. The "
@@ -42,9 +43,6 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                                                         "every following service one port number "
                                                                         "higher.\n You may set this to -1 to get "
                                                                         "random, available ports instead."),
-           no_port_mounts: bool = typer.Option(False, '--no-port-mounts',
-                                               help="If true, it will skip mounts for infrastructure services.",
-                                               envvar=FASTIOT_NO_PORT_MOUNTS),
            no_env_var_overrides: bool = typer.Option(False, '--no-env-var',
                                                      help="Per default, it will override environment variables for "
                                                           "services with current process environment variables. "
@@ -60,39 +58,70 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     build one or more deployments you have to be logged in and connected to the corresponding docker registries or build
     the images locally.
     """
+
     project_config = get_default_context().project_config
 
     if test_deployment_only:
         deployments = [project_config.integration_test_deployment]
 
-    if service_port_offset is not None:
-        if service_port_offset == -1:
-            set_infrastructure_service_port_environment(random=True)
-        else:
-            set_infrastructure_service_port_environment(offset=service_port_offset)
-
     deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
+
+    # This will set environment variables for externally opened ports, usually to be used for integration tests but also
+    # to access the services externally. When creating the compose infos for infrastructure services the env vars will
+    # be used, so no further access to the settings is needed.
+    if service_port_offset == -1:
+        set_infrastructure_service_port_environment(random=True)
+    else:
+        set_infrastructure_service_port_environment(offset=service_port_offset)
+
+    original_os_env = os.environ.copy()
 
     for deployment_name in deployment_names:
         deployment_dir = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
                                       deployment_name)
+        os.environ = original_os_env.copy()
+        shutil.rmtree(deployment_dir, ignore_errors=True)
         try:
             os.makedirs(deployment_dir)
         except FileExistsError:
             pass  # No need to create directory twice
 
+        env_filename = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name, '.env')
+        if os.path.isfile(env_filename):
+            env_file_env = parse_env_file(env_filename)
+            for name, value in env_file_env.items():
+                os.environ[name] = str(value)
+        else:
+            env_file_env = {}
+
         deployment_config = project_config.deployment_by_name(name=deployment_name)
 
         services = _create_fastiot_services_compose_infos(deployment_config, docker_registry, tag, pull_always)
-        infrastructure_services, fastiot_env = _create_infrastructure_service_compose_infos(deployment_config=deployment_config)
+        infrastructure_services, fastiot_env, tests_env = _create_infrastructure_service_compose_infos(
+            deployment_config=deployment_config)
+
+        deployment_source_dir = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
+        shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
+                        ignore=lambda _, __ : ['deployment.yaml', 'dev-overwrite.env'])
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
             docker_compose_file.write(docker_compose_template.render(
                 docker_net_name=net,
                 environment_for_docker_compose_file=fastiot_env,
-                services=services + infrastructure_services
+                services=services + infrastructure_services,
+                env_file=os.path.isfile(env_filename)
             ))
+
+        if deployment_name == project_config.integration_test_deployment:
+            environment = {**env_file_env,**fastiot_env, **tests_env}
+            environment = {k: environment[k] for k in sorted(environment.keys())}
+            with open(os.path.join(project_config.project_root_dir, "src",
+                                   project_config.test_package, 'generated.py'), "w") as generated_file:
+                generated_template = get_jinja_env().get_template('test_env.py.jinja')
+                generated_file.write(generated_template.render(
+                    env_vars=str(environment).replace(",", ",\n               "))
+                )
 
 
 def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
@@ -116,18 +145,19 @@ def _create_fastiot_services_compose_infos(deployment_config: DeploymentConfig,
     result = []
     for name, service_config in deployment_config.services.items():
         if service_config is None:
-            service_config = ServiceConfig(image = f"{project_config.project_namespace}/{name}")
+            service_config = ServiceConfig(image=f"{project_config.project_namespace}/{name}")
 
         full_image_name = _get_full_image_name(deployment_config, docker_registry, service_config, tag)
         manifest = _get_service_manifest(name, image_name=full_image_name, pull_always=pull_always)
 
-        volumes, environment = _create_volumes(manifest)
-        environment = {**environment, **service_config.environment}
+        volumes, volumes_env = _create_volumes(manifest)
+        ports, ports_env = _create_ports(manifest)
+        environment = {**volumes_env, **ports_env, **service_config.environment}
 
         result.append(ServiceComposeInfo(name=name,
                                          image=full_image_name,
                                          environment=environment,
-                                         ports=_create_ports(manifest),
+                                         ports=ports,
                                          volumes=volumes,
                                          privileged=manifest.privileged))
 
@@ -164,7 +194,7 @@ def _get_service_manifest(service_name: str, image_name: str, pull_always: bool)
     return ServiceManifest.from_docker_image(image_name, pull_always=pull_always)
 
 
-def _create_ports(manifest: ServiceManifest) -> List[str]:
+def _create_ports(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str]]:
     ports = []
     env = {}
     for port in manifest.ports.values():
@@ -172,7 +202,7 @@ def _create_ports(manifest: ServiceManifest) -> List[str]:
         ports.append(f"{external_port}:{port.port_nr}")
         env[port.env_variable] = str(port.port_nr)
 
-    return ports
+    return ports, env
 
 
 def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str]]:
@@ -190,12 +220,14 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str
 
 
 def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig
-                                                 ) -> Tuple[List[ServiceComposeInfo], Dict[str, str]]:
+                                                 ) -> Tuple[List[ServiceComposeInfo], Dict[str, str], Dict[str, str]]:
     services_map = get_services_list()
     result = []
-    environment: Dict[str, str] = {}
+
     fastiot_environment: Dict[str, str] = {}
+    tests_environment: Dict[str, str] = {}
     for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
+
         if name not in services_map:
             raise RuntimeError(f"Service with name '{name}' was not found in service list: {', '. join(services_map)}")
         service = services_map[name]
@@ -204,18 +236,21 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             # External services should be skipped
             continue
 
+        service_environment: Dict[str, str] = {}
         for env_var in service.environment:
             if env_var.env_var:
                 value = os.environ.get(env_var.env_var, env_var.default)
                 fastiot_environment[env_var.env_var] = value
             else:
                 value = env_var.default
-            environment[env_var.name] = value
+            service_environment[env_var.name] = value
+        tests_environment[service.host_name_env_var] = 'localhost'
 
         ports: List[str] = []
         for port in service.ports:
             external_port = os.environ.get(port.env_var, str(port.default_port_mount))
             fastiot_environment[port.env_var] = str(port.container_port)
+            tests_environment[port.env_var] = str(external_port)
             ports.append(f'{external_port}:{port.container_port}')
 
         volumes: List[str] = []
@@ -225,8 +260,8 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
         result.append(ServiceComposeInfo(
             name=service.name,
             image=service.image,
-            environment=environment,
+            environment=service_environment,
             ports=ports,
             volumes=volumes
         ))
-    return result, fastiot_environment
+    return result, fastiot_environment, tests_environment

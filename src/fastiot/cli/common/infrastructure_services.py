@@ -4,12 +4,14 @@ from fastiot.cli.model import InfrastructureService
 from fastiot.cli.model.service import InfrastructureServicePort, InfrastructureServiceEnvVar, \
     InfrastructureServiceVolume
 from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, \
-    FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME
+    FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
+    FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST
 
 
 class NatsService(InfrastructureService):
     name: str = 'nats'
     image: str = 'nats:latest'
+    host_name_env_var = FASTIOT_NATS_HOST
     ports: List[InfrastructureServicePort] = [
         InfrastructureServicePort(
             container_port=4222,
@@ -43,6 +45,7 @@ class MariaDBService(InfrastructureService):
             default='yes'
         )
     ]
+    host_name_env_var = FASTIOT_MARIA_DB_HOST
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/mysql',
@@ -54,7 +57,7 @@ class MariaDBService(InfrastructureService):
 
 class MongoDBService(InfrastructureService):
     name: str = 'mongodb'
-    image: str = 'mongodb:4.4-bionic'
+    image: str = 'mongo:5.0'
     ports: List[InfrastructureServicePort] = [
         InfrastructureServicePort(
             container_port=27017,
@@ -74,6 +77,7 @@ class MongoDBService(InfrastructureService):
             env_var=FASTIOT_MONGO_DB_PASSWORD
         )
     ]
+    host_name_env_var = FASTIOT_MONGO_DB_HOST
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/data/db',

@@ -6,6 +6,7 @@ services:
 
 infrastructure-services:
   nats:
+  mongodb:
 
 deployment-target:
   hosts:

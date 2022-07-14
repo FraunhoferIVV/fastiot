@@ -30,6 +30,10 @@ services:
       {{item}}: "{{service.environment[item]}}"
 {% endfor %}
 {% endif %}
+{% if env_file %}
+    env_file:
+      - .env
+{% endif %}
 {% if service.ports|length > 0 %}
     ports:
 {% for item in service.ports %}

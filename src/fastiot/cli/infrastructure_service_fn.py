@@ -19,13 +19,14 @@ def get_services_list() -> Dict[str, InfrastructureService]:
     return {s.name: s for s in services}
 
 
-def set_infrastructure_service_port_environment(offset: int = 1024, random: bool = False,
+def set_infrastructure_service_port_environment(offset: int = 0, random: bool = False,
                                                 services: Optional[List[Union[str, InfrastructureService]]] = None) -> \
         Dict[str, int]:
     """
     Sets up the local environment with environment variables for all ports.
 
-    :param offset: Port number for the first service, will be monotonically increasing for all further services.
+    :param offset: Port number for the first service, will be monotonically increasing for all further services. Set to
+                   ``0`` to not use any alternative ports.
     :param random: Set to random to find a free service for each port. On very busy machines this may to reuse of ports,
                    if another service takes the port betweening determining its free status and acutally starting the
                    service.
@@ -41,13 +42,15 @@ def set_infrastructure_service_port_environment(offset: int = 1024, random: bool
             continue
 
         for port in service.ports:
-            if not random:
+            if offset > 0:
                 os.environ[port.env_var] = str(offset + port_counter)
                 port_counter += 1
-            else:
+            elif random:
                 with socket() as temp_socket:
                     temp_socket.bind(('', 0))
                     os.environ[port.env_var] = str(temp_socket.getsockname()[1])
+            else:
+                os.environ[port.env_var] = str(port.default_port_mount)
 
             open_ports[port.env_var] = int(os.environ.get(port.env_var))
 

@@ -120,7 +120,7 @@ class MongoDBEnv:
 
         Use to get/set the mongodb auth source, which is a database name which is needed for authentication.
         """
-        return os.getenv(FASTIOT_MONGO_DB_AUTH_SOURCE)
+        return os.getenv(FASTIOT_MONGO_DB_AUTH_SOURCE, 'admin')
 
     @property
     def name(self) -> str:
@@ -171,7 +171,7 @@ class MariaDBEnv:
 
         Use to get/set the mariadb user.
         """
-        return os.getenv(FASTIOT_MARIA_DB_USER)
+        return os.getenv(FASTIOT_MARIA_DB_USER, 'root')
 
     @property
     def password(self) -> Optional[str]:

@@ -74,5 +74,6 @@ class InfrastructureService(BaseModel):
     image: str
     """ Name of the image """
     environment: List[InfrastructureServiceEnvVar] = []
+    host_name_env_var: str = ""
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
