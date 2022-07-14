@@ -45,9 +45,15 @@ services:
 {% for item in service.volumes %}
       - "{{ item }}"
 {% endfor %}
+{% endif %}
+{% if service.tmpfs|length > 0 %}
+    tmpfs:
+{% for item in service.tmpfs %}
+      - "{{ item }}"
+{% endfor %}
+{% endif %}
 {% if service.privileged %}
     privileged: true
-{% endif %}
 {% endif %}
     networks:
       - "{{ docker_net_name }}"

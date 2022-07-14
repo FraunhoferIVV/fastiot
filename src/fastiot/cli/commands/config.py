@@ -101,7 +101,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
         services = _create_fastiot_services_compose_infos(deployment_config, docker_registry, tag, pull_always)
         infrastructure_services, fastiot_env, tests_env = _create_infrastructure_service_compose_infos(
             deployment_config=deployment_config,
-            generated_py_with_internal_hostnames=generated_py_with_internal_hostnames)
+            generated_py_with_internal_hostnames=generated_py_with_internal_hostnames,
+            is_test_deployment=deployment_name == project_config.integration_test_deployment)
 
         deployment_source_dir = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
         shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
@@ -223,7 +224,8 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str
 
 
 def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig,
-generated_py_with_internal_hostnames: bool,
+                                                 generated_py_with_internal_hostnames: bool,
+                                                 is_test_deployment: bool
                                                  ) -> Tuple[List[ServiceComposeInfo], Dict[str, str], Dict[str, str]]:
     services_map = get_services_list()
     result = []
@@ -263,15 +265,21 @@ generated_py_with_internal_hostnames: bool,
             else:
                 tests_environment[port.env_var] = str(external_port)
 
-        volumes: List[str] = []
-        for volume in service.volumes:
-            volumes.append(f'{volume.default_volume_mount}:{volume.container_volume}')
+
+        if not is_test_deployment:
+            volumes = [f'{v.default_volume_mount}:{v.container_volume}' for v in service.volumes]
+            tmpfs: List[str] = []
+        else:
+            volumes = []
+            tmpfs = [v.container_volume for v in service.volumes]
+
 
         result.append(ServiceComposeInfo(
             name=service.name,
             image=service.image,
             environment=service_environment,
             ports=ports,
-            volumes=volumes
+            volumes=volumes,
+            tmpfs=tmpfs
         ))
     return result, fastiot_environment, tests_environment
