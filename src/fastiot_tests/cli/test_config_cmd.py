@@ -2,17 +2,34 @@ import os
 import tempfile
 import unittest
 from glob import glob
+from typing import List
 
 from typer.testing import CliRunner
 
 from fastiot.cli import find_deployments
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.infrastructure_service_fn import get_services_list
-from fastiot.cli.model import ProjectConfig, Service
+from fastiot.cli.model import ProjectConfig, Service, InfrastructureService
 from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.service import InfrastructureServicePort
 from fastiot.cli.typer_app import app, _import_infrastructure_services
-from fastiot.env import FASTIOT_NATS_PORT
 from fastiot.helpers.read_yaml import read_config
+
+FASTIOT_AAASERVICE_PORT = 'FASTIOT_AAASERVICE_PORT'
+FASTIOT_AAASERVICE_HOST = 'FASTIOT_AAASERVICE_HOST'
+
+
+class AAAService(InfrastructureService):
+    name: str = 'aaa'
+    image: str = 'hello-world:latest'
+    host_name_env_var = FASTIOT_AAASERVICE_HOST
+    ports: List[InfrastructureServicePort] = [
+        InfrastructureServicePort(
+            container_port=5222,
+            default_port_mount=5222,
+            env_var=FASTIOT_AAASERVICE_PORT
+        )
+    ]
 
 
 def _is_in_file(filename, search):
@@ -67,12 +84,12 @@ class TestConfigCommand(unittest.TestCase):
             docker_compose = self._parse_docker_compose(tempdir, 'integration_test')
 
             # No port changes
-            self.assertEqual('4222', docker_compose['x-env'][FASTIOT_NATS_PORT])
-            self.assertEqual('4222:4222', docker_compose['services']['nats']['ports'][0])
+            self.assertEqual('5222', docker_compose['x-env'][FASTIOT_AAASERVICE_PORT])
+            self.assertEqual('5222:5222', docker_compose['services']['aaa']['ports'][0])
 
             # Tmpfs instead of volume
-            #self.assertTrue('tmpfs' in docker_compose['services']['mongodb'])
-            #self.assertFalse('volumes' in docker_compose['services']['mongodb'])
+            # self.assertTrue('tmpfs' in docker_compose['services']['mongodb'])
+            # self.assertFalse('volumes' in docker_compose['services']['mongodb'])
 
     def test_create_deployment_with_port_change(self):
         """ Changing ports """
@@ -82,16 +99,16 @@ class TestConfigCommand(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
 
             docker_compose = self._parse_docker_compose(tempdir, 'integration_test')
-            self.assertEqual('4222', docker_compose['x-env'][FASTIOT_NATS_PORT])  # Config for internal stays
-            self.assertEqual('1000:4222', docker_compose['services']['nats']['ports'][0])  # External port changes
+            self.assertEqual('5222', docker_compose['x-env'][FASTIOT_AAASERVICE_PORT])  # Config for internal stays
+            self.assertEqual('1000:5222', docker_compose['services']['aaa']['ports'][0])  # External port changes
 
-            os.environ[FASTIOT_NATS_PORT] = '2000'
+            os.environ[FASTIOT_AAASERVICE_PORT] = '2000'
             self.runner.invoke(app, ['config', '--test-deployment-only', '--service-port-offset=1000'])
             docker_compose = self._parse_docker_compose(tempdir, 'integration_test')
-            self.assertEqual(docker_compose['x-env'][FASTIOT_NATS_PORT], '4222')  # Config for internal stays
+            self.assertEqual(docker_compose['x-env'][FASTIOT_AAASERVICE_PORT], '5222')  # Config for internal stays
             # External port changes to offset, not to environment variable
-            self.assertEqual('1000:4222', docker_compose['services']['nats']['ports'][0])
-            os.environ.pop(FASTIOT_NATS_PORT)
+            self.assertEqual('1000:5222', docker_compose['services']['aaa']['ports'][0])
+            os.environ.pop(FASTIOT_AAASERVICE_PORT)
 
     def test_dot_env_does_not_change_ports(self):
         """ If the user explicitly asks for new ports the .env should not be read """
@@ -101,26 +118,25 @@ class TestConfigCommand(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
 
             docker_compose = self._parse_docker_compose(tempdir, 'only_dot_env')
-            self.assertEqual('4222', docker_compose['x-env'][FASTIOT_NATS_PORT])  # Config for internal stays
+            self.assertEqual('5222', docker_compose['x-env'][FASTIOT_AAASERVICE_PORT])  # Config for internal stays
             # External port changes to offset, not to .env
-            self.assertEqual('1000:4222', docker_compose['services']['nats']['ports'][0])
+            self.assertEqual('1000:5222', docker_compose['services']['aaa']['ports'][0])
 
     def test_change_ports_with_env_vars(self):
         with tempfile.TemporaryDirectory() as tempdir:
             self._prepare_env(tempdir)
-            os.environ[FASTIOT_NATS_PORT] = '1000'
+            os.environ[FASTIOT_AAASERVICE_PORT] = '1000'
 
             result = self.runner.invoke(app, ['config', 'only_dot_env', 'per_service_env'])
             self.assertEqual(0, result.exit_code)
 
             docker_compose = self._parse_docker_compose(tempdir, 'per_service_env')
-            self.assertEqual('1000:4222', docker_compose['services']['nats']['ports'][0])
+            self.assertEqual('1000:5222', docker_compose['services']['aaa']['ports'][0])
 
             docker_compose = self._parse_docker_compose(tempdir, 'only_dot_env')
-            self.assertEqual('1000:4222', docker_compose['services']['nats']['ports'][0],
+            self.assertEqual('1000:5222', docker_compose['services']['aaa']['ports'][0],
                              "Should use the variable set env var and not the .env file")
-            os.environ.pop(FASTIOT_NATS_PORT)
-
+            os.environ.pop(FASTIOT_AAASERVICE_PORT)
 
     def test_change_ports_with_dot_env(self):
         with tempfile.TemporaryDirectory() as tempdir:
@@ -130,12 +146,13 @@ class TestConfigCommand(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
 
             docker_compose = self._parse_docker_compose(tempdir, 'per_service_env')
-            self.assertEqual('4222:4222', docker_compose['services']['nats']['ports'][0],
+            self.assertEqual('5222:5222', docker_compose['services']['aaa']['ports'][0],
                              "Use default port for nats")
 
             docker_compose = self._parse_docker_compose(tempdir, 'only_dot_env')
-            self.assertEqual('2000:4222', docker_compose['services']['nats']['ports'][0],
+            self.assertEqual('2000:5222', docker_compose['services']['aaa']['ports'][0],
                              "Should use the variable set .env var")
+
 
 if __name__ == '__main__':
     unittest.main()

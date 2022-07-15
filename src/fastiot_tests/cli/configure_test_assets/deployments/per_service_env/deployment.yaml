@@ -5,4 +5,4 @@ services:
       FASTIOT_DUMMY_VAR: 'ok'
 
 infrastructure-services:
-  nats:
+  aaa:

@@ -16,7 +16,8 @@ def get_services_list() -> Dict[str, InfrastructureService]:
     """
     service_classes = InfrastructureService.__subclasses__()
     services = [s() for s in service_classes]
-    return {s.name: s for s in services}
+    services =  {s.name: s for s in services}
+    return {k: services[k] for k in sorted(services.keys())}
 
 
 def set_infrastructure_service_port_environment(offset: int = 0, random: bool = False,

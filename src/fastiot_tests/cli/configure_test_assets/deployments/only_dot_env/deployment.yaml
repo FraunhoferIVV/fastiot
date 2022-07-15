@@ -3,4 +3,4 @@ services:
 
 
 infrastructure-services:
-  nats:
+  aaa:
