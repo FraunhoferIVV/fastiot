@@ -17,14 +17,14 @@ from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
 def deployment(deployment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
                                                                help="Select the environment to stop."),
                service_names: Optional[List[str]] = typer.Argument(default=None,
-                                                                    help="Optionally specify services to be stopped "
-                                                                         "from the environment. This will only stop "
-                                                                         "the services but not remove the containers."
-                                                                         "(docker-compose stop instead of down)"),
+                                                                   help="Optionally specify services to be stopped "
+                                                                        "from the environment. This will only stop "
+                                                                        "the services but not remove the containers."
+                                                                        "(docker-compose stop instead of down)"),
                project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
                stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
-                                                                         "test environment specified in the project. "
-                                                                         "Useful for the CI runner")
+                                                                               "test environment specified in the project. "
+                                                                               "Useful for the CI runner")
                ):
     """
     Stops up the selected environment.

@@ -4,6 +4,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
+from fastiot.cli.constants import MANIFEST_FILENAME
 from fastiot.cli.model import ServiceManifest
 
 
@@ -33,7 +34,7 @@ class Service(BaseModel):
 
             default_context = get_default_context()
             manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
-                                         self.package, self.name, 'manifest.yaml')
+                                         self.package, self.name, MANIFEST_FILENAME)
             self.manifest = ServiceManifest.from_yaml_file(manifest_path, check_service_name=check_service_name)
         return self.manifest
 

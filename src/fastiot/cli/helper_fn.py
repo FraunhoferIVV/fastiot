@@ -71,9 +71,9 @@ def find_services(package: Optional[str] = None,
         services.append(Service(name=service_name,
                                 package=package_name,
                                 cache=_default_cache(service=service_name, package=package_name,
-                                                           use_per_service_cache=use_per_service_cache),
+                                                     use_per_service_cache=use_per_service_cache),
                                 extra_caches=_default_extra_caches(service=service_name, package=package_name,
-                                                                         use_per_service_cache=use_per_service_cache)))
+                                                                   use_per_service_cache=use_per_service_cache)))
     return services
 
 

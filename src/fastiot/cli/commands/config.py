@@ -85,10 +85,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                       deployment_name)
         os.environ = original_os_env.copy()
         shutil.rmtree(deployment_dir, ignore_errors=True)
-        try:
-            os.makedirs(deployment_dir)
-        except FileExistsError:
-            pass  # No need to create directory twice
+        os.makedirs(deployment_dir, exist_ok=True)
 
         env_filename = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name, '.env')
         if os.path.isfile(env_filename):

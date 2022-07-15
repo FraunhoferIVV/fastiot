@@ -9,7 +9,7 @@ import yaml
 from pydantic.main import BaseModel
 
 from fastiot.cli.cli_logging import get_cli_logger
-from fastiot.cli.constants import DEFAULT_BASE_IMAGE
+from fastiot.cli.constants import DEFAULT_BASE_IMAGE, MANIFEST_FILENAME
 
 
 class Port(BaseModel):
@@ -192,8 +192,8 @@ class ServiceManifest(BaseModel):
                 raise OSError(f"Could not pull image {docker_image_name} from registry.")
 
         with tempfile.TemporaryDirectory() as tempdir:
-            tempfile_name = f"{tempdir}/manifest.yaml"
-            export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/manifest.yaml > {tempfile_name}"
+            tempfile_name = f"{tempdir}/{MANIFEST_FILENAME}"
+            export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME} > {tempfile_name}"
             get_cli_logger().info('Exporting manifest from docker image command: %s', export_cmd)
             ret = os.system(shlex_quote(export_cmd))
             if ret != 0:

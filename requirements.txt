@@ -4,4 +4,3 @@ nats-py>=2.1.0,<3
 PyYAML>=5,<7
 typer[all]>=0.4.1,<1
 Jinja2>=3.1.2,<4
-# nuitka is an optional dependency installed when actually needed. This will keep the container a little bit smaller
