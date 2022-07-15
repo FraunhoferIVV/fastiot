@@ -1,3 +1,6 @@
+services:
+  dummy_service:
+
+
 infrastructure-services:
   nats:
-  mongodb:

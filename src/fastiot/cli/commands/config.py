@@ -36,13 +36,13 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
            test_deployment_only: bool = typer.Option(False, help="Create only the configuration for the integration "
                                                                  "test deployment."),
            service_port_offset: Optional[int] = typer.Option(0, help="Set this to create a docker-compose file with "
-                                                                        "custom ports for infrastructure services. "
-                                                                        "Especially when running multiple deployments "
-                                                                        "(e.g. on a CI runner) this comes handy. The "
-                                                                        "first service will have the selected port, "
-                                                                        "every following service one port number "
-                                                                        "higher.\n You may set this to -1 to get "
-                                                                        "random, available ports instead."),
+                                                                     "custom ports for infrastructure services. "
+                                                                     "Especially when running multiple deployments "
+                                                                     "(e.g. on a CI runner) this comes handy. The "
+                                                                     "first service will have the selected port, "
+                                                                     "every following service one port number "
+                                                                     "higher.\n You may set this to -1 to get "
+                                                                     "random, available ports instead."),
            generated_py_with_internal_hostnames: Optional[bool] = typer.Option(False,
                                                                                help="This is especially for the CI "
                                                                                     "runner. It will create the "
@@ -72,9 +72,11 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     # to access the services externally. When creating the compose infos for infrastructure services the env vars will
     # be used, so no further access to the settings is needed.
     if service_port_offset == -1:
-        set_infrastructure_service_port_environment(random=True)
-    else:
-        set_infrastructure_service_port_environment(offset=service_port_offset)
+        infrastructure_ports = set_infrastructure_service_port_environment(random=True)
+    elif service_port_offset > 0:  # Use defined something
+        infrastructure_ports = set_infrastructure_service_port_environment(offset=service_port_offset)
+    else:  # No overwrites to be done
+        infrastructure_ports = {}
 
     original_os_env = os.environ.copy()
 
@@ -92,7 +94,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
         if os.path.isfile(env_filename):
             env_file_env = parse_env_file(env_filename)
             for name, value in env_file_env.items():
-                os.environ[name] = str(value)
+                if name not in infrastructure_ports and name not in os.environ:
+                    os.environ[name] = str(value)
         else:
             env_file_env = {}
 
@@ -106,7 +109,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
 
         deployment_source_dir = os.path.join(project_config.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
         shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
-                        ignore=lambda _, __ : ['deployment.yaml', 'dev-overwrite.env'])
+                        ignore=lambda _, __: ['deployment.yaml', 'dev-overwrite.env'])
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
@@ -118,7 +121,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
             ))
 
         if deployment_name == project_config.integration_test_deployment:
-            environment = {**env_file_env,**fastiot_env, **tests_env}
+            environment = {**env_file_env, **fastiot_env, **tests_env}
             environment = {k: environment[k] for k in sorted(environment.keys())}
             with open(os.path.join(project_config.project_root_dir, "src",
                                    project_config.test_package, 'generated.py'), "w") as generated_file:
@@ -235,7 +238,7 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
     for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
 
         if name not in services_map:
-            raise RuntimeError(f"Service with name '{name}' was not found in service list: {', '. join(services_map)}")
+            raise RuntimeError(f"Service with name '{name}' was not found in service list: {', '.join(services_map)}")
         service = services_map[name]
 
         if infrastructure_service_config.external is True:
@@ -265,14 +268,12 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
             else:
                 tests_environment[port.env_var] = str(external_port)
 
-
         if not is_test_deployment:
             volumes = [f'{v.default_volume_mount}:{v.container_volume}' for v in service.volumes]
             tmpfs: List[str] = []
         else:
             volumes = []
             tmpfs = [v.container_volume for v in service.volumes]
-
 
         result.append(ServiceComposeInfo(
             name=service.name,

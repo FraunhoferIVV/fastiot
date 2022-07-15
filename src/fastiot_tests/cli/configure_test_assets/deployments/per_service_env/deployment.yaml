@@ -1,0 +1,9 @@
+services:
+  dummy_service:
+    image: fastiot/dummy_service
+    environment:
+      FASTIOT_DUMMY_VAR: 'ok'
+
+infrastructure-services:
+  nats:
+  mongodb:

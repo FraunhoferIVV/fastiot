@@ -1,6 +1,13 @@
 fastiot_service:
   name: producer
 
+  ports:
+    some_port:
+      port_nr: 1234
+      env_variable: FASTIOT_SOME_PORT
+
+  privileged: True
+
   platforms:
     - amd64
     - arm64

@@ -10,13 +10,13 @@ from fastiot.cli.model import ServiceManifest
 class Service(BaseModel):
     name: str
     package: str
-    cache: str
+    cache: Optional[str] = ""
     """
     The name to use as the cache on the set docker cache registry. The tag will be appended automatically, please do not
     specify it.
     Example: mypackage-cache
     """
-    extra_caches: List[str]
+    extra_caches: Optional[List[str]] = []
     """
     A list of extra caches used to speed up building which will all be read-only. It is intended if you want to read
     from other caches or different tags. Each extra cache must match a cache name extended by ':' followed by the tag
