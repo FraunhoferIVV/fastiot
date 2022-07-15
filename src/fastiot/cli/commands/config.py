@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from typing import Optional, List, Tuple, Dict
@@ -64,6 +65,9 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     project_config = get_default_context().project_config
 
     if test_deployment_only:
+        if not project_config.integration_test_deployment:
+            logging.warning("No `integration_test_deployment` configured. Exiting configure.")
+            raise typer.Exit(0)
         deployments = [project_config.integration_test_deployment]
 
     deployment_names = _apply_checks_for_deployment_names(deployments=deployments)

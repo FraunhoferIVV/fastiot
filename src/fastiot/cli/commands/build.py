@@ -95,6 +95,9 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
     project_config = get_default_context().project_config
 
     if test_deployment_only:
+        if not project_config.integration_test_deployment:
+            logging.error("No `integration_test_deployment` configured. Stopping to build.")
+            raise typer.Exit(0)
         services = _find_test_deployment_services(project_config)
 
     _create_all_docker_files(project_config, build_mode=mode, services=services)

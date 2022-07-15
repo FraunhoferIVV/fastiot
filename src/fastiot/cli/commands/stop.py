@@ -33,6 +33,9 @@ def deployment(deployment_name: Optional[str] = typer.Argument(default=None, she
 
     if stop_test_deployment:
         deployment_name = project_config.integration_test_deployment
+        if not deployment_name:
+            logging.warning("No `integration_test_deployment` configured. Exiting.")
+            raise typer.Exit(0)
 
     if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --run-test-deployment!")

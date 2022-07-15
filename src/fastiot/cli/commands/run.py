@@ -117,6 +117,12 @@ def run_unittests(start_deployment: Optional[bool] = typer.Option(False,
 
 
 def _check_and_run_config_cmd(project_config):
+
+    if not project_config.integration_test_deployment:
+        logging.info("No test deployment configured, so no need to run configure for the deployment. "
+                     "Skipping the step")
+        return
+
     if not os.path.isfile(os.path.join(project_config.project_root_dir, 'src', project_config.test_package,
                                        'generated.py')):
         from fastiot.cli.commands.config import config  # pylint: disable=import-outside-toplevel
