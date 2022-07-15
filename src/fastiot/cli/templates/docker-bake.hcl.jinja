@@ -9,7 +9,7 @@ group "default" {
 {% for target in targets %}
 target "{{ target.manifest.name }}" {
     context = "."
-    dockerfile = "./build/Dockerfile.{{ target.manifest.name }}"
+    dockerfile = "./build/docker/Dockerfile.{{ target.manifest.name }}"
     tags = [
     {% for tag in tags %}
       "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}",
