@@ -8,7 +8,8 @@ from typing import List, Optional
 import typer
 from pydantic import BaseModel
 
-from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE
+from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
+    DOCKER_BUILD_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectConfig, ServiceManifest, CPUPlatform, Service
 from fastiot.cli.model.context import get_default_context
@@ -26,7 +27,7 @@ def _mode_callback(mode: str):
 
 
 def _services_completion() -> List[str]:
-    return [os.path.basename(os.path.dirname(m)) for m in list(glob("src/*/*/manifest.yaml"))]
+    return [os.path.basename(os.path.dirname(m)) for m in list(glob("src/*/*/" + MANIFEST_FILENAME))]
 
 
 def _platform_completion() -> List[str]:
@@ -110,7 +111,7 @@ def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, ser
 
 
 def _create_docker_file(service: Service, project_config: ProjectConfig, build_mode: str):
-    build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
+    build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir, DOCKER_BUILD_DIR)
     os.makedirs(build_dir, exist_ok=True)
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + service.name)
@@ -173,8 +174,8 @@ def _docker_bake(project_config: ProjectConfig,
         logging.warning("No services selected to build, aborting build of services.")
         raise typer.Exit()
 
-    with open(os.path.join(project_config.project_root_dir, project_config.build_dir, 'docker-bake.hcl'),
-              "w") as docker_bake_hcl:
+    with open(os.path.join(project_config.project_root_dir, project_config.build_dir,
+                           DOCKER_BUILD_DIR, 'docker-bake.hcl'), "w") as docker_bake_hcl:
         dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
         docker_bake_hcl.write(dockerfile_template.render(targets=targets,
                                                          project_config=project_config,
@@ -209,7 +210,7 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
-    docker_cmd = f"docker buildx bake -f {project_config.build_dir}/docker-bake.hcl"
+    docker_cmd = f"docker buildx bake -f {project_config.build_dir}/{DOCKER_BUILD_DIR}/docker-bake.hcl"
     if push:
         docker_cmd += " --push"
     else:

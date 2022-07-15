@@ -5,6 +5,7 @@ from typing import Optional
 
 from typer.testing import CliRunner
 
+from fastiot.cli.constants import DOCKER_BUILD_DIR
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app
@@ -43,52 +44,57 @@ class TestBuildCommand(unittest.TestCase):
     def test_single_service(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry", "producer"], catch_exceptions=False)
 
             self.assertEqual(0, result.exit_code)
-            self.assertTrue(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
-            self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
-            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
+            self.assertTrue(os.path.isfile(os.path.join(docker_dir, 'docker-bake.hcl')))
+            self.assertTrue(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.producer')))
+            self.assertFalse(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.consumer')))
 
     def test_all_services(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
 
             self.assertEqual(0, result.exit_code)
-            self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
-            self.assertTrue(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
+            self.assertTrue(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.producer')))
+            self.assertTrue(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.consumer')))
 
     def test_docker_registry_per_env(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
+
             os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
 
-            with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
+            with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
 
     def test_docker_registry_per_argument(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
-            # os.environ['FASTIOT_DOCKER_REGISTRY'] = 'TEST_REGISTRY'
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
-            with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
+            with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
 
     def test_no_local_cache_if_pushing(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry", "--push", "--docker-registry", "test_registry", "--docker-registry-cache", "test_cache_registry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
-            with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
+            with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertFalse('"type=local,src=.docker-cache"' in contents)
                 self.assertTrue('cache-to = [ "type=registry,' in contents)
@@ -96,10 +102,11 @@ class TestBuildCommand(unittest.TestCase):
     def test_local_cache_if_not_pushing(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
-            with open(os.path.join(tempdir, 'docker-bake.hcl'), 'r') as f:
+            with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
                 self.assertTrue('"type=local,src=.docker-cache"' in contents)
                 self.assertFalse('cache-to = [ "type=registry,' in contents)
@@ -107,20 +114,22 @@ class TestBuildCommand(unittest.TestCase):
     def test_build_empty_test_env(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry", "--test-deployment-only"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
-            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
+            self.assertFalse(os.path.isfile(os.path.join(docker_dir, 'docker-bake.hcl')))
 
     def test_empty_build(self):
         with tempfile.TemporaryDirectory() as tempdir:
             _prepare_env(tempdir, no_services=True)
+            docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
             result = self.runner.invoke(app, ["build", "--dry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
-            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'docker-bake.hcl')))
-            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.producer')))
-            self.assertFalse(os.path.isfile(os.path.join(tempdir, 'Dockerfile.consumer')))
+            self.assertFalse(os.path.isfile(os.path.join(docker_dir, 'docker-bake.hcl')))
+            self.assertFalse(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.producer')))
+            self.assertFalse(os.path.isfile(os.path.join(docker_dir, 'Dockerfile.consumer')))
 
 
 if __name__ == '__main__':

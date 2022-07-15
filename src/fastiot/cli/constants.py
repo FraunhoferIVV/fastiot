@@ -7,6 +7,8 @@ CONFIGURE_FILE_NAME = "configure.py"
 DEPLOYMENTS_CONFIG_DIR = 'deployments'
 DEPLOYMENTS_CONFIG_FILE = 'deployment.yaml'
 MANIFEST_FILENAME = 'manifest.yaml'
+GENERATED_FILENAME = 'generated.py'
+DOCKER_BUILD_DIR = 'docker'
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
