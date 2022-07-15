@@ -1,3 +1,2 @@
 infrastructure-services:
   nats:
-  mongodb:

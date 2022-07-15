@@ -6,4 +6,3 @@ services:
 
 infrastructure-services:
   nats:
-  mongodb:
