@@ -18,7 +18,7 @@ class Thing(FastIoTData):
     """ Name of the thing or sensor. """
     value: Any
     """ Any data type suitable for Pydantic and serializable by ``ormsgpack`` may be used.
-    Be aware, that the receiving site needs no be able to cope with whatever you send. 
+    Be aware, that the receiving site needs no be able to cope with whatever you send.
     
     We recommend to stick to int, float and string and create your own data models based on
     :class:`fastiot.core.subject.FastIoTData` if want to sent more advanced data.

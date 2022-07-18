@@ -43,9 +43,9 @@ class Subject(BaseModel):
     name: str
     """ Name of the subject, s. :meth:`fastiot.core.data_models.FastIoTData.get_subject` for details about subscription
     names."""
-    msg_cls: Type[Union[FastIoTData,BaseModel]]
+    msg_cls: Type[Union[FastIoTData, BaseModel, dict]]
     """ Datatype the message will provide. """
-    reply_cls: Type[Union[FastIoTData,BaseModel]] = None
+    reply_cls: Type[Union[FastIoTData, BaseModel, dict]] = None
     """ Set to a datatype, not the default ``None`` to expect a reply in this datatype. """
     stream_mode = False
     """ Enable streaming mode. """
