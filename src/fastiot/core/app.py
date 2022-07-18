@@ -46,20 +46,20 @@ class FastIoTService:
         super().__init__(**kwargs)
         self.broker_connection = broker_connection
 
-        self.__subscription_fns = []
-        self.__loop_fns = []
-        self.__tasks: List[asyncio.Task] = []
-        self.__subs = []
+        self._subscription_fns = []
+        self._loop_fns = []
+        self._tasks: List[asyncio.Task] = []
+        self._subs = []
         self.service_id = None  # Use to separate between different services instantiated
 
         for name in dir(self):
             if name.startswith('__'):
                 continue
             attr = self.__getattribute__(name)
-            if hasattr(attr, '__fastiot_is_loop'):
-                self.__loop_fns.append(attr)
-            if hasattr(attr, '__fastiot_subject'):
-                self.__subscription_fns.append(attr)
+            if hasattr(attr, '_fastiot_is_loop'):
+                self._loop_fns.append(attr)
+            if hasattr(attr, '_fastiot_subject'):
+                self._subscription_fns.append(attr)
 
     async def run(self):
         loop = asyncio.get_running_loop()
@@ -75,25 +75,25 @@ class FastIoTService:
                 asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
         signal.signal(signal.SIGTERM, handler)
 
-        for loop_fn in self.__loop_fns:
-            self.__tasks.append(
+        for loop_fn in self._loop_fns:
+            self._tasks.append(
                 asyncio.create_task(self._run_loop(loop_fn=loop_fn))
             )
 
-        for subscription_fn in self.__subscription_fns:
+        for subscription_fn in self._subscription_fns:
             sub = await self.broker_connection.subscribe(
-                subject=subscription_fn.__fastiot_subject,
+                subject=subscription_fn._fastiot_subject,
                 cb=subscription_fn
             )
-            self.__subs.append(sub)
+            self._subs.append(sub)
 
         await shutdown_requested.wait()
 
-        for task in self.__tasks:
+        for task in self._tasks:
             task.cancel()
-        await asyncio.gather(*self.__tasks, *[sub.unsubscribe() for sub in self.__subs], return_exceptions=True)
-        self.__tasks = []
-        self.__subs = []
+        await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
+        self._tasks = []
+        self._subs = []
 
     async def _run_loop(self, loop_fn):
         try:

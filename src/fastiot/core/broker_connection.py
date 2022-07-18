@@ -229,7 +229,6 @@ class BrokerConnectionImpl(BrokerConnection):
         impl._set_subscription(subscription=subscription)
         return impl
 
-    @abstractmethod
     async def send(self, subject: Subject, msg: BaseModel, reply: Subject = None):
         payload = model_to_bin(msg)
         reply_str = '' if reply is None else reply.name

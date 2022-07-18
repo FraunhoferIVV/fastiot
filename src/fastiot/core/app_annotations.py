@@ -6,7 +6,7 @@ def subscribe(subject: Subject):
         raise ValueError("Expected subject to have no reply_cls for subscription mode")
 
     def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
+        fn._fastiot_subject = subject
         return fn
     return subscribe_wrapper_fn
 
@@ -18,7 +18,7 @@ def reply(subject: Subject):
         raise ValueError("Expected subject to have stream mode disabled for reply mode")
 
     def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
+        fn._fastiot_subject = subject
         return fn
     return subscribe_wrapper_fn
 
@@ -30,12 +30,12 @@ def stream(subject: Subject):
         raise ValueError("Expected subject to have stream mode enabled for stream mode")
 
     def subscribe_wrapper_fn(fn):
-        fn.__fastiot_subject = subject
+        fn._fastiot_subject = subject
         return fn
 
     return subscribe_wrapper_fn
 
 
 def loop(fn):
-    fn.__fastiot_is_loop = True
+    fn._fastiot_is_loop = True
     return fn
