@@ -88,8 +88,7 @@ class SubscriptionImpl(Subscription):
 
     async def _received_msg_cb(self, nats_msg: BrokerMsg):
         try:
-            data = model_from_bin(self._subject.msg_cls, nats_msg.data)
-            obj = self._subject.msg_cls(**data)
+            obj = model_from_bin(self._subject.msg_cls, nats_msg.data)
 
             if self._subject.reply_cls is None:
                 await self._on_msg_cb(obj)
