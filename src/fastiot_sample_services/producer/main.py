@@ -1,11 +1,10 @@
 import asyncio
 import logging
 import random
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from fastiot.core.app import FastIoTService
 from fastiot.core.app_annotations import loop
-from fastiot.core.broker_connection import BrokerConnection, BrokerConnectionImpl
 from fastiot.msg.thing import Thing
 
 

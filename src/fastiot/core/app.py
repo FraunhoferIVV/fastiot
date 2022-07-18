@@ -1,15 +1,9 @@
 import asyncio
 import signal
-import threading
-from abc import ABCMeta, ABC
 from asyncio import CancelledError
-from functools import wraps
-from typing import List, Dict, Any, Callable
-
-from pydantic import BaseModel
+from typing import List, Dict, Any
 
 from fastiot.core.broker_connection import BrokerConnection, BrokerConnectionImpl
-from fastiot.core.subject import Subject
 
 
 class FastIoTAppClient:
@@ -40,6 +34,7 @@ class FastIoTService:
                 await app.run()
             finally:
                 await broker_connection.close()
+
         asyncio.run(run_main())
 
     def __init__(self, broker_connection: BrokerConnection, **kwargs):
@@ -69,10 +64,11 @@ class FastIoTService:
             nonlocal shutdown_requested
             shutdown_requested.set()
 
-        def handler(signum, frame):
+        def handler(signum, _):
             nonlocal loop, _set_shutdown
             if signum == signal.SIGTERM:
                 asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
+
         signal.signal(signal.SIGTERM, handler)
 
         for loop_fn in self._loop_fns:

@@ -1,12 +1,11 @@
 import asyncio
-from abc import ABC, abstractmethod
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, Coroutine, Dict, Union, Generator, AsyncIterator, Tuple, Optional
+from typing import Any, Callable, Coroutine, Dict, Union, AsyncIterator
 
 import nats
 from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscription, Msg as BrokerMsg
-from ormsgpack import ormsgpack
 from pydantic import BaseModel
 
 from fastiot.core.serialization import model_from_bin, model_to_bin
@@ -20,21 +19,18 @@ class Subscription(ABC):
         """
         Cancels the subscription
         """
-        pass
 
     @abstractmethod
     def check_pending_error(self):
         """
         Checks if an error is pending and raises it.
         """
-        pass
 
     @abstractmethod
     async def raise_pending_error(self):
         """
         Waits for a pending error and raises it. Useful for testing.
         """
-        pass
 
 
 class SubscriptionImpl(Subscription):
@@ -73,8 +69,8 @@ class SubscriptionImpl(Subscription):
         while self._stream_helper_task_shutdown.is_set() is False:
             to_stop = []
             stop_time = self._get_time_in_s() + env_broker.stream_timeout
-            for key in self._current_stream_tasks:
-                if self._current_stream_tasks[key].time < stop_time:
+            for key, value in self._current_stream_tasks.items():
+                if value.time < stop_time:
                     to_stop.append(key)
 
             for key in to_stop:

@@ -16,7 +16,7 @@ class HistBeat(BaseModel):
         return Subject(
             name=f"v1.hist.{name}",
             msg_cls=HistBeat,
-            resp_cls=Thing,
+            reply_cls=Thing,
             stream_mode=True
         )
 
@@ -37,5 +37,5 @@ class HistReq(BaseModel):
         return Subject(
             name=f"v1.hist.{name}",
             msg_cls=HistReq,
-            resp_cls=HistResp
+            reply_cls=HistResp
         )
