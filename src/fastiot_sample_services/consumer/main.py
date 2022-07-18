@@ -7,7 +7,7 @@ from fastiot.msg.thing import Thing
 
 class MyService(FastIoTService):
 
-    @subscribe(subject=Thing.get_subject('my_sensor'))
+    @subscribe(subject=Thing.get_subject('*'))
     async def consume(self, msg):
         logging.info(msg)
 
