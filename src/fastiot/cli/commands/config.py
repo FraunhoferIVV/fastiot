@@ -221,7 +221,7 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str
         env[volume.env_variable] = volume.location
 
     if manifest.mount_config_dir:
-        volumes.append(f"./config:/etc/fastiot")
+        volumes.append("./config:/etc/fastiot")
         env[FASTIOT_CONFIG_DIR] = "/etc/fastiot"
 
     return volumes, env

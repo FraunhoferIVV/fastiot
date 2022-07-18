@@ -3,8 +3,6 @@ from typing import Optional, List
 
 import typer
 
-from fastiot.cli.infrastructure_service_fn import get_services_list
-from fastiot.cli.model import ProjectConfig
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
