@@ -9,7 +9,7 @@ from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscr
 from pydantic import BaseModel
 
 from fastiot.core.serialization import model_from_bin, model_to_bin
-from fastiot.core.subject import Subject
+from fastiot.core.data_models import Subject
 from fastiot.env import env_broker
 
 

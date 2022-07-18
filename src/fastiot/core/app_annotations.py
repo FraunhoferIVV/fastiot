@@ -1,4 +1,4 @@
-from fastiot.core.subject import Subject
+from fastiot.core.data_models import Subject
 
 
 def subscribe(subject: Subject):

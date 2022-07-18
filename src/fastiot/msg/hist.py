@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic.main import BaseModel
 
-from fastiot.core.subject import Subject
+from fastiot.core.data_models import Subject
 from fastiot.msg.thing import Thing
 
 
