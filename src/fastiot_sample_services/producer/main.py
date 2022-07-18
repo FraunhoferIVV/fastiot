@@ -13,18 +13,18 @@ class MyService(FastIoTService):
     @loop
     async def produce(self):
         sensor_name = f'my_sensor_{random.randint(1,5)}'
-        sensor = Thing.get_subject(sensor_name)
         value = random.randint(20, 30)
+        subject = Thing.get_subject(sensor_name)
         await self.broker_connection.publish(
-            subject=sensor,
+            subject=subject,
             msg=Thing(
                 name=sensor_name,
-                machine= 'FastIoT_Example_Machine',
+                machine='FastIoT_Example_Machine',
                 value=value,
                 timestamp=datetime.utcnow()
             )
         )
-        logging.info("Published %d on sensor %s", value, sensor.name)
+        logging.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
 
 
