@@ -118,7 +118,11 @@ class Vue(BaseModel):
 
 class ServiceManifest(BaseModel):
     """
-    Manifest files may contain these variables.
+    Every service needs a :file:`manifest.yaml` to describe the service.
+
+    The following options may be used. The file always starts with a ``fastiot_service:`` in the first level. Then
+    options from the following may (``name`` must) follow.
+
     :attr:`fastiot.cli.model.manifest.ServiceManifest.name` is needed, others are mostly optional!
     """
     name: str

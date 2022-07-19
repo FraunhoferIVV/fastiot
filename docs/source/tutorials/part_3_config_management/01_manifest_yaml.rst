@@ -6,6 +6,10 @@ In the :file:`manifest.yaml` are information about dependencies of the module, p
 
 This file has to be a valid yaml-file.
 
-You can find the API documentation and thus the whole data model at :mod:`fastiot.cli.model.manifest.manifest`.
+You can find the API documentation and thus the whole data model at :mod:`fastiot.cli.model.manifest.ServiceManifest`.
 
+.. code-block:: yaml
+   :caption: Example for the absolut minimum manifest.yaml
 
+   fastiot_service:
+     name: my_service

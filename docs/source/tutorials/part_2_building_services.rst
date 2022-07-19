@@ -1,11 +1,11 @@
-####################################
-Part 2: Building modules
-####################################
+#########################
+Part 2: Building services
+#########################
 
-Information specific for building modules
+Information specific for building services
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   part_2_building_modules/*
+   part_2_building_services/*
