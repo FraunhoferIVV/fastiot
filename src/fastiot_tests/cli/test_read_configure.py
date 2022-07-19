@@ -33,7 +33,9 @@ class TestConfigurationImport(unittest.TestCase):
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
             self.assertIsInstance(config.services[0], Service)
-            self.assertEqual("fastiot_sample_services", config.services[0].package)
+            package_names = [service.package for service in config.services]
+            self.assertIn("fastiot_sample_services", package_names)
+            self.assertIn("fastiot_core_services", package_names)
 
 
 if __name__ == '__main__':
