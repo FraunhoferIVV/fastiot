@@ -1,0 +1,7 @@
+fastiot_service:
+  name: nats_logger
+
+  depends_on:
+    - nats
+
+  platforms: [amd64, arm64]

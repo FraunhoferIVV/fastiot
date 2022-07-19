@@ -33,10 +33,13 @@ Tutorials
 Services
 ********
 
-.. toctree::
-    :maxdepth: 2
+Please have a look at the API documentation for core services to provide basic functionality and for example services.
+Those will provide you with basic ideas how to do integration tasks and develop you own services.
 
-    Services
+- :mod:`fastiot_core_services`
+- :mod:`fastiot_sample_services`
+
+
 
 *********
 Changelog
@@ -52,7 +55,7 @@ API Reference
 *************
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     fastiot
 
