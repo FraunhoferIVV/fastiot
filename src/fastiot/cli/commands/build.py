@@ -85,7 +85,8 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
 
     Per default, it builds all images. Optionally, you can specify a single image to build.
     """
-    logging.info("Using Docker registry: %s", docker_registry)
+    logging.info("Starting build of project!")
+    logging.info("Using Docker registry %s to tag images", docker_registry)
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
@@ -104,6 +105,8 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
     tags = tag.split(',')
     _docker_bake(project_config, tags=tags, services=services, dry=dry, push=push, docker_registry=docker_registry,
                  docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
+
+    logging.info("Successfully built project. For reference you may consult the dockerfiles in your build directory.")
 
 
 def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, services: Optional[List[str]] = None):
@@ -174,7 +177,13 @@ def _docker_bake(project_config: ProjectConfig,
         targets.append(TargetConfiguration(manifest=manifest, cache_from=cache_from, cache_to=cache_to))
 
     if len(targets) == 0:
-        logging.warning("No services selected to build, aborting build of services.")
+        if services is not None:
+            logging.warning("Service(s) %s could not be found in project configuration, aborting build",
+                            ", ".join(services))
+        else:
+            logging.warning("No services selected to build, aborting build of services.")
+        logging.info("Configured and valid services for this project are: %s",
+                     ", ".join([s.name for s in project_config.services]))
         raise typer.Exit()
 
     with open(os.path.join(project_config.project_root_dir, project_config.build_dir,
