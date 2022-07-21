@@ -1,0 +1,13 @@
+fastiot_service:
+  name: opc_ua_server
+
+  ports: # List all ports of the module
+    opcua:
+      port_nr: 4840
+      env_variable: "FASTIOT_OPCUA_EXAMPLE_PORT"
+
+  depends_on:
+    - nats
+
+  platforms:
+    - amd64
