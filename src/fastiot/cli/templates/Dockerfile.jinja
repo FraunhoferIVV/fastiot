@@ -66,6 +66,10 @@ RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot
 ### Stage: Release ###
 FROM base
 
+{% if service.manifest.additional_pip_packages %}
+RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} --no-cache-dir {{ service.manifest.additional_pip_packages|join(' ') }}
+{% endif %}
+
 # Nuitka compiles "__file__"-variable relative to current location. So we have to place everything inside "/opt/fastiot/src".
 COPY --from=compile_lib /opt/fastiot/output/*.so /opt/fastiot/src/
 COPY --from=compile_lib /opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py /opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py

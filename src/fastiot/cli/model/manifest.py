@@ -164,6 +164,16 @@ class ServiceManifest(BaseModel):
     s :class:`fastiot.cli.model.manifest.Vue`
     """
 
+    additional_pip_packages: Optional[List[str]] = []
+    """ If one specific module needs more packages installed than the other you may add those here. 
+
+    **Caution**: It is recommended to use the projects global :file:`requirements.txt` to install additional packages
+                 in your project. This way all packages will be installed at once and this container stage will later
+                 be shared among all services of your project, so no additional space is needed. The major benefit is
+                 to have all requirements being compatible with each other. Using this option here this cannot be
+                 guaranteed.
+    """
+
     @staticmethod
     def from_yaml_file(filename: str, check_service_name: str = '') -> "ServiceManifest":
         """ Does the magic of import yaml to pydantic model"""
