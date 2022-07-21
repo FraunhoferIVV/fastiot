@@ -62,6 +62,7 @@ class FastIoTService:
 
         async def _set_shutdown():
             nonlocal shutdown_requested
+            await self._stop()
             shutdown_requested.set()
 
         def handler(signum, _):
@@ -70,6 +71,8 @@ class FastIoTService:
                 asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
 
         signal.signal(signal.SIGTERM, handler)
+
+        await self._start()
 
         for loop_fn in self._loop_fns:
             self._tasks.append(
@@ -98,6 +101,12 @@ class FastIoTService:
                 await awaitable
         except CancelledError:
             pass
+
+    async def _start(self):
+        """ Overwrite this method to run any async start commands like ``await self._server.start()``` """
+
+    async def _stop(self):
+        """ Overwrite this method to run any async stop commands like ``await self._server.stop()``` """
 
     async def test_client(self, provide: Dict[str, Any]) -> FastIoTAppClient:
         pass
