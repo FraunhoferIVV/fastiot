@@ -8,8 +8,8 @@ from fastiot.msg.thing import Thing
 class MyService(FastIoTService):
 
     @subscribe(subject=Thing.get_subject('*'))
-    async def consume(self, msg):
-        logging.info(msg)
+    async def consume(self, topic: str, msg: Thing):
+        logging.info("%s: %s", topic, str(msg))
 
 
 if __name__ == '__main__':

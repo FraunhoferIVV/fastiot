@@ -87,9 +87,9 @@ class SubscriptionImpl(Subscription):
             obj = model_from_bin(self._subject.msg_cls, nats_msg.data)
 
             if self._subject.reply_cls is None:
-                await self._on_msg_cb(obj)
+                await self._on_msg_cb(nats_msg.subject, obj)
             elif self._subject.stream_mode is False:
-                ans = await self._on_msg_cb(obj)
+                ans = await self._on_msg_cb(nats_msg.subject, obj)
                 if isinstance(ans, self._subject.reply_cls):
                     raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
                                     f"got {type(ans)}")
@@ -102,7 +102,7 @@ class SubscriptionImpl(Subscription):
                 if nats_msg.reply in self._current_stream_tasks:
                     self._current_stream_tasks[nats_msg.reply].time = self._get_time_in_s()
                 else:
-                    generator = self._on_msg_cb(obj)
+                    generator = self._on_msg_cb(nats_msg.subject, obj)
                     self._current_stream_tasks[nats_msg.reply] = SubscriptionImpl._StreamTaskHandler(
                         time=self._current_stream_tasks[nats_msg.reply].time,
                         task=asyncio.create_task(self._handle_stream_task(generator, nats_msg.reply))
