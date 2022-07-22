@@ -9,3 +9,5 @@ __pycache__/
 coverage.xml
 pytest_report.xml
 .coverage
+/src/fastiot_sample_services/fastapi/vue/dist/
+/src/fastiot_sample_services/fastapi/static/

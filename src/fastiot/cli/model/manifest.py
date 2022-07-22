@@ -161,11 +161,12 @@ class ServiceManifest(BaseModel):
     vue: Optional[Vue] = None
     """
     If your project contains a vue.js application you can automatically build it here. For required configuration
-    s :class:`fastiot.cli.model.manifest.Vue`
+    see :class:`fastiot.cli.model.manifest.Vue`
     """
 
     additional_pip_packages: Optional[List[str]] = []
-    """ If one specific module needs more packages installed than the other you may add those here. 
+    """
+    If one specific module needs more packages installed than the other you may add those here. 
 
     **Caution**: It is recommended to use the projects global :file:`requirements.txt` to install additional packages
                  in your project. This way all packages will be installed at once and this container stage will later
