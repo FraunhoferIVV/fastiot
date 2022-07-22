@@ -25,9 +25,9 @@ HEALTHCHECK --retries=1 CMD if [ -s "/var/fastiot/logs/error.log" ]; then; exit 
 ### Stage: vue.js ###
 FROM node:14-buster-slim as build-vue
 WORKDIR /opt/vue_app
-COPY src/{{ service.package }}/{{ service.name }}/{{vue.src}}/package*.json /opt/vue_app/
+COPY src/{{ service.package }}/{{ service.name }}/{{service.manifest.vue.src}}/package*.json /opt/vue_app/
 RUN npm install
-COPY src/{{ service.package }}/{{ service.name }}/{{vue.src}} /opt/vue_app/
+COPY src/{{ service.package }}/{{ service.name }}/{{service.manifest.vue.src}} /opt/vue_app/
 RUN npm run build
 {% endif %}
 
@@ -35,7 +35,7 @@ RUN npm run build
 FROM base as debug
 # In debug mode we just want to copy everything from source to make it easier.
 {% if service.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ vue.dst }}
+COPY --from=build-vue /opt/vue_app/{{ service.manifest.vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ service.manifest.vue.dst }}
 {% endif %}
 {% if project_config.library_package %}
 COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.library_package}}
@@ -78,7 +78,7 @@ COPY --from=compile_lib /opt/fastiot/src/{{ service.package }}/{{ service.name }
 {% endfor %}
 
 {% if service.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ vue.dst }}
+COPY --from=build-vue /opt/vue_app/{{ service.manifest.vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ service.manifest.vue.dst }}
 {% endif %}
 
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
