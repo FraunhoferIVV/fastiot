@@ -23,6 +23,8 @@ def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
 
     # Use all available configs if not specified otherwise
     project_config = ProjectConfig(**data)
+    if project_config.extensions is not None:
+        _import_plugin_commands(project_config.extensions)
     project_config.deployments = find_deployments(deployments=data['deployments'],
                                                   path=project_config.project_root_dir)
     if not project_config.services:
@@ -40,3 +42,11 @@ def _import_configure_py(file_name):
     sys.modules["config"] = config
     spec.loader.exec_module(config)
     return config
+
+
+def _import_plugin_commands(extensions):
+    for extension in extensions:
+        try:
+            importlib.import_module(f'{extension}')
+        except ImportError:
+            pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
