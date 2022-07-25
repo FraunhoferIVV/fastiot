@@ -35,7 +35,7 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     """ Compile the project library according to the project configuration. """
 
     project_config = get_default_context().project_config
-    if project_config.library_package is None:
+    if not project_config.library_package:
         logging.info("No library package configured in configure.py. Exiting.")
         return
 
