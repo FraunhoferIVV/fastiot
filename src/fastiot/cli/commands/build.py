@@ -4,6 +4,7 @@ import os.path
 import subprocess
 from glob import glob
 from typing import List, Optional
+from shutil import copyfile
 
 import typer
 from pydantic import BaseModel
@@ -121,6 +122,11 @@ def _create_docker_file(service: Service, project_config: ProjectConfig, build_m
     os.makedirs(build_dir, exist_ok=True)
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + service.name)
+
+    service_own_dockerfile = os.path.join(project_config.project_root_dir, 'src', service.package, 'Dockerfile')
+    if os.path.isfile(service_own_dockerfile):
+        logging.debug("Using dockerfile from %s, not creating a new one", service.name)
+        copyfile(service_own_dockerfile, docker_filename)
 
     with open(docker_filename, "w") as dockerfile:
         dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
