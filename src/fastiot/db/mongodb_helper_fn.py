@@ -44,7 +44,7 @@ class CustomMongoClient:
         self._db_client = MongoClient(**mongo_client_kwargs)
 
         try:
-            self._db_client.admin.command('ismaster')
+            self._db_client.admin.command('ping')
             logging.getLogger("mongodb_helper_fn").info("Connection to database established")
         except ConnectionFailure:
             logging.getLogger("mongodb_helper_fn").exception("Connecting to database failed")

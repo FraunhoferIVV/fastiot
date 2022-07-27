@@ -51,3 +51,15 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
             logging.error("Error connecting to MariaDB: %s", str(exception))
             time.sleep(1)
     raise ServiceError("Giving up trials to connect to MariaDB")
+
+
+def init_schema(connection, schema: str):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                query=f'CREATE SCHEMA {schema}'
+            )
+        connection.commit()
+    except Exception as e:
+        logging.error(f'Please connect to mariadb Server first {e}')
+
