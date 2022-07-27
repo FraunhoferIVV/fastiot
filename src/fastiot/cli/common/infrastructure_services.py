@@ -7,7 +7,9 @@ from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_
     FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
     FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN, \
     FASTIOT_INFLUX_DB_HOST, FASTIOT_INFLUX_DB_VOLUME, FASTIOT_INFLUX_DB_MODE, FASTIOT_INFLUX_DB_BUCKET, \
-    FASTIOT_INFLUX_DB_USER, FASTIOT_INFLUX_DB_PASSWORD, FASTIOT_INFLUX_DB_ORG
+    FASTIOT_INFLUX_DB_USER, FASTIOT_INFLUX_DB_PASSWORD, FASTIOT_INFLUX_DB_ORG, FASTIOT_TIME_SCALE_DB_PORT, \
+    FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD, FASTIOT_TIME_SCALE_DB_DATABASE, \
+    FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME
 
 
 class NatsService(InfrastructureService):
@@ -138,6 +140,43 @@ class InfluxDBService(InfrastructureService):
             container_volume='/var/lib/influxdb2',
             default_volume_mount='/var/fastiot/volumes/fastiot_dev/influxdb2',
             env_var=FASTIOT_INFLUX_DB_VOLUME
+        )
+    ]
+
+
+class TimeScaleDBService(InfrastructureService):
+    name: str = 'timescaledb'
+    image: str = 'timescale/timescaledb:latest-pg14'
+    ports: List[InfrastructureServicePort] = [
+        InfrastructureServicePort(
+            container_port=5432,
+            default_port_mount=5432,
+            env_var=FASTIOT_TIME_SCALE_DB_PORT
+        )
+    ]
+    environment: List[InfrastructureServiceEnvVar] = [
+        InfrastructureServiceEnvVar(
+            name='POSTGRES_USER',
+            default='postgres',
+            env_var=FASTIOT_TIME_SCALE_DB_USER
+        ),
+        InfrastructureServiceEnvVar(
+            name='POSTGRES_PASSWORD',
+            default='12345',
+            env_var=FASTIOT_TIME_SCALE_DB_PASSWORD
+        ),
+        InfrastructureServiceEnvVar(
+            name='POSTGRES_DB',
+            default='fastiot_db',
+            env_var=FASTIOT_TIME_SCALE_DB_DATABASE
+        ),
+    ]
+    host_name_env_var: str = FASTIOT_TIME_SCALE_DB_HOST
+    volumes: List[InfrastructureServiceVolume] = [
+        InfrastructureServiceVolume(
+            container_volume='/var/lib/postgresql/data',
+            default_volume_mount='/var/fastiot/volumes/fastiot_dev/timescaledb',
+            env_var=FASTIOT_TIME_SCALE_DB_VOLUME
         )
     ]
 

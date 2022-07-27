@@ -3,3 +3,4 @@ infrastructure-services:
   mariadb:
   mongodb:
   influxdb:
+  timescaledb:
