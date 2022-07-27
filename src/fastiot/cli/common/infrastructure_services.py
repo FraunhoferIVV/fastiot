@@ -5,7 +5,9 @@ from fastiot.cli.model.service import InfrastructureServicePort, InfrastructureS
     InfrastructureServiceVolume
 from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, \
     FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
-    FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST
+    FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN, \
+    FASTIOT_INFLUX_DB_HOST, FASTIOT_INFLUX_DB_VOLUME, FASTIOT_INFLUX_DB_MODE, FASTIOT_INFLUX_DB_BUCKET, \
+    FASTIOT_INFLUX_DB_USER, FASTIOT_INFLUX_DB_PASSWORD, FASTIOT_INFLUX_DB_ORG
 
 
 class NatsService(InfrastructureService):
@@ -85,3 +87,57 @@ class MongoDBService(InfrastructureService):
             env_var=FASTIOT_MONGO_DB_VOLUME
         )
     ]
+
+
+class InfluxDBService(InfrastructureService):
+    name: str = 'influxdb'
+    image: str = 'influxdb:2.0'
+    ports: List[InfrastructureServicePort] = [
+        InfrastructureServicePort(
+            container_port=8086,
+            default_port_mount=8086,
+            env_var=FASTIOT_INFLUX_DB_PORT
+        )
+    ]
+    environment: List[InfrastructureServiceEnvVar] = [
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_USERNAME',
+            default='influxdb_admin',
+            env_var=FASTIOT_INFLUX_DB_USER
+        ),
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_PASSWORD',
+            default='12345',
+            env_var=FASTIOT_INFLUX_DB_PASSWORD
+        ),
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_MODE',
+            default='setup',
+            env_var=FASTIOT_INFLUX_DB_MODE
+        ),
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_ORG',
+            default='IVVDD',
+            env_var=FASTIOT_INFLUX_DB_ORG
+        ),
+
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_BUCKET',
+            default='sensors',
+            env_var=FASTIOT_INFLUX_DB_BUCKET
+        ),
+        InfrastructureServiceEnvVar(
+            name='DOCKER_INFLUXDB_INIT_ADMIN_TOKEN',
+            default='12345',
+            env_var=FASTIOT_INFLUX_DB_TOKEN
+        )
+    ]
+    host_name_env_var = FASTIOT_INFLUX_DB_HOST
+    volumes: List[InfrastructureServiceVolume] = [
+        InfrastructureServiceVolume(
+            container_volume='/var/lib/influxdb2',
+            default_volume_mount='/var/fastiot/volumes/fastiot_dev/influxdb2',
+            env_var=FASTIOT_INFLUX_DB_VOLUME
+        )
+    ]
+
