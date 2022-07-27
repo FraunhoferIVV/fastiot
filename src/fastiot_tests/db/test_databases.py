@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
@@ -12,7 +13,6 @@ class TestDataBases(unittest.TestCase):
         set_test_environment()
 
     def test_mongo_db_connection(self):
-
         db_client = get_mongodb_client_from_env()
         self.assertTrue(db_client.health_check())
 
@@ -23,7 +23,8 @@ class TestDataBases(unittest.TestCase):
 
     def test_influxdb_connection(self):
         db_client = get_influxdb_client_from_env()
-        self.assertTrue(db_client.health_check())
+        time.sleep(1)
+        self.assertTrue(db_client.health_check()['status'] == 'pass')
 
     def test_timescaledb_connection(self):
         db_connection = open_timescaledb_connection_from_env()

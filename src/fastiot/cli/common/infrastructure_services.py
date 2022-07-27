@@ -104,7 +104,7 @@ class InfluxDBService(InfrastructureService):
     environment: List[InfrastructureServiceEnvVar] = [
         InfrastructureServiceEnvVar(
             name='DOCKER_INFLUXDB_INIT_USERNAME',
-            default='influxdb_admin',
+            default='influx_db_admin',
             env_var=FASTIOT_INFLUX_DB_USER
         ),
         InfrastructureServiceEnvVar(

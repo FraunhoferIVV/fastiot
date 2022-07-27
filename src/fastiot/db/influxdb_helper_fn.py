@@ -1,6 +1,7 @@
 import logging
 import sys
 import time
+from typing import Dict
 
 from fastiot.env.env import env_influxdb
 from fastiot.exceptions import ServiceError
@@ -30,13 +31,15 @@ class CustomInfluxClient:
                 health_check = self._db_client.ping()
                 if health_check:
                     return
+                else:
+                    continue
             except InfluxDBError:
                 time.sleep(0.2)
             num_tries -= 1
         raise ServiceError("Could not connect to InfluxDB")
 
-    def health_check(self) -> bool:
-        return self._db_client.ping()
+    def health_check(self) -> Dict:
+        return self._db_client.health().to_dict()
 
 
 def get_influxdb_client_from_env() -> CustomInfluxClient:
