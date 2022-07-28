@@ -109,7 +109,7 @@ class InfluxDBService(InfrastructureService):
         ),
         InfrastructureServiceEnvVar(
             name='DOCKER_INFLUXDB_INIT_PASSWORD',
-            default='12345',
+            default='mf9ZXfeLKuaL3HL7w',
             env_var=FASTIOT_INFLUX_DB_PASSWORD
         ),
         InfrastructureServiceEnvVar(

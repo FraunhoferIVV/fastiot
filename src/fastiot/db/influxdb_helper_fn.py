@@ -38,8 +38,8 @@ class CustomInfluxClient:
             num_tries -= 1
         raise ServiceError("Could not connect to InfluxDB")
 
-    def health_check(self) -> Dict:
-        return self._db_client.health().to_dict()
+    def health_check(self) -> bool:
+        return self._db_client.ping()
 
 
 def get_influxdb_client_from_env() -> CustomInfluxClient:
