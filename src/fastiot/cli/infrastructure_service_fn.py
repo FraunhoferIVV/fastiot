@@ -15,6 +15,8 @@ def get_services_list() -> Dict[str, InfrastructureService]:
     This method will try to import anything from there and for services.
     """
     service_classes = InfrastructureService.__subclasses__()
+    for service_class in service_classes:
+        service_classes += service_class.__subclasses__()
     services = [s() for s in service_classes]
     services =  {s.name: s for s in services}
     return {k: services[k] for k in sorted(services.keys())}
