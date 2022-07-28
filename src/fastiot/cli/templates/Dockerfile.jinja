@@ -82,4 +82,5 @@ COPY --from=build-vue /opt/vue_app/{{ service.manifest.vue.configured_dist }} sr
 {% endif %}
 
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
+MAINTAINER {{ maintainer }}
 CMD ["python",  "/opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py"]

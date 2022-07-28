@@ -1,6 +1,7 @@
 """ Build command """
 import logging
 import os.path
+import re
 import subprocess
 from glob import glob
 from typing import List, Optional
@@ -123,18 +124,36 @@ def _create_docker_file(service: Service, project_config: ProjectConfig, build_m
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + service.name)
 
-    service_own_dockerfile = os.path.join(project_config.project_root_dir, 'src', service.package, 'Dockerfile')
+    service_own_dockerfile = os.path.join(project_config.project_root_dir, 'src',
+                                          service.package, service.name, 'Dockerfile')
     if os.path.isfile(service_own_dockerfile):
         logging.debug("Using dockerfile from %s, not creating a new one", service.name)
         copyfile(service_own_dockerfile, docker_filename)
 
-    with open(docker_filename, "w") as dockerfile:
-        dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
-        dockerfile.write(dockerfile_template.render(service=service,
-                                                    project_config=project_config,
-                                                    extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
-                                                                              "www.piwheels.org/simple/"),
-                                                    build_mode=build_mode))
+    else:
+        with open(docker_filename, "w") as dockerfile:
+            dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
+            dockerfile.write(dockerfile_template.render(service=service,
+                                                        project_config=project_config,
+                                                        extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
+                                                                                  "www.piwheels.org/simple/"),
+                                                        build_mode=build_mode,
+                                                        maintainer=_get_maintainer()
+                                                        )
+                             )
+
+
+def _get_maintainer() -> str:
+
+    cmd = "git show -q HEAD"
+    try:
+        git_log = subprocess.getoutput(cmd)
+        author, mail = re.search("^Author: (.*) (<.*@.*>)$", git_log, re.MULTILINE).groups()
+        maintainer = f"{author} using FastIoT {mail}"
+    except (AttributeError, TypeError):
+        maintainer = "FastIoT Framework <none@none>"
+
+    return maintainer
 
 
 def _docker_bake(project_config: ProjectConfig,
