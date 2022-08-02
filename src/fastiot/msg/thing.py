@@ -28,3 +28,5 @@ class Thing(FastIoTData):
         
     It is recommended to always use UTC times (Function ``datetime.utcnow()``).
     """
+    unit: str = ""
+    """ Optional add a unit, e.g. 's' to the measurement. """
