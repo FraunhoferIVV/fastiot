@@ -6,7 +6,7 @@ Project structure
 As FastIoT is considered a FrameWork certain directories and files are expected to be always at the same location.
 For a new project this should usually be handled using the CLI (s. :ref:`first_project_setup` for more details).
 
-``├── configure.py``  => This file sets up your project and defines where to find tests, library, … (Data Model: :class:`fastiot.cli.model.project.ProjectConfig`)
+``├── configure.py``  => This file sets up your project and defines where to find tests, library, … . S. :ref:`tut-configure_py` for details.
 
 ``├── deployments``
 
@@ -48,7 +48,7 @@ For a new project this should usually be handled using the CLI (s. :ref:`first_p
 
 ``│   │   │   ├── manifest.yaml``  => A manifest describing your service (ports, mounts, …) (data model :class:`fastiot.cli.model.manifest.ServiceManifest`)
 
-``│   │   │   └── run.py`` => This is the entry point used by docker for your service not to be obfuscated when building using :func:`fastiot.cli.commands.build.build`
+``│   │   │   └── run.py`` => This is the entry point used by docker for your service not to be obfuscated when building using :func:`fastiot.cli.commands.build.build`. S. :ref:`tut-Service_Entry_Point` for details.
 
 ``│   │   ├── […]``  => More services as you like
 
