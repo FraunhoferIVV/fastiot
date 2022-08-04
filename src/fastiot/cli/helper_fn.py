@@ -59,22 +59,26 @@ def find_services(package: Optional[str] = None,
     path = path or os.getcwd()
     package = package or '*'
 
-    services = []
+    found_services = []
     for manifest_filename in glob.glob(os.path.join(path, 'src', package, '*', MANIFEST_FILENAME)):
         manifest_path = Path(manifest_filename)
         service_directory = manifest_path.parent
         service_name = service_directory.name
+
+        if services and service_name not in services:
+            continue
+
         package_name = service_directory.parent.name
         if not os.path.isfile(os.path.join(service_directory.absolute(), 'run.py')):
             continue
 
-        services.append(Service(name=service_name,
-                                package=package_name,
-                                cache=_default_cache(service=service_name, package=package_name,
-                                                     use_per_service_cache=use_per_service_cache),
-                                extra_caches=_default_extra_caches(service=service_name, package=package_name,
-                                                                   use_per_service_cache=use_per_service_cache)))
-    return services
+        found_services.append(Service(name=service_name,
+                                      package=package_name,
+                                      cache=_default_cache(service=service_name, package=package_name,
+                                                           use_per_service_cache=use_per_service_cache),
+                                      extra_caches=_default_extra_caches(service=service_name, package=package_name,
+                                                                         use_per_service_cache=use_per_service_cache)))
+    return found_services
 
 
 def find_deployments(deployments: Optional[List[str]] = None, path: Optional[str] = None) -> List[DeploymentConfig]:
