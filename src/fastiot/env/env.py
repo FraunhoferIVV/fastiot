@@ -128,14 +128,14 @@ class MongoDBEnv:
 
         Use to get/set the name of mongodb database.
         """
-        return os.getenv(FASTIOT_MONGO_DB_NAME)
+        return os.getenv(FASTIOT_MONGO_DB_NAME, "fastiot")
 
     @property
     def is_configured(self) -> bool:
         """
         Use to indicate if the mongodb is configured, it is not bound to any environment variable
         """
-        if FASTIOT_MONGO_DB_HOST in os.environ.keys():
+        if FASTIOT_MONGO_DB_HOST in os.environ:
             return True
         return False
 
@@ -166,7 +166,7 @@ class MariaDBEnv:
         return int(os.getenv(FASTIOT_MARIA_DB_PORT, '3306'))
 
     @property
-    def user(self) -> Optional[str]:
+    def user(self) -> str:
         """ .. envvar:: FASTIOT_MARIA_DB_USER
 
         Use to get/set the mariadb user.
@@ -220,7 +220,7 @@ class InfluxDBEnv:
         return int(os.getenv(FASTIOT_INFLUX_DB_PORT, '8086'))
 
     @property
-    def token(self) -> str:
+    def token(self) -> Optional[str]:
         """.. envvar:: FASTIOT_INFLUX_DB_TOKEN
 
         InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices

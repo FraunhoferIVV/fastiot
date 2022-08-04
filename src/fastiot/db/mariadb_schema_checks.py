@@ -3,7 +3,7 @@ from enum import Enum
 from fastiot.exceptions import SQLSchemaCheckError
 
 
-def check_is_enum_represented(connection, sql_query: str, enum: type(Enum)):
+def check_is_enum_represented(connection, sql_query: str, enum: type[Enum]):
     """
     Checks if enum values are in database table. The query must select a single column table with the enum values.
 

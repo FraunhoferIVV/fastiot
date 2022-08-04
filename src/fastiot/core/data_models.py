@@ -45,7 +45,7 @@ class Subject(BaseModel):
     names."""
     msg_cls: Type[Union[FastIoTData, BaseModel, dict]]
     """ Datatype the message will provide. """
-    reply_cls: Type[Union[FastIoTData, BaseModel, dict]] = None
+    reply_cls: Optional[Type[Union[FastIoTData, BaseModel, dict]]] = None
     """ Set to a datatype, not the default ``None`` to expect a reply in this datatype. """
     stream_mode = False
     """ Enable streaming mode. """

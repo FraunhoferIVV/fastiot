@@ -9,7 +9,7 @@ class UvicornAsyncServer(uvicorn.Server):
     """Uvicorn async server  """
 
     def __init__(self, app, host='0.0.0.0', port=8080):
-        """Create a Uvicorn test server
+        """Create an Uvicorn test server
 
         Args:
             app (FastAPI, optional): the FastAPI app. Defaults to main.app.
