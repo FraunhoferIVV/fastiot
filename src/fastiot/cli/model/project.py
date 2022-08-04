@@ -77,9 +77,14 @@ class ProjectConfig(BaseModel):
     """
 
     extensions: List[str] = []
-    """ Use to add own extensions to the FastIoT CLI. The CLI will try to import your services. Make sure importing
-    this service will import further commands and :class:`fastiot.cli.model.service.InfrastructureService`. Most of the
-    times this is done filling the :file:`__init__.py` correspondingly."""
+    """
+    Use to add own extensions to the FastIoT CLI. The CLI will try to import your custom infrastructure services as
+    described in :ref:`tut-own_infrastructure_services`.      
+    
+    Make sure importing this service will import further commands and 
+    :class:`fastiot.cli.model.service.InfrastructureService`.
+    Most of the times this is done filling the :file:`__init__.py` correspondingly.
+    """
 
     lib_compilation_mode: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from

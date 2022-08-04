@@ -1,4 +1,4 @@
-""" data model for external services """
+""" data models for FastIoT and infrastructure services """
 import os
 from typing import Optional, List
 
@@ -69,7 +69,12 @@ class InfrastructureServiceVolume(BaseModel):
 
 
 class InfrastructureService(BaseModel):
-    """ Class to describe external services to be integrated in the deployments. """
+    """
+    Class to describe external services to be integrated in the deployments.
+
+    Please refer to :ref:`tut-own_infrastructure_services` for more information on adding your own infrastructure to
+    your project.
+    """
     name: str
     """ Name of the external service, e.g. mariadb. Per convention these names should be in lower case """
     image: str
