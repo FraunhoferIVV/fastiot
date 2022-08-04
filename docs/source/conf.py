@@ -46,7 +46,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_autodoc_typehints',
               'sphinx.ext.autosectionlabel',
               'myst_parser',
-              #'sphinxcontrib.autodoc_pydantic'
+              'sphinxcontrib.autodoc_pydantic'
               ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -59,7 +59,9 @@ cmd_line_template = "sphinx-apidoc --module-first -f -o {outputdir} {moduledir}"
 
 coverage_show_missing_items = True
 
-
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config = False
+autodoc_pydantic_model_show_field_summary = False
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 autosummary_generate = True
 # May be extended by also using 'special-members',
