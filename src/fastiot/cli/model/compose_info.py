@@ -9,6 +9,7 @@ class ServiceComposeInfo(BaseModel):
     environment: Dict[str, str]
     ports: List[str]
     volumes: List[str]
+    devices: List[str] = []
     tmpfs: List[str] = []
 
     privileged: bool = False

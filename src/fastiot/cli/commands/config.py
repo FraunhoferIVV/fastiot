@@ -122,14 +122,18 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
             ))
 
         if deployment_name == project_config.integration_test_deployment:
-            environment = {**env_file_env, **fastiot_env, **tests_env}
-            environment = {k: environment[k] for k in sorted(environment.keys())}
-            with open(os.path.join(project_config.project_root_dir, "src",
-                                   project_config.test_package, 'generated.py'), "w") as generated_file:
-                generated_template = get_jinja_env().get_template('test_env.py.jinja')
-                generated_file.write(generated_template.render(
-                    env_vars=str(environment).replace(",", ",\n               "))
-                )
+            _create_generated_py(project_config, env_file_env, fastiot_env, tests_env)
+
+
+def _create_generated_py(project_config, env_file_env, fastiot_env, tests_env):
+    environment = {**env_file_env, **fastiot_env, **tests_env}
+    environment = {k: environment[k] for k in sorted(environment.keys())}
+    with open(os.path.join(project_config.project_root_dir, "src",
+                           project_config.test_package, 'generated.py'), "w") as generated_file:
+        generated_template = get_jinja_env().get_template('test_env.py.jinja')
+        generated_file.write(generated_template.render(
+            env_vars=str(environment).replace(",", ",\n               "))
+        )
 
 
 def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
@@ -160,13 +164,15 @@ def _create_fastiot_services_compose_infos(deployment_config: DeploymentConfig,
 
         volumes, volumes_env = _create_volumes(manifest)
         ports, ports_env = _create_ports(manifest)
-        environment = {**volumes_env, **ports_env, **service_config.environment}
+        devices, devices_env = _create_devices(manifest)
+        environment = {**devices_env, **volumes_env, **ports_env, **service_config.environment}
 
         result.append(ServiceComposeInfo(name=name,
                                          image=full_image_name,
                                          environment=environment,
                                          ports=ports,
                                          volumes=volumes,
+                                         devices=devices,
                                          privileged=manifest.privileged))
 
     return result
@@ -225,6 +231,16 @@ def _create_volumes(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str
         env[FASTIOT_CONFIG_DIR] = "/etc/fastiot"
 
     return volumes, env
+
+
+def _create_devices(manifest: ServiceManifest) -> Tuple[List[str], Dict[str, str]]:
+    devices = []
+    env = {}
+    for device in manifest.devices.values():
+        devices.append(f"{device.location}:{device.location}")
+        env[device.env_variable] = device.location
+
+    return devices, env
 
 
 def _create_infrastructure_service_compose_infos(deployment_config: DeploymentConfig,
