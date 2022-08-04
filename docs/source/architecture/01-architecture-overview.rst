@@ -2,7 +2,7 @@
 Architecture Overview
 *********************
 
-fastIoT is designed as a service architecture.
+FastIoT is designed as a service architecture.
 
 We use the following technologies to support the architecture:
  * `nats.io <https://nats.io/>`_ as a message broker for inter module communication.

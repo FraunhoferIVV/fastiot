@@ -1,8 +1,8 @@
 =================
-fastIoT Framework
+FastIoT Framework
 =================
 
-Welcome to fastIoT's documentation.
+Welcome to FastIoT’s documentation.
 
 .. toctree::
    :maxdepth: 2

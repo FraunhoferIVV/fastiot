@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# fastIoT documentation build configuration file
+# FastIoT documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -83,7 +83,7 @@ source_suffix = {
 master_doc = 'index'
 
 # General information about the project.
-project = 'fastIoT'
+project = 'FastIoT'
 copyright = f'2022-{datetime.now().year}, Fraunhofer IVV, Dresden'
 author = 'IVV-DD'
 

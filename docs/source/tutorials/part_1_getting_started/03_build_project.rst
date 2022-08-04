@@ -4,7 +4,7 @@
 Building Docker Images and Generating config files – fastiot.cli
 ################################################################
 
-The ``fastiot.cli`` is your best tool for managing the build process of any fastIoT-project. It takes care of building docker
+The ``fastiot.cli`` is your best tool for managing the build process of any FastIoT-project. It takes care of building docker
 images using files stored in :file:`build`, generating configs from deployments under :file:`generated`, generating a :file:`generated.py` file for testing
 purposes and manage local deployments. See :ref:`project_structure` for more information about the general structure of a FastIoT project.
 

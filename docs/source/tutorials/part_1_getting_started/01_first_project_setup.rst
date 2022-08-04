@@ -1,6 +1,6 @@
 .. _first_project_setup:
 #####################################
-Setting up your first fastIoT Project
+Setting up your first FastIoT Project
 #####################################
 
 There are some basics steps to follow to create your first project
