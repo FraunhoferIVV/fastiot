@@ -1,12 +1,12 @@
 
-sam_module:
+fastiot_service:
   name: dash
 
   mount_config_dir: required
 
   ports: # List all ports of the module
     fastapi:
-      location: 5801
+      port_nr: 5801
       env_variable: "EXAMPLE_SAM_DASH_PORT"
 
   depends_on:
