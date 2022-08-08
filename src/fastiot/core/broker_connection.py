@@ -90,7 +90,7 @@ class SubscriptionImpl(Subscription):
                 await self._on_msg_cb(nats_msg.subject, obj)
             elif self._subject.stream_mode is False:
                 ans = await self._on_msg_cb(nats_msg.subject, obj)
-                if isinstance(ans, self._subject.reply_cls):
+                if not isinstance(ans, self._subject.reply_cls):
                     raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
                                     f"got {type(ans)}")
                 reply_subject = Subject(
@@ -158,7 +158,7 @@ class BrokerConnection(ABC):
         if subject.reply_cls is not None:
             raise ValueError("Subscribe msg queue only allowed for empty reply_cls")
 
-        async def cb(msg):
+        async def cb(_, msg):
             nonlocal msg_queue
             await msg_queue.put(msg)
 
@@ -183,7 +183,7 @@ class BrokerConnection(ABC):
         sub = await self.subscribe_msg_queue(subject=inbox, msg_queue=msg_queue)
         try:
             await self.send(subject=subject, msg=msg, reply=inbox)
-            result = asyncio.wait_for(msg_queue.get(), timeout=timeout)
+            result = await asyncio.wait_for(msg_queue.get(), timeout=timeout)
         finally:
             await sub.unsubscribe()
         return result
