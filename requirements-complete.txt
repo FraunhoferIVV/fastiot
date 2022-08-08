@@ -9,3 +9,6 @@ asyncua
 fastapi
 aiofiles
 uvicorn[standard]
+
+dash
+plotly

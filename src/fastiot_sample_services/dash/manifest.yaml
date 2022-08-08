@@ -1,0 +1,20 @@
+
+sam_module:
+  name: dash
+
+  mount_config_dir: required
+
+  ports: # List all ports of the module
+    fastapi:
+      location: 5801
+      env_variable: "EXAMPLE_SAM_DASH_PORT"
+
+  depends_on:
+    - nats
+
+  platforms:
+    - amd64
+
+  additional_pip_packages:
+    - dash~=1.20.0
+    - plotly~=4.14.3
