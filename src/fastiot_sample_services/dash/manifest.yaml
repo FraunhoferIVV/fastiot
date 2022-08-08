@@ -16,5 +16,5 @@ fastiot_service:
     - amd64
 
   additional_pip_packages:
-    - dash~=1.20.0
-    - plotly~=4.14.3
+    - dash~=2.6.1
+    - plotly~=5.9.0
