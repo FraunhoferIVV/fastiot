@@ -4,7 +4,8 @@ import random
 from datetime import datetime
 
 from fastiot.core.app import FastIoTService
-from fastiot.core.app_annotations import loop
+from fastiot.core.app_annotations import loop, reply
+from fastiot.core.data_models import Subject
 from fastiot.msg.thing import Thing
 
 
@@ -12,7 +13,7 @@ class MyService(FastIoTService):
 
     @loop
     async def produce(self):
-        sensor_name = f'my_sensor_{random.randint(1,5)}'
+        sensor_name = f'my_sensor_{random.randint(1, 5)}'
         value = random.randint(20, 30)
         subject = Thing.get_subject(sensor_name)
         await self.broker_connection.publish(
@@ -26,6 +27,16 @@ class MyService(FastIoTService):
         )
         logging.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
+
+    @reply(Subject(name="reply_test",
+                   msg_cls=Thing,
+                   reply_cls=Thing))
+    async def respond(self, topic: str, msg: Thing) -> Thing:
+        """ Short demo on receiving a thing value and sending back the duplication of its value """
+        logging.info("Received request on topic %s with message %s.", topic, str(msg))
+        new_thing_msg = msg
+        new_thing_msg.value = 2 * msg.value
+        return new_thing_msg
 
 
 if __name__ == '__main__':
