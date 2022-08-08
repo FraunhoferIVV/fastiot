@@ -1,6 +1,9 @@
 import asyncio
+import concurrent.futures
+import threading
 import time
 from abc import ABC, abstractmethod
+from asyncio import get_running_loop
 from dataclasses import dataclass
 from typing import Any, Callable, Coroutine, Dict, Union, AsyncIterator
 
@@ -146,6 +149,11 @@ class SubscriptionImpl(Subscription):
 
 
 class BrokerConnection(ABC):
+
+    def __init__(self):
+        self._loop_mutex = threading.RLock()
+        self._loop = None
+
     @abstractmethod
     async def subscribe(self,
                         subject: Subject,
@@ -188,6 +196,82 @@ class BrokerConnection(ABC):
             await sub.unsubscribe()
         return result
 
+    def run_threadsafe_nowait(self, coro: Coroutine) -> concurrent.futures.Future:
+        """
+        Runs a coroutine on nats client's event loop. This method is thread-safe. It can be useful if you want to
+        interact with the broker from another thread. You have to make sure connect(...) has been called first.
+
+        :param coro: The coroutine to run thread-safe on nats client's event loop, for example
+                     'nats_client.publish(...)'
+        """
+        with self._loop_mutex:
+            if not self._loop:
+                raise RuntimeError("No event loop has been started. Cannot send data in thread safe mode.")
+
+            return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
+
+    def run_threadsafe(self, coro: Coroutine, timeout_thread_waiting: float = None) -> Any:
+        """
+        Runs a coroutine on nats client's event loop. This method is thread-safe. It can be useful if you want to
+        interact with the broker from another thread. You have to make sure connect(...) has been called first.
+
+        :param coro: The coroutine to run thread-safe on nats client's event loop, for example
+                     'nats_client.publish(...)'
+        :param timeout_thread_waiting: The number of seconds to wait for the result to be done. Raises
+                                       concurrent.futures.TimeoutError if timeout exceeds. A value None means wait
+                                       forever.
+        :return: Returns the result of the coroutine or if the coroutine raised an exception, it is reraised.
+        """
+        future = self.run_threadsafe_nowait(coro=coro)
+        return future.result(timeout=10)
+
+    def publish_sync(self,
+                     subject: Subject,
+                     msg: Any = None,
+                     timeout_thread_waiting: float = None) -> bool:
+        """
+        Publishes a message for a subject. This method is thread-safe. Under the hood, it uses run_threadsafe.
+
+        :param subject: The subject info to publish to.
+        :param msg: The message.
+        :param timeout_thread_waiting: The timeout.
+        :return True when method finished successfully
+        """
+        return self.run_threadsafe(
+            coro=self.publish(subject=subject, msg=msg),
+            timeout_thread_waiting=timeout_thread_waiting
+        )
+
+    def publish_sync_nowait(self,
+                            subject: Subject,
+                            msg: Any = None) -> concurrent.futures.Future:
+        """
+        Publishes a message for a subject. This method is thread-safe. Under the hood, it uses run_threadsafe_nowait.
+
+        :param subject: The subject info to publish to.
+        :param msg: The message.
+        :return True when method finished successfully
+        """
+        return self.run_threadsafe_nowait(
+            coro=self.publish(subject=subject, msg=msg)
+        )
+
+    def request_sync(self, subject: Subject, msg: Any = None,
+                     timeout: float = env_broker.default_timeout, timeout_thread_waiting: float = None) -> Any:
+        """
+        Performs a request on the subject. This method is thread-safe. Under the hood, it uses run_threadsafe.
+
+        :param subject: The subject info to publish the request.
+        :param msg: The request message.
+        :param timeout: The timeout for the broker call.
+        :param timeout_thread_waiting: The timeout for the thread waiting.
+        :return The requested message.
+        """
+        return self.run_threadsafe(
+            coro=self.request(subject=subject, msg=msg, timeout=timeout),
+            timeout_thread_waiting=timeout_thread_waiting
+        )
+
     async def beat(self, subject: Subject, msg: Any):
         if subject.stream_mode is False:
             raise ValueError("Expected stream mode to be true for beat")
@@ -204,7 +288,9 @@ class BrokerConnectionImpl(BrokerConnection):
         )
 
     def __init__(self, client: BrokerClient):
+        super().__init__()
         self._client = client
+        self._loop = get_running_loop()
 
     async def close(self):
         await self._client.close()
