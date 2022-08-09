@@ -2,12 +2,12 @@ import asyncio
 import unittest
 from datetime import datetime
 
-from fastiot.core.service import FastIoTService
-from fastiot.core.service_annotations import reply
 from fastiot.core.broker_connection import NatsBrokerConnectionImpl
 from fastiot.core.data_models import Subject
+from fastiot.core.service import FastIoTService
+from fastiot.core.service_annotations import reply
 from fastiot.msg.thing import Thing
-from generated import set_test_environment
+from fastiot_tests.generated import set_test_environment
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now())
 
