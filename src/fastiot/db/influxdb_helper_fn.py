@@ -1,7 +1,6 @@
 import logging
 import sys
 import time
-from typing import Dict
 
 from fastiot.env.env import env_influxdb
 from fastiot.exceptions import ServiceError

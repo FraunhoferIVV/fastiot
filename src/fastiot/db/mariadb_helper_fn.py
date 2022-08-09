@@ -35,7 +35,6 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
                       "to make use of this helper.")
         sys.exit(5)
 
-
     for _ in range(10):
         try:
             db_connection = pymysql.connect(
@@ -61,5 +60,4 @@ def init_schema(connection, schema: str):
             )
         connection.commit()
     except Exception as e:
-        logging.error(f'Please connect to mariadb Server first {e}')
-
+        logging.error('Please connect to mariadb Server first  %s', str(e))

@@ -2,7 +2,7 @@ import asyncio
 import logging
 from datetime import datetime
 
-from fastiot.core import FastIoTService, Subject, loop
+from fastiot.core import FastIoTService, Subject, loop, subscribe
 from fastiot.msg.thing import Thing
 
 

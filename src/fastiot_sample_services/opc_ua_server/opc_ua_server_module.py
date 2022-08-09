@@ -22,8 +22,8 @@ class OpcUaServerService(FastIoTService):
 
         # populating our address space
         # server.nodes, contains links to very common nodes like objects and root
-        object = await self.server.nodes.objects.add_object(self.idx, 'MyObject')
-        self.opc_ua_variable = await object.add_variable(self.idx, 'LastThingValue', 0)
+        obj = await self.server.nodes.objects.add_object(self.idx, 'MyObject')
+        self.opc_ua_variable = await obj.add_variable(self.idx, 'LastThingValue', 0)
 
         # Set MyVariable to be writable by clients
         # await myvar.set_writable()

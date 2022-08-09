@@ -31,18 +31,15 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self.service_task.cancel()
 
     async def test_publish_subscribe(self):
-
         subject = Thing.get_subject(name='test_msg')
 
-        async def cb(topic, msg):
+        async def cb(_, msg):
             self.assertEqual(THING, msg)
             self.assertTrue('test_msg' in topic)
 
-        try:
-            subscription = await self.broker_connection.subscribe(subject=subject, cb=cb)
-            await self.broker_connection.publish(subject, THING)
-        finally:
-            await subscription.unsubscribe()
+        subscription = await self.broker_connection.subscribe(subject=subject, cb=cb)
+        await self.broker_connection.publish(subject, THING)
+        await subscription.unsubscribe()
 
     async def test_request(self):
         request = THING
