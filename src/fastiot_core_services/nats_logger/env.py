@@ -1,6 +1,9 @@
 import os
 from typing import Optional
 
+FASTIOT_NATS_LOGGER_FILTER_FIELD = 'FASTIOT_NATS_LOGGER_FILTER_FIELD'
+FASTIOT_NATS_LOGGER_FILTER_VALUE = 'FASTIOT_NATS_LOGGER_FILTER_VALUE'
+
 
 class NatsLoggerConstants:
 
@@ -22,7 +25,7 @@ class NatsLoggerConstants:
 
         Filter for a specific field, e.g. ``value`` to equal to :envvar:`FASTIOT_NATS_LOGGER_FILTER_VALUE`.
         """
-        return os.environ.get('FASTIOT_NATS_LOGGER_FILTER_FIELD')
+        return os.environ.get(FASTIOT_NATS_LOGGER_FILTER_FIELD)
 
     @property
     def filter_value(self) -> Optional[str]:
@@ -31,7 +34,7 @@ class NatsLoggerConstants:
 
         Set the value to filter for.
         """
-        return os.environ.get('FASTIOT_NATS_LOGGER_FILTER_VALUE')
+        return os.environ.get(FASTIOT_NATS_LOGGER_FILTER_VALUE)
 
 
 nats_logger_env = NatsLoggerConstants()
