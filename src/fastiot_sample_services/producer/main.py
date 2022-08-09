@@ -3,9 +3,7 @@ import logging
 import random
 from datetime import datetime
 
-from fastiot.core.service import FastIoTService
-from fastiot.core.service_annotations import loop, reply
-from fastiot.core.data_models import Subject
+from fastiot.core import FastIoTService, Subject, loop, reply
 from fastiot.msg.thing import Thing
 
 

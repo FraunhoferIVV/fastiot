@@ -6,8 +6,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
-from fastiot.core.service import FastIoTService
-from fastiot.core.service_annotations import subscribe
+from fastiot.core import FastIoTService, subscribe
 from fastiot.msg.thing import Thing
 from fastiot_sample_services.fastapi.env import env_fastapi
 from fastiot_sample_services.fastapi.model import Request, Response

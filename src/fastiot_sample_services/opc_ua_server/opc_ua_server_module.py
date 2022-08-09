@@ -2,8 +2,7 @@ import logging
 
 from asyncua import Server
 
-from fastiot.core.service import FastIoTService
-from fastiot.core.service_annotations import subscribe
+from fastiot.core import FastIoTService, subscribe
 from fastiot.msg.thing import Thing
 from fastiot_sample_services.opc_ua_server.env import env_opc_ua_server
 

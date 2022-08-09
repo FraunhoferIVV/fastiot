@@ -3,13 +3,10 @@ from datetime import datetime
 from random import randint
 
 import dash
-from dash import dcc
-from dash import html
 import plotly.graph_objects as go
+from dash import dcc, html
 
-from fastiot.core.service import FastIoTService
-from fastiot.core.service_annotations import subscribe
-from fastiot.core.data_models import Subject
+from fastiot.core import FastIoTService, Subject, subscribe
 from fastiot.msg.thing import Thing
 from fastiot_sample_services.dash.utils import ServerThread
 
