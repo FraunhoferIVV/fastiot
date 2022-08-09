@@ -6,7 +6,7 @@ from typing import Optional, Dict, Union, Type
 
 import yaml
 
-from fastiot.core.app import FastIoTService
+from fastiot.core.service import FastIoTService
 from fastiot.env import env_basic
 
 

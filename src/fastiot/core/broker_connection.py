@@ -223,7 +223,7 @@ class BrokerConnection(ABC):
         :return: Returns the result of the coroutine or if the coroutine raised an exception, it is reraised.
         """
         future = self.run_threadsafe_nowait(coro=coro)
-        return future.result(timeout=10)
+        return future.result(timeout=timeout_thread_waiting)
 
     def publish_sync(self,
                      subject: Subject,
@@ -278,10 +278,10 @@ class BrokerConnection(ABC):
         await self.send(subject=subject, msg=msg)
 
 
-class BrokerConnectionImpl(BrokerConnection):
+class NatsBrokerConnectionImpl(BrokerConnection):
 
     @classmethod
-    async def connect(cls) -> "BrokerConnectionImpl":
+    async def connect(cls) -> "NatsBrokerConnectionImpl":
         client = await nats.connect(f"nats://{env_broker.host}:{env_broker.port}")
         return cls(
             client=client
@@ -323,6 +323,7 @@ class BrokerConnectionImpl(BrokerConnection):
 class BrokerConnectionTestImpl(BrokerConnection):
 
     def __init__(self):
+        super().__init__()
         self._sublist = []
 
     @abstractmethod

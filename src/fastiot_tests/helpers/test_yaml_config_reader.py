@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import unittest
 
-from fastiot.core.app import FastIoTService
+from fastiot.core.service import FastIoTService
 from fastiot.core.broker_connection import BrokerConnectionTestImpl
 from fastiot.env import env_basic
 from fastiot.env.env_constants import FASTIOT_CONFIG_DIR

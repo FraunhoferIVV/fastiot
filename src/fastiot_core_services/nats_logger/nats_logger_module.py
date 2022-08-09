@@ -1,7 +1,7 @@
 import logging
 
-from fastiot.core.app import FastIoTService
-from fastiot.core.app_annotations import subscribe
+from fastiot.core.service import FastIoTService
+from fastiot.core.service_annotations import subscribe
 from fastiot.core.data_models import Subject
 from fastiot_core_services.nats_logger.env import nats_logger_env as env
 

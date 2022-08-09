@@ -3,7 +3,7 @@ import signal
 from asyncio import CancelledError
 from typing import List, Dict, Any
 
-from fastiot.core.broker_connection import BrokerConnection, BrokerConnectionImpl
+from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnectionImpl
 
 
 class FastIoTAppClient:
@@ -28,7 +28,7 @@ class FastIoTService:
     @classmethod
     def main(cls, **kwargs):
         async def run_main():
-            broker_connection = await BrokerConnectionImpl.connect()
+            broker_connection = await NatsBrokerConnectionImpl.connect()
             try:
                 app = cls(broker_connection=broker_connection, **kwargs)
                 await app.run()
