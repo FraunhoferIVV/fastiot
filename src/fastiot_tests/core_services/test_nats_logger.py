@@ -7,7 +7,7 @@ from fastiot.core.broker_connection import NatsBrokerConnectionImpl
 from fastiot.msg.thing import Thing
 from fastiot_core_services.nats_logger.env import FASTIOT_NATS_LOGGER_FILTER_FIELD, FASTIOT_NATS_LOGGER_FILTER_VALUE
 from fastiot_core_services.nats_logger.nats_logger_module import NatsLoggerService
-from generated import set_test_environment
+from fastiot_tests.generated import set_test_environment
 
 MESSAGE = Thing(machine='SomeMachine', name="LoggedSensor", value=24, timestamp=datetime.now())
 
