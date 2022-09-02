@@ -1,0 +1,8 @@
+fastiot_service:
+  name: time_series
+
+  depends_on:
+    - nats
+    - mongodb
+
+  platforms: [amd64, arm64]
