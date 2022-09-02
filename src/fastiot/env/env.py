@@ -140,6 +140,12 @@ class MongoDBEnv:
         return False
 
 
+class MongoDBColConstants:
+    @property
+    def time_series(self) -> str:
+        return os.getenv(FASTIOT_MONGO_DB_TIME_SERIES_COL, 'time_series')
+
+
 class MariaDBEnv:
     """
     Environment variables for mariadb
@@ -203,6 +209,7 @@ class InfluxDBEnv:
     Use the properties from :func:`fastiot.env.env.env_influxdb` to read the values in an easy manner within your
     code.
     """
+
     @property
     def host(self) -> str:
         """ ..envvar:: FASTIOT_INFLUX_DB_HOST
@@ -282,6 +289,7 @@ class TimeScaleDBEnv:
 env_basic = BasicEnv()
 env_broker = BrokerEnv()
 env_mongodb = MongoDBEnv()
+env_mongodb_cols = MongoDBColConstants()
 env_mariadb = MariaDBEnv()
 env_influxdb = InfluxDBEnv()
 env_timescaledb = TimeScaleDBEnv()
