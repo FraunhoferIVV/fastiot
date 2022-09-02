@@ -1,1 +1,0 @@
-fastiot.cli

@@ -51,7 +51,8 @@ setup(
     packages=find_packages("src", include=["fastiot", "fastiot.*"]),
     package_dir={"": "src"},
     package_data={"fastiot": package_data},
-    scripts=['src/fastiot/cli/version.py', 'src/fastiot/cli/fastiot.cli'],
+    scripts=['scripts/fiot', 'scripts/fiotv'],
     python_requires='~=3.8',
     install_requires=install_requires
 )
+

@@ -12,3 +12,4 @@ pytest_report.xml
 src/fastiot/__version__.py
 /src/fastiot_sample_services/fastapi/vue/dist/
 /src/fastiot_sample_services/fastapi/static/
+fastiot.egg-info/

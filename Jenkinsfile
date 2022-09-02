@@ -5,3 +5,4 @@
 // @Library('fastiot-jenkins-shared-pipeline@1') _
 
 fastIoTPipeline()
+

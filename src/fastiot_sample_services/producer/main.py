@@ -40,3 +40,4 @@ class MyService(FastIoTService):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     MyService.main()
+

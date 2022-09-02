@@ -22,3 +22,4 @@
   - See [Installing Sphinx](https://www.sphinx-doc.org/en/master/usage/installation.html) for more information about sphinx.
 2. Modify the .rst-files inside the `source` directory to your liking. There is a [primer on formatting with reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html) in the Sphinx documentation.
 3. Build the documentation inside the `source` directory with `./make_docs.sh`
+
