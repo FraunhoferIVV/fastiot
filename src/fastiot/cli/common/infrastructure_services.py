@@ -179,4 +179,3 @@ class TimeScaleDBService(InfrastructureService):
             env_var=FASTIOT_TIME_SCALE_DB_VOLUME
         )
     ]
-

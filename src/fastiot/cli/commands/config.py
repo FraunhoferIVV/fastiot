@@ -286,7 +286,8 @@ def _create_infrastructure_service_compose_infos(deployment_config: DeploymentCo
                 tests_environment[port.env_var] = str(external_port)
 
         if not is_test_deployment:
-            volumes = [f'{v.default_volume_mount}:{v.container_volume}' for v in service.volumes]
+            volumes = [f'{v.default_volume_mount}:{v.container_volume}' if v.default_volume_mount == os.environ.get(
+                v.env_var) else f'{os.environ.get(v.env_var)}:{v.container_volume}' for v in service.volumes]
             tmpfs: List[str] = []
         else:
             volumes = []
