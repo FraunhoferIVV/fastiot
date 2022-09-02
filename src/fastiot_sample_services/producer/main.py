@@ -23,7 +23,7 @@ class MyService(FastIoTService):
                 timestamp=datetime.utcnow()
             )
         )
-        logging.info("Published %d on sensor %s", value, subject.name)
+        logging.info("Published %d on sensor %s" %(value, subject.name))
         return asyncio.sleep(2)
 
     @reply(Subject(name="reply_test",
