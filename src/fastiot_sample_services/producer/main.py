@@ -4,6 +4,7 @@ import random
 from datetime import datetime
 
 from fastiot.core import FastIoTService, Subject, loop, reply
+from fastiot.core.core_uuid import get_uuid
 from fastiot.msg.thing import Thing
 
 
@@ -19,11 +20,12 @@ class MyService(FastIoTService):
             msg=Thing(
                 name=sensor_name,
                 machine='FastIoT_Example_Machine',
+                measurement_id=get_uuid(),
                 value=value,
                 timestamp=datetime.utcnow()
             )
         )
-        logging.info("Published %d on sensor %s" %(value, subject.name))
+        print("Published %d on sensor %s" %(value, subject.name))
         return asyncio.sleep(2)
 
     @reply(Subject(name="reply_test",

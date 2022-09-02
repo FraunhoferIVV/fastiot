@@ -16,6 +16,8 @@ class Thing(FastIoTData):
     """ Name of the machine. If you have many machines you may add the vendor to the machine name. """
     name: str
     """ Name of the thing or sensor. """
+    measurement_id: str
+    """ measurement id for this thing or sensor. """
     value: Any
     """ Any data type suitable for Pydantic and serializable by ``ormsgpack`` may be used.
     Be aware, that the receiving site needs no be able to cope with whatever you send.
