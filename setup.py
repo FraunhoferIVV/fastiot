@@ -41,6 +41,10 @@ def get_package_data_for_templates() -> List[str]:
 package_data = get_package_data_for_templates()
 package_data.append(requirements_file)
 
+mongo_db_deps = ["pymongo>=3.9.0"]
+maria_db_deps = ["PyMySQL>=0.9.3"]
+influx_db_deps = ["influxdb-client>=1.32"]
+
 setup(
     name='fastiot',
     version=get_version(complete=True),
@@ -53,6 +57,12 @@ setup(
     package_data={"fastiot": package_data},
     scripts=['scripts/fiot', 'scripts/fiotv'],
     python_requires='~=3.8',
-    install_requires=install_requires
+    install_requires=install_requires,
+    extras_require={
+        "MongoDB": mongo_db_deps,
+        "MariaDB": maria_db_deps,
+        "InfluxDB": influx_db_deps,
+        "all": [*mongo_db_deps, *maria_db_deps, *influx_db_deps]
+    }
 )
 
