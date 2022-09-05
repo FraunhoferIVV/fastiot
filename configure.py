@@ -1,6 +1,6 @@
 from fastiot.cli import find_services
 
-extensions = []
+extensions = ['fastiot_ivv_tools.extension']
 
 project_namespace = 'fastiot'
 
