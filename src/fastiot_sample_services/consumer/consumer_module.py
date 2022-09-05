@@ -6,7 +6,7 @@ from fastiot.core import FastIoTService, Subject, loop, subscribe
 from fastiot.msg.thing import Thing
 
 
-class MyService(FastIoTService):
+class ExampleConsumerService(FastIoTService):
 
     @subscribe(subject=Thing.get_subject('*'))
     async def consume(self, topic: str, msg: Thing):
@@ -23,4 +23,4 @@ class MyService(FastIoTService):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    MyService.main()
+    ExampleConsumerService.main()

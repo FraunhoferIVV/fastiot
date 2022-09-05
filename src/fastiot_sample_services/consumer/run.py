@@ -1,3 +1,3 @@
-from fastiot_sample_services.consumer.main import MyService
+from fastiot_sample_services.consumer.consumer_module import ExampleConsumerService
 
-MyService.main()
+ExampleConsumerService.main()

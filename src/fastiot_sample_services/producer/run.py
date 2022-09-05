@@ -1,3 +1,3 @@
-from fastiot_sample_services.producer.main import MyService
+from fastiot_sample_services.producer.producer_module import ExampleProducerService
 
-MyService.main()
+ExampleProducerService.main()

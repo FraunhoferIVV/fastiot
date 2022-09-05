@@ -33,7 +33,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
     async def test_publish_subscribe(self):
         subject = Thing.get_subject(name='test_msg')
 
-        async def cb(_, msg):
+        async def cb(topic, msg):
             self.assertEqual(THING, msg)
             self.assertTrue('test_msg' in topic)
 

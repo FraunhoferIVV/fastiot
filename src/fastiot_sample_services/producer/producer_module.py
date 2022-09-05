@@ -8,7 +8,7 @@ from fastiot.core.core_uuid import get_uuid
 from fastiot.msg.thing import Thing
 
 
-class MyService(FastIoTService):
+class ExampleProducerService(FastIoTService):
 
     @loop
     async def produce(self):
@@ -25,7 +25,7 @@ class MyService(FastIoTService):
                 timestamp=datetime.utcnow()
             )
         )
-        print("Published %d on sensor %s" %(value, subject.name))
+        logging.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
 
     @reply(Subject(name="reply_test",
@@ -41,5 +41,5 @@ class MyService(FastIoTService):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    MyService.main()
+    ExampleProducerService.main()
 

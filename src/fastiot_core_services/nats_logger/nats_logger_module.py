@@ -8,9 +8,9 @@ class NatsLoggerService(FastIoTService):
 
     @subscribe(subject=Subject(name=env.subject,
                                msg_cls=dict))
-    async def _on_data_received(self, topic: str, data: dict):
-        if env.filter_field is None or str(data.get(env.filter_field)) == env.filter_value:
-            logging.info("%s: %s", topic, str(data))
+    async def _on_data_received(self, subject_name: str, msg: dict):
+        if env.filter_field is None or str(msg.get(env.filter_field)) == env.filter_value:
+            logging.info("%s: %s", subject_name, str(msg))
 
 
 if __name__ == '__main__':
