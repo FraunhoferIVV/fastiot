@@ -5,6 +5,7 @@ import time
 from abc import ABC, abstractmethod
 from asyncio import get_running_loop
 from dataclasses import dataclass
+from inspect import signature
 from typing import Any, Callable, Coroutine, Dict, Union, AsyncIterator
 
 import nats
@@ -61,6 +62,9 @@ class SubscriptionImpl(Subscription):
 
         self._pending_errors = asyncio.Queue(maxsize=max_pending_errors)
 
+        cb_signature = signature(self._on_msg_cb)
+        self._cb_with_subject = len(cb_signature.parameters) == 2
+
     def _set_subscription(self, subscription: BrokerSubscription):
         self._subscription = subscription
 
@@ -85,14 +89,20 @@ class SubscriptionImpl(Subscription):
 
             await asyncio.sleep(1)
 
+    async def _send_cb(self, subject_name, obj):
+        if self._cb_with_subject:
+            return await self._on_msg_cb(subject_name, obj)
+        else:
+            return await self._on_msg_cb(obj)
+
     async def _received_msg_cb(self, nats_msg: BrokerMsg):
         try:
             obj = model_from_bin(self._subject.msg_cls, nats_msg.data)
 
             if self._subject.reply_cls is None:
-                await self._on_msg_cb(nats_msg.subject, obj)
+                await self._send_cb(nats_msg.subject, obj)
             elif self._subject.stream_mode is False:
-                ans = await self._on_msg_cb(nats_msg.subject, obj)
+                ans = await self._send_cb(nats_msg.subject, obj)
                 if not isinstance(ans, self._subject.reply_cls):
                     raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
                                     f"got {type(ans)}")
@@ -105,7 +115,8 @@ class SubscriptionImpl(Subscription):
                 if nats_msg.reply in self._current_stream_tasks:
                     self._current_stream_tasks[nats_msg.reply].time = self._get_time_in_s()
                 else:
-                    generator = self._on_msg_cb(nats_msg.subject, obj)
+                    # TODO: Check if this is still working after fixing #16983
+                    generator = self._send_cb(nats_msg.subject, obj)
                     self._current_stream_tasks[nats_msg.reply] = SubscriptionImpl._StreamTaskHandler(
                         time=self._current_stream_tasks[nats_msg.reply].time,
                         task=asyncio.create_task(self._handle_stream_task(generator, nats_msg.reply))
@@ -166,7 +177,7 @@ class BrokerConnection(ABC):
         if subject.reply_cls is not None:
             raise ValueError("Subscribe msg queue only allowed for empty reply_cls")
 
-        async def cb(_, msg):
+        async def cb(msg):
             nonlocal msg_queue
             await msg_queue.put(msg)
 

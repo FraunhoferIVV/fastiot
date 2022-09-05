@@ -9,13 +9,18 @@ from fastiot.core.service_annotations import reply
 from fastiot.msg.thing import Thing
 from fastiot_tests.generated import set_test_environment
 
-THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now())
+THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
 
 
 class FastIoTTestService(FastIoTService):
     @reply(Subject(name="ping", msg_cls=Thing, reply_cls=Thing))
-    async def ping(self, topic: str, msg: Thing) -> Thing:
+    async def ping(self, msg: Thing) -> Thing:
         """ Short demo on receiving a thing value and sending back the duplication of its value """
+        return msg
+
+    @reply(Subject(name="ping_with_subject", msg_cls=Thing, reply_cls=Thing))
+    async def ping_with_subject(self, subject_name: str, msg: Thing) -> Thing:
+        assert subject_name is not None
         return msg
 
 
@@ -33,9 +38,9 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
     async def test_publish_subscribe(self):
         subject = Thing.get_subject(name='test_msg')
 
-        async def cb(topic, msg):
+        async def cb(subject, msg):
             self.assertEqual(THING, msg)
-            self.assertTrue('test_msg' in topic)
+            self.assertTrue('test_msg' in subject)
 
         subscription = await self.broker_connection.subscribe(subject=subject, cb=cb)
         await self.broker_connection.publish(subject, THING)
@@ -44,6 +49,12 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
     async def test_request(self):
         request = THING
         subject = Subject(name="ping", msg_cls=Thing, reply_cls=Thing)
+        response: Thing = await self.broker_connection.request(subject=subject, msg=request)
+        self.assertEqual(response, request)
+        
+    async def test_request_with_subject_name(self):
+        request = THING
+        subject = Subject(name="ping_with_subject", msg_cls=Thing, reply_cls=Thing)
         response: Thing = await self.broker_connection.request(subject=subject, msg=request)
         self.assertEqual(response, request)
 
