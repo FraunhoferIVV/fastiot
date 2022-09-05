@@ -5,6 +5,7 @@ import sys
 from typing import Optional, List
 
 import typer
+from fastiot.cli.commands.stop import stop
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
@@ -63,11 +64,10 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
         exit_code = subprocess.call(cmd, cwd=cwd)
     except KeyboardInterrupt:
         if not detach:
-            from fastiot.cli.commands.stop import deployment as stop_deployment
-            stop_deployment(deployment_name=deployment_name,
-                            service_names=service_names,
-                            project_name=project_name,
-                            stop_test_deployment=run_test_deployment)
+            stop(deployment_name=deployment_name,
+                 service_names=service_names,
+                 project_name=project_name,
+                 use_test_deployment=use_test_deployment)
     if exit_code != 0:
         logging.error("Running the environment failed with exit code %s", str(exit_code))
         sys.exit(exit_code)

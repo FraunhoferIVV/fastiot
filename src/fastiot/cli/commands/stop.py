@@ -22,7 +22,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
                                                                   "the services but not remove the containers."
                                                                   "(docker-compose stop instead of down)"),
          project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
-         stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
+         use_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
                                                                          "test environment specified in the project. "
                                                                          "Useful for the CI runner")
          ):
@@ -31,7 +31,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
     """
     project_config = get_default_context().project_config
 
-    if stop_test_deployment:
+    if use_test_deployment:
         deployment_name = project_config.integration_test_deployment
         if not deployment_name:
             logging.warning("No `integration_test_deployment` configured. Exiting.")
@@ -53,7 +53,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
         cmd += " stop " + " ".join(service_names)
     else:
         cmd += " down"
-    if stop_test_deployment:
+    if use_test_deployment:
         cmd += " --volumes"  # Remove test volumes right away
 
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)
@@ -69,3 +69,4 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
         if exit_code != 0:
             logging.error("Stopping the environment failed with exit code %s", str(exit_code))
             sys.exit(exit_code)
+
