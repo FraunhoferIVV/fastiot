@@ -22,15 +22,11 @@ app = typer.Typer(
 
 # Use this command to create any subcommand of create, like `fastiot.cli create my-special-file`
 create_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
-app.add_typer(create_cmd, name='create', help='')
+app.add_typer(create_cmd, name='create', help='Generate common files based of templates')
 
 # Use this command to create any subcommand of `run`, like `fastiot.cli run my_special_test`
-run_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
-app.add_typer(run_cmd, name='run', help='Run different parts (services, …) of the project.')
-
-# Use this command to create any subcommand of `stop`, like `fastiot.cli stop environment`
-stop_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
-app.add_typer(stop_cmd, name='stop', help='Stop different parts (services, …) of the project.')
+extras_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
+app.add_typer(extras_cmd, name='extras', help='Extra commands for the project')
 
 
 def _import_commands():

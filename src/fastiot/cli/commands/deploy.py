@@ -6,14 +6,17 @@ from typing import Optional, List
 import jinja2
 import typer
 
-from fastiot.cli.commands.run import _deployment_completion
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import app
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 
-@app.command()
+def _deployment_completion() -> List[str]:
+    return get_default_context().project_config.deployment_names
+
+
+@app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def deploy(deployments: Optional[List[str]] = typer.Argument(default=None, shell_complete=_deployment_completion,
                                                              help="Select the deployments to deploy"),
            ask_pass: Optional[bool] = typer.Option(False, '--ask-pass', '-k',

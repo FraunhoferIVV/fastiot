@@ -12,7 +12,7 @@ import typer
 
 from fastiot.cli.model import CompileSettingsEnum
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import app
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app, extras_cmd
 
 libraries = []
 
@@ -28,7 +28,7 @@ def _styles_completion() -> List[str]:
     return [s.value for s in BuildLibStyles]
 
 
-@app.command()
+@extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
                                                           help="Compile all styles configured for the project or force compiled, "
                                                                "wheel or sdist")):

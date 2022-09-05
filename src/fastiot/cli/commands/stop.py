@@ -7,27 +7,27 @@ from typing import Optional, List
 
 import typer
 
-from fastiot.cli.commands.run import _deployment_completion
+from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, stop_cmd
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 
-@stop_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def deployment(deployment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
-                                                               help="Select the environment to stop."),
-               service_names: Optional[List[str]] = typer.Argument(default=None,
-                                                                   help="Optionally specify services to be stopped "
-                                                                        "from the environment. This will only stop "
-                                                                        "the services but not remove the containers."
-                                                                        "(docker-compose stop instead of down)"),
-               project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
-               stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
-                                                                               "test environment specified in the project. "
-                                                                               "Useful for the CI runner")
-               ):
+@app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
+def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_complete=_deployment_completion,
+                                                         help="Select the environment to stop."),
+         service_names: Optional[List[str]] = typer.Argument(default=None,
+                                                             help="Optionally specify services to be stopped "
+                                                                  "from the environment. This will only stop "
+                                                                  "the services but not remove the containers."
+                                                                  "(docker-compose stop instead of down)"),
+         project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
+         stop_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
+                                                                         "test environment specified in the project. "
+                                                                         "Useful for the CI runner")
+         ):
     """
-    Stops up the selected environment.
+    Stops the selected environment.
     """
     project_config = get_default_context().project_config
 

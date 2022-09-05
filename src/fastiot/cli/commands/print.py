@@ -22,7 +22,7 @@ _name_help = """
 Name can be any of:\n
 * project_namespace ... prints the project namespace.\n
 * library_package ... prints the specified library package.\n
-* library_setup_py_dir ... prints the library directory which includes the setup.py. If unset, nothing will be 
+* library_setup_py_dir ... prints the library directory which includes the setup.py. If unset, nothing will be
 printed.\n
 * services ... prints all services which can be built.\n
 * deployments ... prints all deploy configs.\n
@@ -59,6 +59,9 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
                                                           "specified, it doesn't print services which cannot be built "
                                                           "for the platform. Can be used together with --deployment "
                                                           "flag.")):
+    """
+    Prints project related variables
+    """
     project_config = get_default_context().project_config
     platforms = platform.split(',') if platform else []
     if name == 'project_namespace':

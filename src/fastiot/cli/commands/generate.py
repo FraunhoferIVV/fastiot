@@ -19,3 +19,4 @@ def new_service(service_name: str = typer.Argument(None, help="The project name 
                                                                                "package configured will be used.")):
     logging.error("This method has not yet been implemented")
     raise typer.Exit(1)
+

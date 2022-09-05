@@ -5,7 +5,7 @@ from typing import Optional, List, Tuple, Dict
 
 import typer
 
-from fastiot.cli.commands.run import _deployment_completion
+from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.helper_fn import get_jinja_env, parse_env_file

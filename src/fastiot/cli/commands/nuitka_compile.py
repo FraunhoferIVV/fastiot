@@ -8,10 +8,10 @@ from importlib.util import find_spec
 
 import typer
 
-from fastiot.cli.typer_app import app
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, extras_cmd
 
 
-@app.command()
+@extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def nuitka_compile(package_name: str = typer.Argument(default=None, help='The package to compile, e.g. `fastiot`'),
                    src_dir: str = typer.Option(default='src', help="The location of source files",
                                                exists=True, file_okay=False),
