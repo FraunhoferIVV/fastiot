@@ -13,7 +13,8 @@ class FastIoTData(BaseModel):
     The subject is constructed from the model name, e.g. if your data model is called ``MySpecialModel`` a subject
     ``v1.my_special_subject`` will be created. If you want to have more control over the subject name you may overwrite
     the method :meth:`fastiot.core.data_models.FastIoTData.get_subject` in your data model or create a new model based
-    on Pydantic’s :class:`pydantic.BaseModel`.
+    on Pydantic’s :class:`pydantic.BaseModel`. See :ref:`publish-subscribe` for more details about publish and
+    subscribe.
     """
 
     @classmethod
@@ -25,7 +26,8 @@ class FastIoTData(BaseModel):
                      ``""``. This works well for data models without hierarchies. In this case you will just subscribe
                      to ``v1.my_special_data_model``. If you use many sensors, like in the data model
                      :class:`fastiot.msg.ting.Thing` you have to provide a name. Then you can subscribe to
-                     ``v1.thing.my_sensor``. If you want to subscribe to all sensors use ``*`` as name.
+                     ``v1.thing.my_sensor``. If you want to subscribe to all sensors use ``*`` as name. See more in
+                     :ref:`publish-subscribe`
         """
         subject_name = f"v1.{re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()}"  # Convert CamelCase to snake_case
         if name:
