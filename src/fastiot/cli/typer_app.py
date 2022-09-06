@@ -24,7 +24,7 @@ app = typer.Typer(
 create_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 app.add_typer(create_cmd, name='create', help='Generate common files based of templates')
 
-# Use this command to create any subcommand of `run`, like `fastiot.cli run my_special_test`
+# Use this command to create any subcommand of `run`, like `fastiot.cli extras my_special_test`
 extras_cmd = typer.Typer(context_settings=DEFAULT_CONTEXT_SETTINGS)
 app.add_typer(extras_cmd, name='extras', help='Extra commands for the project')
 
