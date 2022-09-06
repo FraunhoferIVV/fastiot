@@ -12,7 +12,7 @@ import typer
 
 from fastiot.cli.model import CompileSettingsEnum
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app, extras_cmd
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, extras_cmd
 
 libraries = []
 

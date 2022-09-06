@@ -10,7 +10,10 @@ from fastiot.cli.model import ProjectConfig
 
 def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
     """ Imports the :file:`configure.py` in the project root (if not specified otherwise) and returns  """
-    config = _import_configure_py(file_name)
+    try:
+        config = _import_configure_py(file_name)
+    except FileNotFoundError:
+        config = ProjectConfig(project_namespace="")
 
     data = dict()
     for field, options in ProjectConfig.__dict__['__fields__'].items():
