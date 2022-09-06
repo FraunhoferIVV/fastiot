@@ -36,7 +36,7 @@ class BasicEnv:
 
     @property
     def volume_dir(self) -> str:
-        return os.getenv(FASTIOT_VOLUME_DIR, '/var/sam')
+        return os.getenv(FASTIOT_VOLUME_DIR, '/var/fastiot')
 
     @property
     def log_dir(self) -> str:
