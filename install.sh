@@ -2,7 +2,7 @@
 
 DIR_NAME=$(dirname $0)
 
-if [[ ${FASTIOT_EXTRA_PYPI} -eq "" ]]; then
+if [ -z "$FASTIOT_EXTRA_PYPI" ]; then
 
 python3 -m pip install --extra-index-url https://www.piwheels.org/simple/ \
     --no-cache-dir -r $DIR_NAME/requirements.txt
