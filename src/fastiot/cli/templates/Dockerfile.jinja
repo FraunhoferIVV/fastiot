@@ -57,10 +57,10 @@ COPY configure.py /opt/fastiot/
 COPY src /opt/fastiot/src
 
 {% if project_config.library_package %}
-RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
+RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
 {% endif %}
 
-RUN fastiot.cli nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ service.package }}
+RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ service.package }}
 
 
 ### Stage: Release ###
