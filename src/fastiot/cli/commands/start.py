@@ -1,12 +1,11 @@
 import logging
 import os
 import subprocess
-import sys
 from typing import Optional, List
 
 import typer
-from fastiot.cli.commands.stop import stop
 
+from fastiot.cli.commands.stop import stop
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
@@ -42,7 +41,7 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
 
     if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
-        sys.exit(-1)
+        typer.Exit(-1)
 
     cmd = ["docker-compose"]
     project_name = project_name or project_config.project_namespace + "__" + deployment_name
@@ -70,6 +69,4 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
                  use_test_deployment=use_test_deployment)
     if exit_code != 0:
         logging.error("Running the environment failed with exit code %s", str(exit_code))
-        sys.exit(exit_code)
-
-
+        raise typer.Exit(exit_code)

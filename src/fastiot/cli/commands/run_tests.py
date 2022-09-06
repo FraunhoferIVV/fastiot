@@ -1,9 +1,11 @@
-from enum import Enum
 import logging
 import os
 import subprocess
 import sys
+from enum import Enum
+
 import typer
+
 from fastiot.cli.commands.start import start
 from fastiot.cli.commands.stop import stop
 from fastiot.cli.model.context import get_default_context
@@ -22,7 +24,8 @@ class TestRunner(str, Enum):
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def run_tests(start_deployment: bool = typer.Option(False, help="Also start and stop the test-deployment. Defaults to false"),
+def run_tests(start_deployment: bool = typer.Option(False, help="Also start and stop the test-deployment. "
+                                                                "Defaults to false"),
               test_runner: TestRunner = typer.Option(TestRunner.unittest, help="Specify the testrunner to use")
               ):
     """
@@ -51,7 +54,6 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
                         "Running config command to create one now.", project_config.test_package)
         config(test_deployment_only=True, service_port_offset=-1, generated_py_with_internal_hostnames=False)
 
-
     if start_deployment:
         start(use_test_deployment=True, detach=True, project_name=None, service_names=None)
 
@@ -74,13 +76,13 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
 
 def _get_command_for_test_runner(test_runner: TestRunner, src_dir: str) -> str:
     if test_runner is TestRunner.unittest:
-        return f"python3 -m unittest discover fastiot_tests"
-    elif test_runner is TestRunner.pytest:
+        return "python3 -m unittest discover fastiot_tests"
+
+    if test_runner is TestRunner.pytest:
         return f"python3 -m pytest --rootdir={src_dir} -p no:cacheprovider"
-    elif test_runner is TestRunner.pytest_cov:
+
+    if test_runner is TestRunner.pytest_cov:
         return f"python3 -m pytest --rootdir={src_dir} --junitxml=pytest_report.xml " \
             f"--cov={src_dir} --cov-report=xml --cov-branch -p no:cacheprovider"
-    else:
-        raise NotImplementedError()
 
-
+    raise NotImplementedError()

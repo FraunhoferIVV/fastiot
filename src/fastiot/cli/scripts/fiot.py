@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+""" Basic script to start the fiot command line program """
 import logging
 import os
 
@@ -19,4 +20,3 @@ if __name__ == '__main__':
     default_context.external_services = get_services_list()
 
     typer_app.app()
-

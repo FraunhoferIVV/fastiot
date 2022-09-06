@@ -2,7 +2,6 @@
 import logging
 import os
 import subprocess
-import sys
 from typing import Optional, List
 
 import typer
@@ -62,11 +61,10 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
     exit_code = subprocess.call(f"{cmd}".split(), cwd=cwd, env=env)
     if exit_code != 0:
         logging.error("Stopping the environment failed with exit code %s", str(exit_code))
-        sys.exit(exit_code)
+        raise typer.Exit(exit_code)
     if service_names is not None and len(service_names) > 0:
         cmd = "docker-compose rm -f " + " ".join(service_names)
         exit_code = subprocess.call(cmd.split(), cwd=cwd)
         if exit_code != 0:
             logging.error("Stopping the environment failed with exit code %s", str(exit_code))
-            sys.exit(exit_code)
-
+            raise typer.Exit(exit_code)
