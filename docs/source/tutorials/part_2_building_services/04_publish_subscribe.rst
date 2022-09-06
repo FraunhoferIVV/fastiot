@@ -21,6 +21,8 @@ For FastIoT this results in two basic options:
 2. You may use on subject for one data type. Especially if you have custom data types with well defined sources and
    sinks this is an option.
 
+FastIoT only brings very basic data types defined in :mod:`fastiot.msg` coming with it’s own subjects. If you want to
+define own data models for your projects please refer to :ref:`tut-own_data_types`.
 
 Subscribing to an existing subject
 ==================================
