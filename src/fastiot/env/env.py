@@ -1,4 +1,5 @@
 """ Module to hold basic environment variables """
+import logging
 import os
 from typing import Optional
 
@@ -28,6 +29,22 @@ class BasicEnv:
         On automatic project setups everything should work out fine for you!
         """
         return os.getenv(FASTIOT_CONFIG_DIR, '/etc/fastiot')
+
+    @property
+    def log_level_no(self) -> int:
+        return int(os.getenv(FASTIOT_LOG_LEVEL_NO, logging.INFO))
+
+    @property
+    def volume_dir(self) -> str:
+        return os.getenv(FASTIOT_VOLUME_DIR, '/var/sam')
+
+    @property
+    def log_dir(self) -> str:
+        return os.path.join(self.volume_dir, 'logs')
+
+    @property
+    def error_logfile(self) -> str:
+        return os.path.join(self.log_dir, 'error.log')
 
 
 class BrokerEnv:
