@@ -40,7 +40,7 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
             raise typer.Exit(0)
 
     if deployment_name is None:
-        logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
+        logging.error("You have to define an environment to start or use the optional --use-test-deployment!")
         typer.Exit(-1)
 
     cmd = ["docker-compose"]

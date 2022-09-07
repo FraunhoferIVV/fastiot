@@ -74,16 +74,15 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
 
 
 def _get_command_for_test_runner(test_runner: TestRunner, src_dir: str) -> str:
+    project_config = get_default_context().project_config
+    test_dir = os.path.join(src_dir, project_config.test_package)
+
     if test_runner is TestRunner.unittest:
-        sub_dir_in_src = [dI for dI in os.listdir(src_dir) if os.path.isdir(os.path.join(src_dir, dI))]
-        fastiot_tests_dir = [x for x in sub_dir_in_src if 'test' in x][0]
-        return "python3 -m unittest discover " + fastiot_tests_dir
-
+        return "python3 -m unittest discover " + test_dir
     if test_runner is TestRunner.pytest:
-        return f"python3 -m pytest --rootdir={src_dir} -p no:cacheprovider"
-
+        return f"python3 -m pytest --rootdir={test_dir}/ -p no:cacheprovider"
     if test_runner is TestRunner.pytest_cov:
-        return f"python3 -m pytest --rootdir={src_dir} --junitxml=pytest_report.xml " \
+        return f"python3 -m pytest --rootdir={test_dir} --junitxml=pytest_report.xml " \
                f"--cov={src_dir} --cov-report=xml --cov-branch -p no:cacheprovider"
 
     raise NotImplementedError()
