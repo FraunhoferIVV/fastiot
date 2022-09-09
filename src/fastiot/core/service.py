@@ -6,24 +6,6 @@ from typing import List, Dict, Any
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnectionImpl
 
 
-class FastIoTAppClient:
-
-    async def __aenter__(self):
-        pass
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    async def open(self):
-        pass
-
-    async def close(self):
-        pass
-
-    async def call_loop(self, name: str):
-        pass
-
-
 class FastIoTService:
     @classmethod
     def main(cls, **kwargs):
@@ -40,6 +22,7 @@ class FastIoTService:
     def __init__(self, broker_connection: BrokerConnection, **kwargs):
         super().__init__(**kwargs)
         self.broker_connection = broker_connection
+        self._shutdown_requested = None
 
         self._subscription_fns = []
         self._loop_fns = []
@@ -56,17 +39,22 @@ class FastIoTService:
             if hasattr(attr, '_fastiot_subject'):
                 self._subscription_fns.append(attr)
 
+    @property
+    def shutdown_requested(self) -> asyncio.Event:
+        if self._shutdown_requested is None:
+            self._shutdown_requested = asyncio.Event()
+        return self._shutdown_requested
+
     async def run(self):
+        self.shutdown_requested.clear()
         loop = asyncio.get_running_loop()
-        shutdown_requested = asyncio.Event()
 
         async def _set_shutdown():
-            nonlocal shutdown_requested
             await self._stop()
-            shutdown_requested.set()
+            self.shutdown_requested.set()
 
         def handler(signum, _):
-            nonlocal loop, _set_shutdown
+            nonlocal _set_shutdown, loop
             if signum == signal.SIGTERM:
                 asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
 
@@ -86,7 +74,7 @@ class FastIoTService:
             )
             self._subs.append(sub)
 
-        await shutdown_requested.wait()
+        await self.shutdown_requested.wait()
 
         for task in self._tasks:
             task.cancel()
@@ -108,5 +96,3 @@ class FastIoTService:
     async def _stop(self):
         """ Overwrite this method to run any async stop commands like ``await self._server.stop()``` """
 
-    async def test_client(self, provide: Dict[str, Any]) -> FastIoTAppClient:
-        pass

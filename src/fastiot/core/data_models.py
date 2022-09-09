@@ -49,8 +49,6 @@ class Subject(BaseModel):
     """ Datatype the message will provide. """
     reply_cls: Optional[Type[Union[FastIoTData, BaseModel, dict]]] = None
     """ Set to a datatype, not the default ``None`` to expect a reply in this datatype. """
-    stream_mode = False
-    """ Enable streaming mode. """
 
     @root_validator
     def check_valid_fields(cls, values):
@@ -69,7 +67,11 @@ class Subject(BaseModel):
         )
 
     def get_reply_inbox(self, reply_to: str) -> "Subject":
+        if self.reply_cls is None:
+            raise ValueError("Expected reply_cls to be not None")
+
         return Subject(
             name=reply_to,
             msg_cls=self.reply_cls
         )
+
