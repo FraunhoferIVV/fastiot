@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from asyncio import get_running_loop
 from dataclasses import dataclass
 from inspect import signature
-from typing import Any, Callable, Coroutine, Dict, Union, AsyncIterator
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Union, AsyncIterator
 
 import nats
 from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscription, Msg as BrokerMsg
@@ -38,11 +38,6 @@ class Subscription(ABC):
 
 
 class SubscriptionImpl(Subscription):
-    @dataclass
-    class _StreamTaskHandler:
-        time: float
-        task: asyncio.Task
-
     def __init__(self,
                  subject: Subject,
                  on_msg_cb: Callable[[BaseModel], Union[Coroutine, AsyncIterator]],
@@ -53,12 +48,8 @@ class SubscriptionImpl(Subscription):
         self._send_reply_fn = send_reply_fn
         self._subscription = None
 
-        self._current_stream_tasks: Dict[str, SubscriptionImpl._StreamTaskHandler] = {}
-
         self._stream_helper_task = None
         self._stream_helper_task_shutdown = asyncio.Event()
-        if subject.stream_mode:
-            self._stream_helper_task = asyncio.create_task(self._stream_helper_task_main())
 
         self._pending_errors = asyncio.Queue(maxsize=max_pending_errors)
 
@@ -72,23 +63,6 @@ class SubscriptionImpl(Subscription):
     def _get_time_in_s(cls) -> float:
         return time.time()
 
-    async def _stream_helper_task_main(self):
-        while self._stream_helper_task_shutdown.is_set() is False:
-            to_stop = []
-            stop_time = self._get_time_in_s() + env_broker.stream_timeout
-            for key, value in self._current_stream_tasks.items():
-                if value.time < stop_time:
-                    to_stop.append(key)
-
-            for key in to_stop:
-                self._current_stream_tasks[key].task.cancel()
-
-            for key in to_stop:
-                await self._current_stream_tasks[key].task
-                del self._current_stream_tasks[key]
-
-            await asyncio.sleep(1)
-
     async def _send_cb(self, subject_name, obj):
         if self._cb_with_subject:
             return await self._on_msg_cb(subject_name, obj)
@@ -101,7 +75,7 @@ class SubscriptionImpl(Subscription):
 
             if self._subject.reply_cls is None:
                 await self._send_cb(nats_msg.subject, obj)
-            elif self._subject.stream_mode is False:
+            else:
                 ans = await self._send_cb(nats_msg.subject, obj)
                 if not isinstance(ans, self._subject.reply_cls):
                     raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
@@ -111,45 +85,11 @@ class SubscriptionImpl(Subscription):
                     msg_cls=self._subject.reply_cls
                 )
                 await self._send_reply_fn(reply_subject, ans)
-            else:
-                if nats_msg.reply in self._current_stream_tasks:
-                    self._current_stream_tasks[nats_msg.reply].time = self._get_time_in_s()
-                else:
-                    # TODO: Check if this is still working after fixing #16983
-                    generator = self._send_cb(nats_msg.subject, obj)
-                    self._current_stream_tasks[nats_msg.reply] = SubscriptionImpl._StreamTaskHandler(
-                        time=self._current_stream_tasks[nats_msg.reply].time,
-                        task=asyncio.create_task(self._handle_stream_task(generator, nats_msg.reply))
-                    )
 
         finally:
             pass
 
-    async def _handle_stream_task(self, iterator: AsyncIterator, reply: str):
-        reply_subject = Subject(
-            name=reply,
-            msg_cls=self._subject.reply_cls
-        )
-        while True:
-            ans = await iterator.__anext__()
-            if isinstance(ans, self._subject.reply_cls):
-                raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
-                                f"got {type(ans)}")
-            await self._send_reply_fn(reply_subject, ans)
-
     async def unsubscribe(self):
-        if self._stream_helper_task:
-            self._stream_helper_task_shutdown.set()
-            await self._stream_helper_task
-
-        to_stop = list(self._current_stream_tasks)
-
-        for key in to_stop:
-            self._current_stream_tasks[key].task.cancel()
-
-        for key in to_stop:
-            await self._current_stream_tasks[key].task
-            del self._current_stream_tasks[key]
         await self._subscription.unsubscribe()
 
     def check_pending_error(self):
@@ -195,8 +135,6 @@ class BrokerConnection(ABC):
     async def request(self, subject: Subject, msg: Any, timeout: float = env_broker.default_timeout) -> Any:
         if subject.reply_cls is None:
             raise ValueError("Expected reply cls for request")
-        if subject.stream_mode is True:
-            raise ValueError("Expected stream mode to be false for request")
         inbox = subject.make_generic_reply_inbox()
         msg_queue = asyncio.Queue()
         sub = await self.subscribe_msg_queue(subject=inbox, msg_queue=msg_queue)
@@ -267,8 +205,11 @@ class BrokerConnection(ABC):
             coro=self.publish(subject=subject, msg=msg)
         )
 
-    def request_sync(self, subject: Subject, msg: Any = None,
-                     timeout: float = env_broker.default_timeout, timeout_thread_waiting: float = None) -> Any:
+    def request_sync(self,
+                     subject: Subject,
+                     msg: Any = None,
+                     timeout: float = env_broker.default_timeout,
+                     timeout_thread_waiting: Optional[float] = None) -> Any:
         """
         Performs a request on the subject. This method is thread-safe. Under the hood, it uses run_threadsafe.
 
@@ -282,11 +223,6 @@ class BrokerConnection(ABC):
             coro=self.request(subject=subject, msg=msg, timeout=timeout),
             timeout_thread_waiting=timeout_thread_waiting
         )
-
-    async def beat(self, subject: Subject, msg: Any):
-        if subject.stream_mode is False:
-            raise ValueError("Expected stream mode to be true for beat")
-        await self.send(subject=subject, msg=msg)
 
 
 class NatsBrokerConnectionImpl(BrokerConnection):
@@ -308,7 +244,8 @@ class NatsBrokerConnectionImpl(BrokerConnection):
 
     async def subscribe(self,
                         subject: Subject,
-                        cb: Callable[[BaseModel], Union[Coroutine, AsyncIterator]]) -> Subscription:
+                        cb: Optional[Callable[[BaseModel], Union[Coroutine, AsyncIterator]]],
+                        sublist: Optional[List[Subscription]] = None) -> Subscription:
         impl = SubscriptionImpl(
             subject=subject,
             on_msg_cb=cb,
@@ -321,7 +258,7 @@ class NatsBrokerConnectionImpl(BrokerConnection):
         impl._set_subscription(subscription=subscription)
         return impl
 
-    async def send(self, subject: Subject, msg: BaseModel, reply: Subject = None):
+    async def send(self, subject: Subject, msg: BaseModel, reply: Optional[Subject] = None):
         payload = model_to_bin(msg)
         reply_str = '' if reply is None else reply.name
         await self._client.publish(
