@@ -4,17 +4,23 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from asyncio import get_running_loop
-from dataclasses import dataclass
 from inspect import signature
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Union, AsyncIterator
+from typing import Any, Callable, Coroutine, Generic, List, NewType, Optional, TypeVar, Union, AsyncIterator
 
 import nats
-from nats.aio.client import Client as BrokerClient, Subscription as BrokerSubscription, Msg as BrokerMsg
+from nats.aio.client import Client as BrokerClient
+from nats.aio.subscription import Subscription as BrokerSubscription
+from nats.aio.msg import Msg as BrokerMsg
 from pydantic import BaseModel
 
-from fastiot.core.serialization import model_from_bin, model_to_bin
-from fastiot.core.data_models import Subject
+from fastiot.core.serialization import serialize_from_bin, serialize_to_bin
+from fastiot.core.data_models import MsgCls, Subject, ReplySubject
 from fastiot.env import env_broker
+
+
+# passes MsgCls or str (subject_name) and MsgCls into callback
+SubscriptionCallback = Callable[..., Coroutine[None, None, None]]
+SubscriptionReplyCallback = Callable[..., Coroutine[None, None, MsgCls]]
 
 
 class Subscription(ABC):
@@ -37,66 +43,106 @@ class Subscription(ABC):
         """
 
 
-class SubscriptionImpl(Subscription):
+class SubscriptionBaseImpl(Subscription, ABC):
     def __init__(self,
-                 subject: Subject,
-                 on_msg_cb: Callable[[BaseModel], Union[Coroutine, AsyncIterator]],
-                 send_reply_fn: Callable[[Subject, BaseModel], Coroutine],
-                 max_pending_errors: int = 1000):
-        self._subject = subject
-        self._on_msg_cb = on_msg_cb
-        self._send_reply_fn = send_reply_fn
+                 max_pending_errors: int = 1000,
+                 **kwargs):
+        super().__init__(**kwargs)
         self._subscription = None
-
-        self._stream_helper_task = None
-        self._stream_helper_task_shutdown = asyncio.Event()
-
         self._pending_errors = asyncio.Queue(maxsize=max_pending_errors)
-
-        cb_signature = signature(self._on_msg_cb)
-        self._cb_with_subject = len(cb_signature.parameters) == 2
 
     def _set_subscription(self, subscription: BrokerSubscription):
         self._subscription = subscription
 
-    @classmethod
-    def _get_time_in_s(cls) -> float:
-        return time.time()
+    async def unsubscribe(self):
+        if self._subscription is None:
+            raise RuntimeError("Expected a subscription object")
+        await self._subscription.unsubscribe()
 
-    async def _send_cb(self, subject_name, obj):
-        if self._cb_with_subject:
-            return await self._on_msg_cb(subject_name, obj)
-        else:
-            return await self._on_msg_cb(obj)
+
+    def check_pending_error(self):
+        if self._pending_errors.empty() is False:
+            next_error = self._pending_errors.get_nowait()
+            self._pending_errors.task_done()
+            raise next_error
+
+    async def raise_pending_error(self):
+        next_error = await self._pending_errors.get()
+        raise next_error
+
+
+class SubscriptionSubjectImpl(SubscriptionBaseImpl):
+    def __init__(self,
+                 subject: Subject,
+                 on_msg_cb: SubscriptionCallback,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self._subject = subject
+        self._on_msg_cb = on_msg_cb
+        self._num_cb_params = len(signature(on_msg_cb).parameters)
 
     async def _received_msg_cb(self, nats_msg: BrokerMsg):
         try:
-            obj = model_from_bin(self._subject.msg_cls, nats_msg.data)
-
-            if self._subject.reply_cls is None:
-                await self._send_cb(nats_msg.subject, obj)
+            msg = serialize_from_bin(self._subject.msg_cls, nats_msg.data)
+            if self._num_cb_params == 1:
+                result = await self._on_msg_cb(msg)
+            elif self._num_cb_params == 2:
+                result = await self._on_msg_cb(nats_msg.subject, msg)
             else:
-                ans = await self._send_cb(nats_msg.subject, obj)
-                if not isinstance(ans, self._subject.reply_cls):
-                    raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
-                                    f"got {type(ans)}")
-                reply_subject = Subject(
-                    name=nats_msg.reply,
-                    msg_cls=self._subject.reply_cls
-                )
-                await self._send_reply_fn(reply_subject, ans)
+                raise NotImplementedError("Callbacks with more then two params are not intended yet.")
 
+            if result is not None:
+                raise TypeError(
+                    f"Callbacks for subscriptions must return None. "
+                    f"Got object of type {type(result)} instead. "
+                    f"Maybe you need to use request pattern, e.g. @reply instead of @subscribe?"
+                )
+
+        except Exception as e:
+            if self._pending_errors.full() is False:
+                self._pending_errors.put_nowait(e)
         finally:
             pass
 
-    async def unsubscribe(self):
-        await self._subscription.unsubscribe()
 
-    def check_pending_error(self):
-        pass
+class SubscriptionReplySubjectImpl(SubscriptionBaseImpl):
+    def __init__(self,
+                 subject: ReplySubject,
+                 on_msg_cb: SubscriptionReplyCallback,
+                 send_reply_fn: Callable[[Subject, MsgCls], Coroutine[None, None, None]]):
+        self._subject = subject
+        self._on_msg_cb = on_msg_cb
+        self._num_cb_params = len(signature(on_msg_cb).parameters)
+        self._send_reply_fn = send_reply_fn
+        self._subscription = None
 
-    async def raise_pending_error(self):
-        pass
+        cb_signature = signature(self._on_msg_cb)
+        self._cb_with_subject = len(cb_signature.parameters) == 2
+
+    async def _received_msg_cb(self, nats_msg: BrokerMsg):
+        try:
+            msg = serialize_from_bin(self._subject.msg_cls, nats_msg.data)
+            if self._num_cb_params == 1:
+                reply_msg = await self._on_msg_cb(msg)
+            elif self._num_cb_params == 2:
+                reply_msg = await self._on_msg_cb(nats_msg.subject, msg)
+            else:
+                raise NotImplementedError("Callbacks with more then two params are not intended yet.")
+
+            if not isinstance(reply_msg, self._subject.reply_cls):
+                raise TypeError(f"Callback has not returned correct type: Expected type {self._subject.reply_cls}, "
+                                f"got {type(msg)}")
+
+            reply_subject = Subject(
+                name=nats_msg.reply,
+                msg_cls=self._subject.reply_cls
+            )
+            await self._send_reply_fn(reply_subject, reply_msg)
+        except Exception as e:
+            if self._pending_errors.full() is False:
+                self._pending_errors.put_nowait(e)
+        finally:
+            pass
 
 
 class BrokerConnection(ABC):
@@ -114,8 +160,6 @@ class BrokerConnection(ABC):
     async def subscribe_msg_queue(self,
                                   subject: Subject,
                                   msg_queue: asyncio.Queue) -> Subscription:
-        if subject.reply_cls is not None:
-            raise ValueError("Subscribe msg queue only allowed for empty reply_cls")
 
         async def cb(msg):
             nonlocal msg_queue
@@ -132,9 +176,7 @@ class BrokerConnection(ABC):
             raise ValueError("Publish only allowed for empty reply_cls")
         await self.send(subject=subject, msg=msg)
 
-    async def request(self, subject: Subject, msg: Any, timeout: float = env_broker.default_timeout) -> Any:
-        if subject.reply_cls is None:
-            raise ValueError("Expected reply cls for request")
+    async def request(self, subject: ReplySubject, msg: Any, timeout: float = env_broker.default_timeout) -> Any:
         inbox = subject.make_generic_reply_inbox()
         msg_queue = asyncio.Queue()
         sub = await self.subscribe_msg_queue(subject=inbox, msg_queue=msg_queue)
@@ -206,7 +248,7 @@ class BrokerConnection(ABC):
         )
 
     def request_sync(self,
-                     subject: Subject,
+                     subject: ReplySubject,
                      msg: Any = None,
                      timeout: float = env_broker.default_timeout,
                      timeout_thread_waiting: Optional[float] = None) -> Any:

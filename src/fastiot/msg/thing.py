@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Any
 
-from fastiot.core.data_models import FastIoTData
+from fastiot.core.subjects import FastIoTData
+
+from fastiot.core.subjects import Subject
 
 
 class Thing(FastIoTData):
@@ -21,14 +23,15 @@ class Thing(FastIoTData):
     value: Any
     """ Any data type suitable for Pydantic and serializable by ``ormsgpack`` may be used.
     Be aware, that the receiving site needs no be able to cope with whatever you send.
-    
+
     We recommend to stick to int, float and string and create your own data models based on
     :class:`fastiot.core.subject.FastIoTData` if want to sent more advanced data.
     """
     timestamp: datetime
     """ Timestamp for the value.
-        
+
     It is recommended to always use UTC times (Function ``datetime.utcnow()``).
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
+

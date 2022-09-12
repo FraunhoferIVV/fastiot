@@ -1,6 +1,8 @@
 """ Decorator functions to add the basic functionality to FastIoT Services """
 from fastiot.core.data_models import Subject
 
+from fastiot.core.subjects import Subject, ReplySubject
+
 
 def subscribe(subject: Subject):
     """
@@ -13,30 +15,22 @@ def subscribe(subject: Subject):
 
     :param subject: The subject (:class:`fastiot.core.data_models.Subject`) to subscribe.
     """
-    if subject.reply_cls is not None:
-        raise ValueError("Expected subject to have no reply_cls for subscription mode")
-
     def subscribe_wrapper_fn(fn):
         fn._fastiot_subject = subject
         return fn
     return subscribe_wrapper_fn
 
 
-def reply(subject: Subject):
+def reply(subject: ReplySubject):
     """
     Decorator for methods replying on the specified subject. This works similiar to
     :meth:`fastiot.core.service_annotations.subscribe` but you have to return a ``Type[FastIoTData]`` as a reply
     message.
 
-    Please be aware, that your subject is expected to have the parameter ``reply_cls`` set.
-
     :param subject: The subject to subscribe to for sending replies
     """
-    if subject.reply_cls is None:
-        raise ValueError("Expected subject to have a reply_cls for reply mode")
-
     def subscribe_wrapper_fn(fn):
-        fn._fastiot_subject = subject
+        fn._fastiot_reply_subject = subject
         return fn
     return subscribe_wrapper_fn
 
@@ -52,3 +46,4 @@ def loop(fn):
     """
     fn._fastiot_is_loop = True
     return fn
+

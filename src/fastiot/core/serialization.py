@@ -1,17 +1,21 @@
 from typing import Type, Union
 
 from ormsgpack import ormsgpack
-from pydantic.main import BaseModel
 
 from fastiot.core.data_models import FastIoTData
 
 
-def model_to_bin(model: BaseModel):
-    return ormsgpack.packb(model, option=ormsgpack.OPT_SERIALIZE_PYDANTIC)
+def serialize_to_bin(model: Union[FastIoTData, dict]):
+    if isinstance(model, FastIoTData):
+        return ormsgpack.packb(model, option=ormsgpack.OPT_SERIALIZE_PYDANTIC)
+    else:
+        return ormsgpack.packb(model)
 
 
-def model_from_bin(cls: Union[Type[Union[BaseModel, FastIoTData]], dict], data: bytes):
+def serialize_from_bin(model_cls: Union[Type[FastIoTData], Type[dict]], data: bytes):
     unpacked = ormsgpack.unpackb(data)
-    if cls == dict:
+    if issubclass(model_cls, FastIoTData):
+        return model_cls(**unpacked)
+    else:
         return unpacked
-    return cls(**unpacked)
+

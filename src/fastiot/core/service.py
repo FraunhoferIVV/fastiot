@@ -25,6 +25,7 @@ class FastIoTService:
         self._shutdown_requested = None
 
         self._subscription_fns = []
+        self._reply_subscription_fns = []
         self._loop_fns = []
         self._tasks: List[asyncio.Task] = []
         self._subs = []
@@ -38,6 +39,8 @@ class FastIoTService:
                 self._loop_fns.append(attr)
             if hasattr(attr, '_fastiot_subject'):
                 self._subscription_fns.append(attr)
+            if hasattr(attr, '_fastiot_reply_subject'):
+                self._reply_subscription_fns.append(attr)
 
     @property
     def shutdown_requested(self) -> asyncio.Event:
@@ -45,23 +48,39 @@ class FastIoTService:
             self._shutdown_requested = asyncio.Event()
         return self._shutdown_requested
 
+    async def __aenter__(self):
+        self.shutdown_requested.clear()
+        await self._start()
+        await self._start_service_annotations()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._stop()
+        return False
+
     async def run(self):
         self.shutdown_requested.clear()
         loop = asyncio.get_running_loop()
 
-        async def _set_shutdown():
-            await self._stop()
-            self.shutdown_requested.set()
-
         def handler(signum, _):
-            nonlocal _set_shutdown, loop
+            nonlocal loop
             if signum == signal.SIGTERM:
-                asyncio.run_coroutine_threadsafe(_set_shutdown(), loop=loop)
+                asyncio.run_coroutine_threadsafe(self.request_shutdown(), loop=loop)
 
         signal.signal(signal.SIGTERM, handler)
 
         await self._start()
+        await self._start_service_annotations()
 
+        await self.shutdown_requested.wait()
+
+        await self._stop_service_annotations()
+        await self._stop()
+
+    async def request_shutdown(self):
+        self.shutdown_requested.set()
+
+    async def _start_service_annotations(self):
         for loop_fn in self._loop_fns:
             self._tasks.append(
                 asyncio.create_task(self._run_loop(loop_fn=loop_fn))
@@ -74,8 +93,7 @@ class FastIoTService:
             )
             self._subs.append(sub)
 
-        await self.shutdown_requested.wait()
-
+    async def _stop_service_annotations(self):
         for task in self._tasks:
             task.cancel()
         await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
