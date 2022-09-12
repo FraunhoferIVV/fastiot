@@ -162,6 +162,10 @@ class MongoDBColConstants:
     def time_series(self) -> str:
         return os.getenv(FASTIOT_MONGO_DB_TIME_SERIES_COL, 'time_series')
 
+    @property
+    def object_storage(self):
+        return os.getenv(FASTIOT_MONGO_DB_OBJECT_STORAGE_COL, 'object_storage')
+
 
 class MariaDBEnv:
     """

@@ -1,0 +1,9 @@
+fastiot_service:
+  name: object_storage
+
+  depends_on:
+    - nats
+    - mongodb
+
+  platforms: [amd64, arm64]
+
