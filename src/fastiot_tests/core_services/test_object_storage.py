@@ -59,7 +59,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         self.service_task.cancel()
 
-    @unittest.skip('')
+    #@unittest.skip('')
     def test_thing_dict_to_mongo(self):
         thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
                           value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
@@ -67,7 +67,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self.assertEqual('123456', test_thing_msg_mongo_dict['Object']['measurement_id'])
         self._db_col.insert_one(test_thing_msg_mongo_dict)
 
-    @unittest.skip('')
+    #@unittest.skip('')
     async def test_thing_storage(self):
         thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
                           value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
@@ -77,7 +77,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.02)
 
 
-    @unittest.skip('')
+    #@unittest.skip('')
     def test_basemodel_dict_to_mongo(self):
         test_custume_msg_l = TestCustumeMsgList(
             name='test_custume_m',
