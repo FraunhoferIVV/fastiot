@@ -1,20 +1,17 @@
 import logging
-from typing import Any, List, Dict
+from datetime import datetime
+from typing import List, Dict
 
 import pymongo
-from pydantic import BaseModel
-from pymongo.collection import Collection
-from fastiot.core.data_models import ReplySubject
 
-from fastiot.core.service_annotations import subscribe, reply
 from fastiot.core import FastIoTService, Subject
+from fastiot.core.data_models import ReplySubject
+from fastiot.core.service_annotations import subscribe, reply
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
 from fastiot.helpers.read_yaml import read_config
-from fastiot.msg.hist import HistThingReq, HistThingResp
-from fastiot.msg.thing import Thing
+from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot_core_services.object_storage.env import env_object_storage
-from fastiot_core_services.object_storage.object_storage_fn import convert_message_to_mongo_data
 
 
 class ObjectStorageService(FastIoTService):
@@ -33,34 +30,29 @@ class ObjectStorageService(FastIoTService):
                                             index=[(index_name, pymongo.ASCENDING)],
                                             index_name=f"{index_name}_ascending")
 
-    async def _start(self):
-        pass
-
-    async def _stop(self):
-        pass
-
     @subscribe(subject=Subject(name=env_object_storage.subject, msg_cls=dict))
-    async def _cb_receive_data(self, subject_name: str, msg: Any):
-        logging.info("Received message %s" % (str(msg)))
-        mongo_data = convert_message_to_mongo_data(msg)
-        logging.info("Converted Mongo data is %s" % mongo_data)
+    async def _cb_receive_data(self, subject_name: str, msg: dict):
+        logging.debug("Received message %s", str(msg))
+        if 'timestamp' in list(msg.keys()):
+            timestamp = msg['timestamp']
+        else:
+            timestamp = datetime.utcnow()
+        mongo_data = {'_timestamp': timestamp, '_subject': subject_name, 'Object': msg}
+        logging.debug("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
-    @reply(ReplySubject(name="reply_thing",
-                        msg_cls=HistThingReq,
-                        reply_cls=HistThingResp))
-    async def reply_hist_thing(self, subject: str, hist_thing_req: HistThingReq) -> HistThingResp:
-        logging.info("Received request on subject %s with message %s" % (subject, hist_thing_req))
-        query_dict = {"timestamp": {'$gte': hist_thing_req.dt_start, '$lte': hist_thing_req.dt_end},
-                      "Object.machine": hist_thing_req.machine,
-                      "Object.name": hist_thing_req.name}
+    @reply(ReplySubject(name="reply_object",
+                        msg_cls=HistObjectReq,
+                        reply_cls=HistObjectResp))
+    async def reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
+        logging.debug("Received request on subject %s with message %s", subject, hist_object_req)
+        query_dict = {"_timestamp": {'$gte': hist_object_req.dt_start, '$lte': hist_object_req.dt_end}}
         query_results = self._query_db(query_dict=query_dict)
-        values = [Thing.parse_obj(result['Object']) for result in query_results]
-        hist_thing_resp = HistThingResp(machine=hist_thing_req.machine,
-                                        name=hist_thing_req.name,
-                                        values=values)
-        return hist_thing_resp
-
+        values = [result['Object'] for result in query_results]
+        hist_object_resp = HistObjectResp(machine=hist_object_req.machine,
+                                          name=hist_object_req.name,
+                                          values=values)
+        return hist_object_resp
 
     def _query_db(self, query_dict: Dict) -> List:
         return list(self._mongo_object_db_col.find(query_dict))
