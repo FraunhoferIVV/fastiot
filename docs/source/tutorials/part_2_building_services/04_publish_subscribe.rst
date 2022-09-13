@@ -113,9 +113,9 @@ Therefore your responder needs to return a message at the end:
 
 .. code:: python
 
-  @reply(Subject(name="reply",
-                 msg_cls=Thing,
-                 reply_cls=Thing))
+  @reply(ReplySubject(name="reply",
+                      msg_cls=Thing,
+                      reply_cls=Thing))
   async def pong(self, topic: str, msg: Thing) -> Thing:
     return msg
 
@@ -128,7 +128,7 @@ subject (``reply``) and send an request.
 
     async def request(self):
         ping_msg = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now())
-        subject = Subject(name="reply", msg_cls=Thing, reply_cls=Thing)
+        subject = ReplySubject(name="reply", msg_cls=Thing, reply_cls=Thing)
         pong_msg: Thing = await self.broker_connection.request(subject=subject, msg=request, timeout=10)
 
 All methods like ``request`` and ``reply`` can be imported from ``fastiot.core``.

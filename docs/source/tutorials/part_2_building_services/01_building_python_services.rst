@@ -9,7 +9,7 @@ be placed inside the image.
 
 The template can be found within the :mod:`fastiot.cli` at :file:`src/fastiot/cli/templates/docker-compose.yaml.jinja`.
 The template is used via the CLI and generates the Dockerfile in the build directory (typical :file:`build`) within
-your project. You may use the command ``fastiot.cli build --dry`` to only generate the docker files and not start the
+your project. You may use the command ``fiot build --dry`` to only generate the docker files and not start the
 build immediately.
 
 If you need your own Dockerfile just put a file called :file:`Dockerfile` in your service directory next to :file:`run.py`.

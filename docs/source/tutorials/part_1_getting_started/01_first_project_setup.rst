@@ -35,7 +35,7 @@ Setup Project
           However, we've noticed some issues where the PyCharm-IDE still uses the binary format after a reinstall and
           does not provide proper autocompletion. In such cases the easiest fix is to recreate the venv.
 
-    6. Create basic directory structure for your project: ``fastiot.cli create new-project my_project_name``
-        * For more options about creating projects see ``fastiot.cli --help``
+    6. Create basic directory structure for your project: ``fiot create new-project my_project_name``
+        * For more options about creating projects see ``fiot --help``
     7. If working with PyCharm you have to mark the generated ``src`` directory as "Sources Root"
         For more information on PyCharm please refer to :ref:`label-setting-up-pycharm`
