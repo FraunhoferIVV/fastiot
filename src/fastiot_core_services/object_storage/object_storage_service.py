@@ -4,6 +4,7 @@ from typing import Any, List, Dict
 import pymongo
 from pydantic import BaseModel
 from pymongo.collection import Collection
+from fastiot.core.data_models import ReplySubject
 
 from fastiot.core.service_annotations import subscribe, reply
 from fastiot.core import FastIoTService, Subject
@@ -45,9 +46,9 @@ class ObjectStorageService(FastIoTService):
         logging.info("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
-    @reply(Subject(name="reply_thing",
-                   msg_cls=HistThingReq,
-                   reply_cls=HistThingResp))
+    @reply(ReplySubject(name="reply_thing",
+                        msg_cls=HistThingReq,
+                        reply_cls=HistThingResp))
     async def reply_hist_thing(self, subject: str, hist_thing_req: HistThingReq) -> HistThingResp:
         logging.info("Received request on subject %s with message %s" % (subject, hist_thing_req))
         query_dict = {"timestamp": {'$gte': hist_thing_req.dt_start, '$lte': hist_thing_req.dt_end},

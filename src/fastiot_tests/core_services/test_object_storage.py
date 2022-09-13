@@ -6,7 +6,7 @@ from typing import List
 from pydantic import BaseModel
 from fastiot.core.broker_connection import NatsBrokerConnection
 
-from fastiot.core.data_models import FastIoTData, Subject
+from fastiot.core.data_models import FastIoTData, ReplySubject, Subject
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
 from fastiot.msg.hist import HistThingReq, HistThingResp
@@ -104,7 +104,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         hist_req_msg = HistThingReq(machine='test_machine', name='test_thing',
                                     dt_start=datetime(year=2022, month=10, day=9, second=0),
                                     dt_end=datetime(year=2022, month=10, day=9, second=10))
-        subject = Subject(name='reply_thing', msg_cls=HistThingReq, reply_cls=HistThingResp)
+        subject = ReplySubject(name='reply_thing', msg_cls=HistThingReq, reply_cls=HistThingResp)
 
         await self._start_service()
         reply: HistThingResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
