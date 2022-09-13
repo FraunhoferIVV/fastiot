@@ -46,7 +46,7 @@ def get_config_file_name(service: Union[FastIoTService, str]) -> Optional[str]:
     return None
 
 
-def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
+def read_config(service: Union[FastIoTService, str]) -> Dict:
     """
     Load YAML-configuration files based on file or, preferably, service name.
 

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from fastiot.core import FastIoTService
-from fastiot.core.broker_connection import BrokerConnectionTestImpl
+from fastiot.core.broker_connection import BrokerConnectionDummy
 from fastiot.env import env_basic
 from fastiot.env.env_constants import FASTIOT_CONFIG_DIR
 from fastiot.helpers.read_yaml import read_config
@@ -27,14 +27,6 @@ class SimpleService(FastIoTService):
     """ No methods implemented """
 
 
-class MyBroker(BrokerConnectionTestImpl):
-    async def subscribe(self, _, __):
-        pass
-
-    async def send(self, _, __, ___=None):
-        pass
-
-
 class TestYAMLReader(unittest.TestCase):
 
     def setUp(self):
@@ -45,7 +37,7 @@ class TestYAMLReader(unittest.TestCase):
         self.test_dir = tempfile.mkdtemp()
         os.environ[FASTIOT_CONFIG_DIR] = self.test_dir
 
-        self.service = SimpleService(MyBroker())
+        self.service = SimpleService(BrokerConnectionDummy())
         self.service.service_id = 1
 
     def tearDown(self):

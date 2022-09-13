@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import List
 
 from pydantic import BaseModel
+from fastiot.core.broker_connection import NatsBrokerConnection
 
-from fastiot.core.broker_connection import NatsBrokerConnectionImpl
 from fastiot.core.data_models import FastIoTData, Subject
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
@@ -47,7 +47,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self._db_client = get_mongodb_client_from_env()
         self._database = self._db_client.get_database(env_mongodb.name)
         self._db_col = self._database.get_collection('object_storage')
-        self.broker_connection = await NatsBrokerConnectionImpl.connect()
+        self.broker_connection = await NatsBrokerConnection.connect()
         service = FastIoTTestService(broker_connection=self.broker_connection)
         self.service_task = asyncio.create_task(service.run())
 

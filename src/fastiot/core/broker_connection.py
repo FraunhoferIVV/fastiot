@@ -146,9 +146,14 @@ class NatsBrokerSubscriptionReplySubject(NatsBrokerSubscription):
 
 class BrokerConnection(ABC):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._loop_mutex = threading.RLock()
-        self._loop = None
+        # Try to set loop for synchronous functionality
+        try:
+            self._loop = asyncio.get_event_loop()
+        except RuntimeError:
+            self._loop = None
 
     def _set_loop(self, loop: asyncio.AbstractEventLoop):
         with self._loop_mutex:
@@ -240,8 +245,9 @@ class BrokerConnection(ABC):
         with self._loop_mutex:
             if not self._loop:
                 raise RuntimeError(
-                    "No event loop has been started. Cannot send data in "
-                    "thread safe mode."
+                    "No event loop has been detected. Please make sure the "
+                    "connection is created in an asyncio context or the loop "
+                    "has been set manually."
                 )
             return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
 
@@ -350,7 +356,6 @@ class NatsBrokerConnection(BrokerConnection):
         result._set_subscription(subscription=subscription)
         return result
 
-    @abstractmethod
     async def subscribe_reply_cb(self,
                                  subject: ReplySubject,
                                  cb: SubscriptionReplyCallback) -> Subscription:
@@ -377,4 +382,37 @@ class NatsBrokerConnection(BrokerConnection):
             payload=payload,
             reply=reply_str
         )
+
+
+class SubscriptionDummy(Subscription):
+    async def unsubscribe(self):
+        pass
+
+    def check_pending_error(self):
+        pass
+
+    async def raise_pending_error(self):
+        await asyncio.Event().wait()
+
+
+class BrokerConnectionDummy(BrokerConnection):
+    """
+    A dummy broker implementation to mock dependencies.
+    """
+
+    async def subscribe(self,
+                        subject: Subject,
+                        cb: SubscriptionCallback) -> Subscription:
+        return SubscriptionDummy()
+
+    async def subscribe_reply_cb(self,
+                                 subject: ReplySubject,
+                                 cb: SubscriptionReplyCallback) -> Subscription:
+        return SubscriptionDummy()
+
+    async def _send(self,
+                    subject: Subject,
+                    msg: Msg,
+                    reply: Optional[Subject] = None):
+        pass
 

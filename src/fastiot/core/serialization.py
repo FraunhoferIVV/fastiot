@@ -20,7 +20,7 @@ def serialize_to_bin(msg_cls: MsgCls, msg: Msg) -> bytes:
         return ormsgpack.packb(msg)
 
 
-def serialize_from_bin(msg_cls: MsgCls, data: Msg):
+def serialize_from_bin(msg_cls: MsgCls, data: bytes) -> Msg:
     """
     Serializes a msg from binary.
     """
