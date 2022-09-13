@@ -1,0 +1,6 @@
+infrastructure-services:
+  nats:
+  #mariadb:
+  mongodb:
+  #influxdb:
+  #timescaledb:

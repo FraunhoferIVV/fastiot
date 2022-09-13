@@ -1,0 +1,6 @@
+mongodb:
+  search_index:
+    - "_subject"
+    - "_timestamp"
+
+
