@@ -12,7 +12,9 @@ class InfrastructureServiceConfig(BaseModel):
     external: bool = False
     """
     Allows to mention services running on external servers and configured manually. This will avoid warnings in the
-    setup process if services specified by the services as dependency could not be found.
+    setup process if services specified by the services as dependency could not be found. 
+    
+    *Attention*: You need to manage the environment variables like host and port yourself if using ``external = True``.
     """
 
 
@@ -25,11 +27,12 @@ class ServiceConfig(BaseModel):
     """ The name defines which service is taken. Must contain possible namespace identifiers as a prefix,
     e.g. fastiot/time_series """
     docker_registry: str = ''
-    """ The specified docker registry. If given it will override the docker_registry for the service """
+    """ The specified docker registry. If given it will override the docker_registry for the service, otherwise the
+    locally  configured docker registry will be used."""
     tag: str = ''
     """ The specified tag. If given it will override the tag for the service """
     environment: Dict[str, str] = {}
-    """ Includes all environment variables for the service """
+    """ Includes all environment variables specifically for this service """
 
     @property
     def is_local_docker_registry(self) -> bool:
