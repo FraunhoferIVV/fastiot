@@ -60,7 +60,6 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         self.service_task.cancel()
 
-    # @unittest.skip('')
     def test_thing_dict_to_mongo(self):
         thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
                           value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
@@ -68,7 +67,6 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self.assertEqual('123456', test_thing_msg_mongo_dict['Object']['measurement_id'])
         self._db_col.insert_one(test_thing_msg_mongo_dict)
 
-    # @unittest.skip('')
     async def test_thing_storage(self):
         thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
                           value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
@@ -112,7 +110,6 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         reply: HistThingResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
         self.assertListEqual(expected_thing_list, reply.values)
 
-    # @unittest.skip('')
     def test_basemodel_dict_to_mongo(self):
         test_custume_msg_l = TestCustumeMsgList(
             name='test_custume_m',
@@ -131,7 +128,6 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(test_custume_msg_mongo_dict['_subject'], TestCustumeMsgList.get_subject().name)
         self._db_col.insert_one(test_custume_msg_mongo_dict)
 
-    # @unittest.skip('')
     async def test_basemodel_storage(self):
         test_custume_msg_l = TestCustumeMsgList(
             name='test_custume_m',

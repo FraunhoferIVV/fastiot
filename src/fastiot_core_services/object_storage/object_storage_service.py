@@ -39,17 +39,17 @@ class ObjectStorageService(FastIoTService):
         pass
 
     @subscribe(subject=Subject(name=env_object_storage.subject, msg_cls=dict))
-    async def _cb_receive_primitive_data(self, subject_name: str, msg: Any):
+    async def _cb_receive_data(self, subject_name: str, msg: Any):
         logging.info("Received message %s" % (str(msg)))
         mongo_data = convert_message_to_mongo_data(msg)
-        logging.info("Converted Mongo data is ", mongo_data)
+        logging.info("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
     @reply(Subject(name="reply_thing",
                    msg_cls=HistThingReq,
                    reply_cls=HistThingResp))
     async def reply_hist_thing(self, subject: str, hist_thing_req: HistThingReq) -> HistThingResp:
-        print("Received request on subject %s with message %s" %(subject, hist_thing_req))
+        logging.info("Received request on subject %s with message %s" % (subject, hist_thing_req))
         query_dict = {"timestamp": {'$gte': hist_thing_req.dt_start, '$lte': hist_thing_req.dt_end},
                       "Object.machine": hist_thing_req.machine,
                       "Object.name": hist_thing_req.name}
