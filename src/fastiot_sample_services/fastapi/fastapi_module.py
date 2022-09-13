@@ -90,7 +90,7 @@ class FastAPIModule(FastIoTService):
         received = await websocket.receive_text()
         logging.info("Received data: %s", received)
 
-        while True:
+        while not self.shutdown_requested:
             await self.message_received.wait()
             await websocket.send_text(f"Received message from sensor {self.last_msg.name}: {str(self.last_msg.value)}")
             self.message_received.clear()
