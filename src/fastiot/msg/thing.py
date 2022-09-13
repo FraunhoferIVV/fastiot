@@ -1,9 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from fastiot.core.subjects import FastIoTData
-
-from fastiot.core.subjects import Subject
+from fastiot.core.data_models import FastIoTData
 
 
 class Thing(FastIoTData):

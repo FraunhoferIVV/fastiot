@@ -1,7 +1,7 @@
 """ Decorator functions to add the basic functionality to FastIoT Services """
 from fastiot.core.data_models import Subject
 
-from fastiot.core.subjects import Subject, ReplySubject
+from fastiot.core.data_models import Subject, ReplySubject
 
 
 def subscribe(subject: Subject):

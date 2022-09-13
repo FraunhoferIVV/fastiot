@@ -3,14 +3,14 @@ import signal
 from asyncio import CancelledError
 from typing import List, Dict, Any
 
-from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnectionImpl
+from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection
 
 
 class FastIoTService:
     @classmethod
     def main(cls, **kwargs):
         async def run_main():
-            broker_connection = await NatsBrokerConnectionImpl.connect()
+            broker_connection = await NatsBrokerConnection.connect()
             try:
                 app = cls(broker_connection=broker_connection, **kwargs)
                 await app.run()
@@ -89,6 +89,13 @@ class FastIoTService:
         for subscription_fn in self._subscription_fns:
             sub = await self.broker_connection.subscribe(
                 subject=subscription_fn._fastiot_subject,
+                cb=subscription_fn
+            )
+            self._subs.append(sub)
+
+        for subscription_fn in self._reply_subscription_fns:
+            sub = await self.broker_connection.subscribe_reply_cb(
+                subject=subscription_fn._fastiot_reply_subject,
                 cb=subscription_fn
             )
             self._subs.append(sub)

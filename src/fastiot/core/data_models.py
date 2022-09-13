@@ -43,7 +43,7 @@ class FastIoTData(BaseModel):
         return subject_name
 
     @classmethod
-    def get_reply_subject(cls, reply_cls: "MsgClsType", name: str = "") -> "ReplySubject":
+    def get_reply_subject(cls, reply_cls: "MsgCls", name: str = "") -> "ReplySubject":
         """
         This method returns the corresponding reply subject for the data model as :class:`fastiot.core.data_models.ReplySubject`.
 
@@ -62,8 +62,8 @@ class FastIoTData(BaseModel):
         )
 
 
-MsgCls = Union[FastIoTData, dict]
-MsgClsType = Type[MsgCls]
+Msg = Union[FastIoTData, dict]
+MsgCls = Type[Msg]
 
 
 class Subject(BaseModel):
@@ -72,14 +72,14 @@ class Subject(BaseModel):
     name: str
     """ Name of the subject, s. :meth:`fastiot.core.data_models.FastIoTData.get_subject` for details about subscription
     names."""
-    msg_cls: MsgClsType
+    msg_cls: MsgCls
     """ Datatype the message will provide. """
 
 
 class ReplySubject(Subject):
     """ Model for handle subject subscription which also have a reply to cls """
 
-    reply_cls: MsgClsType
+    reply_cls: MsgCls
     """ Set to a datatype, not the default ``None`` to expect a reply in this datatype. """
 
     def make_generic_reply_inbox(self) -> Subject:

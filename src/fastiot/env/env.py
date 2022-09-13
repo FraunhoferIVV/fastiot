@@ -82,14 +82,6 @@ class BrokerEnv:
         """
         return float(os.getenv(FASTIOT_NATS_DEFAULT_TIMEOUT, '30'))
 
-    @property
-    def stream_timeout(self) -> float:
-        """ .. envvar::FASTIOT_NATS_STREAM_TIMEOUT
-
-        Use to get/set  the broker stream timeout in seconds, defaults to 10.
-        """
-        return float(os.getenv(FASTIOT_NATS_STREAM_TIMEOUT, '10'))
-
 
 class MongoDBEnv:
     """

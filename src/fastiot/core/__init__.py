@@ -6,7 +6,7 @@ This module provides the core functionality for FastIoT Services:
    handling requests with a reply (:meth:`fastiot.core.service_annotations.reply`) and run background-tasks
    (:meth:`fastiot.core.service_annotations.loop`)
 """
-from fastiot.core.subjects import FastIoTData, Subject, ReplySubject
+from fastiot.core.data_models import FastIoTData, Subject, ReplySubject
 from fastiot.core.service import FastIoTService
 from fastiot.core.service_annotations import subscribe, reply, loop
 
