@@ -50,7 +50,7 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
         from fastiot.cli.commands.config import config  # pylint: disable=import-outside-toplevel
 
         logging.warning("No file `generated.py` found in testpackage %s.\n"
-                        "Running config command to create one now.", project_config.test_package)
+                        "\tRunning config command to create one now.", project_config.test_package)
         config(test_deployment_only=True, service_port_offset=-1, generated_py_with_internal_hostnames=False)
 
     if start_deployment:

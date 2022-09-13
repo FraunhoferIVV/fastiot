@@ -62,6 +62,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     the images locally.
     """
 
+    logging.info("Creating configurations…")
+
     project_config = get_default_context().project_config
 
     if test_deployment_only:
@@ -123,6 +125,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
 
         if deployment_name == project_config.integration_test_deployment:
             _create_generated_py(project_config, env_file_env, fastiot_env, tests_env)
+
+        logging.info("Successfully created configurations!")
 
 
 def _create_generated_py(project_config, env_file_env, fastiot_env, tests_env):
