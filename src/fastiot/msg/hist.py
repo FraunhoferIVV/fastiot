@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic.main import BaseModel
 
-from fastiot.core.data_models import Subject
+from fastiot.core.data_models import Subject, FastIoTData
 from fastiot.msg.thing import Thing
 
 
@@ -21,21 +21,22 @@ class HistBeat(BaseModel):
         )
 
 
-class HistResp(BaseModel):
+class HistThingResp(FastIoTData):
+    machine: str
     name: str
     values: List[Thing]
 
 
-class HistReq(BaseModel):
+class HistThingReq(FastIoTData):
+    machine: str
     name: str
     dt_start: datetime
     dt_end: datetime = None
-    max_values: int = None
 
     @classmethod
     def get_hist_subject(cls, name: str):
         return Subject(
             name=f"v1.hist.{name}",
-            msg_cls=HistReq,
-            reply_cls=HistResp
+            msg_cls=HistThingReq,
+            reply_cls=HistThingResp
         )
