@@ -9,19 +9,22 @@ from fastiot.cli.model import ServiceManifest
 
 
 class Service(BaseModel):
+    """
+    The model class for a service
+    """
     name: str
     package: str
-    cache: Optional[str] = ""
+    cache: str = ""
     """
-    The name to use as the cache on the set docker cache registry. The tag will be appended automatically, please do not
-    specify it.
+    The name to use as the cache on the set docker cache registry. The tag will
+    be appended automatically (in case not empty), please do not specify it.
     Example: mypackage-cache
     """
-    extra_caches: Optional[List[str]] = []
+    extra_caches: List[str] = []
     """
     A list of extra caches used to speed up building which will all be read-only. It is intended if you want to read
     from other caches or different tags. Each extra cache must match a cache name extended by ':' followed by the tag
-    for the cache. It is useful to always include the cache name followed by tag latest to always use latest cache for 
+    for the cache. It is useful to always include the cache name followed by tag latest to always use latest cache for
     feature branches.
     Examples: mypackage-cache:latest, mypackage-cache:my-feature
     """
@@ -45,7 +48,7 @@ class InfrastructureServiceEnvVar(BaseModel):
     default: str
     """ THe default value for the infrastructure service env var """
     env_var: str = ''
-    """ The env var which can be used for modification. If empty it cannot be modified, therefore is static for the 
+    """ The env var which can be used for modification. If empty it cannot be modified, therefore is static for the
     infrastructure service """
 
 
@@ -83,3 +86,4 @@ class InfrastructureService(BaseModel):
     host_name_env_var: str = ""
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
+

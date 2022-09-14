@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model import Service
+from fastiot.cli.model.project import ProjectConfig
 
 
 class TestConfigurationImport(unittest.TestCase):
@@ -12,16 +13,12 @@ class TestConfigurationImport(unittest.TestCase):
             f.write(b"project_namespace = 'fastiot_unittest'")
             f.seek(0)
 
-            config = import_configure(f.name)
+            config = ProjectConfig()
+            import_configure(config, f.name)
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
             self.assertEqual(os.getcwd(), config.project_root_dir)
             self.assertEqual('', config.library_package)
-
-    def test_missing_configuration_option(self):
-        with NamedTemporaryFile(suffix='.py') as f:
-            with self.assertRaises(ValueError):
-                _ = import_configure(f.name)
 
     def test_with_service_packages(self):
         with NamedTemporaryFile(suffix='.py', encoding='utf8', mode="w") as f:
@@ -29,7 +26,8 @@ class TestConfigurationImport(unittest.TestCase):
             f.write(f"project_root_dir = '{os.path.abspath(os.path.join(__file__, '../../../..'))}'\n")
             f.seek(0)
 
-            config = import_configure(f.name)
+            config = ProjectConfig()
+            import_configure(config, f.name)
 
             self.assertEqual('fastiot_unittest', config.project_namespace)
             self.assertIsInstance(config.services[0], Service)
@@ -40,3 +38,4 @@ class TestConfigurationImport(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

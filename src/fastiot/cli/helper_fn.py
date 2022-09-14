@@ -81,7 +81,7 @@ def find_services(package: Optional[str] = None,
     return found_services
 
 
-def find_deployments(deployments: Optional[List[str]] = None, path: Optional[str] = None) -> List[DeploymentConfig]:
+def find_deployments(deployments: Optional[List[str]] = None, path: str = '') -> List[DeploymentConfig]:
     """
     Creates a list of all deployments found the projects :file:`deployments` path.
 

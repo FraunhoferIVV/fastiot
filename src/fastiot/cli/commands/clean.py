@@ -5,7 +5,7 @@ import typer
 
 from fastiot.cli.model import ProjectConfig
 from fastiot.cli.model.context import get_default_context
-from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
+from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app, extras_cmd
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -27,3 +27,16 @@ def _clean_generated_files(project_config: ProjectConfig):
     build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
     if os.path.exists(build_dir):
         rmtree(build_dir)
+
+
+@extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
+def remove_all_container(kill: bool = typer.Option(False, '-k', '--kill', help="Sending kill signal to containers, instead of stop signal.")):
+    """
+    Remove all running container
+    """
+    if kill:
+        os.system("docker ps -q | xargs -r docker kill")
+    else:
+        os.system("docker ps -q | xargs -r docker stop")
+    os.system("docker ps -aq | xargs -r docker rm")
+

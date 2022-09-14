@@ -12,7 +12,7 @@ from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 
-def _deployment_completion() -> List[str]:
+def _deployment_completion(*_) -> List[str]:
     return get_default_context().project_config.deployment_names
 
 

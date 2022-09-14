@@ -1,22 +1,37 @@
-from typing import List, Optional
+import os
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel
+from fastiot.cli.constants import FASTIOT_CONFIGURE_FILE
+from fastiot.cli.import_configure import import_configure
 
 from fastiot.cli.model import ProjectConfig, InfrastructureService
+from fastiot.cli.infrastructure_service_fn import get_services_list
 
 
-class Context:
-    """ Singleton class to hold the current context with e.g. project configuration """
-    # pylint: disable=too-few-public-methods
-    def __init__(self):
-        self.project_config: Optional[ProjectConfig] = None
-        self.external_services: Optional[List[InfrastructureService]] = None
+class Context(BaseModel):
+    """
+    Singleton class to hold the current context with e.g. project configuration
+    """
+
+    project_config: ProjectConfig = ProjectConfig()
+    external_services: Dict[str, InfrastructureService] = {}
 
 
 __default_context = None
 
 
 def get_default_context() -> Context:
-    """ Use this method to retrieve the singleton :class:`fastiot.cli.model.context.Context` """
+    """
+    Use this method to retrieve the singleton :class:`fastiot.cli.model.context.Context`
+    """
     global __default_context
     if __default_context is None:
         __default_context = Context()
+        import_configure(
+            project_config=__default_context.project_config,
+            file_name=os.environ.get(FASTIOT_CONFIGURE_FILE, '')
+        )
+        __default_context.external_services = get_services_list()
     return __default_context
+

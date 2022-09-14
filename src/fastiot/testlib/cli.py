@@ -30,6 +30,6 @@ def init_default_context(configure_filename: Optional[str] = None):
                 configure_filename = filename
                 break
     default_context = get_default_context()
-    default_context.project_config = import_configure(configure_filename)
+    import_configure(default_context.project_config, configure_filename)
     default_context.external_services = get_services_list()
     _import_infrastructure_services()

@@ -4,52 +4,47 @@ import sys
 from typing import Optional
 
 from fastiot.cli import find_deployments, find_services
-from fastiot.cli.constants import CONFIGURE_FILE_NAME
+from fastiot.cli.constants import CONFIGURE_FILE_NAME, IMPORT_NAME_CONFIGURE_PY
 from fastiot.cli.model import ProjectConfig
 
 
-def import_configure(file_name: Optional[str] = None) -> ProjectConfig:
-    """ Imports the :file:`configure.py` in the project root (if not specified otherwise) and returns  """
-    try:
-        config = _import_configure_py(file_name)
-    except FileNotFoundError:
-        config = ProjectConfig(project_namespace="")
+def import_configure(project_config: ProjectConfig, file_name: str = ''):
+    """
+    Imports the :file:`configure.py` in the project root (if not specified
+    otherwise) and sets project config accordingly.
+    """
+    file_name = file_name or os.path.join(os.getcwd(), CONFIGURE_FILE_NAME)
+    config = _import_configure_py(file_name)
 
-    data = dict()
-    for field, options in ProjectConfig.__dict__['__fields__'].items():
+    for field in ProjectConfig.__fields__:
         if hasattr(config, field):
-            data[field] = getattr(config, field)
-        elif options.required:
-            raise ValueError(f"Error reading configure.py: Mandatory setting for {field} not found!")
-        else:
-            data[field] = options.default
+            setattr(project_config, field, getattr(config, field))
 
-    # Use all available configs if not specified otherwise
-    project_config = ProjectConfig(**data)
-    if project_config.extensions is not None:
-        _import_plugin_commands(project_config.extensions)
-    project_config.deployments = find_deployments(deployments=data['deployments'],
-                                                  path=project_config.project_root_dir)
+    if project_config.extensions:
+        _import_extension(project_config.extensions)
+
+    if not project_config.deployments:
+        project_config.deployments = find_deployments(
+            path=project_config.project_root_dir
+        )
     if not project_config.services:
         project_config.services = find_services(path=project_config.project_root_dir)
 
-    return project_config
-
 
 def _import_configure_py(file_name):
-    file_name = file_name or os.path.join(os.getcwd(), CONFIGURE_FILE_NAME)
     if not os.path.isfile(file_name):
-        raise FileNotFoundError(f"Could not open configure file {file_name} from working directory {os.getcwd()}.")
-    spec = importlib.util.spec_from_file_location("config", file_name)
+        raise FileNotFoundError(f"Could not find configure file '{file_name}'.")
+    spec = importlib.util.spec_from_file_location(IMPORT_NAME_CONFIGURE_PY, file_name)
     config = importlib.util.module_from_spec(spec)
-    sys.modules["config"] = config
+    sys.modules[IMPORT_NAME_CONFIGURE_PY] = config
     spec.loader.exec_module(config)
     return config
 
 
-def _import_plugin_commands(extensions):
+def _import_extension(extensions):
     for extension in extensions:
         try:
-            importlib.import_module(f'{extension}')
+            importlib.import_module(extension)
         except ImportError:
             pass  # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
+

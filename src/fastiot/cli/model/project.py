@@ -28,7 +28,7 @@ class ProjectConfig(BaseModel):
     be needed in rare cases.
     """
 
-    project_namespace: str
+    project_namespace: str = ''
     """ Namespace of the project used e.g. on the docker registry. This should be your project name."""
 
     project_root_dir: str = os.getcwd()
@@ -45,10 +45,10 @@ class ProjectConfig(BaseModel):
 
     services: List[Service] = []
     """ Define a list of :class:`fastiot.cli.model.service.ServiceConfig`. If not defined the cli will look for python
-    packages containing a :file:`manifest.yaml` and a `run.py` with the pattern :file:`src/*/*/manifest.yaml` and call 
+    packages containing a :file:`manifest.yaml` and a `run.py` with the pattern :file:`src/*/*/manifest.yaml` and call
     this package a FastIoT Service. Be aware of this when creating a :file:`manifest.yaml` somewhere, e.g. in your
     tests.
-    
+
     *Hint:* If you want to override this configuration you may use :func:`fastiot.cli.helper_fn.find_services` to create
     a list of services to build by package."""
 
@@ -56,7 +56,7 @@ class ProjectConfig(BaseModel):
     """ Manually define a list of deployments as :class:`fastiot.cli.model.DeploymentConfig` to actually build using the
     command :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path
     :file:`deployments` will be used.
-    
+
     *Hint:* You may use :func:`fastiot.cli.helper_fn.find_deployments` to create a list of deployments according to your special
     needs."""
 
@@ -65,10 +65,10 @@ class ProjectConfig(BaseModel):
     special deployment found within the :attr:`fastiot.cli.model.project.ProjectConfig.deployments`."""
 
     test_package: str = ''
-    """ Name of the package in the :file:`src` directory where automated tests are stored. Common is to use something 
+    """ Name of the package in the :file:`src` directory where automated tests are stored. Common is to use something
     like :file:`myproject_tests`."""
 
-    imports_for_test_deployment_env_vars: Optional[List[str]] = None
+    imports_for_test_deployment_env_vars: List[str] = []
     npm_test_dir: str = ''
 
     build_dir: str = 'build'
@@ -79,14 +79,14 @@ class ProjectConfig(BaseModel):
     extensions: List[str] = []
     """
     Use to add own extensions to the FastIoT CLI. The CLI will try to import your custom infrastructure services as
-    described in :ref:`tut-own_infrastructure_services`.      
-    
-    Make sure importing this service will import further commands and 
+    described in :ref:`tut-own_infrastructure_services`.
+
+    Make sure importing this service will import further commands and
     :class:`fastiot.cli.model.service.InfrastructureService`.
     Most of the times this is done filling the :file:`__init__.py` correspondingly.
     """
 
-    lib_compilation_mode: Optional[CompileSettingsEnum] = CompileSettingsEnum.only_compiled
+    lib_compilation_mode: CompileSettingsEnum = CompileSettingsEnum.only_compiled
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from
     :class:`fastiot.cli.model.project.CompileSettingsEnum` """
 
@@ -114,3 +114,4 @@ class ProjectConfig(BaseModel):
         if self.services:
             return [s.name for s in self.services]
         return []
+
