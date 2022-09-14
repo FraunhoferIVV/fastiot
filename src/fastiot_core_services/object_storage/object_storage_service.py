@@ -21,7 +21,6 @@ class ObjectStorageService(FastIoTService):
         self._mongo_client = get_mongodb_client_from_env()
         database = self._mongo_client.get_database(env_mongodb.name)
         self._mongo_object_db_col = database.get_collection(env_mongodb_cols.object_storage)
-
         service_config = read_config(self)
 
         mongo_indicies = service_config['mongodb']['search_index']
@@ -32,13 +31,13 @@ class ObjectStorageService(FastIoTService):
 
     @subscribe(subject=Subject(name=env_object_storage.subject, msg_cls=dict))
     async def _cb_receive_data(self, subject_name: str, msg: dict):
-        logging.debug("Received message %s", str(msg))
+        logging.getLogger('Object_Storage received data').debug("Received message %s", str(msg))
         if 'timestamp' in list(msg.keys()):
             timestamp = msg['timestamp']
         else:
             timestamp = datetime.utcnow()
         mongo_data = {'_timestamp': timestamp, '_subject': subject_name, 'Object': msg}
-        logging.debug("Converted Mongo data is %s" % mongo_data)
+        logging.getLogger('Object_Storage received data').debug("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
     @reply(ReplySubject(name="reply_object",

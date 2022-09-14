@@ -71,16 +71,3 @@ def read_config(service: Union[FastIoTService, str]) -> Dict:
         return {}
     logging.getLogger("yaml_config").info("Successfully read configuration %s", config_file)
     return result[0]
-
-
-def read_log_config() -> Dict:
-    config_file = os.path.join(env_basic.config_dir, "log_config.yaml")
-    if os.path.isfile(config_file):
-        try:
-            with open(config_file) as file:
-                loader = yaml.safe_load_all(file)
-                result = [x for x in loader]
-            return result[0]
-        except:
-            return {}
-    return {}

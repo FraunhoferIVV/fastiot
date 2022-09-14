@@ -1,14 +1,19 @@
 import asyncio
+import logging.config
 import signal
 from asyncio import CancelledError
 from typing import List, Dict, Any
 
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection
+from fastiot.env import env_basic
+from fastiot.helpers.log_config import get_log_config
 
 
 class FastIoTService:
     @classmethod
     def main(cls, **kwargs):
+        logging.config.dictConfig(get_log_config(env_basic.log_level_no))
+
         async def run_main():
             broker_connection = await NatsBrokerConnection.connect()
             try:
@@ -120,4 +125,3 @@ class FastIoTService:
 
     async def _stop(self):
         """ Overwrite this method to run any async stop commands like ``await self._server.stop()``` """
-
