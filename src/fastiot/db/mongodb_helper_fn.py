@@ -93,7 +93,7 @@ class CustomMongoClient:
         :param index_name: Define a unique name for the index. This name will be used to check if index has already been
         created
 
-        :return True if index was created, False if index has been created already
+        return True if index was created, False if index has been created already
         """
         all_indices = [index['name'] for index in collection.list_indexes()]
         if index_name not in all_indices:
@@ -108,6 +108,14 @@ class CustomMongoClient:
 
 
 def get_mongodb_client_from_env() -> CustomMongoClient:
+    """
+    For connecting Mongodb, the environment variables can be set,
+    if you want to use your own settings instead of default:
+    FASTIOT_MONGO_DB_HOST, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, FASTIOT_MONGO_DB_PASSWORD,
+    FASTIOT_MONGO_DB_AUTH_SOURCE, FASTIOT_MONGO_DB_NAME
+
+    >>> mongo_client = get_mongodb_client_from_env()
+    """
     db_client = CustomMongoClient(
         db_host=env_mongodb.host,
         db_port=env_mongodb.port,

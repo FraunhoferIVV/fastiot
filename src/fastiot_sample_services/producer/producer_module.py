@@ -3,7 +3,7 @@ import logging
 import random
 from datetime import datetime
 
-from fastiot.core import FastIoTService, Subject, loop, reply
+from fastiot.core import FastIoTService, loop, reply, ReplySubject
 from fastiot.core.core_uuid import get_uuid
 from fastiot.msg.thing import Thing
 
@@ -28,7 +28,7 @@ class ExampleProducerService(FastIoTService):
         logging.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
 
-    @reply(Subject(name="reply_test",
+    @reply(ReplySubject(name="reply_test",
                    msg_cls=Thing,
                    reply_cls=Thing))
     async def respond(self, topic: str, msg: Thing) -> Thing:

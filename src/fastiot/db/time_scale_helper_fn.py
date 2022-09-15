@@ -9,6 +9,14 @@ from fastiot.exceptions import ServiceError
 
 
 def open_timescaledb_connection_from_env():
+    """
+    For connecting TimeScaleDB, the environment variables can be set,
+    if you want to use your own settings instead of default:
+    FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_PORT, FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD,
+    FASTIOT_TIME_SCALE_DB_DATABASE
+
+    >>> time_scale_db_connection = open_timescaledb_connection_from_env()
+    """
     db_connection = open_timescaledb_connection(
         host=env_timescaledb.host,
         port=env_timescaledb.port,

@@ -12,6 +12,14 @@ def open_mariadb_connection_from_env(schema: Optional[str] = None):
     Establishes a connection to a MariaDB instance and returns a Connection object.
 
     An optional schema name can be specified. The connection should be closed before termination.
+
+    For connecting Mariadb, the environment variables can be set,
+    if you want to use your own settings instead of default:
+    FASTIOT_MARIA_DB_HOST, FASTIOT_MARIA_DB_PORT, FASTIOT_MARIA_DB_USER, FASTIOT_MARIA_DB_PASSWORD,
+    FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB
+
+    >>> mariadb_connection = open_mariadb_connection_from_env(schema=None)
+    You should create a schema using `init_schema()` after opening the connection.
     """
     db_connection = open_mariadb_connection(
         host=env_mariadb.host,
