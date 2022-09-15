@@ -31,7 +31,7 @@ def _get_config_file_name(service: Union[FastIoTService, str]) -> Optional[str]:
         logging.getLogger("yaml_config").warning("Provided config file %s could not be found.", service)
     else:
         service_name = service.__class__.__name__
-        service_id = service.service_id_
+        service_id = service.service_id
 
         config_file_per_service = os.path.join(env_basic.config_dir, f"{service_name}.yaml")
         config_file_per_instance = os.path.join(env_basic.config_dir, f"{service_name}_{service_id}.yaml")

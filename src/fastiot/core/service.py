@@ -42,7 +42,7 @@ class FastIoTService:
         self._loop_fns = []
         self._tasks: List[asyncio.Task] = []
         self._subs = []
-        self.service_id_: Optional[str] = env_basic.service_id_  # Use to separate different services instantiated
+        self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
 
         for name in dir(self):
             if name.startswith('__'):
