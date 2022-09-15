@@ -2,7 +2,7 @@ import asyncio
 import logging.config
 import signal
 from asyncio import CancelledError
-from typing import List, Dict, Any
+from typing import List
 
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection
 from fastiot.env import env_basic
@@ -10,8 +10,16 @@ from fastiot.helpers.log_config import get_log_config
 
 
 class FastIoTService:
+    """
+    This is the most base class for all FastIoT Services. Your service must inherit from this class for everything to
+    work.
+    """
     @classmethod
     def main(cls, **kwargs):
+        """
+        Entrypoint of the class; this is the method to be started using e.g. a :file:`run.py` like generated when
+        creating a new service. Do not overwrite, unless you know exactly what you are doing.
+        """
         logging.config.dictConfig(get_log_config(env_basic.log_level_no))
 
         async def run_main():
@@ -49,6 +57,16 @@ class FastIoTService:
 
     @property
     def shutdown_requested(self) -> asyncio.Event:
+        """
+        Method to check, if the service is shutting down. This is helpfull if you have a loop running forever till the
+        service needs to shutdown.
+        Shutdown may occur when some other parts of the service fail like database connection, broker connection, ….
+
+        Example:
+        >>> while not self._shutdown_requested():
+        >>>     print("Still running…")
+        >>>     asyncio.sleep(1)
+        """
         if self._shutdown_requested is None:
             self._shutdown_requested = asyncio.Event()
         return self._shutdown_requested
@@ -83,6 +101,7 @@ class FastIoTService:
         await self._stop()
 
     async def request_shutdown(self):
+        """ Sets the shutdown request for all loops and tasks in the service to stop """
         self.shutdown_requested.set()
 
     async def _start_service_annotations(self):
@@ -121,7 +140,7 @@ class FastIoTService:
             pass
 
     async def _start(self):
-        """ Overwrite this method to run any async start commands like ``await self._server.start()``` """
+        """ Optionally overwrite this method to run any async start commands like ``await self._server.start()``` """
 
     async def _stop(self):
-        """ Overwrite this method to run any async stop commands like ``await self._server.stop()``` """
+        """ Optionally overwrite this method to run any async stop commands like ``await self._server.stop()``` """
