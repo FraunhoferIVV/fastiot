@@ -21,7 +21,7 @@ def import_configure(project_config: ProjectConfig, file_name: str = ''):
             setattr(project_config, field, getattr(config, field))
 
     if project_config.extensions:
-        _import_extension(project_config.extensions)
+        _import_extensions(project_config.extensions)
 
     if not project_config.deployments:
         project_config.deployments = find_deployments(
@@ -41,7 +41,7 @@ def _import_configure_py(file_name):
     return config
 
 
-def _import_extension(extensions):
+def _import_extensions(extensions):
     for extension in extensions:
         try:
             importlib.import_module(extension)
