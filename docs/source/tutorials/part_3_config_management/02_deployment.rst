@@ -1,4 +1,4 @@
-.. _compose_yaml:
+.. _deployment_yaml:
 
 ##########################################
 Deployment configuration - deployment.yaml

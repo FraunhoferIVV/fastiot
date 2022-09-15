@@ -39,6 +39,15 @@ class BasicEnv:
         return os.getenv(FASTIOT_VOLUME_DIR, '/var/fastiot')
 
     @property
+    def service_id(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_SERVICE_ID
+
+        Use this variable to differentiate between multiple instances of the same service. The result is available as
+        ``self.service_id_``. It is for example used to read a configuration file for each service with
+        :func:`fastiot.helpers.read_yaml.read_config`. See
+        """
+        return os.getenv(FASTIOT_SERVICE_ID)
+    @property
     def log_dir(self) -> str:
         return os.path.join(self.volume_dir, 'logs')
 

@@ -38,7 +38,7 @@ class TestYAMLReader(unittest.TestCase):
         os.environ[FASTIOT_CONFIG_DIR] = self.test_dir
 
         self.service = SimpleService(BrokerConnectionDummy())
-        self.service.service_id = 1
+        self.service.service_id_ = 1
 
     def tearDown(self):
         # Remove the directory after the test
