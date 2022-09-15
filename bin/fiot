@@ -4,14 +4,16 @@ import logging
 import os
 
 from fastiot.cli import typer_app
-from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
+from fastiot.cli.commands import *
+from fastiot.cli.model.context import get_default_context  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 if __name__ == '__main__':
     # entry point for fastiot command
     LOGLEVEL = os.environ.get('FASTIOT_LOGLEVEL', 'INFO').upper()
-
     logging.basicConfig(level=LOGLEVEL)
 
+    # trigger context creation
+    get_default_context()
     typer_app.app()
 
