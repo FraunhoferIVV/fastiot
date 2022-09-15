@@ -1,7 +1,7 @@
+import importlib
 import importlib.util
 import os
 import sys
-from typing import Optional
 
 from fastiot.cli import find_deployments, find_services
 from fastiot.cli.constants import CONFIGURE_FILE_NAME, IMPORT_NAME_CONFIGURE_PY
