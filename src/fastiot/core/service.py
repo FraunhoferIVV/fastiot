@@ -9,6 +9,7 @@ from typing import List, Optional
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
 from fastiot.core.service_annotations import loop
 from fastiot.env import env_basic
+from fastiot.exceptions.exceptions import ShutdownRequestedInterruption
 from fastiot.helpers.log_config import get_log_config
 
 
@@ -125,6 +126,21 @@ class FastIoTService:
             except TimeoutError:
                 result = False
             return result
+
+    async def run_coro(self, coro):
+        """
+        Waits for coro or raises ShutdownRequestedInterruption if shutdown is
+        requested.
+
+        :param coro: The coroutine to wait for
+        :returns The result of the coroutine
+        """
+        async def _wait_and_raise_interruption():
+            await self.wait_for_shutdown()
+            raise ShutdownRequestedInterruption()
+
+        for c in asyncio.as_completed([coro, _wait_and_raise_interruption()]):
+            return await c
 
     async def __aenter__(self):
         self._shutdown_event.clear()
