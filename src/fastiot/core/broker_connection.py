@@ -1,17 +1,14 @@
 import asyncio
 import concurrent.futures
 import threading
-import time
 from abc import ABC, abstractmethod
 from asyncio import get_running_loop
 from inspect import signature
 from typing import Any, Callable, Coroutine, Generic, List, NewType, Optional, TypeVar, Union, AsyncIterator
 
-import nats
-from nats.aio.client import Client as BrokerClient
+from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback
 from nats.aio.subscription import Subscription as BrokerSubscription
 from nats.aio.msg import Msg as NatsBrokerMsg
-from pydantic import BaseModel
 
 from fastiot.core.serialization import serialize_from_bin, serialize_to_bin
 from fastiot.core.data_models import Msg, Subject, ReplySubject
@@ -324,11 +321,17 @@ class BrokerConnection(ABC):
 class NatsBrokerConnection(BrokerConnection):
 
     @classmethod
-    async def connect(cls) -> "NatsBrokerConnection":
+    async def connect(cls,
+                      closed_cb: Optional[BrokerCallback] = None
+                      ) -> "NatsBrokerConnection":
         """
-        Connects
+        Connects a nats instance and returns a nats broker connection.
         """
-        client = await nats.connect(f"nats://{env_broker.host}:{env_broker.port}")
+        client = BrokerClient()
+        await client.connect(
+            f"nats://{env_broker.host}:{env_broker.port}",
+            closed_cb=closed_cb
+        )
         return cls(
             client=client
         )

@@ -1,10 +1,13 @@
 import asyncio
+from datetime import time
+import logging
 import logging.config
 import signal
 from asyncio import CancelledError
 from typing import List, Optional
 
-from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection
+from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
+from fastiot.core.service_annotations import loop
 from fastiot.env import env_basic
 from fastiot.helpers.log_config import get_log_config
 
@@ -23,7 +26,16 @@ class FastIoTService:
         logging.config.dictConfig(get_log_config(env_basic.log_level_no))
 
         async def run_main():
-            broker_connection = await NatsBrokerConnection.connect()
+            app = None
+            async def closed_cb():
+                # We want to request service shutdown if connection closes
+                nonlocal app
+                if app is not None:
+                    await app.request_shutdown("Lost connection to broker")
+
+            broker_connection = await NatsBrokerConnection.connect(
+                closed_cb=closed_cb
+            )
             try:
                 app = cls(broker_connection=broker_connection, **kwargs)
                 await app.run()
@@ -35,13 +47,13 @@ class FastIoTService:
     def __init__(self, broker_connection: BrokerConnection, **kwargs):
         super().__init__(**kwargs)
         self.broker_connection = broker_connection
-        self._shutdown_requested = None
+        self._shutdown_event = asyncio.Event()
 
         self._subscription_fns = []
         self._reply_subscription_fns = []
         self._loop_fns = []
         self._tasks: List[asyncio.Task] = []
-        self._subs = []
+        self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
 
         for name in dir(self):
@@ -55,34 +67,79 @@ class FastIoTService:
             if hasattr(attr, '_fastiot_reply_subject'):
                 self._reply_subscription_fns.append(attr)
 
-    @property
-    def shutdown_requested(self) -> asyncio.Event:
+    def run_task(self, coro):
         """
-        Method to check, if the service is shutting down. This is helpfull if you have a loop running forever till the
-        service needs to shutdown.
-        Shutdown may occur when some other parts of the service fail like database connection, broker connection, ….
+        Creates an asyncio-Task which is managed by this class. If the execution
+        of the coroutine raises an exception, they are logged and a service
+        shutdown is requested. If the task terminates reguarly, it is dropped
+        and the module continuous to run.
+
+        The task is awaited after _stop() has been called.
+        """
+        self._tasks.append(
+            asyncio.create_task(self._exec_task(coro=coro))
+        )
+
+    async def _exec_task(self, coro):
+        err = None
+        try:
+            await coro
+        except Exception as e:
+            logging.exception("Uncaught exception raised inside task")
+            err = e
+        if err:
+            await self.request_shutdown("Task failed with an exception")
+
+    async def wait_for_shutdown(self, timeout: float = 0.0) -> bool:
+        """
+        Method to wait for service shutdown. This is helpfull if you have a loop
+        running forever till the service needs to shutdown.
+
+        Shutdown may occur when some other parts of the service fail like
+        database connection or broker connection.
+
+        Per default, it will wait indefinetly, but you can specify a timeout. If
+        timeout exceeds, it will not raise a timeout error, but instead return
+        false. Otherwise it will return true.
 
         Example:
-        >>> while not self._shutdown_requested():
-        >>>     print("Still running…")
-        >>>     asyncio.sleep(1)
+        >>> while await self.wait_for_shutdown(1.0) is False:
+        >>>     print("Still running...")
+
+        :param timeout: Specify a time you want to wait for the shutdown. A
+                        value of 0.0 (default) will wait indefinetly.
+        :result Return true if shutdown is requested, false if timeout occured.
         """
-        if self._shutdown_requested is None:
-            self._shutdown_requested = asyncio.Event()
-        return self._shutdown_requested
+        if timeout < 0:
+            raise ValueError("Timeout must be greater or equal zero")
+        elif timeout == 0:
+            await self._shutdown_event.wait()
+            return True
+        else:
+            result = True
+            try:
+                await asyncio.wait_for(
+                    self._shutdown_event.wait(),
+                    timeout=timeout
+                )
+            except TimeoutError:
+                result = False
+            return result
 
     async def __aenter__(self):
-        self.shutdown_requested.clear()
+        self._shutdown_event.clear()
         await self._start()
         await self._start_service_annotations()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.request_shutdown()
+        await self._stop_service_annotations()
         await self._stop()
         return False
 
     async def run(self):
-        self.shutdown_requested.clear()
+        self._shutdown_event.clear()
         loop = asyncio.get_running_loop()
 
         def handler(signum, _):
@@ -95,20 +152,20 @@ class FastIoTService:
         await self._start()
         await self._start_service_annotations()
 
-        await self.shutdown_requested.wait()
+        await self.wait_for_shutdown()
 
         await self._stop_service_annotations()
         await self._stop()
 
-    async def request_shutdown(self):
+    async def request_shutdown(self, reason: str = ''):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
-        self.shutdown_requested.set()
+        if self._shutdown_event.is_set() is False and reason:
+            logging.info(f"Initial shutdown requested with reason: {reason}")
+        self._shutdown_event.set()
 
     async def _start_service_annotations(self):
         for loop_fn in self._loop_fns:
-            self._tasks.append(
-                asyncio.create_task(self._run_loop(loop_fn=loop_fn))
-            )
+            self.run_task(self._loop_task_cb(loop_fn=loop_fn))
 
         for subscription_fn in self._subscription_fns:
             sub = await self.broker_connection.subscribe(
@@ -125,22 +182,20 @@ class FastIoTService:
             self._subs.append(sub)
 
     async def _stop_service_annotations(self):
-        for task in self._tasks:
-            task.cancel()
+        for sub in self._subs:
+            await sub.unsubscribe()
         await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
-        self._tasks = []
         self._subs = []
+        self._tasks = []
 
-    async def _run_loop(self, loop_fn):
-        try:
-            while True:
-                awaitable = await asyncio.shield(loop_fn())
-                await awaitable
-        except CancelledError:
-            pass
+    async def _loop_task_cb(self, loop_fn):
+        while True:
+            awaitable = await asyncio.shield(loop_fn())
+            await awaitable
 
     async def _start(self):
         """ Optionally overwrite this method to run any async start commands like ``await self._server.start()``` """
 
     async def _stop(self):
         """ Optionally overwrite this method to run any async stop commands like ``await self._server.stop()``` """
+
