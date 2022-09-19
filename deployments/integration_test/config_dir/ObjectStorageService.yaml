@@ -1,6 +1,6 @@
-mongodb:
-  search_index:
-    - "_subject"
-    - "_timestamp"
-
+search_index:
+  - "_subject"
+  - "_timestamp"
+collection: object_storage
+subject: '>'
 

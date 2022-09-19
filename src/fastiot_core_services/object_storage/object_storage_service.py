@@ -5,7 +5,7 @@ import pymongo
 
 from fastiot import logging
 from fastiot.core import FastIoTService, Subject
-from fastiot.core.data_models import ReplySubject
+from fastiot.core.data_models import ReplySubject, FastIoTData
 from fastiot.core.service_annotations import subscribe, reply
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
@@ -19,18 +19,21 @@ class ObjectStorageService(FastIoTService):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._logger = logging('object_storage')
-        self._mongo_client = get_mongodb_client_from_env()
-        database = self._mongo_client.get_database(env_mongodb.name)
-        self._mongo_object_db_col = database.get_collection(env_mongodb_cols.object_storage)
         service_config = read_config(self)
 
-        mongo_indicies = service_config['mongodb']['search_index']
+        self._mongo_client = get_mongodb_client_from_env()
+        database = self._mongo_client.get_database(env_mongodb.name)
+        self._mongo_object_db_col = database.get_collection(service_config['collection'])
+        mongo_indicies = service_config['search_index']
         for index_name in mongo_indicies:
             self._mongo_client.create_index(collection=self._mongo_object_db_col,
                                             index=[(index_name, pymongo.ASCENDING)],
                                             index_name=f"{index_name}_ascending")
+        self.subject = Subject(name='v1.'+service_config['subject'], msg_cls=dict)
 
-    @subscribe(subject=Subject(name=env_object_storage.subject, msg_cls=dict))
+    async def _start(self):
+        await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)
+
     async def _cb_receive_data(self, subject_name: str, msg: dict):
         self._logger.debug("Received message %s", str(msg))
         if 'timestamp' in list(msg.keys()):
