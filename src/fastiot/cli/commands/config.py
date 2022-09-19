@@ -7,7 +7,7 @@ import typer
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
-    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR
+    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PULL_ALWAYS
 from fastiot.cli.helper_fn import get_jinja_env, parse_env_file
 from fastiot.cli.infrastructure_service_fn import get_services_list, set_infrastructure_service_port_environment
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
@@ -18,9 +18,9 @@ from fastiot.env import FASTIOT_CONFIG_DIR
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell_complete=_deployment_completion,
-                                                             help="The deployment configs to generate. Default: all "
-                                                                  "configs"),
+def config(deployments: List[str] = typer.Argument(default=[],
+                                                   shell_complete=_deployment_completion,
+                                                   help="The deployment configs to generate. Default: all configs"),
            tag: str = typer.Option('latest', '-t', '--tag',
                                    help="Specify a default tag for the deployment(s).",
                                    envvar=FASTIOT_DEFAULT_TAG),
@@ -33,10 +33,12 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
            pull_always: bool = typer.Option(False, '--pull-always',
                                             help="If given, it will always use 'docker pull' command to pull images "
                                                  "from specified docker registries before reading manifest.yaml "
-                                                 "files."),
-           test_deployment_only: bool = typer.Option(False, help="Create only the configuration for the integration "
-                                                                 "test deployment."),
-           service_port_offset: Optional[int] = typer.Option(0, help="Set this to create a docker-compose file with "
+                                                 "files.",
+                                            envvar=FASTIOT_PULL_ALWAYS),
+           use_test_deployment: bool = typer.Option(False,
+                                                    help="Create only the configuration for the integration "
+                                                          "test deployment."),
+           port_offset: Optional[int] = typer.Option(None, help="Set this to create a docker-compose file with "
                                                                      "custom ports for infrastructure services. "
                                                                      "Especially when running multiple deployments "
                                                                      "(e.g. on a CI runner) this comes handy. The "
@@ -44,14 +46,13 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None, shell
                                                                      "every following service one port number "
                                                                      "higher.\n You may set this to -1 to get "
                                                                      "random, available ports instead."),
-           generated_py_with_internal_hostnames: Optional[bool] = typer.Option(False,
-                                                                               help="This is especially for the CI "
-                                                                                    "runner. It will create the "
-                                                                                    "generated.py to set up env vars "
-                                                                                    "for tests with docker-internal "
-                                                                                    "hostnames, e.g. nats for the "
-                                                                                    "broker.")
-           ):
+           use_internal_hostnames: Optional[bool] = typer.Option(False,
+                                                                 help="This is especially for the CI "
+                                                                      "runner. It will create the "
+                                                                      "generated.py to set up env vars "
+                                                                      "for tests with docker-internal "
+                                                                      "hostnames, e.g. nats for the "
+                                                                      "broker.")):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
