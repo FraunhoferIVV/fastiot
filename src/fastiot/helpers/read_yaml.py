@@ -57,6 +57,7 @@ def read_config(service: Union[FastIoTService, str]) -> Dict:
     Also see :ref:`configuration_for_service` for more information about handling configurations.
 
     Example passing your service to get a filename configuration automatically:
+
     >>> from fastiot.core import FastIoTService
     >>> from fastiot.helpers.read_yaml import read_config
     >>>
