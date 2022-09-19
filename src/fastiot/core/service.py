@@ -23,6 +23,8 @@ class FastIoTService:
         """
         Entrypoint of the class; this is the method to be started using e.g. a :file:`run.py` like generated when
         creating a new service. Do not overwrite, unless you know exactly what you are doing.
+
+        :param kwargs: kwargs will be passed to class constructor.
         """
         logging.config.dictConfig(get_log_config(env_basic.log_level_no))
 
@@ -67,6 +69,13 @@ class FastIoTService:
                 self._subscription_fns.append(attr)
             if hasattr(attr, '_fastiot_reply_subject'):
                 self._reply_subscription_fns.append(attr)
+
+    async def _start(self):
+        """ Optionally overwrite this method to run any async start commands like ``await self._server.start()``` """
+
+    async def _stop(self):
+        """ Optionally overwrite this method to run any async stop commands like ``await self._server.stop()``` """
+
 
     def run_task(self, coro):
         """
@@ -197,21 +206,15 @@ class FastIoTService:
             )
             self._subs.append(sub)
 
+    async def _loop_task_cb(self, loop_fn):
+        while True:
+            awaitable = await loop_fn()
+            await self.run_coro(awaitable)
+
     async def _stop_service_annotations(self):
         for sub in self._subs:
             await sub.unsubscribe()
         await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
         self._subs = []
         self._tasks = []
-
-    async def _loop_task_cb(self, loop_fn):
-        while True:
-            awaitable = await asyncio.shield(loop_fn())
-            await awaitable
-
-    async def _start(self):
-        """ Optionally overwrite this method to run any async start commands like ``await self._server.start()``` """
-
-    async def _stop(self):
-        """ Optionally overwrite this method to run any async stop commands like ``await self._server.stop()``` """
 
