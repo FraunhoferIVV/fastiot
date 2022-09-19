@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple, Union, Any
 
 from pymongo.collection import Collection
 
+from fastiot.core.logger import FIoTLogger
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
 from fastiot.msg.time_series_msg import TimeSeriesData
@@ -19,6 +20,7 @@ class CustomMongoClient:
         *Note:* You have to manually install ``pymongo>=4.1,<5`` using your :file:`requirements.txt` to make use of this
         helper. Database clients are not automatically installed to keep the containers smaller.
         """
+        self._logger = FIoTLogger.get_logger('mongodb_helper')
         try:
             # pylint: disable=import-outside-toplevel
             from bson.binary import UUID_SUBTYPE
@@ -26,8 +28,9 @@ class CustomMongoClient:
             from pymongo import MongoClient
             from pymongo.errors import ConnectionFailure
         except (ImportError, ModuleNotFoundError):
-            logging.error("You have to manually install `pymongo>=4.1,<5` using your `requirements.txt` to make use of "
-                          "this helper.")
+            self._logger.error("You have to manually install "
+                               "`pymongo>=4.1,<5` using your `requirements.txt` to make use of "
+                               "this helper.")
             sys.exit(5)
 
         mongo_client_kwargs = {
@@ -49,9 +52,9 @@ class CustomMongoClient:
 
         try:
             self._db_client.admin.command('ping')
-            logging.getLogger("mongodb_helper_fn").info("Connection to database established")
+            self._logger.info("Connection to database established")
         except ConnectionFailure:
-            logging.getLogger("mongodb_helper_fn").exception("Connecting to database failed")
+            self._logger.exception("Connecting to database failed")
             raise ServiceError("Database is not available")
 
         self.__set_version_compatibility_to_current_version()
@@ -98,7 +101,6 @@ class CustomMongoClient:
         all_indices = [index['name'] for index in collection.list_indexes()]
         if index_name not in all_indices:
             collection.create_index(index, name=index_name)
-            logging.getLogger("mongodb_helper_fn").info("Created new MongoDB index %s", index_name)
             return True
 
         return False
@@ -152,4 +154,3 @@ def time_series_data_from_mongodb_data_set(data_set: Dict) -> TimeSeriesData:
         values=data_set['value']
     )
     return time_series_data
-

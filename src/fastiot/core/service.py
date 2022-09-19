@@ -1,16 +1,14 @@
 import asyncio
 from datetime import time
-import logging
-import logging.config
 import signal
 from asyncio import CancelledError
 from typing import List, Optional
 
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
+from fastiot.core.logger import FIoTLogger
 from fastiot.core.service_annotations import loop
 from fastiot.env import env_basic
 from fastiot.exceptions.exceptions import ShutdownRequestedInterruption
-from fastiot.helpers.log_config import get_log_config
 
 
 class FastIoTService:
@@ -26,7 +24,6 @@ class FastIoTService:
 
         :param kwargs: kwargs will be passed to class constructor.
         """
-        logging.config.dictConfig(get_log_config(env_basic.log_level_no))
 
         async def run_main():
             app = None
@@ -58,6 +55,7 @@ class FastIoTService:
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
+        self._logger = FIoTLogger.get_logger()
 
         for name in dir(self):
             if name.startswith('__'):
@@ -95,7 +93,7 @@ class FastIoTService:
         try:
             await coro
         except Exception as e:
-            logging.exception("Uncaught exception raised inside task")
+            self._logger.exception("Uncaught exception raised inside task")
             err = e
         if err:
             await self.request_shutdown("Task failed with an exception")
@@ -185,7 +183,7 @@ class FastIoTService:
     async def request_shutdown(self, reason: str = ''):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
         if self._shutdown_event.is_set() is False and reason:
-            logging.info(f"Initial shutdown requested with reason: {reason}")
+            self._logger.info(f"Initial shutdown requested with reason: {reason}")
         self._shutdown_event.set()
 
     async def _start_service_annotations(self):

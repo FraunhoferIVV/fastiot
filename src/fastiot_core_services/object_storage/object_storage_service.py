@@ -6,6 +6,7 @@ import pymongo
 
 from fastiot.core import FastIoTService, Subject
 from fastiot.core.data_models import ReplySubject
+from fastiot.core.logger import FIoTLogger
 from fastiot.core.service_annotations import subscribe, reply
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
@@ -18,6 +19,7 @@ class ObjectStorageService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self._logger = FIoTLogger.get_logger('object_storage')
         self._mongo_client = get_mongodb_client_from_env()
         database = self._mongo_client.get_database(env_mongodb.name)
         self._mongo_object_db_col = database.get_collection(env_mongodb_cols.object_storage)
@@ -31,20 +33,20 @@ class ObjectStorageService(FastIoTService):
 
     @subscribe(subject=Subject(name=env_object_storage.subject, msg_cls=dict))
     async def _cb_receive_data(self, subject_name: str, msg: dict):
-        logging.getLogger('Object_Storage received data').debug("Received message %s", str(msg))
+        self._logger.debug("Received message %s", str(msg))
         if 'timestamp' in list(msg.keys()):
             timestamp = msg['timestamp']
         else:
             timestamp = datetime.utcnow()
         mongo_data = {'_timestamp': timestamp, '_subject': subject_name, 'Object': msg}
-        logging.getLogger('Object_Storage received data').debug("Converted Mongo data is %s" % mongo_data)
+        self._logger.debug("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
     @reply(ReplySubject(name="reply_object",
                         msg_cls=HistObjectReq,
                         reply_cls=HistObjectResp))
     async def reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
-        logging.debug("Received request on subject %s with message %s", subject, hist_object_req)
+        self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)
         query_dict = {"_timestamp": {'$gte': hist_object_req.dt_start, '$lte': hist_object_req.dt_end}}
         query_results = self._query_db(query_dict=query_dict)
         values = [result['Object'] for result in query_results]
