@@ -1,4 +1,5 @@
 from fastiot.cli.version import get_version
+from fastiot.logging import logging
 
 try:
     from fastiot.__version__ import __version__

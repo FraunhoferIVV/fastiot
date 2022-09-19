@@ -1,10 +1,9 @@
-import logging
 import sys
 from typing import Dict, List, Tuple, Union, Any
 
 from pymongo.collection import Collection
 
-from fastiot.core.logger import FIoTLogger
+from fastiot import logging
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
 from fastiot.msg.time_series_msg import TimeSeriesData
@@ -20,7 +19,7 @@ class CustomMongoClient:
         *Note:* You have to manually install ``pymongo>=4.1,<5`` using your :file:`requirements.txt` to make use of this
         helper. Database clients are not automatically installed to keep the containers smaller.
         """
-        self._logger = FIoTLogger.get_logger('mongodb_helper')
+        self._logger = logging('mongodb_helper')
         try:
             # pylint: disable=import-outside-toplevel
             from bson.binary import UUID_SUBTYPE

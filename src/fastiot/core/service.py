@@ -1,12 +1,9 @@
 import asyncio
-from datetime import time
 import signal
-from asyncio import CancelledError
-from typing import List, Optional
+from typing import List
 
+from fastiot import logging
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
-from fastiot.core.logger import FIoTLogger
-from fastiot.core.service_annotations import loop
 from fastiot.env import env_basic
 from fastiot.exceptions.exceptions import ShutdownRequestedInterruption
 
@@ -55,7 +52,7 @@ class FastIoTService:
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
-        self._logger = FIoTLogger.get_logger()
+        self._logger = logging
 
         for name in dir(self):
             if name.startswith('__'):

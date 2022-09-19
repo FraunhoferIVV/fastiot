@@ -1,12 +1,11 @@
-import logging
 from datetime import datetime
 from typing import List, Dict
 
 import pymongo
 
+from fastiot import logging
 from fastiot.core import FastIoTService, Subject
 from fastiot.core.data_models import ReplySubject
-from fastiot.core.logger import FIoTLogger
 from fastiot.core.service_annotations import subscribe, reply
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
@@ -19,7 +18,7 @@ class ObjectStorageService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._logger = FIoTLogger.get_logger('object_storage')
+        self._logger = logging('object_storage')
         self._mongo_client = get_mongodb_client_from_env()
         database = self._mongo_client.get_database(env_mongodb.name)
         self._mongo_object_db_col = database.get_collection(env_mongodb_cols.object_storage)
