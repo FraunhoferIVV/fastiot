@@ -113,8 +113,8 @@ def get_mongodb_client_from_env() -> CustomMongoClient:
     """
     For connecting Mongodb, the environment variables can be set,
     if you want to use your own settings instead of default:
-    FASTIOT_MONGO_DB_HOST, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, FASTIOT_MONGO_DB_PASSWORD,
-    FASTIOT_MONGO_DB_AUTH_SOURCE, FASTIOT_MONGO_DB_NAME
+    :envvar:`FASTIOT_MONGO_DB_HOST`, :envvar:`FASTIOT_MONGO_DB_PORT`, :envvar:`FASTIOT_MONGO_DB_USER`,
+    :envvar:`FASTIOT_MONGO_DB_PASSWORD`, :envvar:`FASTIOT_MONGO_DB_AUTH_SOURCE`, :envvar:`FASTIOT_MONGO_DB_NAME`
 
     >>> mongo_client = get_mongodb_client_from_env()
     """

@@ -45,7 +45,7 @@ def get_influxdb_client_from_env() -> CustomInfluxClient:
     """
     For connecting Influxdb, the environment variables can be set,
     if you want to use your own settings instead of default:
-    FASTIOT_INFLUX_DB_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN
+    :envvar:`FASTIOT_INFLUX_DB_HOST`, :envvar:`FASTIOT_INFLUX_DB_PORT`, :envvar:`FASTIOT_INFLUX_DB_TOKEN`
 
     >>> influxdb_client = get_influxdb_client_from_env()
     """

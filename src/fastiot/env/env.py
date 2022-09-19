@@ -102,7 +102,7 @@ class MongoDBEnv:
 
     @property
     def host(self) -> str:
-        """ ..envvar:: FASTIOT_MONGO_DB_HOST
+        """ .. envvar:: FASTIOT_MONGO_DB_HOST
 
         Use to get/set the mongo database host. This is usually either ``mongodb`` within the docker network or
         ``localhost`` when developing against a local mongodb.
@@ -159,8 +159,17 @@ class MongoDBEnv:
 
 
 class MongoDBColConstants:
+    """
+    Environment variables for mongodb collection
+
+    Use the properties from :func:`fastiot.env.env_mongodb_cols` to read the values in an easy manner within your
+    code.
+    """
     @property
     def time_series(self) -> str:
+        """ ..envvar:: FASTIOT_MONGO_DB_TIME_SERIES_COL
+
+        """
         return os.getenv(FASTIOT_MONGO_DB_TIME_SERIES_COL, 'time_series')
 
     @property
@@ -179,7 +188,7 @@ class MariaDBEnv:
 
     @property
     def host(self) -> str:
-        """ ..envvar:: FASTIOT_MARIA_DB_HOST
+        """ .. envvar:: FASTIOT_MARIA_DB_HOST
 
         Use to get/set the maria database host. This is usually either ``mariadb`` within the docker network or
         ``localhost`` when developing against a local mariadb.
@@ -234,7 +243,7 @@ class InfluxDBEnv:
 
     @property
     def host(self) -> str:
-        """ ..envvar:: FASTIOT_INFLUX_DB_HOST
+        """ .. envvar:: FASTIOT_INFLUX_DB_HOST
 
         Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
         ``localhost`` when developing against a local influxdb.
@@ -267,7 +276,7 @@ class TimeScaleDBEnv:
 
     @property
     def host(self) -> str:
-        """ ..envvar:: FASTIOT_TIME_SCALE_DB_HOST
+        """ .. envvar:: FASTIOT_TIME_SCALE_DB_HOST
 
         Use to get/set the time scale database host. This is usually either ``timescaledb`` within the docker
         network or ``localhost`` when developing against a local time_scale_db.
@@ -276,7 +285,7 @@ class TimeScaleDBEnv:
 
     @property
     def port(self) -> int:
-        """ ..envvar:: FASTIOT_TIME_SCALE_DB_PORT
+        """ .. envvar:: FASTIOT_TIME_SCALE_DB_PORT
 
         Use to get/set the time scale database port.
         Use to get/set the time scale db port, defaults to 5432.
