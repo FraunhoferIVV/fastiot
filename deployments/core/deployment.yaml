@@ -1,3 +1,9 @@
+name: core
+
+services:
+  producer:
+  object_storage:
+
 infrastructure-services:
   nats:
   #mariadb:
