@@ -15,7 +15,12 @@ def import_configure(project_config: ProjectConfig, file_name: str = ''):
     otherwise) and sets project config accordingly.
     """
     file_name = file_name or os.path.join(os.getcwd(), CONFIGURE_FILE_NAME)
-    config = _import_configure_py(file_name)
+
+    try:
+        config = _import_configure_py(file_name)
+    except FileNotFoundError as err:
+        logging.warning(str(err))
+        return
 
     for field in ProjectConfig.__fields__:
         if hasattr(config, field):
