@@ -32,4 +32,3 @@ class Thing(FastIoTData):
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
-

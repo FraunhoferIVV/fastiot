@@ -57,8 +57,8 @@ class ProjectConfig(BaseModel):
     command :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path
     :file:`deployments` will be used.
 
-    *Hint:* You may use :func:`fastiot.cli.helper_fn.find_deployments` to create a list of deployments according to your special
-    needs."""
+    *Hint:* You may use :func:`fastiot.cli.helper_fn.find_deployments` to create a list of deployments according to your
+    special needs."""
 
     integration_test_deployment: str = ''
     """ If you need any services to be started for automatic testing your project you may define the name of this
@@ -114,4 +114,3 @@ class ProjectConfig(BaseModel):
         if self.services:
             return [s.name for s in self.services]
         return []
-

@@ -10,4 +10,3 @@ if __name__ == '__main__':
     tests = loader.discover(os.path.dirname(__file__))
     testRunner = unittest.runner.TextTestRunner()
     testRunner.run(tests)
-
