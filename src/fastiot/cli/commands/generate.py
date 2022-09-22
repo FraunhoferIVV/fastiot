@@ -17,7 +17,6 @@ from fastiot.cli.typer_app import create_cmd
 
 @create_cmd.command()
 def new_project(project_name: str = typer.Argument(None, help="The project name to generate"),
-                target_dir: str = typer.Option('.', '-d', '--dir', help="Specify the dir to generate the new project in."),
                 force: Optional[bool] = typer.Option(False, '-f', '--force',
                                                      help="Create project even if an existing project has been found."),
                 target_directory: Optional[str] = typer.Option('.', '-d', '--directory',
@@ -36,13 +35,11 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                       get_default_context().project_config.project_namespace)
         raise typer.Exit(2)
 
-    if target_dir.startswith('/'):
-        project_config.project_root_dir = target_dir
+    if target_directory.startswith('/'):
+        project_config.project_root_dir = target_directory
     else:
-        project_config.project_root_dir = os.path.join(project_config.project_root_dir, target_dir)
+        project_config.project_root_dir = os.path.join(project_config.project_root_dir, target_directory)
 
-    if not os.path.exists(project_config.project_root_dir):
-        os.makedirs(project_config.project_root_dir)
 
     # TODO: Check for valid project name (no space, no /, …)
     not_usable: bool = True
@@ -50,35 +47,29 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     project_name = project_name.replace(" ", "_").replace("-", '_')
     for letter in project_name:
         if letter.isalnum() or letter == "_" or letter == ".":
-                not_usable = False
+            not_usable = False
         else:
-                not_usable = True
-                break
+            not_usable = True
+            break
     if not_usable:
         logging.error("Please enter valid Name. Only use a-z, A-Z, 0-9, '.' and '_' .")
-        exit()
-
+        raise typer.Exit(3)
 
     # TODO: Create necessary directories
-    new_directory_location: str = os.getcwd()
-    if target_directory != ".":
-        new_directory_location = target_directory
-    new_directory_location = os.path.join(new_directory_location, project_name)
-
-    os.mkdir(new_directory_location)
-    os.mkdir(os.path.join(new_directory_location, f"{project_name}_lib"))
-    os.mkdir(os.path.join(new_directory_location, f"{project_name}_tests"))
-    os.mkdir(os.path.join(new_directory_location, f"{project_name}_services"))
-
+    if not os.path.exists(project_config.project_root_dir):
+        os.makedirs(project_config.project_root_dir)
+    for directory in [f"{project_name}_lib", f"{project_name}_tests", f"{project_name}_services"]:
+        if not os.path.exists(directory):
+            os.makedirs(os.path.join(project_config.project_root_dir, directory))
 
     # TODO: Loop over many templates used to create a new project
-    with open(os.path.join(new_directory_location, 'configure.py'), "w") as docker_compose_file:
+    with open(os.path.join(project_config.project_root_dir, 'configure.py'), "w") as docker_compose_file:
         configure_py_template = get_jinja_env().get_template('new_project/configure.py.j2')
         docker_compose_file.write(configure_py_template.render(
             project_namespace=project_name,
         ))
 
-    with open(os.path.join(new_directory_location, 'requirements.txt'), "w") as docker_compose_file:
+    with open(os.path.join(project_config.project_root_dir, 'requirements.txt'), "w") as docker_compose_file:
         configure_py_template = get_jinja_env().get_template('new_project/requirements.txt.j2')
         docker_compose_file.write(configure_py_template.render(
             project_namespace=project_name,
@@ -86,21 +77,18 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
             major_version=int(get_version(False, True, False))
         ))
 
-
     # TODO: Copy static files like .gitignore
-    shutil.copy(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/.dockerignore'),
-                new_directory_location)
-    shutil.copy(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/.gitignore'),
-                new_directory_location)
-    shutil.copy(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/install.sh'),
-                new_directory_location)
-    shutil.copy(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/README.md'),
-                new_directory_location)
+    templates_dir = os.path.join(os.path.dirname(__file__), '..', 'templates', 'new_project')
+    for src, dest in [('.dockerignore', '.'),
+                      ('.gitignore', '.'),
+                      ('install.sh', '.')]:
+        shutil.copy(os.path.join(templates_dir, src), os.path.join(project_config.project_root_dir, dest))
+
     shutil.copytree(os.path.join(project_config.project_root_dir, 'deployments/integration_test'),
-                    os.path.join(new_directory_location, 'deployments/integration_test'))
+                    os.path.join(project_config.project_root_dir, 'deployments/integration_test'))
 
     # shutil.copytree(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/.run'),
-                    # os.path.join(new_directory_location, '.run'))
+                    # os.path.join(project_config.project_root_dir, '.run'))
 
     logging.warning("This method has not yet been fully implemented")
 
