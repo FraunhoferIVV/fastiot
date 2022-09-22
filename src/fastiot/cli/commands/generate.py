@@ -3,7 +3,9 @@ Commands for generating new projects and services.
 """
 import logging
 import os
+import random
 import shutil
+import string
 from typing import Optional
 
 import typer
@@ -13,6 +15,18 @@ from fastiot.cli.constants import FASTIOT_CONFIGURE_FILE
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import create_cmd
+from fastiot.__version__ import __version__
+def new_password(length: int) -> str:
+
+    charlist = list(string.ascii_letters + string.digits + "_-.,:%&$?!*()")
+    password: str = ""
+    while len(password) < length:
+        i: int = int(random.random()*100)
+        while len(charlist) - 1 < i:
+            i = i - len(charlist) - 2
+        password = password + charlist[i]
+    return password
+
 
 
 @create_cmd.command()
@@ -58,24 +72,11 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     # TODO: Create necessary directories
     if not os.path.exists(project_config.project_root_dir):
         os.makedirs(project_config.project_root_dir)
-    for directory in [f"{project_name}_lib", f"{project_name}_tests", f"{project_name}_services"]:
+    for directory in [f"{project_name}_lib",
+                      f"{project_name}_tests",
+                      f"{project_name}_services"]:
         if not os.path.exists(directory):
             os.makedirs(os.path.join(project_config.project_root_dir, directory))
-
-    # TODO: Loop over many templates used to create a new project
-    with open(os.path.join(project_config.project_root_dir, 'configure.py'), "w") as docker_compose_file:
-        configure_py_template = get_jinja_env().get_template('new_project/configure.py.j2')
-        docker_compose_file.write(configure_py_template.render(
-            project_namespace=project_name,
-        ))
-
-    with open(os.path.join(project_config.project_root_dir, 'requirements.txt'), "w") as docker_compose_file:
-        configure_py_template = get_jinja_env().get_template('new_project/requirements.txt.j2')
-        docker_compose_file.write(configure_py_template.render(
-            project_namespace=project_name,
-            version=get_version(),
-            major_version=int(get_version(False, True, False))
-        ))
 
     # TODO: Copy static files like .gitignore
     templates_dir = os.path.join(os.path.dirname(__file__), '..', 'templates', 'new_project')
@@ -84,13 +85,35 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                       ('install.sh', '.')]:
         shutil.copy(os.path.join(templates_dir, src), os.path.join(project_config.project_root_dir, dest))
 
-    shutil.copytree(os.path.join(project_config.project_root_dir, 'deployments/integration_test'),
-                    os.path.join(project_config.project_root_dir, 'deployments/integration_test'))
+    shutil.copytree(
+        os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'deployments/integration_test/config_dir'),
+        os.path.join(project_config.project_root_dir, 'deployments/integration_test/config_dir'))
+    shutil.copy(
+        os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
+                     'deployments/integration_test/deployment.yaml'),
+        os.path.join(project_config.project_root_dir, 'deployments/integration_test/'))
 
     # shutil.copytree(os.path.join(project_config.project_root_dir, 'src/fastiot/cli/templates/new_project/.run'),
-                    # os.path.join(project_config.project_root_dir, '.run'))
+        # os.path.join(project_config.project_root_dir, '.run'))
+
+
+    # TODO: Loop over many templates used to create a new project
+    for dest,temp in [('configure.py', 'new_project/configure.py.j2'),
+                      ('README.md', 'new_project/README.md.j2'),
+                      ('deployments/integration_test/.env', 'new_project/.env.j2'),
+                      ('requirements.txt', 'new_project/requirements.txt.j2')]:
+
+        with open(os.path.join(project_config.project_root_dir, dest), "w") as docker_compose_file:
+            configure_py_template = get_jinja_env().get_template(temp)
+            docker_compose_file.write(configure_py_template.render(
+                project_namespace=project_name,
+                password=new_password(16),
+                version=get_version(),
+                major_version=int(__version__.split(".")[0])
+            ))
 
     logging.warning("This method has not yet been fully implemented")
+
 
 @create_cmd.command()
 def new_service(service_name: str = typer.Argument(None, help="The service name to generate"),

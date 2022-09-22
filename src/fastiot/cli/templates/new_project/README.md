@@ -1,3 +1,0 @@
-# Fast-IoT (fastiot)
-
-Text 
