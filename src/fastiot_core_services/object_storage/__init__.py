@@ -9,17 +9,33 @@ and requesting of historical object data.
 
 Your Object will be saved in Dictionary in such format:
 
->>> {'_id': 'xxx', '_subject': 'xxx', '_timestamp': 'xxx', 'Object': 'xxx'}
+.. code:: python
+
+  {'_id': 'xxx', '_subject': 'xxx', '_timestamp': 'xxx', 'Object': 'xxx'}
+
 
 In Order to use this Service, you must set a config file named ObjectStorageService.yaml in my_deployment/config_dir.
 
->>> search_index:
->>>  - "_subject"
->>>  - "_timestamp"
->>> collection: 'object_storage'
->>> subject: 'thing.*'
+.. code:: yaml
 
-or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g. 'my_data_model'.
+  search_index:
+   - "_subject"
+   - "_timestamp"
+  collection: 'object_storage'
+  subject: 'thing.*'
+
+  
+or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g.:
+
+.. code:: python
+
+  class MyDataType(FastIoTData)
+
+You can assign the subject like following 'MyDataType' or 'my_data_type',
+both will return you a right subject name format.
+**CAUTION**: Thing will be instanced with many different names. So by subscribing **thing** please always with a *****.
+For understanding you can reference this https://docs.nats.io/nats-concepts/subjects.
+
 
 For quick query data in mongodb, search_index must be set.
 Through collection, the collection will be defined, where you save your data.
