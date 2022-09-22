@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import glob
 import os
+import pathlib
 import sys
 from typing import List
 
@@ -32,9 +32,8 @@ create_version_file(destination='src/fastiot/__version__.py')
 
 
 def get_package_data_for_templates() -> List[str]:
-    fastiot_dir = os.path.join(TEMPLATES_DIR, '**')
-    files = list(glob.glob(fastiot_dir, recursive=True))
-    files = [f for f in files if os.path.isfile(f)]
+    files = pathlib.Path(TEMPLATES_DIR).rglob('*')
+    files = [str(f) for f in files if os.path.isfile(f)]
     return files
 
 
