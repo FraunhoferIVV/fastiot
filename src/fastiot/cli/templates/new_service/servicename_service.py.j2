@@ -1,4 +1,54 @@
-from fastiot.core import FastIoTService, Subject, subscribe
+import asyncio
+import logging
+import random
+from datetime import datetime
 
-class {{ service_name_camel }}Service(FastIoTService):
-    pass
+
+from fastiot.core import FastIoTService, Subject, subscribe, loop
+from fastiot.core.core_uuid import get_uuid
+from fastiot.msg.thing import Thing
+
+
+"""
+This is the file where you can write you own service. Currently the is code for an basic producer and an basic consumer.
+In order for your code to work, you must delete the code that you are not using.
+ """
+
+
+class {{ service_name_class}}Service(FastIoTService):
+
+    @loop
+    async def produce(self):
+        sensor_name = f'my_sensor_{random.randint(1, 5)}'
+        value = random.randint(20, 30)
+        subject = Thing.get_subject(sensor_name)
+        await self.broker_connection.publish(
+            subject=subject,
+            msg=Thing(
+                name=sensor_name,
+                machine='FastIoT_Example_Machine',
+                measurement_id=get_uuid(),
+                value=value,
+                timestamp=datetime.utcnow()
+            )
+        )
+        logging.info("Published %d on sensor %s", value, subject.name)
+        return asyncio.sleep(2)
+
+
+    @subscribe(subject=Thing.get_subject('*'))
+    async def consume(self, topic: str, msg: Thing):
+        logging.info("%s: %s", topic, str(msg))
+
+    @loop
+    async def request(self):
+        request = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now())
+        subject = Subject(name="reply_test", msg_cls=Thing, reply_cls=Thing)
+        reply: Thing = await self.broker_connection.request(subject=subject, msg=request, timeout=10)
+        logging.info("Got reply %s", str(reply))
+        return asyncio.sleep(30)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    {{ service_name_class}}Service.main()

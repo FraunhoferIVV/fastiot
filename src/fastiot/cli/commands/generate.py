@@ -165,6 +165,13 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
     # __init__.py
     open(os.path.join(service_location, "__init__.py"), "w")
 
+    # class name
+    words_list = service_name.split("_")
+    service_classname: str = ""
+    for word in words_list:
+        service_classname = service_classname + word.capitalize()
+
+
     # Templates
     for dest, temp in [('manifest.ymal', os.path.join('new_service', 'manifest.yaml.j2')),
                        (f'{service_name}_service.py', os.path.join('new_service', 'servicename_service.py.j2')),
@@ -173,6 +180,6 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
             configure_py_template = get_jinja_env().get_template(temp)
             file.write(configure_py_template.render(
                 service_name=service_name,
-                service_name_camel=service_name.capitalize(),
-                path=f"{service_package}.{service_name}"
+                service_name_class=service_classname,
+                path=f"{service_package}.{service_name}.{service_name}_service"
             ))
