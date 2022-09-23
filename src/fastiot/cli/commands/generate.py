@@ -46,7 +46,6 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     if os.path.isfile(os.path.join(target_directory, CONFIGURE_FILE_NAME)) and not force:
         logging.error("An existing project configuration has been found! "
                       "To force overwriting this you may use the --force argument.")
-        print(target_directory)
         raise typer.Exit(2)
 
     project_config = get_default_context().project_config
@@ -58,18 +57,14 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 
 
     # TODO: Check for valid project name (no space, no /, …)
-    not_usable: bool = True
 
     project_name = project_name.replace(" ", "_").replace("-", '_')
     for letter in project_name:
-        if letter.isalnum() or letter == "_" or letter == ".":
-            not_usable = False
-        else:
-            not_usable = True
-            break
-    if not_usable:
-        logging.error("Please enter valid Name. Only use a-z, A-Z, 0-9, '.' and '_' .")
-        raise typer.Exit(3)
+        if not (letter.isalnum() or letter == "_" or letter == "."):
+            logging.error("Please enter valid Name. Only use a-z, A-Z, 0-9, '.' and '_' .")
+            raise typer.Exit(3)
+    logging.info(f"the project {project_name} will be created in {project_config.project_root_dir}")
+
 
     # TODO: Create necessary directories
     if not os.path.exists(project_config.project_root_dir):
@@ -109,74 +104,84 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 major_version=int(__version__.split(".")[0])
             ))
 
-    logging.warning("This method has not yet been fully implemented")
-
 
 @create_cmd.command()
 def new_service(service_name: str = typer.Argument(None, help="The service name to generate"),
                 service_package: Optional[str] = typer.Option(None, '-p', '--package',
                                                               help="Specify the package to create the "
                                                                    "service in. If left empty the first "
-                                                                   "package configured will be used.")):
-    not_usable: bool = True
+                                                                   "package configured will be used."),
+                service_destination: Optional[str] = typer.Option(None, '-d', '--destination',
+                                                                  help="Specify the destination "
+                                                                       "to create the service in."
+                                                                       "if package and destinatiion given "
+                                                                       "destination will be used"),
+                force: Optional[bool] = typer.Option(False, '-f', '--force',
+                                         help="Create service even if if an existing service has the same name."),
+                ):
+    # service name
     service_name = service_name.replace(" ", "_").replace("-", '_')
     for letter in service_name:
-        if (letter.isalnum() and letter.islower()) or letter == "_" or letter == ".":
-            not_usable = False
+        if not((letter.isalnum() and (letter.islower() or letter.isnumeric())) or letter == "_" or letter == "."):
+            logging.error("Please enter valid Name. Only use a-z, 0-9, '.' and '_' .")
+            raise typer.Exit(3)
+    # service location
+    project_config = get_default_context().project_config
+    service_package_list = []
+    # nothing given
+    if service_package is None and service_destination is None:
+        for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
+            if "service" in package:
+                service_package_list.append(package)
+
+        if len(service_package_list) == 0:
+            logging.warning("no service package found")
+            raise typer.Exit(4)
+        elif len(service_package_list) == 1:
+            service_location = os.path.join(os.path.join(project_config.project_root_dir, "src", service_package_list[0]
+                                                         , service_name))
         else:
-            not_usable = True
-            break
-    if not_usable:
-        logging.error("Please enter valid Name. Only use a-z, 0-9, '.' and '_' .")
-        exit()
+            logging.warning("more than one service package please choose manual")
+            print(service_package_list)
+            raise typer.Exit(4)
+    # destination given
+    elif service_destination is not None:
+        service_location = service_destination
+    # package given
+    else:
+        for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
+            if service_package == package:
+                service_package_list.append(package)
 
-
-    if service_package is None:
-        service_package = '/home/sieber/'
-        project_config = get_default_context().project_config
-
-        print(project_config.test_package)
-        print(project_config.project_root_dir)
-        print(project_config.library_package)
-        print(project_config.services)
-
-        list_src_packages = os.listdir(os.path.join(project_config.project_root_dir, "src"))
-        if list_src_packages.__contains__(project_config.library_package):
-            list_src_packages.remove(project_config.library_package)
-        if list_src_packages.__contains__(project_config.test_package):
-            list_src_packages.remove(project_config.test_package)
-        if len(list_src_packages) > 1:
-            logging.info("more than one service package pleas choose Manual")
-        elif list_src_packages == 1:
-            print("Destination folder: " + list_src_packages[0])
+        if len(service_package_list) == 1:
+            service_location = os.path.join(os.path.join(project_config.project_root_dir, "src", service_package_list[0]
+                                                         , service_name))
         else:
-            logging.info("No service package found")
+            logging.warning("package could not be found")
+            raise typer.Exit(4)
 
+    logging.info(f"the service {service_name} will be created in {service_location}")
 
+    # service package
+    if not (os.path.isdir(service_location)):
+        os.makedirs(service_location)
+    elif not force:
+        logging.warning("service with same name found")
+        raise typer.Exit(5)
 
-
-
-
-
-
-
-
-
-
-    service_location = os.path.join(service_package, service_name)
-    os.mkdir(service_location)
     # __init__.py
     open(os.path.join(service_location, "__init__.py"), "w")
 
     # Templates
-    for dest, temp in [('manifest.ymal','new_service/manifest.yaml.j2'),
-                       (f'{service_name}_service.py', 'new_service/servicename_service.py.j2'),
-                       ('run.py', 'new_service/.run.py.j2')]:
+    for dest, temp in [('manifest.ymal', os.path.join('new_service', 'manifest.yaml.j2')),
+                       (f'{service_name}_service.py', os.path.join('new_service', 'servicename_service.py.j2')),
+                       ('run.py', os.path.join('new_service', '.run.py.j2'))]:
         with open(os.path.join(service_location, dest), "w") as file:
             configure_py_template = get_jinja_env().get_template(temp)
             file.write(configure_py_template.render(
                 service_name=service_name,
-                service_name_camel=service_name.capitalize()
+                service_name_camel=service_name.capitalize(),
+                path=service_location.replace("/", ".")
             ))
 
 
