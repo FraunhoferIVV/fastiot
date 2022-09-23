@@ -72,7 +72,7 @@ class BrokerEnv:
         Use to get/set the broker host. This is usually either ``nats`` within the docker network or ``localhost``
         when developing against a local broker.
         """
-        return os.environ[FASTIOT_NATS_HOST]
+        return os.environ.get(FASTIOT_NATS_HOST, 'localhost')
 
     @property
     def port(self) -> int:
@@ -107,7 +107,7 @@ class MongoDBEnv:
         Use to get/set the mongo database host. This is usually either ``mongodb`` within the docker network or
         ``localhost`` when developing against a local mongodb.
         """
-        return os.getenv(FASTIOT_MONGO_DB_HOST, '127.0.0.1')
+        return os.getenv(FASTIOT_MONGO_DB_HOST, 'localhost')
 
     @property
     def port(self) -> int:
@@ -189,7 +189,7 @@ class MariaDBEnv:
         Use to get/set the maria database host. This is usually either ``mariadb`` within the docker network or
         ``localhost`` when developing against a local mariadb.
         """
-        return os.getenv(FASTIOT_MARIA_DB_HOST, '127.0.0.1')
+        return os.getenv(FASTIOT_MARIA_DB_HOST, 'localhost')
 
     @property
     def port(self) -> int:
@@ -244,7 +244,7 @@ class InfluxDBEnv:
         Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
         ``localhost`` when developing against a local influxdb.
         """
-        return os.getenv(FASTIOT_INFLUX_DB_HOST, '127.0.0.1')
+        return os.getenv(FASTIOT_INFLUX_DB_HOST, 'localhost')
 
     @property
     def port(self) -> int:
@@ -277,7 +277,7 @@ class TimeScaleDBEnv:
         Use to get/set the time scale database host. This is usually either ``timescaledb`` within the docker
         network or ``localhost`` when developing against a local time_scale_db.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_HOST, '127.0.0.1')
+        return os.getenv(FASTIOT_TIME_SCALE_DB_HOST, 'localhost')
 
     @property
     def port(self) -> int:
