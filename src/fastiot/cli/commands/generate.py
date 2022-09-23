@@ -111,11 +111,6 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
                                                               help="Specify the package to create the "
                                                                    "service in. If left empty the first "
                                                                    "package configured will be used."),
-                service_destination: Optional[str] = typer.Option(None, '-d', '--destination',
-                                                                  help="Specify the destination "
-                                                                       "to create the service in."
-                                                                       "if package and destinatiion given "
-                                                                       "destination will be used"),
                 force: Optional[bool] = typer.Option(False, '-f', '--force',
                                          help="Create service even if if an existing service has the same name."),
                 ):
@@ -129,7 +124,7 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
     project_config = get_default_context().project_config
     service_package_list = []
     # nothing given
-    if service_package is None and service_destination is None:
+    if service_package is None:
         for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
             if "service" in package:
                 service_package_list.append(package)
@@ -144,9 +139,6 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
             logging.warning("more than one service package please choose manual")
             print(service_package_list)
             raise typer.Exit(4)
-    # destination given
-    elif service_destination is not None:
-        service_location = service_destination
     # package given
     else:
         for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
@@ -156,6 +148,7 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
         if len(service_package_list) == 1:
             service_location = os.path.join(os.path.join(project_config.project_root_dir, "src", service_package_list[0]
                                                          , service_name))
+            service_package = service_package_list[0]
         else:
             logging.warning("package could not be found")
             raise typer.Exit(4)
@@ -181,9 +174,5 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
             file.write(configure_py_template.render(
                 service_name=service_name,
                 service_name_camel=service_name.capitalize(),
-                path=service_location.replace("/", ".")
+                path=f"{service_package}.{service_name}"
             ))
-
-
-    logging.error("This method has not yet been implemented")
-    raise typer.Exit(1)
