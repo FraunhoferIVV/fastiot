@@ -4,7 +4,7 @@ from fastiot.helpers.dict_helper import dict_subtract
 from fastiot.testlib.testlib import populate_test_env
 
 
-class TestYAMLReader(unittest.TestCase):
+class TestDictHelper(unittest.TestCase):
 
     def setUp(self):
         populate_test_env()
