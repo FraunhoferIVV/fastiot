@@ -4,7 +4,6 @@
 
 FROM {{ service.manifest.base_image }} as base
 RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install -y git && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # As a convention, the workdir should always be the project root dir inside the container.

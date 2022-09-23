@@ -1,11 +1,9 @@
 """
-Methods and classes within this directory are mainly for setting up new projects and building existing ones
-locally or with the Jenkins pipeline
-"""
-from fastiot.cli import version
-from fastiot.cli.helper_fn import find_services, find_deployments
+====================================================
+Base of the Command Line Interface (CLI) for FastIoT
+====================================================
 
-try:
-    from fastiot.cli.__version__ import __version__
-except ImportError:
-    __version__ = version.get_version(complete=True)
+Methods and classes within this directory are mainly for setting up new projects and building existing ones
+locally or with a CI runner like Jenkins
+"""
+from fastiot.cli.helper_fn import find_services, find_deployments

@@ -41,6 +41,7 @@ import re
 from subprocess import Popen, PIPE
 from typing import Optional
 
+
 GIT_UNSPECIFIED = "git-unspecified"
 
 
@@ -67,7 +68,8 @@ def _git_version() -> str:
 
     try:
         branch = _call_git_branch()
-    except IndexError:  # If git could not run (git not found, no git directory) readline[0] will fail with IndexError
+    except (IndexError, FileNotFoundError):
+        # If git could not run (git not found, no git directory) readline[0] will fail with IndexError
         return GIT_UNSPECIFIED
 
     if branch == 'HEAD':
@@ -117,7 +119,7 @@ def _git_version() -> str:
 def _version_file_version() -> Optional[str]:
 
     def get_file():
-        for root, _, files in os.walk(os.getcwd()):
+        for root, _, files in os.walk(os.path.join(os.getcwd(), 'src')):
             if "__version__.py" in files:
                 return os.path.join(root, "__version__.py")
 
@@ -134,22 +136,19 @@ def _version_file_version() -> Optional[str]:
         return None
 
 
-def create_version_file(destination: Optional[str] = None):
+def create_version_file(destination: Optional[str]):
     """
     Creates a file with __version__=…
 
-    :param destination: Destination to put the generated file. If not specified the file will be created in path above
-    this version.py
+    :param destination: Destination path (full filename) to put the generated file.
     """
 
     version = get_version(complete=True)
     file_contents = f"__version__ = '{version}'\n"
-    file_path = destination or os.path.abspath(
-        os.path.join(pathlib.Path(__file__).parent.absolute(), '..', '__version__.py'))
 
     # Don’t overwrite anything that might be better than 'git_unspecified'
-    if not (version == GIT_UNSPECIFIED and os.path.isfile(file_path)):
-        with open(file_path, "w") as f:
+    if not (version == GIT_UNSPECIFIED and os.path.isfile(destination)):
+        with open(destination, "w") as f:
             f.write(file_contents)
 
 
