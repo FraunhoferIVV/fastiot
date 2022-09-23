@@ -1,18 +1,21 @@
 import logging
 import os
 import subprocess
+from glob import glob
 from typing import Optional, List
 
 import typer
 
 from fastiot.cli.commands.stop import stop
-from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
 def _deployment_completion() -> List[str]:
-    return get_default_context().project_config.deployment_names
+    """ Attention: Don’t use default_context here as the modules are not completely started when calling this method """
+    deployment_configs = glob(os.path.join(DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE))
+    return [str(os.path.dirname(f).split(os.sep, 1)[1]) for f in deployment_configs]
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
