@@ -32,10 +32,19 @@ class BasicEnv:
 
     @property
     def log_level_no(self) -> int:
+        """ .. envvar:: FASTIOT_LOG_LEVEL_NO
+
+        This environment variable is used to set the logging Level.
+        Level for logging s. https://docs.python.org/3/library/logging.html#logging-levels
+        """
         return int(os.getenv(FASTIOT_LOG_LEVEL_NO, logging.INFO))
 
     @property
     def volume_dir(self) -> str:
+        """ .. envvar:: FASTIOT_VOLUME_DIR
+
+        Use this variable to set the mount dir for your project
+        """
         return os.getenv(FASTIOT_VOLUME_DIR, '/var/fastiot')
 
     @property
