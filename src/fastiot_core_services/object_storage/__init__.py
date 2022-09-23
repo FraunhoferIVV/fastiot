@@ -32,8 +32,8 @@ or the subject can be your own Data Model, which inherits :class:`fastiot.core.d
   class MyDataType(FastIoTData)
 
 You can assign the subject like following 'MyDataType' or 'my_data_type',
-both will return you a right subject name format.
-**CAUTION**: Thing will be instanced with many different names. So by subscribing **thing** please always with a *****.
+both will return you a right subject name format: 'v1.my_data_type'.
+**CAUTION**: Thing will be instanced with different names. So by subscribing **thing** please always with a *****.
 For understanding you can reference this https://docs.nats.io/nats-concepts/subjects.
 
 
@@ -43,6 +43,16 @@ Furthermore, the subject should also be set, it indicates, which topic the nats 
 
 The other functionality for Object Storage Service is, you can make a request of the historical data,
 which are saved in Mongodb.
-To request the historical data, you need to instantiate :class:`fastiot.msg.hist.HistObjectReq`.
-This request will reply to you a List of Dictionary. Then you can convert it to your own data type.
+To request the historical data, you need to instantiate :class:`fastiot.msg.hist.HistObjectReq`,
+with subject_name 'reply_object'.
+The code will look like:
+
+.. code:: python
+
+  hist_req_msg = HistObjectReq(dt_start=datetime(), dt_end=datetime(), limit=10, subject_name='test_subject')
+  subject = ReplySubject(name='reply_object', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
+
+
+This request will reply to you a List of Dictionary.
+Then you can convert it to your own data type using :func:`fastiot.helpers.object_helper.parse_object_list`.
 """
