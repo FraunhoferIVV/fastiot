@@ -39,7 +39,7 @@ For understanding you can reference this https://docs.nats.io/nats-concepts/subj
 
 For quick query data in mongodb, search_index must be set.
 Through collection, the collection will be defined, where you save your data.
-Furthermore, the subject should also be set, it indicates, which topic the nats client function subscripts.
+Furthermore, the subject must be set, it indicates, which topic the nats client function subscripts.
 
 The other functionality for Object Storage Service is, you can make a request of the historical data,
 which are saved in Mongodb.

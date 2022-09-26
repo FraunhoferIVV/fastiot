@@ -27,23 +27,21 @@ class HistObjectResp(FastIoTData):
 
 class HistObjectReq(FastIoTData):
     """
-    This class is the request class for historical data.
-    **dt_start** and **dt_end** are used to limit the timestamp,
-    **limit** will limit the number of results,
-    **subject_name** will search only the objects, which are saved under this subject_name, this is not the reply subject name,
+    This class is used for requesting historical data.
+
+    :param dt_start: are used to limit the time range.
+    :param dt_end: are used to limit the time range.
+    :param limit: will limit the number of results.
+    :param subject_name: will search only the objects, which are saved under this subject_name, **CAUTION!** This is not the request-reply subject name.
+    :param query_dict: is an optional variable, you can also add your own query_dict, besides the default setting, which consists only `_subject` and `_timestamp`. Your default will be extended by query_dict, after ObjectStorage Service receives it.
 
     .. code:: python
 
-      HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10, subject_name=sanitize_subject('my_data_type'))
+      query_dict = {'test_index': 'test'}
+      >>> HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10, subject_name=sanitize_subject('my_data_type'), query_dict=query_dict)
 
-    **query_dict** is a optional variable, you can also add your own query_dict, besides the default dict.
-    Your query_dict will extend it:
 
-    .. code:: python
-
-      {'_subject': xxx, '_timestamp': xxx}
-
-    After instancing HistObjectReq, a subject for requesting historical data must also be instanced.
+    After instancing HistObjectReq, a subject for requesting historical data must also be instanced, with the subject_name 'reply_object'.
 
     .. code:: python
 
