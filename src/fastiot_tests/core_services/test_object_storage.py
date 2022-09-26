@@ -98,7 +98,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
                                      dt_end=datetime(year=2022, month=10, day=9, second=10),
                                      limit=10, subject_name='v1.thing.sensor_0',
                                      query_dict={'machine': 'test_machine'})
-        subject = ReplySubject(name='reply_object', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
+        subject = hist_req_msg.get_reply_subject()
 
         await self._start_service()
         reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
