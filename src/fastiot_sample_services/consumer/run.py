@@ -1,3 +1,4 @@
 from fastiot_sample_services.consumer.consumer_module import ExampleConsumerService
 
-ExampleConsumerService.main()
+if __name__ == '__main__':
+    ExampleConsumerService.main()
