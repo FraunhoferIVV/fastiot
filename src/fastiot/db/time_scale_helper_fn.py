@@ -12,8 +12,8 @@ def open_timescaledb_connection_from_env():
     """
     For connecting TimeScaleDB, the environment variables can be set,
     if you want to use your own settings instead of default:
-    FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_PORT, FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD,
-    FASTIOT_TIME_SCALE_DB_DATABASE
+    :envvar:`FASTIOT_TIME_SCALE_DB_HOST`, :envvar:`FASTIOT_TIME_SCALE_DB_PORT`, :envvar:`FASTIOT_TIME_SCALE_DB_USER`,
+    :envvar:`FASTIOT_TIME_SCALE_DB_PASSWORD`, :envvar:`FASTIOT_TIME_SCALE_DB_DATABASE`
 
     >>> time_scale_db_connection = open_timescaledb_connection_from_env()
     """

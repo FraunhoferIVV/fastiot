@@ -66,7 +66,7 @@ containers for your project using `fiot build`.
 
 For a more comprehensive list of features, a guide to the project structure please refer to the complete documentation.
 
-To run services localy, in your IDE or within a container you may also refer to the complete documentation.
+To run services locally, in your IDE or within a container you may also refer to the complete documentation.
 
 ## Developing FastIoT
 

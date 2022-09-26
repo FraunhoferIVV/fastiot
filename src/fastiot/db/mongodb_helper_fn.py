@@ -1,10 +1,9 @@
-import logging
 import sys
 from typing import Dict, List, Tuple, Union, Any
 
 from pymongo.collection import Collection
 
-from fastiot.core.logger import FIoTLogger
+from fastiot import logging
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
 from fastiot.msg.time_series_msg import TimeSeriesData
@@ -20,7 +19,7 @@ class CustomMongoClient:
         *Note:* You have to manually install ``pymongo>=4.1,<5`` using your :file:`requirements.txt` to make use of this
         helper. Database clients are not automatically installed to keep the containers smaller.
         """
-        self._logger = FIoTLogger.get_logger('mongodb_helper')
+        self._logger = logging('mongodb_helper')
         try:
             # pylint: disable=import-outside-toplevel
             from bson.binary import UUID_SUBTYPE
@@ -113,8 +112,8 @@ def get_mongodb_client_from_env() -> CustomMongoClient:
     """
     For connecting Mongodb, the environment variables can be set,
     if you want to use your own settings instead of default:
-    FASTIOT_MONGO_DB_HOST, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, FASTIOT_MONGO_DB_PASSWORD,
-    FASTIOT_MONGO_DB_AUTH_SOURCE, FASTIOT_MONGO_DB_NAME
+    :envvar:`FASTIOT_MONGO_DB_HOST`, :envvar:`FASTIOT_MONGO_DB_PORT`, :envvar:`FASTIOT_MONGO_DB_USER`,
+    :envvar:`FASTIOT_MONGO_DB_PASSWORD`, :envvar:`FASTIOT_MONGO_DB_AUTH_SOURCE`, :envvar:`FASTIOT_MONGO_DB_NAME`
 
     >>> mongo_client = get_mongodb_client_from_env()
     """

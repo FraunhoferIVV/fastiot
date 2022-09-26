@@ -17,7 +17,10 @@ class Thing(FastIoTData):
     name: str
     """ Name of the thing or sensor. """
     measurement_id: str
-    """ measurement id for this thing or sensor. """
+    """ Measurement id for this thing or sensor. The measurement id is intended to be unique across a measurement. If
+    the data producer is restartet, it should change. This can be useful e.g. if a measurement is messed up and needs
+    to be removed.
+    """
     value: Any
     """ Any data type suitable for Pydantic and serializable by ``ormsgpack`` may be used.
     Be aware, that the receiving site needs no be able to cope with whatever you send.
@@ -32,4 +35,3 @@ class Thing(FastIoTData):
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
-

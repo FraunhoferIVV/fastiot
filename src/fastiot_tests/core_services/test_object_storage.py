@@ -60,11 +60,13 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         self.service_task.cancel()
 
     async def test_thing_storage(self):
-        thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
-                          value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
-
+        self._db_col.delete_many({})
         await self._start_service()
-        await self.broker_connection.publish(Thing.get_subject(), thing_msg)
+        for i in range(5):
+            thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
+                              value=1, timestamp=datetime(year=2022, month=10, day=10, second=1))
+
+            await self.broker_connection.publish(Thing.get_subject(f'sensor_{i}'), thing_msg)
         await asyncio.sleep(0.02)
 
     async def test_object_storage(self):
@@ -85,7 +87,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
             expected_thing_list.append(thing_msg)
             test_thing_msg_mongo_dict = convert_message_to_mongo_data(
                 msg=thing_msg.dict(),
-                subject=Thing.get_subject().name,
+                subject=Thing.get_subject(f'sensor_{i}').name,
                 timestamp=datetime(year=2022, month=10, day=9, second=i))
             self._db_col.insert_one(test_thing_msg_mongo_dict)
         hist_req_msg = HistObjectReq(machine='test_machine', name='test_thing',

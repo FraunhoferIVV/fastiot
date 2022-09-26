@@ -1,12 +1,12 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict
 
 from pydantic import BaseModel
+
 from fastiot.cli.constants import FASTIOT_CONFIGURE_FILE
 from fastiot.cli.import_configure import import_configure
-
-from fastiot.cli.model import ProjectConfig, InfrastructureService
 from fastiot.cli.infrastructure_service_fn import get_services_list
+from fastiot.cli.model import ProjectConfig, InfrastructureService
 
 
 class Context(BaseModel):
@@ -34,4 +34,3 @@ def get_default_context() -> Context:
         )
         __default_context.external_services = get_services_list()
     return __default_context
-

@@ -14,6 +14,7 @@ from fastiot.cli.typer_app import create_cmd
 
 @create_cmd.command()
 def new_project(project_name: str = typer.Argument(None, help="The project name to generate"),
+                target_dir: str = typer.Option('.', '-d', '--dir', help="Specify the dir to generate the new project in."),
                 force: Optional[bool] = typer.Option(False, '-f', '--force',
                                                      help="Create project even if an existing project has been found.")
                 ):
@@ -30,6 +31,14 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                       "To force overwriting this you may use the --force argument.",
                       get_default_context().project_config.project_namespace)
         raise typer.Exit(2)
+
+    if target_dir.startswith('/'):
+        project_config.project_root_dir = target_dir
+    else:
+        project_config.project_root_dir = os.path.join(project_config.project_root_dir, target_dir)
+
+    if not os.path.exists(project_config.project_root_dir):
+        os.makedirs(project_config.project_root_dir)
 
     # TODO: Check for valid project name (no space, no /, …)
     project_name = project_name.replace(" ", "_").replace("-", '_')
