@@ -22,7 +22,7 @@ class TestDataBases(unittest.TestCase):
 
     def test_influxdb_connection(self):
         db_client = get_influxdb_client_from_env()
-        self.assertTrue(db_client.health_check())
+        self.assertTrue(db_client.ping())
 
     def test_timescaledb_connection(self):
         db_connection = open_timescaledb_connection_from_env()
