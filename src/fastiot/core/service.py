@@ -117,19 +117,20 @@ class FastIoTService:
         """
         if timeout < 0:
             raise ValueError("Timeout must be greater or equal zero")
-        elif timeout == 0:
+
+        if timeout == 0:
             await self._shutdown_event.wait()
             return True
-        else:
-            result = True
-            try:
-                await asyncio.wait_for(
-                    self._shutdown_event.wait(),
-                    timeout=timeout
-                )
-            except TimeoutError:
-                result = False
-            return result
+
+        result = True
+        try:
+            await asyncio.wait_for(
+                self._shutdown_event.wait(),
+                timeout=timeout
+            )
+        except TimeoutError:
+            result = False
+        return result
 
     async def run_coro(self, coro):
         """
@@ -212,4 +213,3 @@ class FastIoTService:
         await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
         self._subs = []
         self._tasks = []
-

@@ -30,7 +30,8 @@ def _clean_generated_files(project_config: ProjectConfig):
 
 
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def remove_all_container(kill: bool = typer.Option(False, '-k', '--kill', help="Sending kill signal to containers, instead of stop signal.")):
+def remove_all_container(kill: bool = typer.Option(False, '-k', '--kill',
+                                                   help="Sending kill signal to containers, instead of stop signal.")):
     """
     Remove all running container
     """
@@ -39,4 +40,3 @@ def remove_all_container(kill: bool = typer.Option(False, '-k', '--kill', help="
     else:
         os.system("docker ps -q | xargs -r docker stop")
     os.system("docker ps -aq | xargs -r docker rm")
-

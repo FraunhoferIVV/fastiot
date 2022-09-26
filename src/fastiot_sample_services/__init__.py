@@ -8,4 +8,3 @@ This package contains various samples of, mostly minimal, services to show how t
 Feel free to use these packages as blueprints for your own services.
 
 """
-

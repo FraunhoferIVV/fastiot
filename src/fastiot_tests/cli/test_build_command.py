@@ -85,7 +85,8 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
             docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"], catch_exceptions=False)
+            result = self.runner.invoke(app, ["build", "--dry", "--docker-registry=TEST_REGISTRY"],
+                                        catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
             with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 self.assertTrue('TEST_REGISTRY' in f.read())
@@ -95,7 +96,8 @@ class TestBuildCommand(unittest.TestCase):
             _prepare_env(tempdir)
             docker_dir = os.path.join(tempdir, DOCKER_BUILD_DIR)
 
-            result = self.runner.invoke(app, ["build", "--dry", "--push", "--docker-registry", "test_registry", "--docker-registry-cache", "test_cache_registry"], catch_exceptions=False)
+            result = self.runner.invoke(app, ["build", "--dry", "--push", "--docker-registry", "test_registry",
+                                              "--docker-registry-cache", "test_cache_registry"], catch_exceptions=False)
             self.assertEqual(0, result.exit_code)
             with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()

@@ -78,7 +78,7 @@ def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
     try:
         with open(config_file) as file:
             loader = yaml.safe_load_all(file)
-            result = [x for x in loader]
+            result = list(loader)
     except:
         logging.getLogger("yaml_config").warning("Could not open or parse yaml file %s", config_file)
         return {}

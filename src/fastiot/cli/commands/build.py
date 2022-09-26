@@ -57,8 +57,8 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
                                                     envvar=FASTIOT_DOCKER_REGISTRY_CACHE,
                                                     help="The docker registry cache. If docker registry cache is "
                                                          "unspecified, it will look for a process environment variable "
-                                                         "FASTIOT_DOCKER_REGISTRY_CACHE. If docker registry cache is not "
-                                                         "empty, it will use it as a cache for intermediate image "
+                                                         "FASTIOT_DOCKER_REGISTRY_CACHE. If docker registry cache is "
+                                                         "not empty, it will use it as a cache for intermediate image "
                                                          "layers."),
           platform: str = typer.Option('', '-p', '--platform', shell_complete=_platform_completion,
                                        help="The platform to compile for given as a comma ',' separated list. Possible "
@@ -78,8 +78,8 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
           test_deployment_only: Optional[bool] = typer.Option(False,
-                                                              help="Build only services defined in the integration test "
-                                                                   "deployment. This is especially useful in the "
+                                                              help="Build only services defined in the integration "
+                                                                   "test deployment. This is especially useful in the "
                                                                    "CI-runner"),
           no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build.")):
     """

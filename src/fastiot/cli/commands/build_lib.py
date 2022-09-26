@@ -30,8 +30,8 @@ def _styles_completion() -> List[str]:
 
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
-                                                          help="Compile all styles configured for the project or force compiled, "
-                                                               "wheel or sdist")):
+                                                          help="Compile all styles configured for the project or force "
+                                                               "compiled, wheel or sdist")):
     """ Compile the project library according to the project configuration. """
 
     project_config = get_default_context().project_config
@@ -70,4 +70,3 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         if exit_code != 0:
             logging.error("Building library with style %s failed with exit code %s", str(style.value), str(exit_code))
             raise typer.Exit(exit_code)
-

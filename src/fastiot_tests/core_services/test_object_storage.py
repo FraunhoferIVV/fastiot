@@ -47,6 +47,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_client = get_mongodb_client_from_env()
         self._database = self._db_client.get_database(env_mongodb.name)
         self._db_col = self._database.get_collection('object_storage')
+        self._db_col.delete_many({})
         self.broker_connection = await NatsBrokerConnection.connect()
 
 
@@ -59,7 +60,6 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.service_task.cancel()
 
     async def test_thing_storage(self):
-        self._db_col.delete_many({})
         await self._start_service()
         for i in range(5):
             thing_msg = Thing(machine='test_machine', name=f'sensor_{i}', measurement_id='123456',
@@ -72,7 +72,6 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(values[0]['_subject'], 'v1.thing.sensor_0')
 
     async def test_object_storage(self):
-        self._db_col.delete_many({})
         test_custom_msg_l = TestCustomMsgList(
             values=[TestCustomMsg(x=TestValue(real=1, img=2),
                                   y=TestValue(real=1, img=2))])
@@ -85,7 +84,6 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(values[0]), 4)
 
     async def test_reqeust_response_thing(self):
-        self._db_col.delete_many({})
         expected_thing_list = []
         for i in range(5):
             thing_msg = Thing(machine='test_machine', name='test_thing', measurement_id='123456',
@@ -110,11 +108,10 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
     async def test_request_response_object(self):
         await self._start_service()
 
-        self._db_col.delete_many({})
         expected_object_list = []
         dt_start = datetime.utcnow()
         dt_end = datetime.utcnow() + timedelta(minutes=5)
-        for i in range(5):
+        for _ in range(5):
             object_msg = TestCustomMsgList(
                 values=[TestCustomMsg(x=TestValue(real=1, img=2),
                                       y=TestValue(real=1, img=2))])

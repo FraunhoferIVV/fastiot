@@ -165,7 +165,6 @@ class BrokerConnection(ABC):
         :param subject: The subject to subscribe to
         :param cb: The callback which is called when a message is received
         """
-        pass
 
     async def subscribe_msg_queue(self,
                                   subject: Subject,
@@ -192,14 +191,12 @@ class BrokerConnection(ABC):
         :param subject: The reply subject to subscribe to
         :param cb: The callback which is called when a request is received
         """
-        pass
 
     @abstractmethod
     async def _send(self, subject: Subject, msg: MsgCls, reply: Optional[Subject] = None):
         """
         Low level method to send msg to broker
         """
-        pass
 
     async def publish(self, subject: Subject, msg: MsgClsPub):
         """
@@ -418,4 +415,3 @@ class BrokerConnectionDummy(BrokerConnection):
                     msg: Msg,
                     reply: Optional[Subject] = None):
         pass
-

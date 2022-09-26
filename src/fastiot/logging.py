@@ -20,4 +20,3 @@ def logging(name: str = None):
     import logging.config
     logging.config.dictConfig(get_log_config(env_basic.log_level_no))
     return logging.getLogger(name)
-

@@ -1,5 +1,3 @@
-from typing import Type, Union
-
 from ormsgpack import ormsgpack
 
 from fastiot.core.data_models import FastIoTData, Msg, MsgCls

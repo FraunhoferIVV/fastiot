@@ -233,7 +233,7 @@ class MariaDBEnv:
 
     @property
     def is_configured(self) -> bool:
-        if FASTIOT_MARIA_DB_HOST in os.environ.keys():
+        if FASTIOT_MARIA_DB_HOST in os.environ:
             return True
         return False
 

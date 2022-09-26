@@ -12,4 +12,3 @@ def populate_test_env():
     os.environ[FASTIOT_NATS_HOST] = 'localhost'
     init_default_context()
     set_infrastructure_service_port_environment()
-

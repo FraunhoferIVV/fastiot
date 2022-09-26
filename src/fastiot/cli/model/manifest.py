@@ -105,13 +105,13 @@ class Vue(BaseModel):
     Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
     in the `<vue-path>/dist` which is also the default here.
     If you have something like::
-    
+
         service.exports = {
           outputDir:"../flask_server/static",
           assetsDir: "static"
         }
 
-    
+
     in your :file:`vue.config.js` use the `outputDir` variable as relative path here.
     """
 

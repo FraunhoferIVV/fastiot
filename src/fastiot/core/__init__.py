@@ -9,4 +9,3 @@ This module provides the core functionality for FastIoT Services:
 from fastiot.core.data_models import FastIoTPublish, FastIoTRequest, FastIoTResponse, Subject, ReplySubject
 from fastiot.core.service import FastIoTService
 from fastiot.core.service_annotations import subscribe, reply, loop
-

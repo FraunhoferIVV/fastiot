@@ -86,4 +86,3 @@ class InfrastructureService(BaseModel):
     host_name_env_var: str = ""
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
-

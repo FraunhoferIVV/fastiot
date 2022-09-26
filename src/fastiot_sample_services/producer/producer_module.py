@@ -4,7 +4,6 @@ import random
 from datetime import datetime
 
 from fastiot.core import FastIoTService, loop, reply, ReplySubject
-from fastiot.core.core_uuid import get_uuid
 from fastiot.msg.thing import Thing
 
 
@@ -41,4 +40,3 @@ class ExampleProducerService(FastIoTService):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     ExampleProducerService.main()
-

@@ -12,8 +12,8 @@ class InfrastructureServiceConfig(BaseModel):
     external: bool = False
     """
     Allows to mention services running on external servers and configured manually. This will avoid warnings in the
-    setup process if services specified by the services as dependency could not be found. 
-    
+    setup process if services specified by the services as dependency could not be found.
+
     *Attention*: You need to manage the environment variables like host and port yourself if using ``external = True``.
     """
 

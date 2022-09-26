@@ -3,11 +3,10 @@ import logging
 import pymongo
 from pymongo.collection import Collection
 
-from fastiot.core import FastIoTService, stream, Subject, subscribe
+from fastiot.core import FastIoTService, subscribe
 from fastiot.core.core_uuid import get_uuid
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env, time_series_data_to_mongodb_data_set
-from fastiot.env import env_mongodb
-from fastiot.env import env_mongodb_cols
+from fastiot.env import env_mongodb, env_mongodb_cols
 from fastiot.msg.thing import Thing
 from fastiot.msg.time_series_msg import TimeSeriesData
 
@@ -32,8 +31,8 @@ class TimeSeriesService(FastIoTService):
         pass
 
     @subscribe(subject=Thing.get_subject('*'))
-    async def _cb_receive_data(self, topic: str, msg: Thing):
-        logging.info("Received message from sensor %s: %s" % (msg.name, str(msg)))
+    async def _cb_receive_data(self, msg: Thing):
+        logging.info("Received message from sensor %s: %s", msg.name, str(msg))
         time_seires_data = self._convert_thing_message_to_time_series_data(msg)
         self._insert_or_update_time_series(self._time_series_db_col, time_seires_data)
 

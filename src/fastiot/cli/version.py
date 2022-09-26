@@ -33,10 +33,8 @@
 #   include RELEASE-VERSION
 
 
-import argparse
 import logging
 import os
-import pathlib
 import re
 from subprocess import Popen, PIPE
 from typing import Optional
@@ -178,4 +176,3 @@ def get_version(complete=False, only_major=False, minor=False) -> str:
     if minor:
         parts = version.split('.')
         return f"{parts[0]}.{parts[1]}"
-

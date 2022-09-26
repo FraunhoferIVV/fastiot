@@ -18,7 +18,7 @@ def import_configure(project_config: ProjectConfig, file_name: str = ''):
 
     try:
         config = _import_configure_py(file_name)
-    except FileNotFoundError as err:
+    except FileNotFoundError:
         logging.warning("No file configure.py found in %s. Trying to continue.", os.path.dirname(file_name))
         return
 
