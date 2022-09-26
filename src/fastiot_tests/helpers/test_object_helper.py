@@ -2,23 +2,23 @@ import unittest
 from datetime import datetime
 from typing import List
 
-from fastiot.core import FastIoTData
+from fastiot.core import FastIoTPublish
 from fastiot.helpers.object_helper import parse_object, parse_object_list
 from fastiot.msg.thing import Thing
 from fastiot.testlib.testlib import populate_test_env
 
 
-class TestValue(FastIoTData):
+class TestValue(FastIoTPublish):
     real: float
     img: float
 
 
-class TestCustomMsg(FastIoTData):
+class TestCustomMsg(FastIoTPublish):
     x: TestValue
     y: TestValue
 
 
-class TestCustomMsgList(FastIoTData):
+class TestCustomMsgList(FastIoTPublish):
     values: List[TestCustomMsg]
 
 

@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime
 
 from fastiot.core.broker_connection import NatsBrokerConnection
-from fastiot.core.data_models import ReplySubject, Subject
+from fastiot.core.data_models import ReplySubject
 from fastiot.core.service import FastIoTService
 from fastiot.core.service_annotations import reply
 from fastiot.msg.thing import Thing

@@ -3,10 +3,10 @@ from typing import Dict, Type, Union, List
 from pydantic import BaseModel
 
 from fastiot import logging
-from fastiot.core import FastIoTData
+from fastiot.core.data_models import FastIoTData
 
 
-def parse_object(dic: Dict, data_model: Type[Union[FastIoTData, BaseModel]]) -> \
+def parse_object(dic: Dict, data_model: Type[Union[Type[FastIoTData], BaseModel]]) -> \
         Union[Type[Union[FastIoTData, BaseModel]], None]:
     """
     This function will help you convert a dictionary to an instance, of which the class inherits

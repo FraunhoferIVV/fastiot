@@ -15,21 +15,30 @@ structure your data. This is done using data models.
 FastIoT relies on `Pydantic <https://pydantic-docs.helpmanual.io/>`_, so you may consult this for any details about data
 models.
 
-To add the FastIoT handling of subjects it is recommended (though not necessary) to inherit your class from
-:class:`fastiot.core.data_models.FastIoTData`. This will add the method
-:meth:`fastiot.core.data_models.FastIoTData.get_subject` and allow for an easy publish/subscribe as described in
-:ref:`publish-subscribe`.
+To add the FastIoT handling of subjects it is recommended (though not necessary) to inherit your class from one of the
+inheritors of :class:`fastiot.core.data_models.FastIoTData`.
 
-A very basic data model could thus look like the following:
+Three basic classes inherit from this class:
+ -  :class:`fastiot.core.data_models.FastIoTPublish` for data to be simply published like :class:`fastiot.msg.thing.Thing`.
+    This will add the method :meth:`fastiot.core.data_models.FastIoTPublish.get_subject` and allow for an easy
+    publish/subscribe as described in :ref:`publish-subscribe`.
+ - :class:`fastiot.core.data_models.FastIoTRequest` to request data from other services. To define your datatype for the
+   response please set the property :attr:`fastiot.core.data_models.FastIoTRequest._reply_cls` accordingly. To get the
+   subject for the datatype please use :meth:`fastiot.core.data_models.FastIoTRequest.get_reply_subject`.
+ - :class:`fastiot.core.data_models.FastIoTResponse` is the expected reply datatype for any request. This class does
+   explicitly not provide any form of ``get_subject()`` as there are no subjects to subscribe to for an answer.
+
+
+A very basic data model for publishing data could thus look like the following:
 
 .. code:: python
 
   from typing import Optional, Union
 
-  from fastiot.core.data_models import FastIoTData
+  from fastiot.core.data_models import FastIoTPublish
 
 
-  class MyDataModel(FastIoTData):
+  class MyDataModel(FastIoTPublish):
     my_id: str
     """ A required string """
 

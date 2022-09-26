@@ -20,7 +20,6 @@ class ExampleProducerService(FastIoTService):
             msg=Thing(
                 name=sensor_name,
                 machine='FastIoT_Example_Machine',
-                measurement_id=get_uuid(),
                 value=value,
                 timestamp=datetime.utcnow()
             )
@@ -29,8 +28,8 @@ class ExampleProducerService(FastIoTService):
         return asyncio.sleep(2)
 
     @reply(ReplySubject(name="reply_test",
-                   msg_cls=Thing,
-                   reply_cls=Thing))
+                        msg_cls=Thing,
+                        reply_cls=Thing))
     async def respond(self, topic: str, msg: Thing) -> Thing:
         """ Short demo on receiving a thing value and sending back the duplication of its value """
         logging.info("Received request on topic %s with message %s.", topic, str(msg))

@@ -1,10 +1,14 @@
 from datetime import datetime
 from typing import Any
 
-from fastiot.core.data_models import FastIoTData
+from fastiot.core.core_uuid import get_uuid
+from fastiot.core.data_models import FastIoTPublish
 
 
-class Thing(FastIoTData):
+MEASUREMENT_ID = get_uuid()
+
+
+class Thing(FastIoTPublish):
     """
     Default data model for sending Things (e.g. Sensors) values.
 
@@ -16,10 +20,10 @@ class Thing(FastIoTData):
     """ Name of the machine. If you have many machines you may add the vendor to the machine name. """
     name: str
     """ Name of the thing or sensor. """
-    measurement_id: str
+    measurement_id: str = MEASUREMENT_ID
     """ Measurement id for this thing or sensor. The measurement id is intended to be unique across a measurement. If
-    the data producer is restartet, it should change. This can be useful e.g. if a measurement is messed up and needs
-    to be removed.
+    the data producer is restarted, it should change. This can be useful e.g. if a measurement is messed up and needs
+    to be removed. Per default a UUID will be generated upon system start for this property.
     """
     value: Any
     """ Any data type suitable for Pydantic and serializable by ``ormsgpack`` may be used.

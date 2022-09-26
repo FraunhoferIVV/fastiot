@@ -4,16 +4,15 @@ import threading
 from abc import ABC, abstractmethod
 from asyncio import get_running_loop
 from inspect import signature
-from typing import Any, Callable, Coroutine, Generic, List, NewType, Optional, TypeVar, Union, AsyncIterator
+from typing import Any, Callable, Coroutine, Optional
 
 from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback
-from nats.aio.subscription import Subscription as BrokerSubscription
 from nats.aio.msg import Msg as NatsBrokerMsg
+from nats.aio.subscription import Subscription as BrokerSubscription
 
+from fastiot.core.data_models import Msg, Subject, ReplySubject, MsgClsPub, MsgClsReq, MsgCls, MsgClsResp
 from fastiot.core.serialization import serialize_from_bin, serialize_to_bin
-from fastiot.core.data_models import Msg, Subject, ReplySubject
 from fastiot.env import env_broker
-
 
 # passes MsgCls or str (subject_name) and MsgCls into callback
 SubscriptionCallback = Callable[..., Coroutine[None, None, None]]
@@ -196,13 +195,13 @@ class BrokerConnection(ABC):
         pass
 
     @abstractmethod
-    async def _send(self, subject: Subject, msg: Msg, reply: Optional[Subject] = None):
+    async def _send(self, subject: Subject, msg: MsgCls, reply: Optional[Subject] = None):
         """
         Low level method to send msg to broker
         """
         pass
 
-    async def publish(self, subject: Subject, msg: Msg):
+    async def publish(self, subject: Subject, msg: MsgClsPub):
         """
         Publishes a message for a subject.
 
@@ -211,7 +210,8 @@ class BrokerConnection(ABC):
         """
         await self._send(subject=subject, msg=msg)
 
-    async def request(self, subject: ReplySubject, msg: Msg, timeout: float = env_broker.default_timeout) -> Msg:
+    async def request(self, subject: ReplySubject, msg: MsgClsReq,
+                      timeout: float = env_broker.default_timeout) -> MsgClsResp:
         """
         Send a request on a subject.
 

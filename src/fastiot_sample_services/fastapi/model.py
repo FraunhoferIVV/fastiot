@@ -1,11 +1,12 @@
 from typing import List
 
-from fastiot.core.data_models import FastIoTData
+from fastiot.core.data_models import FastIoTRequest, FastIoTResponse
 
 
-class Request(FastIoTData):
-    req_value: List[int]  # A list of values
+class Response(FastIoTResponse):
 
-
-class Response(FastIoTData):
     resp_value: float  # A float usually containing the average of requested numbers
+
+class Request(FastIoTRequest):
+    _reply_cls = Response
+    req_value: List[int]  # A list of values

@@ -1,6 +1,5 @@
 """ Decorator functions to add the basic functionality to FastIoT Services """
 import asyncio
-from fastiot.core.data_models import Subject
 
 from fastiot.core.data_models import Subject, ReplySubject
 
@@ -60,4 +59,3 @@ def loop(fn):
         raise TypeError("Expected coroutine function for loop annotation")
     fn._fastiot_is_loop = True
     return fn
-

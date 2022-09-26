@@ -2,7 +2,7 @@ import asyncio
 import logging
 from datetime import datetime
 
-from fastiot.core import FastIoTService, Subject, loop, subscribe
+from fastiot.core import FastIoTService, Subject, loop, subscribe, ReplySubject
 from fastiot.msg.thing import Thing
 
 
@@ -15,7 +15,7 @@ class ExampleConsumerService(FastIoTService):
     @loop
     async def request(self):
         request = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now())
-        subject = Subject(name="reply_test", msg_cls=Thing, reply_cls=Thing)
+        subject = ReplySubject(name="reply_test", msg_cls=Thing, reply_cls=Thing)
         reply: Thing = await self.broker_connection.request(subject=subject, msg=request, timeout=10)
         logging.info("Got reply %s", str(reply))
         return asyncio.sleep(30)

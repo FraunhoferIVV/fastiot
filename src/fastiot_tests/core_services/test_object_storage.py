@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 from typing import List, Type, Union
 
 from pydantic import BaseModel
-from fastiot.core.broker_connection import NatsBrokerConnection
 
-from fastiot.core.data_models import FastIoTData, ReplySubject, Subject
+from fastiot.core.broker_connection import NatsBrokerConnection
+from fastiot.core.data_models import FastIoTData, ReplySubject, FastIoTPublish
 from fastiot.core.subject_helper import sanitize_subject
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
@@ -15,27 +15,27 @@ from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing
 from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data
 from fastiot_core_services.object_storage.object_storage_service import ObjectStorageService
-from fastiot_tests.core.test_publish_subscribe import FastIoTTestService
 from fastiot_tests.generated import set_test_environment
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
 
 
-class TestValue(FastIoTData):
+class TestValue(FastIoTPublish):
     real: float
     img: float
 
 
-class TestCustomMsg(FastIoTData):
+class TestCustomMsg(FastIoTPublish):
     x: TestValue
     y: TestValue
 
 
-class TestCustomMsgList(FastIoTData):
+class TestCustomMsgList(FastIoTPublish):
     values: List[TestCustomMsg]
 
 
-def convert_message_to_mongo_data(msg: Type[Union[FastIoTData, BaseModel, dict]], subject: str, timestamp: datetime):
+def convert_message_to_mongo_data(msg: Type[Union[Type[FastIoTData], BaseModel, dict]],
+                                  subject: str, timestamp: datetime):
     mongo_data = to_mongo_data(timestamp=timestamp, subject_name=subject, msg=msg)
     return mongo_data
 
@@ -48,8 +48,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._database = self._db_client.get_database(env_mongodb.name)
         self._db_col = self._database.get_collection('object_storage')
         self.broker_connection = await NatsBrokerConnection.connect()
-        service = FastIoTTestService(broker_connection=self.broker_connection)
-        self.service_task = asyncio.create_task(service.run())
+
 
     async def _start_service(self):
         service = ObjectStorageService(broker_connection=self.broker_connection)
@@ -109,6 +108,8 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected_thing_list[0], values[0])
 
     async def test_request_response_object(self):
+        await self._start_service()
+
         self._db_col.delete_many({})
         expected_object_list = []
         dt_start = datetime.utcnow()
@@ -126,9 +127,8 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
 
         hist_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10,
                                      subject_name=sanitize_subject('test_custom_msg_list'))
-        subject = hist_req_msg.get_subject()
+        subject = hist_req_msg.get_reply_subject()
 
-        await self._start_service()
         reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
         values = parse_object_list(reply.values, TestCustomMsgList)
         self.assertListEqual(expected_object_list, values)

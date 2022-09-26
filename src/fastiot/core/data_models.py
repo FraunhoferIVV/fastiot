@@ -1,8 +1,10 @@
 import random
 import re
-from typing import Type, Union
+from typing import Type, Union, Optional
 
 from pydantic import BaseModel
+
+from fastiot.core.subject_helper import MSG_FORMAT_VERSION
 
 
 class FastIoTData(BaseModel):
@@ -15,8 +17,30 @@ class FastIoTData(BaseModel):
     the method :meth:`fastiot.core.data_models.FastIoTData.get_subject` in your data model or create a new model based
     on Pydantic’s :class:`pydantic.BaseModel`. See :ref:`publish-subscribe` for more details about publish and
     subscribe.
+
+    For your own data models please use :class:`fastiot.core.data_models.FastIoTPublish` for data that is simply
+    published over the broker. For Request and Response please use :class:`fastiot.core.data_models.FastIoTRequest` and
+    :class:`fastiot.core.data_models.FastIoTResponse`.
     """
 
+    @classmethod
+    def _get_subject_name(cls, name: str):
+        # Convert CamelCase to snake_case
+        subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()}"
+        if name:
+            subject_name += "." + name
+        return subject_name
+
+
+Msg = Union[FastIoTData, dict]
+MsgCls = Type[Msg]
+
+
+class FastIoTPublish(FastIoTData):
+    """
+    Base datatype for publishing data. Please refer to :ref:`tut-own_data_types` for more information about creating
+    your own data types.
+    """
     @classmethod
     def get_subject(cls, name: str = "") -> "Subject":
         """
@@ -34,18 +58,41 @@ class FastIoTData(BaseModel):
             msg_cls=cls
         )
 
-    @classmethod
-    def _get_subject_name(cls, name: str):
-        # Convert CamelCase to snake_case
-        subject_name = f"v1.{re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()}"
-        if name:
-            subject_name += "." + name
-        return subject_name
 
+MsgPub = Union[FastIoTPublish, dict]
+MsgClsPub = Type[MsgPub]
+
+
+class FastIoTResponse(FastIoTData):
+    """
+    Base datatype for answering requests based on :class: `fastiot.core.data_models.FastIoTRequest`.
+    Please refer to :ref:`tut-own_data_types` for more information about creating your own data types.
+    """
     @classmethod
-    def get_reply_subject(cls, reply_cls: "MsgCls", name: str = "") -> "ReplySubject":
+    def get_subject(cls):
+        raise NotImplementedError("A response does not listen to any subjects, thus `get_subject()` is not "
+                                  "implemented.")
+
+
+MsgResp = Union[FastIoTPublish, dict]
+MsgClsResp = Type[MsgResp]
+
+
+class FastIoTRequest(FastIoTData):
+    """
+    Base datatype for handling requests. Please refer to :ref:`tut-own_data_types` for more information about creating
+    your own data types.
+    """
+    _reply_cls: Optional[Type[FastIoTResponse]] = None
+    """
+    This is the best way to describe the datatype (class) your request will be answered with. As an alternative you may
+    manually define a :class:`fastiot.core.data_models.ReplySubject`.
+    """
+    @classmethod
+    def get_reply_subject(cls, reply_cls: Optional["MsgCls"] = None, name: str = "") -> "ReplySubject":
         """
-        This method returns the corresponding reply subject for the data model as :class:`fastiot.core.data_models.ReplySubject`.
+        This method returns the corresponding reply subject for the data model as
+         :class:`fastiot.core.data_models.ReplySubject`.
 
         :param reply_cls: The corresponding reply class.
         :param name: The name of the subject. Please pay special attention to this parameter: The default is set to
@@ -55,6 +102,10 @@ class FastIoTData(BaseModel):
                      ``v1.thing.my_sensor``. If you want to subscribe to all sensors use ``*`` as name. See more in
                      :ref:`publish-subscribe`
         """
+        if not reply_cls:
+            reply_cls = cls._reply_cls
+        if not reply_cls:
+            raise TypeError("Reply class needs to be defined for class.")
         return ReplySubject(
             name=cls._get_subject_name(name=name),
             msg_cls=cls,
@@ -62,8 +113,8 @@ class FastIoTData(BaseModel):
         )
 
 
-Msg = Union[FastIoTData, dict]
-MsgCls = Type[Msg]
+MsgReq = Union[FastIoTPublish, dict]
+MsgClsReq = Type[MsgReq]
 
 
 class Subject(BaseModel):
@@ -99,4 +150,3 @@ class ReplySubject(Subject):
             name=reply_to,
             msg_cls=self.reply_cls
         )
-
