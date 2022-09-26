@@ -1,12 +1,10 @@
-name: core
-
 services:
   producer:
   object_storage:
 
 infrastructure-services:
   nats:
-  #mariadb:
   mongodb:
-  #influxdb:
-  #timescaledb:
+
+config-dir: ./config_dir
+

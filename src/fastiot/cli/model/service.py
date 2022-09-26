@@ -1,6 +1,6 @@
 """ data models for FastIoT and infrastructure services """
 import os
-from typing import Optional, List
+from typing import Dict, Optional, List
 
 from pydantic import BaseModel
 
@@ -78,12 +78,33 @@ class InfrastructureService(BaseModel):
     Please refer to :ref:`tut-own_infrastructure_services` for more information on adding your own infrastructure to
     your project.
     """
-    name: str
+    name: str = ""
     """ Name of the external service, e.g. mariadb. Per convention these names should be in lower case """
-    image: str
+    image: str = ""
     """ Name of the image """
     environment: List[InfrastructureServiceEnvVar] = []
     host_name_env_var: str = ""
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
+
+    @classmethod
+    @property
+    def all(cls) -> Dict[str, "InfrastructureService"]:
+        """ Method to get a dict of all available services as instantiated
+        :class:`fastiot.cli.model.service.InfrastructureService`.
+
+        To append own services you simply have to inherit from this class and put them into your project. Then import
+        those parts using :attr:`fastiot.cli.model.project.ProjectConfig.extensions`. This method will try to import
+        anything from there and for services.
+        """
+        service_classes = InfrastructureService.__subclasses__()
+        i_service_class = 0
+        while i_service_class < len(service_classes):
+            for subcls in service_classes[i_service_class].__subclasses__():
+                if subcls not in service_classes:  # We have to check for multiple inheritance
+                    service_classes.append(subcls)
+            i_service_class += 1
+        services_list = [s() for s in service_classes]
+        services = {s.name: s for s in services_list}
+        return {k: services[k] for k in sorted(services.keys())}
 

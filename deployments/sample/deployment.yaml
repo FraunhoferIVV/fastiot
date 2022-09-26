@@ -1,5 +1,3 @@
-name: sample
-
 services:
   producer:
   consumer:
@@ -12,3 +10,4 @@ deployment-target:
   hosts:
     localhost:
       ip: 127.0.0.1
+
