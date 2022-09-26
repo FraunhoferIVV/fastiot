@@ -21,7 +21,7 @@ Here we will provide a short description of the core concepts. A useful starting
 Image Names and Services
 ========================
 
-By default the image name will be constructed using the configured Docker-Registry (either in the file or using :envvar:`FASTIOT_DOCKER_REGISTRY),
+By default the image name will be constructed using the configured Docker-Registry (either in the file or using :envvar:`FASTIOT_DOCKER_REGISTRY`),
 the project namespace from your :file:`configure.py`, the service and name and a tag: ``REGISTRY/namespace/image_name:tag``.
 
 This can either be configured global or per service using an :class:`fastiot.cli.model.deployment.ServiceConfig`.
