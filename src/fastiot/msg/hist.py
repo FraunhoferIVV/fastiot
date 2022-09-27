@@ -58,8 +58,8 @@ class HistObjectReq(FastIoTRequest):
 
     dt_start: Optional[datetime]
     dt_end: Optional[datetime]
-    limit: Optional[int]
+    limit: Optional[int] = 100
     subject_name: Optional[str]
     machine: Optional[str]
     sensor: Optional[str]
-    query_dict: Optional[Union[dict, str]] = None
+    query_dict: Optional[Union[dict, str]]
