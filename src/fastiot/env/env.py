@@ -282,7 +282,7 @@ class InfluxDBEnv:
         This env var is only used for browser login, not for connecting from fastiot framework.
         password for InfluxDB must be complex, otherwise InfluxDB won't be started.
         """
-        pass
+        return str(os.getenv(FASTIOT_INFLUX_DB_PASSWORD, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_PASSWORD)))
 
     @property
     def token(self) -> Optional[str]:
