@@ -3,6 +3,7 @@ Nuitka
 pymongo>=4.1,<5
 PyMySQL>=1.0,<2
 influxdb-client>=1.30,<2
+aiohttp
 psycopg2>=2.9.3,<3
 asyncua
 
