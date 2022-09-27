@@ -66,7 +66,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         os.makedirs(project_config.project_root_dir)
     for directory in [
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
-                      os.path.join("src", f"{project_name}_lib"),
+                      os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
                       os.path.join("src", f"{project_name}_services")]:
         os.makedirs(os.path.join(project_config.project_root_dir, directory), exist_ok=True)
@@ -81,9 +81,9 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 
     # Loop over many templates used to create a new project
     for dest, temp in [(CONFIGURE_FILE_NAME, 'new_project/configure.py.j2'),
-                      ('README.md', 'new_project/README.md.j2'),
-                      ('deployments/integration_test/.env', 'new_project/.env.j2'),
-                      ('requirements.txt', 'new_project/requirements.txt.j2')]:
+                       ('README.md', 'new_project/README.md.j2'),
+                       ('deployments/integration_test/.env', 'new_project/.env.j2'),
+                       ('requirements.txt', 'new_project/requirements.txt.j2')]:
 
         with open(os.path.join(project_config.project_root_dir, dest), "w") as docker_compose_file:
             configure_py_template = get_jinja_env().get_template(temp)
