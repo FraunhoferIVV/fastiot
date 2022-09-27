@@ -76,7 +76,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     for src, dest in [('.dockerignore', '.'),
                       ('.gitignore', '.'),
                       ('install.sh', '.'),
-                      ('deployment.yaml', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'integration_test'))]:
+                      ('deployment.yaml', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'integration_test')),
+                      ('dummy_test.py', os.path.join("src", f"{project_name}_tests"))]:
         shutil.copy(os.path.join(templates_dir, src), os.path.join(project_config.project_root_dir, dest))
 
     # Loop over many templates used to create a new project
