@@ -130,6 +130,30 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         values = parse_object_list(reply.values, TestCustomMsgList)
         self.assertListEqual(expected_object_list, values)
 
+    async def test_request_response_object_req_default(self):
+        await self._start_service()
+
+        expected_object_list = []
+        dt_start = datetime.utcnow()
+        dt_end = datetime.utcnow() + timedelta(minutes=5)
+        for _ in range(5):
+            object_msg = TestCustomMsgList(
+                values=[TestCustomMsg(x=TestValue(real=1, img=2),
+                                      y=TestValue(real=1, img=2))])
+            expected_object_list.append(object_msg)
+            test_object_msg_mongo_dict = convert_message_to_mongo_data(
+                msg=object_msg.dict(),
+                subject=object_msg.get_subject().name,
+                timestamp=datetime.utcnow())
+            self._db_col.insert_one(test_object_msg_mongo_dict)
+
+        hist_req_msg = HistObjectReq()
+        subject = hist_req_msg.get_reply_subject()
+
+        reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
+        values = parse_object_list(reply.values[:-1], TestCustomMsgList)
+        self.assertListEqual(expected_object_list, values)
+
 
 if __name__ == '__main__':
     unittest.main()
