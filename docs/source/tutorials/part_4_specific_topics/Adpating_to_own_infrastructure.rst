@@ -1,3 +1,5 @@
+.. _tut-adapting_build_system:
+
 ======================================================
 Adapting the build system to your local infrastructure
 ======================================================
