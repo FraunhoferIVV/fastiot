@@ -10,7 +10,7 @@ from typing import Optional
 
 import typer
 
-from fastiot.__version__ import __version__
+from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.context import get_default_context
@@ -86,9 +86,9 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                        ('deployments/integration_test/.env', 'new_project/.env.j2'),
                        ('requirements.txt', 'new_project/requirements.txt.j2')]:
 
-        with open(os.path.join(project_config.project_root_dir, dest), "w") as docker_compose_file:
-            configure_py_template = get_jinja_env().get_template(temp)
-            docker_compose_file.write(configure_py_template.render(
+        with open(os.path.join(project_config.project_root_dir, dest), "w") as template_file:
+            template = get_jinja_env().get_template(temp)
+            template_file.write(template.render(
                 project_namespace=project_name,
                 password=_create_random_password(16),
                 version=__version__,

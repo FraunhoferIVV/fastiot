@@ -4,8 +4,8 @@ import logging
 import os
 
 from fastiot.cli import typer_app
-from fastiot.cli.commands import *
-from fastiot.cli.model.context import get_default_context  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
+from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
+from fastiot.cli.model.context import get_default_context
 
 
 if __name__ == '__main__':
@@ -16,4 +16,3 @@ if __name__ == '__main__':
     # trigger context creation
     get_default_context()
     typer_app.app()
-
