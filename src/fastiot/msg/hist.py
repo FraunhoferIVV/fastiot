@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Union
 
 from pydantic.main import BaseModel
 
@@ -56,8 +56,10 @@ class HistObjectReq(FastIoTRequest):
     """
     _reply_cls = HistObjectResp
 
-    dt_start: datetime
-    dt_end: datetime
-    limit: int
-    subject_name: str
-    query_dict: dict = None
+    dt_start: Optional[datetime]
+    dt_end: Optional[datetime]
+    limit: Optional[int]
+    subject_name: Optional[str]
+    machine: Optional[str]
+    sensor: Optional[str]
+    query_dict: Optional[Union[dict, str]] = None
