@@ -37,8 +37,8 @@ def get_influxdb_client_from_env():
             if health_check:
                 return client
             else:
+                num_tries -= 1
                 continue
         except InfluxDBError:
             time.sleep(0.2)
-        num_tries -= 1
     raise ServiceError("Could not connect to InfluxDB")

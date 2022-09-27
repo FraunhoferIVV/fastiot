@@ -268,7 +268,7 @@ class InfluxDBEnv:
 
         InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices
         """
-        return os.getenv(FASTIOT_INFLUX_DB_TOKEN)
+        return os.getenv(FASTIOT_INFLUX_DB_TOKEN, '12345')
 
 
 class TimeScaleDBEnv:
@@ -303,7 +303,7 @@ class TimeScaleDBEnv:
 
         Use to get/set the time scale db user.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_USER)
+        return os.getenv(FASTIOT_TIME_SCALE_DB_USER, 'postgres')
 
     @property
     def password(self) -> Optional[str]:
@@ -311,7 +311,7 @@ class TimeScaleDBEnv:
 
         Use to get/set the time scale db password.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD)
+        return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD, '12345')
 
     @property
     def database(self) -> str:
