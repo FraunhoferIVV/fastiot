@@ -6,7 +6,7 @@ import pymongo
 from fastiot import logging
 from fastiot.core import FastIoTService, Subject
 from fastiot.core.service_annotations import reply
-from fastiot.core.subject_helper import sanitize_subject
+from fastiot.core.subject_helper import sanitize_subject_name
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
 from fastiot.helpers.read_yaml import read_config
@@ -30,7 +30,7 @@ class ObjectStorageService(FastIoTService):
             self._mongo_client.create_index(collection=self._mongo_object_db_col,
                                             index=[(index_name, pymongo.ASCENDING)],
                                             index_name=f"{index_name}_ascending")
-        self.subject = Subject(name=sanitize_subject(service_config['subject']), msg_cls=dict)
+        self.subject = Subject(name=sanitize_subject_name(service_config['subject']), msg_cls=dict)
 
     async def _start(self):
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)

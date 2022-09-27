@@ -24,6 +24,9 @@ def from_mongo_data(mongo_data: dict) -> Dict:
 
 
 def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
+    """
+    This function parses the HistObjectReq instance, and build the query dict to search data in database
+    """
     query_dict = {"_subject": hist_object_req.subject_name,
                   "_timestamp": {'$gte': hist_object_req.dt_start, '$lte': hist_object_req.dt_end}}
     if hist_object_req.query_dict is not None:

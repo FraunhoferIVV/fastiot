@@ -2,28 +2,43 @@ import re
 
 MSG_FORMAT_VERSION = 'v1'
 HIERARCHY = '>'
-THING = 'thing'
 WILDCARD_SAME_LEVEL = '*'
 
 
-def sanitize_subject(subject_name: str) -> str:
-    subject_name_components = subject_name.split('.')
-    if MSG_FORMAT_VERSION in subject_name_components and HIERARCHY in subject_name_components:
-        return subject_name
-    elif HIERARCHY in subject_name_components and MSG_FORMAT_VERSION not in subject_name_components:
-        return f'{MSG_FORMAT_VERSION}.{subject_name}'
+def sanitize_subject_name(subject_name: str) -> str:
+    """
+    This function will help you to check if the subject in right format and build it for you.
+    In FastIoT Framework, the right format base for subject_name is: "v1.my_message**", this will only subscribe till my_message level.
+    If you want to build a hierarchy for this topic, the subject_name must be "v1.my_topic.*" or "v1.my_topic.>"
 
-    if MSG_FORMAT_VERSION in subject_name_components:
-        if THING in subject_name_components and WILDCARD_SAME_LEVEL in subject_name_components:
-            subject_name = subject_name
-        elif THING in subject_name_components and WILDCARD_SAME_LEVEL not in subject_name_components:
-            subject_name = \
-                f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', subject_name_components[1]).lower()}.{WILDCARD_SAME_LEVEL}"
-        else:
-            subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', subject_name_components[1]).lower()}"
+    In summary, it will do the following for you:
+     - "MyMessage" -> "v1.my_message";
+     - "my_message" -> "v1.my_message";
+     - "MyMessage.*" -> "v1.my_message.*"
+     - "my_message.*" -> "v1.my_message.*"
+     - "v1.MyMessage" -> "v1.my_message"
+     - "v1.my_message" -> "v1.my_message"
+     - "v1.MyMessage" -> "v1.my_message"
+     - "v1.my_message.*" -> "v1.my_message.*"
+
+    If the suffix is a ">" instead of a "*", it will also be kept.
+
+    """
+    subject_name_components = subject_name.split('.')
+    subject_name_class = [subject for subject in subject_name_components if subject not in [MSG_FORMAT_VERSION, HIERARCHY, WILDCARD_SAME_LEVEL]]
+    signs = [subject for subject in subject_name_components if subject in [HIERARCHY, WILDCARD_SAME_LEVEL]]
+    if subject_name_components[-1] == WILDCARD_SAME_LEVEL or subject_name_components[-1] == HIERARCHY:
+        subject_name = f"{MSG_FORMAT_VERSION}.{_convert_camelcase_to_snakecase(subject_name_class)}.{_build_signs(signs)}"
     else:
-        if THING in subject_name_components and WILDCARD_SAME_LEVEL not in subject_name_components:
-            subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', subject_name).lower()}.{WILDCARD_SAME_LEVEL}"
-        else:
-            subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', subject_name).lower()}"
+        subject_name = f"{MSG_FORMAT_VERSION}.{_convert_camelcase_to_snakecase(subject_name_class)}"
+
     return subject_name
+
+
+def _convert_camelcase_to_snakecase(camel_list: list[str]) -> str:
+    snake_list = [f"{re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()}" for camel in camel_list]
+    return '.'.join(snake_list)
+
+
+def _build_signs(sign_list: list[str]) -> str:
+    return '.'.join(sign_list)

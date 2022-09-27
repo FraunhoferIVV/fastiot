@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.data_models import FastIoTData, ReplySubject, FastIoTPublish
-from fastiot.core.subject_helper import sanitize_subject
+from fastiot.core.subject_helper import sanitize_subject_name
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
 from fastiot.helpers.object_helper import parse_object, parse_object_list
@@ -123,7 +123,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
             self._db_col.insert_one(test_object_msg_mongo_dict)
 
         hist_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10,
-                                     subject_name=sanitize_subject('test_custom_msg_list'))
+                                     subject_name=sanitize_subject_name('test_custom_msg_list'))
         subject = hist_req_msg.get_reply_subject()
 
         reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)

@@ -1,6 +1,6 @@
 import unittest
 
-from fastiot.core.subject_helper import sanitize_subject
+from fastiot.core.subject_helper import sanitize_subject_name
 from fastiot_tests.generated import set_test_environment
 
 
@@ -9,37 +9,62 @@ class TestSubjectHelper(unittest.TestCase):
         set_test_environment()
 
     def test_subject_name(self):
-        test_subject_name = 'ContaminationList'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.contamination_list', subject_name)
 
-        test_subject_name = 'contamination_list'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.contamination_list', subject_name)
+        my_message = 'v1.my_message'
+        my_message_wildcard = 'v1.my_message.*'
+        my_message_hierarchy = 'v1.my_message.>'
 
-        test_subject_name = 'v1.ContaminationList'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.contamination_list', subject_name)
+        test_subject_name = 'MyMessage'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message, subject_name)
 
-        test_subject_name = 'v1.contamination_list'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.contamination_list', subject_name)
+        test_subject_name = 'MyMessage.MyData'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.my_message.my_data', subject_name)
 
-        test_subject_name = 'thing.*'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.thing.*', subject_name)
+        test_subject_name = 'MyMessage.*.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.my_message.*.*', subject_name)
 
-        test_subject_name = 'v1.thing.*'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.thing.*', subject_name)
+        test_subject_name = 'MyMessage.*.>'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.my_message.*.>', subject_name)
 
-        test_subject_name = 'thing'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.thing.*', subject_name)
+        test_subject_name = 'my_message'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message, subject_name)
 
-        test_subject_name = 'v1.thing'
-        subject_name = sanitize_subject(test_subject_name)
-        self.assertEqual('v1.thing.*', subject_name)
+        test_subject_name = 'MyMessage.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message_wildcard, subject_name)
+
+        test_subject_name = 'my_message.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message_wildcard, subject_name)
+
+        test_subject_name = 'v1.MyMessage'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message, subject_name)
+
+        test_subject_name = 'v1.my_message'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message, subject_name)
+
+        test_subject_name = 'v1.MyMessage.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message_wildcard, subject_name)
+
+        test_subject_name = 'v1.MyMessage.MyData.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.my_message.my_data.*', subject_name)
+
+        test_subject_name = 'v1.my_message.*'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message_wildcard, subject_name)
+
+        test_subject_name = 'v1.my_message.>'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual(my_message_hierarchy, subject_name)
 
 
 if __name__ == '__main__':
