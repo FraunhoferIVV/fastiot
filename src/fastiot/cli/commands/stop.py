@@ -22,8 +22,8 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
                                                                   "(docker-compose stop instead of down)"),
          project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
          use_test_deployment: Optional[bool] = typer.Option(False, help="Explicitly set the environment to the "
-                                                                         "test environment specified in the project. "
-                                                                         "Useful for the CI runner")
+                                                                        "test environment specified in the project. "
+                                                                        "Useful for the CI runner")
          ):
     """
     Stops the selected environment.
@@ -37,7 +37,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
             raise typer.Exit(0)
 
     if deployment_name is None:
-        logging.error("You have to define an environment to start or use the optional --run-test-deployment!")
+        logging.error("You have to define an environment to stop or use the optional argument --use-test-deployment!")
         raise typer.Exit(1)
 
     cwd = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
@@ -49,10 +49,10 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
     cmd += "--project-name=" + project_name
 
     if service_names is not None and len(service_names) > 0:
-        cmd += " stop " + " ".join(service_names)
+        cmd += " rm --stop --force " + " ".join(service_names)
     else:
         cmd += " down"
-    if use_test_deployment:
+    if use_test_deployment or deployment_name == project_config.integration_test_deployment:
         cmd += " --volumes"  # Remove test volumes right away
 
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)
@@ -62,9 +62,3 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
     if exit_code != 0:
         logging.error("Stopping the environment failed with exit code %s", str(exit_code))
         raise typer.Exit(exit_code)
-    if service_names is not None and len(service_names) > 0:
-        cmd = "docker-compose rm -f " + " ".join(service_names)
-        exit_code = subprocess.call(cmd.split(), cwd=cwd)
-        if exit_code != 0:
-            logging.error("Stopping the environment failed with exit code %s", str(exit_code))
-            raise typer.Exit(exit_code)
