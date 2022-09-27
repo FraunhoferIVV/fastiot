@@ -96,7 +96,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 
 
 @create_cmd.command()
-def new_service(service_name: str = typer.Argument(None, help="The service name to generate"),
+def new_service(service_name: str = typer.Argument("", help="The service name to generate"),
                 service_package: Optional[str] = typer.Option(None, '-p', '--package',
                                                               help="Specify the package to create the "
                                                                    "service in. If left empty the first "
@@ -124,13 +124,13 @@ def new_service(service_name: str = typer.Argument(None, help="The service name 
         raise typer.Exit(4)
 
     # nothing given
-    if service_package is None and len(service_package_list) > 1:
+    if not service_package and len(service_package_list) > 1:
         logging.error("More than one service package found. Please choose one manually. "
                       "Detected packages: %s", ", ".join(service_package_list))
         raise typer.Exit(4)
 
     # package given
-    if service_package not in service_package_list:
+    if service_package and service_package not in service_package_list:
         logging.error("Package %s not found in project. Found service packages %s.",
                       service_package, ", ".join(service_package_list))
         raise typer.Exit(4)
