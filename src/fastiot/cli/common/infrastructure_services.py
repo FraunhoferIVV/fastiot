@@ -119,13 +119,13 @@ class InfluxDBService(InfrastructureService):
         ),
         InfrastructureServiceEnvVar(
             name='DOCKER_INFLUXDB_INIT_ORG',
-            default='IVVDD',
+            default='FASTIOT',
             env_var=FASTIOT_INFLUX_DB_ORG
         ),
 
         InfrastructureServiceEnvVar(
             name='DOCKER_INFLUXDB_INIT_BUCKET',
-            default='sensors',
+            default='things',
             env_var=FASTIOT_INFLUX_DB_BUCKET
         ),
         InfrastructureServiceEnvVar(

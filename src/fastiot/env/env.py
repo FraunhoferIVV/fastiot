@@ -3,6 +3,8 @@ import logging
 import os
 from typing import Optional
 
+from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
+    TimeScaleDBService, NatsService
 from fastiot.env import *
 
 
@@ -90,7 +92,7 @@ class BrokerEnv:
 
         Use to get/set the broker port, defaults to 4222.
         """
-        return int(os.getenv(FASTIOT_NATS_PORT, '4222'))
+        return int(os.getenv(FASTIOT_NATS_PORT, NatsService().get_default_port()))
 
     @property
     def default_timeout(self) -> float:
@@ -123,7 +125,7 @@ class MongoDBEnv:
         """ .. envvar:: FASTIOT_MONGO_DB_PORT
 
         Use to get/set the mongodb port, defaults to 27017. """
-        return int(os.getenv(FASTIOT_MONGO_DB_PORT, '27017'))
+        return int(os.getenv(FASTIOT_MONGO_DB_PORT, MongoDBService().get_default_port()))
 
     @property
     def user(self) -> Optional[str]:
@@ -131,7 +133,7 @@ class MongoDBEnv:
 
         Use to get/set the mongodb user.
         """
-        return os.getenv(FASTIOT_MONGO_DB_USER)
+        return os.getenv(FASTIOT_MONGO_DB_USER, MongoDBService().get_default_env(FASTIOT_MONGO_DB_USER))
 
     @property
     def password(self) -> Optional[str]:
@@ -139,7 +141,7 @@ class MongoDBEnv:
 
         Use to get/set the mongodb password.
         """
-        return os.getenv(FASTIOT_MONGO_DB_PASSWORD)
+        return os.getenv(FASTIOT_MONGO_DB_PASSWORD, MongoDBService().get_default_env(FASTIOT_MONGO_DB_PASSWORD))
 
     @property
     def auth_source(self) -> Optional[str]:
@@ -205,7 +207,7 @@ class MariaDBEnv:
         """ .. envvar:: FASTIOT_MARIA_DB_PORT
 
         Use to get/set the mariadb port, defaults to 3306. """
-        return int(os.getenv(FASTIOT_MARIA_DB_PORT, '3306'))
+        return int(os.getenv(FASTIOT_MARIA_DB_PORT, MariaDBService().get_default_port()))
 
     @property
     def user(self) -> str:
@@ -221,7 +223,7 @@ class MariaDBEnv:
 
         Use to get/set the mariadb password.
         """
-        return os.getenv(FASTIOT_MARIA_DB_PASSWORD)
+        return os.getenv(FASTIOT_MARIA_DB_PASSWORD, MariaDBService().get_default_env(FASTIOT_MARIA_DB_PASSWORD))
 
     @property
     def schema_fastiotlib(self) -> str:
@@ -260,7 +262,7 @@ class InfluxDBEnv:
         """ .. envvar:: FASTIOT_INFLUX_DB_PORT
 
         Use to get/set the influxdb port, defaults to 8086. """
-        return int(os.getenv(FASTIOT_INFLUX_DB_PORT, '8086'))
+        return int(os.getenv(FASTIOT_INFLUX_DB_PORT, InfluxDBService().get_default_port()))
 
     @property
     def token(self) -> Optional[str]:
@@ -268,7 +270,7 @@ class InfluxDBEnv:
 
         InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices
         """
-        return os.getenv(FASTIOT_INFLUX_DB_TOKEN, '12345')
+        return os.getenv(FASTIOT_INFLUX_DB_TOKEN, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_TOKEN))
 
 
 class TimeScaleDBEnv:
@@ -295,7 +297,7 @@ class TimeScaleDBEnv:
         Use to get/set the time scale database port.
         Use to get/set the time scale db port, defaults to 5432.
         """
-        return int(os.getenv(FASTIOT_TIME_SCALE_DB_PORT, '5432'))
+        return int(os.getenv(FASTIOT_TIME_SCALE_DB_PORT, TimeScaleDBService().get_default_port()))
 
     @property
     def user(self) -> Optional[str]:
@@ -303,7 +305,7 @@ class TimeScaleDBEnv:
 
         Use to get/set the time scale db user.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_USER, 'postgres')
+        return os.getenv(FASTIOT_TIME_SCALE_DB_USER, TimeScaleDBService().get_default_env(FASTIOT_TIME_SCALE_DB_USER))
 
     @property
     def password(self) -> Optional[str]:
@@ -311,7 +313,8 @@ class TimeScaleDBEnv:
 
         Use to get/set the time scale db password.
         """
-        return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD, '12345')
+        return os.getenv(FASTIOT_TIME_SCALE_DB_PASSWORD,
+                         TimeScaleDBService().get_default_env(FASTIOT_TIME_SCALE_DB_PASSWORD))
 
     @property
     def database(self) -> str:
@@ -319,7 +322,8 @@ class TimeScaleDBEnv:
 
         Use to get/set the time scale db database.
         """
-        return str(os.getenv(FASTIOT_TIME_SCALE_DB_DATABASE))
+        return str(os.getenv(FASTIOT_TIME_SCALE_DB_DATABASE,
+                             TimeScaleDBService().get_default_env(FASTIOT_TIME_SCALE_DB_DATABASE)))
 
 
 env_basic = BasicEnv()

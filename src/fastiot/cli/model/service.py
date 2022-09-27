@@ -86,3 +86,27 @@ class InfrastructureService(BaseModel):
     host_name_env_var: str = ""
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
+
+    def get_default_env(self, name: str) -> str:
+        """ Will return the default set for the given FastIoT environment variable."""
+        var = [e for e in self.environment if e.env_var == name]
+        if not var:
+            raise ValueError(f"Environment variable {name} not found.")
+
+        return var[0].default
+
+    def get_default_port(self, name: Optional[str] = "") -> int:
+        """
+        Will return the default value for the given FastIoT port by environment variable.
+        If you leave out the name the first port configured will be returned.
+        """
+        if not self.ports:
+            raise ValueError(f"No ports configured for service {self.name}")
+
+        if not name:
+            return self.ports[0].default_port_mount
+
+        var = [e for e in self.ports if e.env_var == name]
+        if not var:
+            raise ValueError(f"Port {name} not found.")
+        return var[0].default_port_mount
