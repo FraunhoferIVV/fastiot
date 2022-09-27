@@ -66,6 +66,14 @@ class TestSubjectHelper(unittest.TestCase):
         subject_name = sanitize_subject_name(test_subject_name)
         self.assertEqual(my_message_hierarchy, subject_name)
 
+        test_subject_name = 'v1.my_message.*.my_data'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.my_message.*.my_data', subject_name)
+
+        test_subject_name = '>'
+        subject_name = sanitize_subject_name(test_subject_name)
+        self.assertEqual('v1.>', subject_name)
+
 
 if __name__ == '__main__':
     unittest.main()

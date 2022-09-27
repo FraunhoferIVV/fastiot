@@ -25,12 +25,11 @@ def sanitize_subject_name(subject_name: str) -> str:
 
     """
     subject_name_components = subject_name.split('.')
-    subject_name_class = [subject for subject in subject_name_components if subject not in [MSG_FORMAT_VERSION, HIERARCHY, WILDCARD_SAME_LEVEL]]
-    signs = [subject for subject in subject_name_components if subject in [HIERARCHY, WILDCARD_SAME_LEVEL]]
-    if subject_name_components[-1] == WILDCARD_SAME_LEVEL or subject_name_components[-1] == HIERARCHY:
-        subject_name = f"{MSG_FORMAT_VERSION}.{_convert_camelcase_to_snakecase(subject_name_class)}.{_build_signs(signs)}"
+
+    if MSG_FORMAT_VERSION in subject_name_components:
+        subject_name = f"{_convert_camelcase_to_snakecase(subject_name_components)}"
     else:
-        subject_name = f"{MSG_FORMAT_VERSION}.{_convert_camelcase_to_snakecase(subject_name_class)}"
+        subject_name = f"{MSG_FORMAT_VERSION}.{_convert_camelcase_to_snakecase(subject_name_components)}"
 
     return subject_name
 
@@ -38,7 +37,3 @@ def sanitize_subject_name(subject_name: str) -> str:
 def _convert_camelcase_to_snakecase(camel_list: list[str]) -> str:
     snake_list = [f"{re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()}" for camel in camel_list]
     return '.'.join(snake_list)
-
-
-def _build_signs(sign_list: list[str]) -> str:
-    return '.'.join(sign_list)
