@@ -26,6 +26,10 @@ class NatsService(InfrastructureService):
 
 
 class MariaDBService(InfrastructureService):
+    """ .. _MariaDBService:
+
+    Here, all relevant environment variables are listed to build a MariaDB Service,
+    """
     name: str = 'mariadb'
     image: str = 'mariadb:10.8'
     ports: List[InfrastructureServicePort] = [
@@ -60,6 +64,10 @@ class MariaDBService(InfrastructureService):
 
 
 class MongoDBService(InfrastructureService):
+    """ .. _MongoDBService:
+
+    Here, all relevant environment variables are listed to build a MongoDB Service,
+    """
     name: str = 'mongodb'
     image: str = 'mongo:5.0'
     ports: List[InfrastructureServicePort] = [
@@ -92,6 +100,10 @@ class MongoDBService(InfrastructureService):
 
 
 class InfluxDBService(InfrastructureService):
+    """ .. _InfluxDBService:
+
+    Here, all relevant environment variables are listed to build a InfluxDB Service,
+    """
     name: str = 'influxdb'
     image: str = 'influxdb:2.0'
     ports: List[InfrastructureServicePort] = [
@@ -145,6 +157,10 @@ class InfluxDBService(InfrastructureService):
 
 
 class TimeScaleDBService(InfrastructureService):
+    """ .. _TimeScaleDBService:
+
+    Here, all relevant environment variables are listed to build a TimeScaleDB Service,
+    """
     name: str = 'timescaledb'
     image: str = 'timescale/timescaledb:latest-pg14'
     ports: List[InfrastructureServicePort] = [

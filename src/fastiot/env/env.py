@@ -19,7 +19,7 @@ class BasicEnv:
     def config_dir(self):
         """ .. envvar:: FASTIOT_CONFIG_DIR
 
-        Use to set/get the config dir, defaults to :file:`/etc/fastiot` if not set.
+        Use to get/set the config dir, defaults to :file:`/etc/fastiot` if not set.
 
         This should point to your deployment configuration dir, which is also copied to target either manually or using
         the :func:`fastiot.cli.commands.deploy.deploy` CLI command.
@@ -105,7 +105,7 @@ class BrokerEnv:
 
 class MongoDBEnv:
     """
-    Environment variables for mongodb
+    Environment variables for mongodb :ref:`MongoDB Service <MongoDBService>`
 
     Use the properties from :func:`fastiot.env.env.env_mongodb` to read the values in an easy manner within your
     code.
@@ -186,7 +186,7 @@ class MongoDBColConstants:
 
 class MariaDBEnv:
     """
-    Environment variables for mariadb
+    Environment variables for mariadb :ref:`MariaDB Service <MariaDBService>`
 
     Use the properties from :func:`fastiot.env.env.env_mariadb` to read the values in an easy manner within your
     code. This will provide the environment variables needed for
@@ -242,10 +242,11 @@ class MariaDBEnv:
 
 class InfluxDBEnv:
     """
-    Environment variables for influxdb
+    Environment variables for influxdb :ref:`InfluxDB Service <InfluxDBService>`
 
     Use the properties from :func:`fastiot.env.env.env_influxdb` to read the values in an easy manner within your
-    code.
+    code. For connecting to InfluxDB, which is started with a token, you only need host, port and token.
+    username and password are used for browser GUI.
     """
 
     @property
@@ -265,6 +266,25 @@ class InfluxDBEnv:
         return int(os.getenv(FASTIOT_INFLUX_DB_PORT, InfluxDBService().get_default_port()))
 
     @property
+    def user(self) -> str:
+        """ .. envvar:: FASTIOT_INFLUX_DB_USER
+
+        Use to get/set the influxdb username, default to 'influx_db_admin'.
+        This env var is only used for browser login, not for connecting from fastiot framework.
+        """
+        return str(os.getenv(FASTIOT_INFLUX_DB_USER, 'influx_db_admin'))
+
+    @property
+    def password(self) -> str:
+        """ .. envvar:: FASTIOT_INFLUX_DB_PASSWORD
+
+        Use to get/set the influxdb password, default to 'mf9ZXfeLKuaL3HL7w'.
+        This env var is only used for browser login, not for connecting from fastiot framework.
+        password for InfluxDB must be complex, otherwise InfluxDB won't be started.
+        """
+        pass
+
+    @property
     def token(self) -> Optional[str]:
         """.. envvar:: FASTIOT_INFLUX_DB_TOKEN
 
@@ -275,7 +295,7 @@ class InfluxDBEnv:
 
 class TimeScaleDBEnv:
     """
-    Environment variables for timescaledb
+    Environment variables for timescaledb :ref:`TimeScaleDB Service <TimeScaleDBService>`
 
     Use the properties from :func:`fastiot.env.env.env_timescaledb` to read the values in an easy manner within your
     code.
@@ -294,7 +314,6 @@ class TimeScaleDBEnv:
     def port(self) -> int:
         """ .. envvar:: FASTIOT_TIME_SCALE_DB_PORT
 
-        Use to get/set the time scale database port.
         Use to get/set the time scale db port, defaults to 5432.
         """
         return int(os.getenv(FASTIOT_TIME_SCALE_DB_PORT, TimeScaleDBService().get_default_port()))
