@@ -1,8 +1,10 @@
-import logging
 import sys
 import time
 from typing import Optional
 
+import pymysql.err
+
+from fastiot import logging
 from fastiot.env.env import env_mariadb
 from fastiot.exceptions.exceptions import ServiceError
 
@@ -39,8 +41,8 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
         # pylint: disable=import-outside-toplevel
         import pymysql.cursors
     except (ImportError, ModuleNotFoundError):
-        logging.error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
-                      "to make use of this helper.")
+        logging('MariaDB').error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
+                                 "to make use of this helper.")
         sys.exit(5)
 
     for _ in range(10):
@@ -55,7 +57,7 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
             )
             return db_connection
         except pymysql.err.OperationalError as exception:
-            logging.error("Error connecting to MariaDB: %s", str(exception))
+            logging('MariaDB').error("Error connecting to MariaDB: %s", str(exception))
             time.sleep(1)
     raise ServiceError("Giving up trials to connect to MariaDB")
 
@@ -67,5 +69,5 @@ def init_schema(connection, schema: str):
                 query=f'CREATE SCHEMA {schema}'
             )
         connection.commit()
-    except Exception as e:
-        logging.error('Please connect to mariadb Server first  %s', str(e))
+    except pymysql.err.ProgrammingError as e:
+        logging('MariaDB').info('%s', str(e))

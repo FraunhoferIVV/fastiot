@@ -1,9 +1,8 @@
-
 # --------- apt-get install libpq-dev first to install psycopg2 !!! -----------
-import logging
 import sys
 import time
 
+from fastiot import logging
 from fastiot.env.env import env_timescaledb
 from fastiot.exceptions import ServiceError
 
@@ -29,14 +28,13 @@ def open_timescaledb_connection_from_env():
 
 def open_timescaledb_connection(host: str, port: int, user: str, password: str,
                                 database: str = None):
-
     try:
         # pylint: disable=import-outside-toplevel
         import psycopg2
         from psycopg2 import OperationalError
     except (ImportError, ModuleNotFoundError):
-        logging.error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
-                      "to make use of this helper.")
+        logging('TimeScaleDB').error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
+                                     "to make use of this helper.")
         sys.exit(5)
 
     connection_parameters = {"user": user, "password": password, "host": host,

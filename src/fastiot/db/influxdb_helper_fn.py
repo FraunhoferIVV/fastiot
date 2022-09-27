@@ -24,7 +24,7 @@ def get_influxdb_client_from_env():
                       "to make use of this helper.")
         sys.exit(5)
 
-    sleep_time = 0.2
+    sleep_time = 0.1
     num_tries = 300 / sleep_time
     while num_tries > 0:
         try:
@@ -38,7 +38,8 @@ def get_influxdb_client_from_env():
                 return client
             else:
                 num_tries -= 1
+                time.sleep(sleep_time)
                 continue
         except InfluxDBError:
-            time.sleep(0.2)
+            time.sleep(sleep_time)
     raise ServiceError("Could not connect to InfluxDB")
