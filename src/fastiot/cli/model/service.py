@@ -84,6 +84,12 @@ class InfrastructureService(BaseModel):
     """ Name of the image """
     environment: List[InfrastructureServiceEnvVar] = []
     host_name_env_var: str = ""
+    """ The environment variable setting the hostname. This variable needs special attention: When working in a
+    local development environment this defaults to localhost. Within a docker network the value needs to be the 
+    docker-internal hostname. """
+    password_env_vars: List[str] = []
+    """ List of environment variables containing a password. Those will be filled with random passwords for new 
+     projects automatically. """
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
 
