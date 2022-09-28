@@ -42,7 +42,7 @@ package_data.append(requirements_file)
 
 mongo_db_deps = ["pymongo>=3.9.0"]
 maria_db_deps = ["PyMySQL>=0.9.3"]
-influx_db_deps = ["influxdb-client>=1.32"]
+influx_db_deps = ["influxdb-client>=1.32", "aiohttp>=3.8"]
 
 setup(
     name='fastiot',
