@@ -111,37 +111,12 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
                                                      help="Create service even if if an existing service has the same "
                                                           "name."),
                 ):
+    """ Create a new service with some method stubs for further programming. """
     # service name
-    service_name = service_name.replace(" ", "_").replace("-", '_')
-    for letter in service_name:
-        if not ((letter.isalnum() and (letter.islower() or letter.isnumeric())) or letter == "_"):
-            logging.error("Please enter valid name for the service. Only use a-z, 0-9, and '_' .")
-            raise typer.Exit(3)
+    service_name = _sanitize_service_name(service_name)
     # service location
     project_config = get_default_context().project_config
-    service_package_list = []
-    for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
-        if package != project_config.library_package and package != project_config.test_package and \
-                os.path.isdir(os.path.join(project_config.project_root_dir, 'src', package)):
-            service_package_list.append(package)
-
-    if len(service_package_list) == 0:
-        logging.error("No service package found in project to place the service.")
-        raise typer.Exit(4)
-
-    # nothing given
-    if not service_package and len(service_package_list) > 1:
-        logging.error("More than one service package found. Please choose one manually. "
-                      "Detected packages: %s", ", ".join(service_package_list))
-        raise typer.Exit(4)
-
-    # package given
-    if service_package and service_package not in service_package_list:
-        logging.error("Package %s not found in project. Found service packages %s.",
-                      service_package, ", ".join(service_package_list))
-        raise typer.Exit(4)
-
-    service_package = service_package or service_package_list[0]
+    service_package = _find_service_package(project_config, service_package)
     service_location = os.path.join(project_config.project_root_dir, "src", service_package, service_name)
     logging.info("The service %s will be created in %s.", service_name, service_location)
 
@@ -175,3 +150,38 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
             ))
 
     logging.info("Service %s.%s created successfully", service_package, service_name)
+
+
+def _sanitize_service_name(service_name):
+    service_name = service_name.replace(" ", "_").replace("-", '_')
+    for letter in service_name:
+        if not ((letter.isalnum() and (letter.islower() or letter.isnumeric())) or letter == "_"):
+            logging.error("Please enter valid name for the service. Only use a-z, 0-9, and '_' .")
+            raise typer.Exit(3)
+    return service_name
+
+
+def _find_service_package(project_config, service_package):
+    """
+    Find *the* package to place the service if not defined. Raise errors when no or to many packages are possible.
+    """
+    service_package_list = []
+    for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
+        if package != project_config.library_package and package != project_config.test_package and \
+                os.path.isdir(os.path.join(project_config.project_root_dir, 'src', package)):
+            service_package_list.append(package)
+    if len(service_package_list) == 0:
+        logging.error("No service package found in project to place the service.")
+        raise typer.Exit(4)
+    # nothing given
+    if not service_package and len(service_package_list) > 1:
+        logging.error("More than one service package found. Please choose one manually. "
+                      "Detected packages: %s", ", ".join(service_package_list))
+        raise typer.Exit(4)
+    # package given
+    if service_package and service_package not in service_package_list:
+        logging.error("Package %s not found in project. Found service packages %s.",
+                      service_package, ", ".join(service_package_list))
+        raise typer.Exit(4)
+    service_package = service_package or service_package_list[0]
+    return service_package
