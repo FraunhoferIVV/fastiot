@@ -13,19 +13,15 @@ import typer
 from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME
 from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.infrastructure_service_fn import get_services_list
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import create_cmd
 
 
-def _create_random_password(length: int) -> str:
-    charlist = list(string.ascii_letters + string.digits + "_-.,:%&$?!*()")
-    password: str = ""
-    while len(password) < length:
-        i: int = int(random.random()*100)
-        while len(charlist) - 1 < i:
-            i = i - len(charlist) - 2
-        password = password + charlist[i]
-    return password
+def _create_random_password(length: int = 16) -> str:
+    chars = list(string.ascii_letters + string.digits + "_-.,:%?!*")
+    password = [random.choice(chars) for _ in range(length)]
+    return "".join(password)
 
 
 @create_cmd.command()
@@ -64,8 +60,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     # Create necessary directories
     if not os.path.exists(project_config.project_root_dir):
         os.makedirs(project_config.project_root_dir)
-    for directory in [
-                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
+    for directory in [os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
+                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
                       os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
                       os.path.join("src", f"{project_name}_services")]:
@@ -84,16 +80,25 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     for dest, temp in [(CONFIGURE_FILE_NAME, 'new_project/configure.py.j2'),
                        ('README.md', 'new_project/README.md.j2'),
                        ('deployments/integration_test/.env', 'new_project/.env.j2'),
+                       ('deployments/production/.env', 'new_project/.env.production.j2'),
                        ('requirements.txt', 'new_project/requirements.txt.j2')]:
+
+        # For each potential service create a unique password for the production deployment.
+        password_fields = []
+        for service in get_services_list().values():
+            password_fields += service.password_env_vars
+        env_vars = [f"{f}={_create_random_password(24)}" for f in password_fields]
 
         with open(os.path.join(project_config.project_root_dir, dest), "w") as template_file:
             template = get_jinja_env().get_template(temp)
             template_file.write(template.render(
                 project_namespace=project_name,
-                password=_create_random_password(16),
                 version=__version__,
-                major_version=int(__version__.split(".", maxsplit=1)[0])
+                major_version=int(__version__.split(".", maxsplit=1)[0]),
+                env_vars=env_vars
             ))
+
+    logging.info("Project created successfully")
 
 
 @create_cmd.command()
@@ -109,7 +114,7 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
     # service name
     service_name = service_name.replace(" ", "_").replace("-", '_')
     for letter in service_name:
-        if not((letter.isalnum() and (letter.islower() or letter.isnumeric())) or letter == "_"):
+        if not ((letter.isalnum() and (letter.islower() or letter.isnumeric())) or letter == "_"):
             logging.error("Please enter valid name for the service. Only use a-z, 0-9, and '_' .")
             raise typer.Exit(3)
     # service location

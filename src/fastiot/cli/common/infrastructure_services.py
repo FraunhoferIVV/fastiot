@@ -54,7 +54,7 @@ class MariaDBService(InfrastructureService):
         )
     ]
     host_name_env_var = FASTIOT_MARIA_DB_HOST
-    password_env_vars = [FASTIOT_MARIA_DB_PASSWORD]
+    password_env_vars: List[str] = ["FASTIOT_MARIA_DB_PASSWORD"]
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/mysql',
@@ -91,7 +91,7 @@ class MongoDBService(InfrastructureService):
         )
     ]
     host_name_env_var = FASTIOT_MONGO_DB_HOST
-    password_env_vars = [FASTIOT_MONGO_DB_PASSWORD]
+    password_env_vars: List[str] = [FASTIOT_MONGO_DB_PASSWORD]
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/data/db',
@@ -149,7 +149,7 @@ class InfluxDBService(InfrastructureService):
         )
     ]
     host_name_env_var = FASTIOT_INFLUX_DB_HOST
-    password_env_vars = [FASTIOT_INFLUX_DB_TOKEN, FASTIOT_INFLUX_DB_PASSWORD]
+    password_env_vars: List[str] = [FASTIOT_INFLUX_DB_TOKEN, FASTIOT_INFLUX_DB_PASSWORD]
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/influxdb2',
@@ -191,7 +191,7 @@ class TimeScaleDBService(InfrastructureService):
         ),
     ]
     host_name_env_var: str = FASTIOT_TIME_SCALE_DB_HOST
-    password_env_vars = [FASTIOT_TIME_SCALE_DB_PASSWORD]
+    password_env_vars: List[str] = [FASTIOT_TIME_SCALE_DB_PASSWORD]
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/postgresql/data',

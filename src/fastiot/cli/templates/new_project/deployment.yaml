@@ -1,2 +1,4 @@
 infrastructure-services:
   nats:
+
+services: {}
