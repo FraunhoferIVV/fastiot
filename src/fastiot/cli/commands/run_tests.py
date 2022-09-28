@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 from enum import Enum
+from importlib.machinery import PathFinder
+from typing import Optional
 
 import typer
 
@@ -25,12 +27,14 @@ class TestRunner(str, Enum):
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def run_tests(start_deployment: bool = typer.Option(False, help="Also start and stop the test-deployment. "
                                                                 "Defaults to false"),
-              test_runner: TestRunner = typer.Option(TestRunner.unittest, help="Specify the testrunner to use")
+              test_runner: Optional[TestRunner] = typer.Option(None,
+                                                               help="Specify the testrunner to use. Will try to use "
+                                                                    "pytest if found, otherwise falls back to "
+                                                                    "unittest.")
               ):
     """
-    This command will trigger all unittests found in the configured test package. Be aware that this will not
-    automatically start your integration test deployment with e.g. a message broker. You may start this using the
-    command ``fastiot.cli run deployment --run-test-deployment`` (:func:`fastiot.cli.commands.run.deployment`)
+    This command will trigger all unittests found in the configured test package. You may use the option
+    `--start-deployment` to also run your integration test deployment with message broker, ….
     """
     os.environ['PYTHONDONTWRITEBYTECODE'] = '1'  # Stop writing an __pycache__ for clean containers afterwards
 
@@ -76,6 +80,10 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
 def _get_command_for_test_runner(test_runner: TestRunner, src_dir: str) -> str:
     project_config = get_default_context().project_config
     test_dir = os.path.join(src_dir, project_config.test_package)
+
+    if not test_runner:
+        test_runner = TestRunner.pytest if PathFinder.find_spec(TestRunner.pytest) else TestRunner.unittest
+    logging.debug("Using %s as test_runner", test_runner)
 
     if test_runner is TestRunner.unittest:
         return "python3 -m unittest discover " + test_dir
