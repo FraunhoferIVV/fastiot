@@ -13,8 +13,7 @@ from pydantic import BaseModel
 from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
     DOCKER_BUILD_DIR
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.model import ProjectConfig, ServiceManifest, CPUPlatform, Service
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
@@ -77,11 +76,11 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
                                          "to a registry. Push is only allowed if a docker registry is specified. "
                                          "Additionally, if a docker registry cache is used, it will also push "
                                          "intermediate image layers."),
-          test_deployment_only: Optional[bool] = typer.Option(False,
-                                                              help="Build only services defined in the integration test "
-                                                                   "deployment. This is especially useful in the "
-                                                                   "CI-runner"),
-          no_cache: Optional[bool] = typer.Option(False, help="Force disabling caches for build.")):
+          test_deployment_only: bool = typer.Option(False,
+                                                    help="Build only services defined in the integration test "
+                                                         "deployment. This is especially useful in the "
+                                                         "CI-runner"),
+          no_cache: bool = typer.Option(False, help="Force disabling caches for build.")):
     """
     This command builds images.
 
@@ -95,36 +94,36 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
     if not services:
         services = None
 
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
 
     if test_deployment_only:
-        if not project_config.integration_test_deployment:
+        if not context.integration_test_deployment:
             logging.error("No `integration_test_deployment` configured. Stopping to build.")
             raise typer.Exit(0)
-        services = _find_test_deployment_services(project_config)
+        services = _find_test_deployment_services(context)
 
-    _create_all_docker_files(project_config, build_mode=mode, services=services)
+    _create_all_docker_files(context, build_mode=mode, services=services)
     tags = tag.split(',')
-    _docker_bake(project_config, tags=tags, services=services, dry=dry, push=push, docker_registry=docker_registry,
+    _docker_bake(context, tags=tags, services=services, dry=dry, push=push, docker_registry=docker_registry,
                  docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
 
     logging.info("Successfully built project. For reference you may consult the dockerfiles in your build directory.")
 
 
-def _create_all_docker_files(project_config: ProjectConfig, build_mode: str, services: Optional[List[str]] = None):
-    for service in project_config.services:
+def _create_all_docker_files(context: ProjectContext, build_mode: str, services: Optional[List[str]] = None):
+    for service in context.services:
         if services is None or service.name in services:
             service.read_manifest()
-            _create_docker_file(service, project_config, build_mode)
+            _create_docker_file(service, context, build_mode)
 
 
-def _create_docker_file(service: Service, project_config: ProjectConfig, build_mode: str):
-    build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir, DOCKER_BUILD_DIR)
+def _create_docker_file(service: Service, context: ProjectContext, build_mode: str):
+    build_dir = os.path.join(context.project_root_dir, context.build_dir, DOCKER_BUILD_DIR)
     os.makedirs(build_dir, exist_ok=True)
 
     docker_filename = os.path.join(build_dir, 'Dockerfile.' + service.name)
 
-    service_own_dockerfile = os.path.join(project_config.project_root_dir, 'src',
+    service_own_dockerfile = os.path.join(context.project_root_dir, 'src',
                                           service.package, service.name, 'Dockerfile')
     if os.path.isfile(service_own_dockerfile):
         logging.debug("Using dockerfile from %s, not creating a new one", service.name)
@@ -134,7 +133,7 @@ def _create_docker_file(service: Service, project_config: ProjectConfig, build_m
         with open(docker_filename, "w") as dockerfile:
             dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
             dockerfile.write(dockerfile_template.render(service=service,
-                                                        project_config=project_config,
+                                                        project_config=context,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
                                                         build_mode=build_mode,
@@ -156,7 +155,7 @@ def _get_maintainer() -> str:
     return maintainer
 
 
-def _docker_bake(project_config: ProjectConfig,
+def _docker_bake(context: ProjectContext,
                  tags: List[str],
                  services: Optional[List[str]] = None,
                  dry: bool = False,
@@ -175,7 +174,7 @@ def _docker_bake(project_config: ProjectConfig,
     docker_registry = docker_registry + "/" if docker_registry else docker_registry
 
     targets = []
-    for service in project_config.services:
+    for service in context.services:
         if services is not None and service.name not in services:
             continue
         manifest = service.read_manifest()
@@ -208,22 +207,22 @@ def _docker_bake(project_config: ProjectConfig,
         else:
             logging.warning("No services selected to build, aborting build of services.")
         logging.info("Configured and valid services for this project are: %s",
-                     ", ".join([s.name for s in project_config.services]))
+                     ", ".join([s.name for s in context.services]))
         raise typer.Exit()
 
-    with open(os.path.join(project_config.project_root_dir, project_config.build_dir,
+    with open(os.path.join(context.project_root_dir, context.build_dir,
                            DOCKER_BUILD_DIR, 'docker-bake.hcl'), "w") as docker_bake_hcl:
         dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
         docker_bake_hcl.write(dockerfile_template.render(targets=targets,
-                                                         project_config=project_config,
+                                                         project_config=context,
                                                          tags=tags,
                                                          docker_registry=docker_registry))
 
     if not dry:
-        _run_docker_bake_cmd(project_config, push, no_cache)
+        _run_docker_bake_cmd(context, push, no_cache)
 
 
-def _find_test_deployment_services(project_config: ProjectConfig) -> List[str]:
+def _find_test_deployment_services(project_config: ProjectContext) -> List[str]:
     """ Builds a list of services based on the test env project configuration. May exit the program if no services are
     to be built."""
     if project_config.integration_test_deployment is None:
@@ -268,7 +267,7 @@ def _make_caches(docker_registry_cache: str,
                  extra_caches: List[str],
                  push: bool,
                  tags: List[str]):
-    project_namespace = get_default_context().project_config.project_namespace
+    project_namespace = ProjectContext.default.project_namespace
     caches_from = []
 
     # Sort the tags: If we have a `latest` we want this to be first for the push the cache.

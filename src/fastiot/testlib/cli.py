@@ -1,15 +1,13 @@
 """ Some helpers to write CLI tests """
 import logging
 import os
-from typing import Optional
 
-from fastiot.cli.infrastructure_service_fn import get_services_list
 from fastiot.cli.import_configure import import_configure
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import _import_infrastructure_services
 
 
-def init_default_context(configure_filename: Optional[str] = None):
+def init_default_context(configure_filename: str = ''):
     """ Sets up the default context as it is usually done by the starting point of cli app """
 
     # We need to search for a configure file as running the tests as script will most likely be another working
@@ -29,7 +27,6 @@ def init_default_context(configure_filename: Optional[str] = None):
             if os.path.isfile(filename):
                 configure_filename = filename
                 break
-    default_context = get_default_context()
-    import_configure(default_context.project_config, configure_filename)
-    default_context.external_services = get_services_list()
+    import_configure(ProjectContext.default, configure_filename)
     _import_infrastructure_services()
+

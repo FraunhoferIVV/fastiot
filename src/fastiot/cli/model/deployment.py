@@ -82,6 +82,7 @@ class DeploymentConfig(BaseModel):
     Represents an imported config. All fields are already overwritten specified command line parameters, currently
     including environment, docker_registry and tag
     """
+    name: str
     version: int = 1
     services: Dict[str, Optional[ServiceConfig]] = {}
     """ List of services for the deployment """

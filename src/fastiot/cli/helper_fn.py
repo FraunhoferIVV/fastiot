@@ -81,20 +81,20 @@ def find_services(package: Optional[str] = None,
     return found_services
 
 
-def find_deployments(deployments: Optional[List[str]] = None, path: str = '') -> List[DeploymentConfig]:
+def find_deployments(deployments: Optional[List[str]] = None, path: str = '') -> Dict[str, DeploymentConfig]:
     """
-    Creates a list of all deployments found the projects :file:`deployments` path.
+    Creates a dict of all deployments found the projects :file:`deployments` path.
 
     :param deployments: Optional, specify a list of deployments to be exclusively included
     :param path: Optional, specify a search path, uses ``os.getcwd()`` as default
     """
     path = path or os.getcwd()
 
-    deploy_configs = []
+    deploy_configs = {}
     for config_filename in glob.glob(os.path.join(path, DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE)):
         deployment_name = os.path.basename(os.path.dirname(config_filename))
         if not deployments or deployment_name in deployments:
-            deploy_configs.append(DeploymentConfig.from_yaml_file(config_filename))
+            deploy_configs[deployment_name] = DeploymentConfig.from_yaml_file(config_filename)
     return deploy_configs
 
 

@@ -17,7 +17,7 @@ class Port(BaseModel):
     A port entry represents one port used by the service which should be mounted outside the container.
     """
 
-    port_nr: int
+    port: int
     """
     The default port location.
     """
@@ -105,13 +105,13 @@ class Vue(BaseModel):
     Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
     in the `<vue-path>/dist` which is also the default here.
     If you have something like::
-    
+
         service.exports = {
           outputDir:"../flask_server/static",
           assetsDir: "static"
         }
 
-    
+
     in your :file:`vue.config.js` use the `outputDir` variable as relative path here.
     """
 
@@ -127,7 +127,7 @@ class ServiceManifest(BaseModel):
     """
     name: str
     """ Name needs to comply with the services name (Mandatory) """
-    ports: Dict[str, Port] = {}
+    ports: List[Port] = []
     """
     Provide a list with some name for the service and a port that this container will open, e.g. when operating
     as a webserver.`
@@ -135,15 +135,18 @@ class ServiceManifest(BaseModel):
     base_image: str = DEFAULT_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
     :const:`fastiot.cli.constants.DEFAULT_BASE_IMAGE` will be used.
-    
+
     Be aware, that the further Dockerfile will be unchanged, thus your base image should be based on some Debian-style.
     If this does not work for you, you may also provide a :file:`Dockerfile` in your service which will automatically be
     used.
     """
-    volumes: Dict[str, Volume] = {}  # Volumes to be mounted in the container
-    devices: Dict[str, Device] = {}  # Devices, e.g. serial devices, to be mounted in the container
+    volumes: List[Volume] = []  # Volumes to be mounted in the container
+    devices: List[Device] = []  # Devices, e.g. serial devices, to be mounted in the container
+    depends_on: List[str] = []
+    """
+    List of infrastructure services that need to be deployed
+    """
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
-    # depends_on: List[ServiceEnum] = ()
     privileged: bool = False
     """
     Enable if this service needs privileged permissions inside docker, e.g. for hardware access
@@ -166,7 +169,7 @@ class ServiceManifest(BaseModel):
 
     additional_pip_packages: Optional[List[str]] = []
     """
-    If one specific module needs more packages installed than the other you may add those here. 
+    If one specific module needs more packages installed than the other you may add those here.
 
     **Caution**: It is recommended to use the projects global :file:`requirements.txt` to install additional packages
                  in your project. This way all packages will be installed at once and this container stage will later

@@ -8,8 +8,7 @@ from typer.testing import CliRunner
 
 from fastiot.cli import find_deployments
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
-from fastiot.cli.infrastructure_service_fn import get_services_list
-from fastiot.cli.model import ProjectConfig, Service, InfrastructureService
+from fastiot.cli.model import ProjectContext, Service, InfrastructureService
 from fastiot.cli.model.context import get_default_context
 from fastiot.cli.model.service import InfrastructureServicePort
 from fastiot.cli.typer_app import app, _import_infrastructure_services
@@ -54,15 +53,13 @@ class TestConfigCommand(unittest.TestCase):
 
         os.environ['FASTIOT_CONFIGURE_FILE'] = os.path.join(self.assets_dir_, 'configure.py')
         os.chdir(self.assets_dir_)
-        default_context = get_default_context()
-        default_context.project_config = ProjectConfig(project_namespace='fastiot_tests',
-                                                       project_root_dir=self.assets_dir_,
-                                                       build_dir=tempdir,
-                                                       deployments=find_deployments(path=self.assets_dir_),
-                                                       services=[Service(name='dummy_service',
-                                                                         package='services')],
-                                                       integration_test_deployment='integration_test')
-        default_context.external_services = get_services_list()
+        default_context = ProjectContext.default
+        default_context.project_namespace = 'fastiot_tests'
+        default_context.project_root_dir = self.assets_dir_
+        default_context.build_dir = tempdir
+        default_context.deployments = find_deployments(path=self.assets_dir_)
+        default_context.services = [Service(name='dummy_service', package='services')]
+        default_context.integration_test_deployment = 'integration_test'
         _import_infrastructure_services()
 
     def _parse_docker_compose(self, tempdir, deployment):

@@ -33,10 +33,9 @@ class Service(BaseModel):
     def read_manifest(self, check_service_name: str = "") -> ServiceManifest:
         """ Reads out the service manifest, if not run before using the yaml-file otherwise just ``self.manifest``"""
         if self.manifest is None:
-            from fastiot.cli.model.context import get_default_context  # pylint: disable=import-outside-toplevel
-
-            default_context = get_default_context()
-            manifest_path = os.path.join(default_context.project_config.project_root_dir, 'src',
+            from fastiot.cli.model.project import ProjectContext  # pylint: disable=import-outside-toplevel
+            default_context = ProjectContext.default
+            manifest_path = os.path.join(default_context.project_root_dir, 'src',
                                          self.package, self.name, MANIFEST_FILENAME)
             self.manifest = ServiceManifest.from_yaml_file(manifest_path, check_service_name=check_service_name)
         return self.manifest
@@ -46,7 +45,7 @@ class InfrastructureServiceEnvVar(BaseModel):
     name: str
     """ The name of the infrastructure service env var """
     default: str
-    """ THe default value for the infrastructure service env var """
+    """ The default value for the infrastructure service env var """
     env_var: str = ''
     """ The env var which can be used for modification. If empty it cannot be modified, therefore is static for the
     infrastructure service """
@@ -65,10 +64,11 @@ class InfrastructureServicePort(BaseModel):
 class InfrastructureServiceVolume(BaseModel):
     container_volume: str
     """ The volume inside the container """
-    default_volume_mount: str = ''
-    """ The default location to mount the volume to. If empty, it will always use the given env var """
+    default_volume_mount: str = 'tmpfs'
+    """ The default location to mount the volume to. A value of 'tmpfs' will mount the container to a
+    temporary file system inside the RAM. """
     env_var: str
-    """ The env var which can be used for volume mount modification """
+    """ The env var which can be used for volume mount modification. """
 
 
 class InfrastructureService(BaseModel):

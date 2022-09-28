@@ -8,8 +8,7 @@ from typer.testing import CliRunner
 
 from fastiot.cli.constants import DOCKER_BUILD_DIR
 from fastiot.cli.import_configure import import_configure
-from fastiot.cli.model.context import get_default_context
-from fastiot.cli.model.project import ProjectConfig
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app
 from fastiot.testlib.cli import init_default_context
 from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
@@ -30,12 +29,10 @@ def _write_configure(path: str, no_services: bool, project_root_dir: Optional[st
         file.seek(0)
 
 
-def _prepare_env(tempdir, no_services=False, project_root_dir:str = None):
+def _prepare_env(tempdir, no_services=False, project_root_dir: Optional[str] = None):
     _write_configure(tempdir, no_services, project_root_dir)
     os.environ['FASTIOT_CONFIGURE_FILE'] = os.path.join(tempdir, 'configure.py')
-    default_context = get_default_context()
-    default_context.project_config = ProjectConfig()
-    import_configure(default_context.project_config, os.environ.get('FASTIOT_CONFIGURE_FILE', ''))
+    import_configure(ProjectContext.default, os.environ.get('FASTIOT_CONFIGURE_FILE', ''))
 
 
 class TestBuildCommand(unittest.TestCase):

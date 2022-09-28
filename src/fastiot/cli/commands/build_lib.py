@@ -7,11 +7,12 @@ from enum import Enum
 from glob import glob
 from shutil import rmtree
 from typing import Optional, List
+from fastiot.cli.model.project import ProjectContext
 
 import typer
 
 from fastiot.cli.model import CompileSettingsEnum
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, extras_cmd
 
 libraries = []
@@ -34,16 +35,16 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
                                                                "wheel or sdist")):
     """ Compile the project library according to the project configuration. """
 
-    project_config = get_default_context().project_config
-    if not project_config.library_package:
+    context = ProjectContext.default
+    if not context.library_package:
         logging.info("No library package configured in configure.py. Exiting.")
         return
 
     styles = []
     if build_style == BuildLibStyles.all:
-        if project_config.lib_compilation_mode == CompileSettingsEnum.only_compiled:
+        if context.lib_compilation_mode == CompileSettingsEnum.only_compiled:
             styles.append(BuildLibStyles.compiled)
-        elif project_config.lib_compilation_mode == CompileSettingsEnum.only_source:
+        elif context.lib_compilation_mode == CompileSettingsEnum.only_source:
             styles += [BuildLibStyles.wheel, BuildLibStyles.sdist]
         else:
             styles += [BuildLibStyles.wheel, BuildLibStyles.sdist, BuildLibStyles.compiled]
@@ -56,13 +57,13 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
                     BuildLibStyles.sdist: 'sdist -q',
                     BuildLibStyles.compiled: 'bdist_nuitka'}
 
-    setup_py = os.path.join(project_config.library_setup_py_dir, 'setup.py')
+    setup_py = os.path.join(context.library_setup_py_dir, 'setup.py')
     for style in styles:
         cmd = f"{sys.executable} {setup_py} {command_args.get(style)}"
-        exit_code = subprocess.call(cmd.split(), env=env, cwd=project_config.project_root_dir)
+        exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
 
         try:
-            for file in glob(os.path.join(project_config.project_root_dir, 'src', '*.egg-info')):
+            for file in glob(os.path.join(context.project_root_dir, 'src', '*.egg-info')):
                 rmtree(file)
         except FileNotFoundError:
             pass

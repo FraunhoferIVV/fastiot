@@ -6,10 +6,10 @@ import sys
 
 from fastiot.cli import find_deployments, find_services
 from fastiot.cli.constants import CONFIGURE_FILE_NAME, IMPORT_NAME_CONFIGURE_PY
-from fastiot.cli.model import ProjectConfig
+from fastiot.cli.model import ProjectContext
 
 
-def import_configure(project_config: ProjectConfig, file_name: str = ''):
+def import_configure(project_context: ProjectContext, file_name: str = ''):
     """
     Imports the :file:`configure.py` in the project root (if not specified
     otherwise) and sets project config accordingly.
@@ -22,19 +22,19 @@ def import_configure(project_config: ProjectConfig, file_name: str = ''):
         logging.warning("No file configure.py found in %s. Trying to continue.", os.path.dirname(file_name))
         return
 
-    for field in ProjectConfig.__fields__:
+    for field in ProjectContext.__fields__:
         if hasattr(config, field):
-            setattr(project_config, field, getattr(config, field))
+            setattr(project_context, field, getattr(config, field))
 
-    if project_config.extensions:
-        _import_extensions(project_config.extensions)
+    if project_context.extensions:
+        _import_extensions(project_context.extensions)
 
-    if not project_config.deployments:
-        project_config.deployments = find_deployments(
-            path=project_config.project_root_dir
+    if not project_context.deployments:
+        project_context.deployments = find_deployments(
+            path=project_context.project_root_dir
         )
-    if not project_config.services:
-        project_config.services = find_services(path=project_config.project_root_dir)
+    if not project_context.services:
+        project_context.services = find_services(path=project_context.project_root_dir)
 
 
 def _import_configure_py(file_name):

@@ -7,12 +7,12 @@ import typer
 
 from fastiot.cli.commands.stop import stop
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
 def _deployment_completion() -> List[str]:
-    return get_default_context().project_config.deployment_names
+    return ProjectContext.default.deployment_names
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -21,9 +21,8 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
           service_names: Optional[List[str]] = typer.Argument(default=None,
                                                               help="Optionally specify services to be started "
                                                                    "from the environment."),
-          detach: Optional[bool] = typer.Option(False, "-d", "--detach",
-                                                help="Use to run this task in the background (detached)"),
-          project_name: Optional[str] = typer.Option(None, help="Manually set project name for docker-compose"),
+          detach: bool = typer.Option(False, "-d", "--detach", help="Use to run this task in the background (detached)"),
+          project_name: str = typer.Option('', help="Manually set project name for docker-compose"),
           use_test_deployment: Optional[bool] = typer.Option(False,
                                                              help="Explicitly set the deployment_name to specified "
                                                                   "integration test deployment. Useful for the CI "
@@ -31,20 +30,20 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
           ):
     """ Starts the selected environment.
     Be aware that the configuration needs to be built manually before using `fiot config`."""
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
 
     if use_test_deployment:
-        deployment_name = project_config.integration_test_deployment
+        deployment_name = context.integration_test_deployment
         if not deployment_name:
             logging.warning("You have not configured any integration_test_deployment in your configure.py. Exiting.")
             raise typer.Exit(0)
 
     if deployment_name is None:
         logging.error("You have to define an environment to start or use the optional --use-test-deployment!")
-        typer.Exit(-1)
+        raise typer.Exit(-1)
 
     cmd = ["docker-compose"]
-    project_name = project_name or project_config.project_namespace + "__" + deployment_name
+    project_name = project_name or context.project_namespace + "_" + deployment_name
     cmd.append("--project-name=" + project_name)
 
     cmd.append("up")
@@ -54,7 +53,7 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
     if service_names is not None:
         cmd += service_names
 
-    cwd = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
+    cwd = os.path.join(context.project_root_dir, context.build_dir, DEPLOYMENTS_CONFIG_DIR,
                        deployment_name)
     logging.debug("Running command to start the environment: %s", " ".join(cmd))
     os.environ['COMPOSE_HTTP_TIMEOUT'] = '300'
