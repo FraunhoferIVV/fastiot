@@ -44,3 +44,5 @@ async def get_async_influxdb_client_from_env():
             time.sleep(sleep_time)
         except aiohttp.ServerDisconnectedError:
             time.sleep(sleep_time)
+        except aiohttp.client.ClientConnectorError:
+            time.sleep(sleep_time)
