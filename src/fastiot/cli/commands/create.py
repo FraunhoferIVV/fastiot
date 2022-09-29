@@ -6,16 +6,16 @@ import os
 import random
 import shutil
 import string
-from typing import Optional
+from typing import List, Optional
 
 import typer
 
 from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.infrastructure_service_fn import get_services_list
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.service import InfrastructureService
 from fastiot.cli.typer_app import create_cmd
+from fastiot.cli.model.project import ProjectContext
 
 
 def _create_random_password(length: int = 16) -> str:
@@ -26,10 +26,10 @@ def _create_random_password(length: int = 16) -> str:
 
 @create_cmd.command()
 def new_project(project_name: str = typer.Argument(None, help="The project name to generate"),
-                force: Optional[bool] = typer.Option(False, '-f', '--force',
-                                                     help="Create project even if an existing project has been found."),
-                target_directory: Optional[str] = typer.Option('.', '-d', '--directory',
-                                                               help="The directory the project will be stored")
+                force: bool = typer.Option(False, '-f', '--force',
+                                           help="Create project even if an existing project has been found."),
+                target_directory: str = typer.Option('.', '-d', '--directory',
+                                                     help="The directory the project will be stored")
                 ):
     """
     Function to create a new project with its directory structure and all needed files for a quick start.
@@ -42,12 +42,12 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                       "To force overwriting this you may use the --force argument.")
         raise typer.Exit(2)
 
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
 
     if target_directory.startswith('/'):
-        project_config.project_root_dir = target_directory
+        context.project_root_dir = target_directory
     else:
-        project_config.project_root_dir = os.path.join(project_config.project_root_dir, target_directory)
+        context.project_root_dir = os.path.join(context.project_root_dir, target_directory)
 
     # Check for valid project name (no space, no /, …)
     project_name = project_name.replace(" ", "_").replace("-", '_')
@@ -55,17 +55,17 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         if not (letter.isalnum() or letter == "_" or letter == "."):
             logging.error("Please enter valid Name. Only use a-z, A-Z, 0-9, '.' and '_' .")
             raise typer.Exit(3)
-    logging.info("The project %s will be created in %s", project_name, project_config.project_root_dir)
+    logging.info("The project %s will be created in %s", project_name, context.project_root_dir)
 
     # Create necessary directories
-    if not os.path.exists(project_config.project_root_dir):
-        os.makedirs(project_config.project_root_dir)
+    if not os.path.exists(context.project_root_dir):
+        os.makedirs(context.project_root_dir)
     for directory in [os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
                       os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
                       os.path.join("src", f"{project_name}_services")]:
-        os.makedirs(os.path.join(project_config.project_root_dir, directory), exist_ok=True)
+        os.makedirs(os.path.join(context.project_root_dir, directory), exist_ok=True)
 
     # Copy static files like .gitignore
     templates_dir = os.path.join(os.path.dirname(__file__), '..', 'templates', 'new_project')
@@ -74,7 +74,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                       ('install.sh', '.'),
                       ('deployment.yaml', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'integration_test')),
                       ('dummy_test.py', os.path.join("src", f"{project_name}_tests"))]:
-        shutil.copy(os.path.join(templates_dir, src), os.path.join(project_config.project_root_dir, dest))
+        shutil.copy(os.path.join(templates_dir, src), os.path.join(context.project_root_dir, dest))
 
     # Loop over many templates used to create a new project
     for dest, temp in [(CONFIGURE_FILE_NAME, 'new_project/configure.py.j2'),
@@ -85,11 +85,11 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 
         # For each potential service create a unique password for the production deployment.
         password_fields = []
-        for service in get_services_list().values():
+        for service in InfrastructureService.all.values():
             password_fields += service.password_env_vars
         env_vars = [f"{f}={_create_random_password(24)}" for f in password_fields]
 
-        with open(os.path.join(project_config.project_root_dir, dest), "w") as template_file:
+        with open(os.path.join(context.project_root_dir, dest), "w") as template_file:
             template = get_jinja_env().get_template(temp)
             template_file.write(template.render(
                 project_namespace=project_name,
@@ -115,9 +115,9 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
     # service name
     service_name = _sanitize_service_name(service_name)
     # service location
-    project_config = get_default_context().project_config
-    service_package = _find_service_package(project_config, service_package)
-    service_location = os.path.join(project_config.project_root_dir, "src", service_package, service_name)
+    context = ProjectContext.default
+    service_package = _find_service_package(context, service_package)
+    service_location = os.path.join(context.project_root_dir, "src", service_package, service_name)
     logging.info("The service %s will be created in %s.", service_name, service_location)
 
     # service package
