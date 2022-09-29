@@ -2,7 +2,7 @@ import os
 
 CONFIG_KEY_EXTENSIONS = "extensions"
 # Base image used to build docker files if not defined otherwise in the manifest
-DEFAULT_BASE_IMAGE = "python:3.10-slim-bullseye"
+DEFAULT_BASE_IMAGE = "python:3.10"
 CONFIGURE_FILE_NAME = "configure.py"
 DEPLOYMENTS_CONFIG_DIR = 'deployments'
 DEPLOYMENTS_CONFIG_FILE = 'deployment.yaml'
