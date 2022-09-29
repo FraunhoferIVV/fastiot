@@ -4,8 +4,7 @@ fastiot_service:
   mount_config_dir: required
 
   ports: # List all ports of the module
-    fastapi:
-      port_nr: 5800
+    - port: 5800
       env_variable: "EXAMPLE_SAM_FASTAPI"
 
   depends_on:

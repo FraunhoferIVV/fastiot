@@ -8,8 +8,8 @@ from fastiot.core import FastIoTService, Subject
 from fastiot.core.service_annotations import reply
 from fastiot.core.subject_helper import sanitize_subject_name
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
-from fastiot.env import env_mongodb
-from fastiot.helpers.read_yaml import read_config
+from fastiot.env import env_mongodb, env_mongodb_cols
+from fastiot.util.read_yaml import read_config
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data, build_query_dict, \
     from_mongo_data

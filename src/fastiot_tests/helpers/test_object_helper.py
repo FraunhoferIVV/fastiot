@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 
 from fastiot.core import FastIoTPublish
-from fastiot.helpers.object_helper import parse_object, parse_object_list
+from fastiot.util.object_helper import parse_object, parse_object_list
 from fastiot.msg.thing import Thing
 from fastiot.testlib.testlib import populate_test_env
 

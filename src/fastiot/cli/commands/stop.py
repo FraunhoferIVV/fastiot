@@ -3,12 +3,12 @@ import logging
 import os
 import subprocess
 from typing import Optional, List
+from fastiot.cli.model.project import ProjectContext
 
 import typer
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
-from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 
@@ -28,10 +28,10 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
     """
     Stops the selected environment.
     """
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
 
     if use_test_deployment:
-        deployment_name = project_config.integration_test_deployment
+        deployment_name = context.integration_test_deployment
         if not deployment_name:
             logging.warning("No `integration_test_deployment` configured. Exiting.")
             raise typer.Exit(0)
@@ -40,12 +40,12 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
         logging.error("You have to define an environment to stop or use the optional argument --use-test-deployment!")
         raise typer.Exit(1)
 
-    cwd = os.path.join(project_config.project_root_dir, project_config.build_dir, DEPLOYMENTS_CONFIG_DIR,
+    cwd = os.path.join(context.project_root_dir, context.build_dir, DEPLOYMENTS_CONFIG_DIR,
                        deployment_name)
 
     cmd = "docker-compose "
 
-    project_name = project_name or project_config.project_namespace + "__" + deployment_name
+    project_name = project_name or context.project_namespace + "_" + deployment_name
     cmd += "--project-name=" + project_name
 
     if service_names is not None and len(service_names) > 0:

@@ -10,7 +10,7 @@ from fastiot.core.service import FastIoTService
 from fastiot.env import env_basic
 
 
-def _get_config_file_name(service: Union[Type[FastIoTService], str]) -> Optional[str]:
+def _get_config_file_name(service: Union[FastIoTService, str]) -> Optional[str]:
     """
     Find the yaml config file for the given service.
 
@@ -46,7 +46,7 @@ def _get_config_file_name(service: Union[Type[FastIoTService], str]) -> Optional
     return None
 
 
-def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
+def read_config(service: Union[FastIoTService, str]) -> Dict:
     """
     Load YAML-configuration files based on file (provide string) or, preferably, service.
 
@@ -59,7 +59,7 @@ def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
     Example passing your service to get a filename configuration automatically:
 
     >>> from fastiot.core import FastIoTService
-    >>> from fastiot.helpers.read_yaml import read_config
+    >>> from fastiot.util.read_yaml import read_config
     >>>
     >>> class MyService(FastIoTService)
     >>>
@@ -77,8 +77,12 @@ def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
 
     try:
         with open(config_file) as file:
+<<<<<<< HEAD:src/fastiot/helpers/read_yaml.py
             loader = yaml.safe_load_all(file)
             result = list(loader)
+=======
+            result = yaml.safe_load(file)
+>>>>>>> kmerker:src/fastiot/util/read_yaml.py
     except:
         logging.getLogger("yaml_config").warning("Could not open or parse yaml file %s", config_file)
         return {}
@@ -87,4 +91,4 @@ def read_config(service: Union[Type[FastIoTService], str]) -> Dict:
         logging.getLogger("yaml_config").warning("Could not parse yaml file %s", config_file)
         return {}
     logging.getLogger("yaml_config").info("Successfully read configuration %s", config_file)
-    return result[0]
+    return result

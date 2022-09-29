@@ -3,9 +3,30 @@ import logging
 import os
 from typing import Optional
 
+<<<<<<< HEAD
 from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
     TimeScaleDBService, NatsService
 from fastiot.env import *
+=======
+from fastiot.env.env_constants import *
+
+
+def parse_bool_flag(env_var: str, default: bool) -> bool:
+    """
+    Helper function for parsing flag env variables (returns true or false).
+
+    Please use this function for parsing boolean flags for unified behavior across fastiot. Please also note, that this
+    function exists because a bool cast doesn't cut it because bool('false') is true why this function exists.
+
+    :param env_var: The name of the env var
+    :param default: The default flag if the env var doesn't exist in os environment.
+    :return The flag, true or false
+    """
+    if env_var in os.environ:
+        return os.environ[env_var].lower() == 'true'
+    else:
+        return default
+>>>>>>> kmerker
 
 
 class BasicEnv:
@@ -55,7 +76,7 @@ class BasicEnv:
 
         Use this variable to differentiate between multiple instances of the same service. The result is available as
         ``self.service_id``. It is for example used to read a configuration file for each service with
-        :func:`fastiot.helpers.read_yaml.read_config`. See
+        :func:`fastiot.util.read_yaml.read_config`. See
         """
         return os.getenv(FASTIOT_SERVICE_ID, '')
     @property
@@ -65,6 +86,15 @@ class BasicEnv:
     @property
     def error_logfile(self) -> str:
         return os.path.join(self.log_dir, 'error.log')
+
+
+class TestsEnv:
+    """
+    Environment variables for running tests
+    """
+    @property
+    def use_internal_hostnames(self) -> bool:
+        return parse_bool_flag(FASTIOT_USE_INTERNAL_HOSTNAMES, False)
 
 
 class BrokerEnv:
@@ -346,6 +376,7 @@ class TimeScaleDBEnv:
 
 
 env_basic = BasicEnv()
+env_tests = TestsEnv()
 env_broker = BrokerEnv()
 env_mongodb = MongoDBEnv()
 env_mongodb_cols = MongoDBColConstants()

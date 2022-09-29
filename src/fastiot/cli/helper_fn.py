@@ -9,25 +9,6 @@ from fastiot.cli.constants import TEMPLATES_DIR, DEPLOYMENTS_CONFIG_DIR, DEPLOYM
 from fastiot.cli.model import Service, DeploymentConfig
 
 
-def parse_env_file(env_filename: str) -> Dict[str, str]:
-    environment = {}
-    with open(env_filename, 'r') as stream:
-        for i_line, line in enumerate(stream.readlines()):
-            # need a space before '#' or e.g. password containing # will be split
-            i_comment = line.find(' #')
-            if i_comment != -1:
-                line = line[0:i_comment]
-            line = line.strip()
-            if line == '' or line[0] == '#':
-                continue
-            parts = line.split('=', maxsplit=2)
-            parts = [p.strip() for p in parts]
-            if len(parts) == 1 or parts[0].replace("_", "").isalnum() is False:
-                raise ValueError(f"Cannot parse env file: Invalid line {i_line + 1}: {line}")
-            environment[parts[0]] = parts[1]
-    return environment
-
-
 _jinja_env = None
 
 
@@ -81,20 +62,20 @@ def find_services(package: Optional[str] = None,
     return found_services
 
 
-def find_deployments(deployments: Optional[List[str]] = None, path: str = '') -> List[DeploymentConfig]:
+def find_deployments(deployments: Optional[List[str]] = None, path: str = '') -> Dict[str, DeploymentConfig]:
     """
-    Creates a list of all deployments found the projects :file:`deployments` path.
+    Creates a dict of all deployments found the projects :file:`deployments` path.
 
     :param deployments: Optional, specify a list of deployments to be exclusively included
     :param path: Optional, specify a search path, uses ``os.getcwd()`` as default
     """
     path = path or os.getcwd()
 
-    deploy_configs = []
+    deploy_configs = {}
     for config_filename in glob.glob(os.path.join(path, DEPLOYMENTS_CONFIG_DIR, '*', DEPLOYMENTS_CONFIG_FILE)):
         deployment_name = os.path.basename(os.path.dirname(config_filename))
         if not deployments or deployment_name in deployments:
-            deploy_configs.append(DeploymentConfig.from_yaml_file(config_filename))
+            deploy_configs[deployment_name] = DeploymentConfig.from_yaml_file(config_filename)
     return deploy_configs
 
 

@@ -2,8 +2,8 @@ from enum import Enum
 from typing import Optional, List
 
 import typer
+from fastiot.cli.model.project import ProjectContext
 
-from fastiot.cli.model.context import get_default_context
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
@@ -62,22 +62,22 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
     """
     Prints project related variables
     """
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
     platforms = platform.split(',') if platform else []
     if name == 'project_namespace':
-        print(project_config.project_namespace)
+        print(context.project_namespace)
     elif name == 'library_package':
-        if project_config.library_package:
-            print(project_config.library_package)
+        if context.library_package:
+            print(context.library_package)
     elif name == 'library_setup_py_dir':
-        if project_config.library_setup_py_dir:
-            print(project_config.library_setup_py_dir)
+        if context.library_setup_py_dir:
+            print(context.library_setup_py_dir)
     elif name == 'services':
         if deployment is not None:
-            deployment_obj = project_config.deployment_by_name(deployment)
+            deployment_obj = context.deployment_by_name(deployment)
             print("\n".join(deployment_obj.services))
         else:
-            for service in project_config.services:
+            for service in context.services:
                 if len(platforms) > 0:
                     manifest = service.read_manifest()
                     platforms_in_manifest = [p.value for p in manifest.platforms]
@@ -85,16 +85,16 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
                         continue
                 print(service.name)
     elif name == 'deployments':
-        for deployment in project_config.deployments:
-            print(deployment.name)
+        for deployment in context.deployments:
+            print(deployment)
     elif name == 'integration_test_deployment':
-        if project_config.integration_test_deployment:
-            print(project_config.integration_test_deployment)
+        if context.integration_test_deployment:
+            print(context.integration_test_deployment)
     elif name == 'test_package':
-        if project_config.test_package:
-            print(project_config.test_package)
+        if context.test_package:
+            print(context.test_package)
     elif name == 'npm_test_dir':
-        if project_config.npm_test_dir:
-            print(project_config.npm_test_dir)
+        if context.npm_test_dir:
+            print(context.npm_test_dir)
     else:
         raise NotImplementedError(f"Print command for value '{name}' is not implemented")

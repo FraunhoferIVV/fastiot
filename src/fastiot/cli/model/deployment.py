@@ -83,18 +83,16 @@ class DeploymentConfig(BaseModel):
     including environment, docker_registry and tag
     """
     name: str
-    """ Name of the deployment. This should always be the directory name where the corresponding :file:`deployment.yaml`
-    is located. """
     version: int = 1
     services: Dict[str, Optional[ServiceConfig]] = {}
     """ List of services for the deployment """
     infrastructure_services: Dict[str, InfrastructureServiceConfig] = {}
     """ List of infrastructure services for the deployment """
-    deployment_target: Optional[DeploymentTargetSetup]
+    deployment_target: Optional[DeploymentTargetSetup] = None
     """ A deployment configuration to auto-generate Ansible Playbooks
     """
     docker_registry: str = ''
-    """ Specify a docker registry which acts as a default registry for all services (not infrastructure services). 
+    """ Specify a docker registry which acts as a default registry for all services (not infrastructure services).
     Overrides any docker registry specified by CLI. """
     tag: str = ''
     """ Specify a docker tag which acts as a default tag for all services (not infrastructure services). Overrides any
@@ -104,14 +102,13 @@ class DeploymentConfig(BaseModel):
 
     @root_validator
     def check_services(cls, values):
-        try:
-            from fastiot.cli.infrastructure_service_fn import get_services_list
-            services = get_services_list()
-        except AttributeError:
-            return values  # If the project is not configured completely this will fail
+        from fastiot.cli.model import InfrastructureService
+        services = InfrastructureService.all
+
         for service in values.get("infrastructure_services"):
-            if service not in services.keys():
+            if service not in services:
                 raise ValueError(f"Service {service} not found in service list!")
+
         return values
 
     @staticmethod

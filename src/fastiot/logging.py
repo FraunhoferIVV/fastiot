@@ -1,9 +1,10 @@
 
+from typing import Optional
 from fastiot.env import env_basic
-from fastiot.helpers.log_config import get_log_config
+from fastiot.util.log_config import get_log_config
 
 
-def logging(name: str = None):
+def logging(name: Optional[str] = None):
     """
     This logging is a wrapper for logging from python, you can use it like following.
     Also the :envvar:`FASTIOT_LOG_LEVEL_NO` must be set to the expected level.

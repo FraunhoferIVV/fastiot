@@ -1,60 +1,42 @@
 """ Some helpers to work with external services: importing, port handling, … """
-import os
 from socket import socket
-from typing import Optional, Dict, List, Union
+from typing import Dict
 
 from fastiot.cli.model import InfrastructureService
 
 
-def get_services_list() -> Dict[str, InfrastructureService]:
-    """ Method to get a list of all available services as instantiated
-    :class:`fastiot.cli.model.service.ExternalService`.
-
-    To append own services you simply have to inherit from :class:`fastiot.cli.model.service.ExternalService` and put
-    them into your project. Then import those parts using :attr:`fastiot.cli.model.project.ProjectConfig.extensions`.
-    This method will try to import anything from there and for services.
+def get_infrastructure_service_ports_randomly() -> Dict[str, int]:
     """
-    service_classes = InfrastructureService.__subclasses__()
-    for service_class in service_classes:
-        service_classes += service_class.__subclasses__()
-    services_list = [s() for s in service_classes]
-    services = {s.name: s for s in services_list}
-    return {k: services[k] for k in sorted(services.keys())}
+    Get random environment variables for all ports.
 
+    On very busy machines this may to reuse of ports, if another service takes the port betweening determining its free
+    status and acutally starting the service.
 
-def set_infrastructure_service_port_environment(offset: int = 0, random: bool = False,
-                                                services: Optional[List[Union[str, InfrastructureService]]] = None) -> \
-        Dict[str, int]:
+    :return: dict with the environment variables and the corresponding port numbers
     """
-    Sets up the local environment with environment variables for all ports.
-
-    :param offset: Port number for the first service, will be monotonically increasing for all further services. Set to
-                   ``0`` to not use any alternative ports.
-    :param random: Set to random to find a free service for each port. On very busy machines this may to reuse of ports,
-                   if another service takes the port betweening determining its free status and acutally starting the
-                   service.
-    :param services:  List of services as service name or instance of :class:`fastiot.cli.model.service.ExternalService`
-    :return: dict with the environment variables set and the corresponding port numbers
-    """
-
-    open_ports = {}
-    port_counter = 0
-    for service in get_services_list().values():
-
-        if services is not None and service.name not in services and service in services:
-            continue
-
+    ports = {}
+    for service in InfrastructureService.all.values():
         for port in service.ports:
-            if offset > 0:
-                os.environ[port.env_var] = str(offset + port_counter)
-                port_counter += 1
-            elif random:
-                with socket() as temp_socket:
-                    temp_socket.bind(('', 0))
-                    os.environ[port.env_var] = str(temp_socket.getsockname()[1])
-            else:
-                os.environ[port.env_var] = str(port.default_port_mount)
+            with socket() as temp_socket:
+                temp_socket.bind(('', 0))
+                ports[port.env_var] = temp_socket.getsockname()[1]
+    return ports
 
-            open_ports[port.env_var] = int(os.environ.get(port.env_var))
 
-    return open_ports
+def get_infrastructure_service_ports_monotonically_increasing(offset: int) -> Dict[str, int]:
+    """
+    Get environment variables for all ports in a monotonically increasing order with an offset.
+
+    :param offset: Port number for the first service, will be monotonically increasing for all further services.
+    :return: dict with the environment variables and the corresponding port numbers
+    """
+    if offset < 0:
+        raise ValueError(f"Expected offset greater or equal than zero. Is {offset} instead.")
+
+    ports = {}
+    for service in InfrastructureService.all.values():
+        for port in service.ports:
+            ports[port.env_var] = offset
+            offset += 1
+    return ports
+

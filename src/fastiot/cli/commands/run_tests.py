@@ -10,7 +10,7 @@ import typer
 
 from fastiot.cli.commands.start import start
 from fastiot.cli.commands.stop import stop
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 
@@ -38,35 +38,35 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
     """
     os.environ['PYTHONDONTWRITEBYTECODE'] = '1'  # Stop writing an __pycache__ for clean containers afterwards
 
-    project_config = get_default_context().project_config
+    context = ProjectContext.default
 
-    if not project_config.test_package:
+    if not context.test_package:
         logging.info("No test_package defined in configure.py. Skipping unittests.")
         sys.exit(0)
 
-    if not project_config.integration_test_deployment:
+    if not context.integration_test_deployment:
         logging.info("No test deployment configured, so no need to run configure for the deployment. "
                      "Skipping the step")
         return
 
-    if not os.path.isfile(os.path.join(project_config.project_root_dir, 'src', project_config.test_package,
+    if not os.path.isfile(os.path.join(context.project_root_dir, 'src', context.test_package,
                                        'generated.py')):
         from fastiot.cli.commands.config import config  # pylint: disable=import-outside-toplevel
 
         logging.warning("No file `generated.py` found in testpackage %s.\n"
-                        "\tRunning config command to create one now.", project_config.test_package)
-        config(test_deployment_only=True, service_port_offset=-1, generated_py_with_internal_hostnames=False)
+                        "\tRunning config command to create one now.", context.test_package)
+        config(use_test_deployment=True, port_offset=0)
 
     if start_deployment:
         start(use_test_deployment=True, detach=True, project_name=None, service_names=None)
 
     env = os.environ.copy()
-    src_dir = os.path.join(project_config.project_root_dir, 'src')
+    src_dir = os.path.join(context.project_root_dir, 'src')
     env['PYTHONPATH'] = src_dir
     cmd = _get_command_for_test_runner(test_runner=test_runner, src_dir=src_dir)
 
     exit_code = subprocess.call(cmd.split(),
-                                cwd=project_config.project_root_dir,
+                                cwd=context.project_root_dir,
                                 env=env)
 
     if start_deployment:
@@ -78,8 +78,7 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
 
 
 def _get_command_for_test_runner(test_runner: TestRunner, src_dir: str) -> str:
-    project_config = get_default_context().project_config
-    test_dir = os.path.join(src_dir, project_config.test_package)
+    test_dir = os.path.join(src_dir, ProjectContext.default.test_package)
 
     if not test_runner:
         test_runner = TestRunner.pytest if PathFinder.find_spec(TestRunner.pytest) else TestRunner.unittest

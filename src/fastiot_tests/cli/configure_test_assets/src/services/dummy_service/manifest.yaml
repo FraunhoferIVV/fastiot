@@ -2,8 +2,7 @@ fastiot_service:
   name: dummy_service
 
   ports:
-    some_port:
-      port_nr: 1234
+    - port: 1234
       env_variable: FASTIOT_SOME_PORT
 
   privileged: True

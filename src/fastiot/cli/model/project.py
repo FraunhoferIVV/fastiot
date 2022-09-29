@@ -1,9 +1,10 @@
 """ data model for project configuration """
 import os
 from enum import Enum
-from typing import List
+from typing import Dict, List, Optional
 
 from pydantic.main import BaseModel
+import yaml
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model.deployment import DeploymentConfig
@@ -21,7 +22,7 @@ class CompileSettingsEnum(str, Enum):
     # Provide compiled and source version of the library
 
 
-class ProjectConfig(BaseModel):
+class ProjectContext(BaseModel):
     """
     This class holds all variables reade from :file:`configure.py` in the project root directory. Use this as for hints
     to do custom adjustments to your :file:`configure.py`. We try to set sensible defaults so that changes should only
@@ -52,7 +53,7 @@ class ProjectConfig(BaseModel):
     *Hint:* If you want to override this configuration you may use :func:`fastiot.cli.helper_fn.find_services` to create
     a list of services to build by package."""
 
-    deployments: List[DeploymentConfig] = []
+    deployments: Dict[str, DeploymentConfig] = {}
     """ Manually define a list of deployments as :class:`fastiot.cli.model.DeploymentConfig` to actually build using the
     command :meth:`fastiot.cli.commands.config.config`. If left empty all deployment configurations in the path
     :file:`deployments` will be used.
@@ -90,17 +91,56 @@ class ProjectConfig(BaseModel):
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from
     :class:`fastiot.cli.model.project.CompileSettingsEnum` """
 
+    _default_context = None
+
+    @classmethod
+    @property
+    def default(cls) -> "ProjectContext":
+        """
+        Use this method to retrieve the singleton :class:`fastiot.cli.model.project.ProjectContext`
+        """
+        if cls._default_context is None:
+            cls._default_context = ProjectContext()
+            from fastiot.cli.import_configure import import_configure
+            import_configure(
+                project_context=cls._default_context,
+            )
+        return cls._default_context
+
     @property
     def deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration
         (:attr:`fastiot.cli.model.project.ProjectConfig.deployments`) or by convention in deployments dir."""
-        return [d.name for d in self.deployments]
+        return [key for key in self.deployments]
 
     def deployment_by_name(self, name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """
         deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
                                        name, DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
+
+    def deployment_build_dir(self, name: str) -> str:
+        """ Returns the deployment build dir for specific deployment """
+        return os.path.join(self.project_root_dir, self.build_dir, DEPLOYMENTS_CONFIG_DIR, name)
+
+    def env_for_deployment(self, name: str) -> Dict[str, str]:
+        env_filename = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, '.env')
+        if os.path.isfile(env_filename):
+            return parse_env_file(env_filename)
+        else:
+            return {}
+
+    def env_for_internal_services_deployment(self, name: str) -> Dict[str, str]:
+        docker_compose_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, 'docker-compose.yaml')
+        if os.path.isfile(docker_compose_file):
+            with open(docker_compose_file) as file:
+                result = yaml.safe_load(file)
+                if 'x-env' in result:
+                    return result['x-env']
+                else:
+                    return {}
+        else:
+            return {}
 
     def get_service_by_name(self, name: str) -> Service:
         """ Get a configured service from the project by name """
@@ -114,3 +154,23 @@ class ProjectConfig(BaseModel):
         if self.services:
             return [s.name for s in self.services]
         return []
+
+
+def parse_env_file(env_filename: str) -> Dict[str, str]:
+    environment = {}
+    with open(env_filename, 'r') as stream:
+        for i_line, line in enumerate(stream.readlines()):
+            # need a space before '#' or e.g. password containing # will be split
+            i_comment = line.find(' #')
+            if i_comment != -1:
+                line = line[0:i_comment]
+            line = line.strip()
+            if line == '' or line[0] == '#':
+                continue
+            parts = line.split('=', maxsplit=2)
+            parts = [p.strip() for p in parts]
+            if len(parts) == 1 or parts[0].replace("_", "").isalnum() is False:
+                raise ValueError(f"Cannot parse env file: Invalid line {i_line + 1}: {line}")
+            environment[parts[0]] = parts[1]
+    return environment
+

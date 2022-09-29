@@ -3,8 +3,7 @@ from shutil import rmtree
 
 import typer
 
-from fastiot.cli.model import ProjectConfig
-from fastiot.cli.model.context import get_default_context
+from fastiot.cli.model import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app, extras_cmd
 
 
@@ -15,16 +14,15 @@ def clean(do_clean_all: bool = typer.Option(False, '-a', '--all', help="If speci
     """
     This command cleans up all generated files and removes all container and images from docker daemon.
     """
-    project_config = get_default_context().project_config
-    _clean_generated_files(project_config=project_config)
+    _clean_generated_files(context=ProjectContext.default)
     if do_clean_all:
         os.system("docker ps -q | xargs -r docker kill")
         os.system("docker ps -aq | xargs -r docker rm")
         os.system("docker images -q | xargs -r docker rmi -f")
 
 
-def _clean_generated_files(project_config: ProjectConfig):
-    build_dir = os.path.join(project_config.project_root_dir, project_config.build_dir)
+def _clean_generated_files(context: ProjectContext):
+    build_dir = os.path.join(context.project_root_dir, context.build_dir)
     if os.path.exists(build_dir):
         rmtree(build_dir)
 

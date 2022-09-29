@@ -10,8 +10,7 @@ fastiot_service:
   mount_config_dir: required
 
   ports:
-    http:
-      port_nr: 5802
+    - port: 5802
       env_variable: SAM_DASHBOARD_PORT
 
   depends_on:
