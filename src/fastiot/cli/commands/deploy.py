@@ -26,12 +26,15 @@ def deploy(deployments: Optional[List[str]] = typer.Argument(default=None, shell
     on :class:`fastiot.cli.model.deployment.DeploymentTargetSetup` in your :file:`deployment.yaml`. """
     context = ProjectContext.default
 
-    for deployment_name in context.deployments:
+    if not deployments:
+        deployments = []
+
+    for deployment_name in deployments:
         if deployment_name not in context.deployment_names:
             typer.echo(f"Deployment {deployment_name} not in project deployments.")
             raise typer.Exit(code=1)
 
-    for deployment_name in context.deployments:
+    for deployment_name in deployments:
         deployment = context.deployment_by_name(deployment_name)
         if deployment.deployment_target is None:
             typer.echo(f"Deployment {deployment_name} does not have a deployment_target configured.")

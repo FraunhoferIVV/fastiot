@@ -62,6 +62,7 @@ class MountConfigDirEnum(str, Enum):
     """ Set if the configuration dir needs to be mounted in the container """
     required = "required"  # This will make the config dir available through the docker-compose file.
     optional = "optional"
+    no = "no"
 
 
 class CPUPlatform(str, Enum):
@@ -146,7 +147,7 @@ class ServiceManifest(BaseModel):
     """
     List of infrastructure services that need to be deployed
     """
-    mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.required
+    mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.optional
     privileged: bool = False
     """
     Enable if this service needs privileged permissions inside docker, e.g. for hardware access

@@ -1,7 +1,6 @@
 import unittest
 from tempfile import NamedTemporaryFile
-
-from fastiot.cli.helper_fn import parse_env_file
+from fastiot.cli.model.project import parse_env_file
 
 
 class TestEnvFileParser(unittest.TestCase):

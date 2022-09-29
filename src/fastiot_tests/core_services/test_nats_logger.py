@@ -7,14 +7,12 @@ from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.msg.thing import Thing
 from fastiot_core_services.nats_logger.env import FASTIOT_NATS_LOGGER_FILTER_FIELD, FASTIOT_NATS_LOGGER_FILTER_VALUE
 from fastiot_core_services.nats_logger.nats_logger_module import NatsLoggerService
-from fastiot_tests.generated import set_test_environment
 
 MESSAGE = Thing(machine='SomeMachine', name="LoggedSensor", value=24, timestamp=datetime.now(), measurement_id="1")
 
 
 class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        set_test_environment()
         self.broker_connection = await NatsBrokerConnection.connect()
 
     async def _start_service(self):

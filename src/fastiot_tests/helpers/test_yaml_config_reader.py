@@ -8,8 +8,8 @@ from fastiot.core import FastIoTService
 from fastiot.core.broker_connection import BrokerConnectionDummy
 from fastiot.env import env_basic
 from fastiot.env.env_constants import FASTIOT_CONFIG_DIR
-from fastiot.helpers.read_yaml import read_config
-from fastiot.testlib.testlib import populate_test_env
+from fastiot.util.read_yaml import read_config
+from fastiot.testlib import populate_test_env
 
 BASIC_YAML = """
 config item 1:
@@ -43,6 +43,7 @@ class TestYAMLReader(unittest.TestCase):
     def tearDown(self):
         # Remove the directory after the test
         shutil.rmtree(self.test_dir)
+        del os.environ[FASTIOT_CONFIG_DIR]
 
     @staticmethod
     def create_yaml_file(filename, content=BASIC_YAML):

@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model import Service
-from fastiot.cli.model.project import ProjectContext#
+from fastiot.cli.model.project import ProjectContext
 
 
 class TestConfigurationImport(unittest.TestCase):

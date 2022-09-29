@@ -13,7 +13,6 @@ from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing
 from fastiot_core_services.object_storage.object_storage_service import ObjectStorageService
 from fastiot_tests.core.test_publish_subscribe import FastIoTTestService
-from fastiot_tests.generated import set_test_environment
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
 
@@ -43,7 +42,6 @@ def convert_message_to_mongo_data(msg: Type[Union[FastIoTData, BaseModel, dict]]
 class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
-        set_test_environment()
         self._db_client = get_mongodb_client_from_env()
         self._database = self._db_client.get_database(env_mongodb.name)
         self._db_col = self._database.get_collection('object_storage')

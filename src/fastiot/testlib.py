@@ -2,13 +2,11 @@
 import os
 from fastiot.cli.model.project import ProjectContext
 
-from fastiot.testlib.cli import init_default_context
 from fastiot.env.env import env_tests
 
 
 def populate_test_env():
     """Populates the local environment with test env vars from the test integration deployment. """
-    init_default_context()
     context = ProjectContext.default
 
     if os.path.exists(context.deployment_build_dir(context.integration_test_deployment)) is False:

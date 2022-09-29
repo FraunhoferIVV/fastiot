@@ -9,7 +9,7 @@ from fastiot.core.data_models import ReplySubject, FastIoTData
 from fastiot.core.service_annotations import subscribe, reply
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
-from fastiot.helpers.read_yaml import read_config
+from fastiot.util.read_yaml import read_config
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot_core_services.object_storage.env import env_object_storage
 

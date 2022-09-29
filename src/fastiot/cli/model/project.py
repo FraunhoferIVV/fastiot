@@ -6,11 +6,9 @@ from typing import Dict, List, Optional
 from pydantic.main import BaseModel
 import yaml
 
-from fastiot.cli.helper_fn import parse_env_file
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model.deployment import DeploymentConfig
 from fastiot.cli.model.service import Service
-from fastiot.cli.import_configure import import_configure
 
 
 class CompileSettingsEnum(str, Enum):
@@ -93,7 +91,7 @@ class ProjectContext(BaseModel):
     """ Set to false if you do not want your library to be compiled (and obfuscated), use options from
     :class:`fastiot.cli.model.project.CompileSettingsEnum` """
 
-    __default_context = None
+    _default_context = None
 
     @classmethod
     @property
@@ -101,12 +99,13 @@ class ProjectContext(BaseModel):
         """
         Use this method to retrieve the singleton :class:`fastiot.cli.model.project.ProjectContext`
         """
-        if cls.__default_context is None:
-            cls.__default_context = ProjectContext()
+        if cls._default_context is None:
+            cls._default_context = ProjectContext()
+            from fastiot.cli.import_configure import import_configure
             import_configure(
-                project_context=cls.__default_context,
+                project_context=cls._default_context,
             )
-        return cls.__default_context
+        return cls._default_context
 
     @property
     def deployment_names(self) -> List[str]:
@@ -155,3 +154,23 @@ class ProjectContext(BaseModel):
         if self.services:
             return [s.name for s in self.services]
         return []
+
+
+def parse_env_file(env_filename: str) -> Dict[str, str]:
+    environment = {}
+    with open(env_filename, 'r') as stream:
+        for i_line, line in enumerate(stream.readlines()):
+            # need a space before '#' or e.g. password containing # will be split
+            i_comment = line.find(' #')
+            if i_comment != -1:
+                line = line[0:i_comment]
+            line = line.strip()
+            if line == '' or line[0] == '#':
+                continue
+            parts = line.split('=', maxsplit=2)
+            parts = [p.strip() for p in parts]
+            if len(parts) == 1 or parts[0].replace("_", "").isalnum() is False:
+                raise ValueError(f"Cannot parse env file: Invalid line {i_line + 1}: {line}")
+            environment[parts[0]] = parts[1]
+    return environment
+

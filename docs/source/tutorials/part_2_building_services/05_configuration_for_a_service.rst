@@ -42,7 +42,7 @@ Using YAML-Files
 ================
 
 YAML, for yet another markup language, allows for more complex setups.
-Reading a yaml-file is pretty easy, using :func:`fastiot.helpers.read_yaml.read_config`.
+Reading a yaml-file is pretty easy, using :func:`fastiot.util.read_yaml.read_config`.
 
 Please pay attention when instantiating multiple instances of a service. Each service needs to have the environment
 variable :envvar:`FASTIOT_SERVICE_ID` set, resulting in reading out different configuration files for each service.

@@ -20,9 +20,9 @@ from fastiot.env import FASTIOT_CONFIG_DIR
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
-def config(deployments: List[str] = typer.Argument(default=[],
-                                                   shell_complete=_deployment_completion,
-                                                   help="The deployment configs to generate. Default: all configs"),
+def config(deployments: Optional[List[str]] = typer.Argument(default=None,
+                                                             shell_complete=_deployment_completion,
+                                                             help="The deployment configs to generate. Default: all configs"),
            tag: str = typer.Option('latest', '-t', '--tag',
                                    help="Specify a default tag for the deployment(s).",
                                    envvar=FASTIOT_DEFAULT_TAG),
@@ -123,7 +123,7 @@ def config(deployments: List[str] = typer.Argument(default=[],
         if env_additions:
             with open(os.path.join(deployment_dir, '.env'), "a") as env_file:
                 for key, value in env_additions.items():
-                    env_file.write(f"{key}={value}\n")
+                    env_file.write(f"\n{key}={value}")
 
     logging.info("Successfully created configurations!")
 
