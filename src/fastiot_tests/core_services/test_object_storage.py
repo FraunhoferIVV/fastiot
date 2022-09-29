@@ -47,6 +47,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._database = self._db_client.get_database(env_mongodb.name)
         self._db_col = self._database.get_collection('object_storage')
         self._db_col.delete_many({})
+        self.service_task = None
         self.broker_connection = await NatsBrokerConnection.connect()
 
     async def _start_service(self):
@@ -55,7 +56,8 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.005)
 
     async def asyncTearDown(self):
-        self.service_task.cancel()
+        if self.service_task:
+            self.service_task.cancel()
 
     async def test_thing_storage(self):
         await self._start_service()
