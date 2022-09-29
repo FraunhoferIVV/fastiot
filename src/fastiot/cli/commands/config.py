@@ -277,7 +277,8 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                 value = str(port.default_port_mount)
             if port.env_var not in env:
                 env_additions[port.env_var] = value
-                env_service_internal_modifications[port.env_var] = str(port.container_port)
+
+            env_service_internal_modifications[port.env_var] = str(port.container_port)
             service_ports.append(f'{value}:{port.container_port}')
 
         service_volumes: List[str] = []

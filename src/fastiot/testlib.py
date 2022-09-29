@@ -13,7 +13,7 @@ def populate_test_env():
         raise RuntimeError(f"Expected test deployment '{context.integration_test_deployment}' to be configured. Please configure it via `fiot config`")
 
     env = context.build_env_for_deployment(context.integration_test_deployment)
-    if True or env_tests.use_internal_hostnames:
+    if env_tests.use_internal_hostnames:
         env = {**env, **context.build_env_for_internal_services_deployment(context.integration_test_deployment)}
 
     for key, value in env.items():
