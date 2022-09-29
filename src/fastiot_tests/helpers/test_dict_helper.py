@@ -1,7 +1,7 @@
 import unittest
 
 from fastiot.util.dict_helper import dict_subtract
-from fastiot.testlib.testlib import populate_test_env
+from fastiot.testlib import populate_test_env
 
 
 class TestDictHelper(unittest.TestCase):

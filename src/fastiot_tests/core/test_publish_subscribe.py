@@ -7,7 +7,6 @@ from fastiot.core.data_models import ReplySubject
 from fastiot.core.service import FastIoTService
 from fastiot.core.service_annotations import reply
 from fastiot.msg.thing import Thing
-from fastiot_tests.generated import set_test_environment
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
 
@@ -27,7 +26,6 @@ class FastIoTTestService(FastIoTService):
 class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
-        set_test_environment()
         self.broker_connection = await NatsBrokerConnection.connect()
         service = FastIoTTestService(broker_connection=self.broker_connection)
         self.service_task = asyncio.create_task(service.run())

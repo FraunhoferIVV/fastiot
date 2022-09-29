@@ -1,13 +1,9 @@
 import unittest
 
 from fastiot.core.subject_helper import sanitize_subject_name
-from fastiot_tests.generated import set_test_environment
 
 
 class TestSubjectHelper(unittest.TestCase):
-    def setUp(self):
-        set_test_environment()
-
     def test_subject_name(self):
 
         my_message = 'v1.my_message'
