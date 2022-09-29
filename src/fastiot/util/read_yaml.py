@@ -77,12 +77,7 @@ def read_config(service: Union[FastIoTService, str]) -> Dict:
 
     try:
         with open(config_file) as file:
-<<<<<<< HEAD:src/fastiot/helpers/read_yaml.py
-            loader = yaml.safe_load_all(file)
-            result = list(loader)
-=======
             result = yaml.safe_load(file)
->>>>>>> kmerker:src/fastiot/util/read_yaml.py
     except:
         logging.getLogger("yaml_config").warning("Could not open or parse yaml file %s", config_file)
         return {}

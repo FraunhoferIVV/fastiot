@@ -3,11 +3,8 @@ import logging
 import os
 from typing import Optional
 
-<<<<<<< HEAD
 from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
     TimeScaleDBService, NatsService
-from fastiot.env import *
-=======
 from fastiot.env.env_constants import *
 
 
@@ -26,7 +23,6 @@ def parse_bool_flag(env_var: str, default: bool) -> bool:
         return os.environ[env_var].lower() == 'true'
     else:
         return default
->>>>>>> kmerker
 
 
 class BasicEnv:
