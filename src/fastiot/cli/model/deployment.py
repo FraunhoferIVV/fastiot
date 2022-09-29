@@ -115,6 +115,12 @@ class DeploymentConfig(BaseModel):
     def from_yaml_file(filename) -> "DeploymentConfig":
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
+            if "config-dir" in config:
+                config["config_dir"] = config["config-dir"]
+                del config["config-dir"]
+            if "docker-registry" in config:
+                config["docker_registry"] = config["docker-registry"]
+                del config["docker-registry"]
             if "infrastructure-services" in config:
                 config["infrastructure_services"] = config["infrastructure-services"]
                 del config["infrastructure-services"]

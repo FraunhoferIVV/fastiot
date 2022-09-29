@@ -73,7 +73,11 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             raise typer.Exit(1)
         deployments = [context.integration_test_deployment]
 
-    deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
+    if deployments:
+        deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
+    else:
+        deployments = context.deployment_names
+        deployment_names = context.deployment_names
 
     # This will set environment variables for externally opened ports, usually to be used for integration tests but also
     # to access the services externally. When creating the compose infos for infrastructure services the env vars will
@@ -108,6 +112,9 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             tag=tag,
             pull_always=pull_always
         )
+
+        if deployment_config.config_dir and FASTIOT_CONFIG_DIR not in env:
+            env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_build_dir(name=deployment_name), deployment_config.config_dir)
 
         deployment_source_dir = os.path.join(context.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
         shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True, ignore=lambda _, __: ['deployment.yaml'])
