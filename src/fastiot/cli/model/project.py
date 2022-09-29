@@ -130,7 +130,14 @@ class ProjectContext(BaseModel):
         else:
             return {}
 
-    def env_for_internal_services_deployment(self, name: str) -> Dict[str, str]:
+    def build_env_for_deployment(self, name: str) -> Dict[str, str]:
+        env_filename = os.path.join(self.deployment_build_dir(name=name), '.env')
+        if os.path.isfile(env_filename):
+            return parse_env_file(env_filename)
+        else:
+            return {}
+
+    def build_env_for_internal_services_deployment(self, name: str) -> Dict[str, str]:
         docker_compose_file = os.path.join(self.deployment_build_dir(name=name), 'docker-compose.yaml')
         if os.path.isfile(docker_compose_file):
             with open(docker_compose_file) as file:
