@@ -75,6 +75,7 @@ class BasicEnv:
         :func:`fastiot.util.read_yaml.read_config`. See
         """
         return os.getenv(FASTIOT_SERVICE_ID, '')
+
     @property
     def log_dir(self) -> str:
         return os.path.join(self.volume_dir, 'logs')

@@ -24,7 +24,7 @@ In Order to use this Service, you must set a config file named ObjectStorageServ
   collection: 'object_storage'
   subject: 'thing.*'
 
-  
+
 or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g.:
 
 .. code:: python
@@ -54,5 +54,5 @@ The code will look like:
 
 
 This request will reply to you a List of Dictionary.
-Then you can convert it to your own data type using :func:`fastiot.helpers.object_helper.parse_object_list`.
+Then you can convert it to your own data type using :func:`fastiot.util.object_helper.parse_object_list`.
 """
