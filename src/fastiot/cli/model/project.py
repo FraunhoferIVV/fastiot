@@ -131,7 +131,7 @@ class ProjectContext(BaseModel):
             return {}
 
     def env_for_internal_services_deployment(self, name: str) -> Dict[str, str]:
-        docker_compose_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, 'docker-compose.yaml')
+        docker_compose_file = os.path.join(self.deployment_build_dir(name=name), 'docker-compose.yaml')
         if os.path.isfile(docker_compose_file):
             with open(docker_compose_file) as file:
                 result = yaml.safe_load(file)
