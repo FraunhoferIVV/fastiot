@@ -49,7 +49,6 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         self.broker_connection = await NatsBrokerConnection.connect()
 
-
     async def _start_service(self):
         service = ObjectStorageService(broker_connection=self.broker_connection)
         self.service_task = asyncio.create_task(service.run())
