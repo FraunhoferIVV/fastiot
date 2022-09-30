@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from fastiot.cli.constants import MANIFEST_FILENAME
 from fastiot.cli.model import ServiceManifest
+from fastiot.util.classproperty import classproperty
 
 
 class Service(BaseModel):
@@ -93,8 +94,7 @@ class InfrastructureService(BaseModel):
     ports: List[InfrastructureServicePort] = []
     volumes: List[InfrastructureServiceVolume] = []
 
-    @classmethod
-    @property
+    @classproperty
     def all(cls) -> Dict[str, "InfrastructureService"]:
         """ Method to get a dict of all available services as instantiated
         :class:`fastiot.cli.model.service.InfrastructureService`.
@@ -113,6 +113,9 @@ class InfrastructureService(BaseModel):
         services_list = [s() for s in service_classes]
         services = {s.name: s for s in services_list}
         return {k: services[k] for k in sorted(services.keys())}
+
+    # we need this line for Pycharm IDE to detect type-hinting properly. Maybe it is fixed in the future
+    all: Dict[str, "InfrastructureService"]
 
     def get_default_env(self, name: str) -> str:
         """ Will return the default set for the given FastIoT environment variable."""

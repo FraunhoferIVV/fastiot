@@ -9,6 +9,7 @@ import yaml
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.model.deployment import DeploymentConfig
 from fastiot.cli.model.service import Service
+from fastiot.util.classproperty import classproperty
 
 
 class CompileSettingsEnum(str, Enum):
@@ -93,8 +94,7 @@ class ProjectContext(BaseModel):
 
     _default_context = None
 
-    @classmethod
-    @property
+    @classproperty
     def default(cls) -> "ProjectContext":
         """
         Use this method to retrieve the singleton :class:`fastiot.cli.model.project.ProjectContext`
@@ -106,6 +106,9 @@ class ProjectContext(BaseModel):
                 project_context=cls._default_context,
             )
         return cls._default_context
+
+    # we need this line for Pycharm IDE to detect type-hinting properly. Maybe it is fixed in the future
+    default: "ProjectContext"
 
     @property
     def deployment_names(self) -> List[str]:

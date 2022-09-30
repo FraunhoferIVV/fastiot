@@ -3,7 +3,7 @@
 Project structure
 =================
 
-As FastIoT is considered a FrameWork certain directories and files are expected to be always at the same location.
+As FastIoT is considered a framework, certain directories and files are expected to be always at the same location.
 For a new project this should usually be handled using the CLI (s. :ref:`first_project_setup` for more details).
 
 ``├── configure.py``  => This file sets up your project and defines where to find tests, library, … . S. :ref:`tut-configure_py` for details.
