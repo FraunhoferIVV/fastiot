@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Dict
 
 import typer
 
@@ -9,7 +9,8 @@ from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS
 from fastiot.cli.helper_fn import get_jinja_env
-from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, get_infrastructure_service_ports_randomly
+from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
+    get_infrastructure_service_ports_randomly
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
 from fastiot.cli.model.manifest import MountConfigDirEnum
@@ -22,7 +23,8 @@ from fastiot.env import FASTIOT_CONFIG_DIR
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                              shell_complete=_deployment_completion,
-                                                             help="The deployment configs to generate. Default: all configs"),
+                                                             help="The deployment configs to generate. "
+                                                                  "Default: all configs"),
            tag: str = typer.Option('latest', '-t', '--tag',
                                    help="Specify a default tag for the deployment(s).",
                                    envvar=FASTIOT_DEFAULT_TAG),
@@ -63,20 +65,20 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
     logging.info("Creating configurations…")
 
     if port_offset and port_offset < 0:
-        raise ValueError(f"Port offset must be greater or equal zero. It is {port_offset} instead")
+        logging.error("Port offset must be greater or equal zero. It is %s instead", str(port_offset))
+        raise typer.Exit(1)
 
-    context = ProjectContext.default
+    context: ProjectContext = ProjectContext.default
 
     if use_test_deployment:
         if not context.integration_test_deployment:
             logging.warning("No `integration_test_deployment` configured. Exiting configure.")
-            raise typer.Exit(1)
+            raise typer.Exit(0)
         deployments = [context.integration_test_deployment]
 
     if deployments:
         deployment_names = _apply_checks_for_deployment_names(deployments=deployments)
     else:
-        deployments = context.deployment_names
         deployment_names = context.deployment_names
 
     # This will set environment variables for externally opened ports, usually to be used for integration tests but also
@@ -114,10 +116,12 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         )
 
         if deployment_config.config_dir and FASTIOT_CONFIG_DIR not in env:
-            env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_build_dir(name=deployment_name), deployment_config.config_dir)
+            env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_build_dir(name=deployment_name),
+                                                             deployment_config.config_dir)
 
         deployment_source_dir = os.path.join(context.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
-        shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True, ignore=lambda _, __: ['deployment.yaml'])
+        shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
+                        ignore=lambda _, __: ['deployment.yaml'])
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
@@ -155,7 +159,7 @@ def _create_services_compose_infos(env: Dict[str, str],
                                    tag: str,
                                    pull_always: bool
                                    ) -> List[ServiceComposeInfo]:
-    context = ProjectContext.default
+    context: ProjectContext = ProjectContext.default
     result = []
     for name, service_config in deployment_config.services.items():
         if service_config is None:
@@ -310,4 +314,3 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             tmpfs=service_temp_volumes
         ))
     return result
-

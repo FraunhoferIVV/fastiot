@@ -6,12 +6,11 @@ from typing import Optional
 
 from typer.testing import CliRunner
 
+from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 from fastiot.cli.constants import DOCKER_BUILD_DIR, FASTIOT_CONFIGURE_FILE
 from fastiot.cli.import_configure import import_configure
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app
-from fastiot.env.env_constants import FASTIOT_CONFIG_DIR
-from fastiot.cli.commands import *  # noqa  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 def _write_configure(path: str, no_services: bool, project_root_dir: Optional[str]):
