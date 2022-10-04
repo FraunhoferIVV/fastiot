@@ -8,8 +8,8 @@ from fastiot.db.time_scale_helper_fn import open_timescaledb_connection_from_env
 
 class TestDataBases(unittest.TestCase):
     def test_mongo_db_connection(self):
-        db_client = get_mongodb_client_from_env()
-        self.assertTrue(db_client.health_check())
+        client_wrapper = get_mongodb_client_from_env()
+        self.assertTrue(client_wrapper.health_check())
 
     def test_mariadb_connection(self):
         db_connection = open_mariadb_connection_from_env(schema=None)

@@ -9,7 +9,7 @@ from fastiot.exceptions import ServiceError
 from fastiot.msg.time_series_msg import TimeSeriesData
 
 
-class CustomMongoClient:
+class MongoClientWrapper:
     def __init__(self, db_host: str, db_port: int, db_user: str = None, db_password: str = None,
                  db_auth_source: str = None, db_compression: str = None):
         """
@@ -47,10 +47,10 @@ class CustomMongoClient:
             if db_compression == "zlib":
                 mongo_client_kwargs["zlibCompressionLevel"] = 9
 
-        self._db_client = MongoClient(**mongo_client_kwargs)
+        self.client = MongoClient(**mongo_client_kwargs)
 
         try:
-            self._db_client.admin.command('ping')
+            self.client.admin.command('ping')
             self._logger.info("Connection to database established")
         except ConnectionFailure:
             self._logger.exception("Connecting to database failed")
@@ -60,12 +60,12 @@ class CustomMongoClient:
         self._codec_options = CodecOptions(uuid_representation=UUID_SUBTYPE)
 
     def __set_version_compatibility_to_current_version(self):
-        version_array = self._db_client.server_info()['versionArray']
+        version_array = self.client.server_info()['versionArray']
         version = f"{version_array[0]}.{version_array[1]}"
-        self._db_client.admin.command({"setFeatureCompatibilityVersion": version})
+        self.client.admin.command({"setFeatureCompatibilityVersion": version})
 
     def health_check(self) -> bool:
-        connected_nodes = self._db_client.nodes
+        connected_nodes = self.client.nodes
         if connected_nodes is not None:
             return True
         return False
@@ -73,15 +73,15 @@ class CustomMongoClient:
     def get_database(self, name):
         if name is None:
             raise ValueError('database name is None, please assign a value')
-        return self._db_client.get_database(name, codec_options=self._codec_options)
+        return self.client.get_database(name, codec_options=self._codec_options)
 
-    def drop_datebase(self, name):
+    def drop_database(self, name):
         if name is None:
             raise ValueError('database name is None, please assign a value')
-        self._db_client.drop_database(name)
+        self.client.drop_database(name)
 
     def fsync(self):
-        self._db_client.admin.command('fsync', lock=True)
+        self.client.admin.command('fsync', lock=True)
 
     @staticmethod
     def create_index(collection: Collection, index: List[Tuple[str, Union[int, Any]]], index_name: str) -> bool:
@@ -105,10 +105,10 @@ class CustomMongoClient:
         return False
 
     def close(self):
-        self._db_client.close()
+        self.client.close()
 
 
-def get_mongodb_client_from_env() -> CustomMongoClient:
+def get_mongodb_client_from_env() -> MongoClientWrapper:
     """
     For connecting Mongodb, the environment variables can be set,
     if you want to use your own settings instead of default:
@@ -117,7 +117,7 @@ def get_mongodb_client_from_env() -> CustomMongoClient:
 
     >>> mongo_client = get_mongodb_client_from_env()
     """
-    db_client = CustomMongoClient(
+    db_client = MongoClientWrapper(
         db_host=env_mongodb.host,
         db_port=env_mongodb.port,
         db_user=env_mongodb.user,
