@@ -15,4 +15,5 @@ src/fastiot/__version__.py
 /src/fastiot_sample_services/fastapi/static/fastiot.egg-info/
 /src/fastiot_sample_services/fastapi/static/
 fastiot.egg-info/
+generated/
 

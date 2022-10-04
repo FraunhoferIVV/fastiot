@@ -9,7 +9,7 @@ from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_
     FASTIOT_INFLUX_DB_HOST, FASTIOT_INFLUX_DB_VOLUME, FASTIOT_INFLUX_DB_MODE, FASTIOT_INFLUX_DB_BUCKET, \
     FASTIOT_INFLUX_DB_USER, FASTIOT_INFLUX_DB_PASSWORD, FASTIOT_INFLUX_DB_ORG, FASTIOT_TIME_SCALE_DB_PORT, \
     FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD, FASTIOT_TIME_SCALE_DB_DATABASE, \
-    FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME
+    FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME, FASTIOT_MARIA_DB_USER
 
 
 class NatsService(InfrastructureService):
@@ -40,6 +40,11 @@ class MariaDBService(InfrastructureService):
         )
     ]
     environment: List[InfrastructureServiceEnvVar] = [
+        InfrastructureServiceEnvVar(
+            name='MYSQL_ROOT_USER',
+            default='root',
+            env_var=FASTIOT_MARIA_DB_USER
+        ),
         InfrastructureServiceEnvVar(
             name='MYSQL_ROOT_PASSWORD',
             default='12345',
