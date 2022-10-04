@@ -14,6 +14,9 @@ async def get_async_influxdb_client_from_env():
     if you want to use your own settings instead of default:
     :envvar:`FASTIOT_INFLUX_DB_HOST`, :envvar:`FASTIOT_INFLUX_DB_PORT`, :envvar:`FASTIOT_INFLUX_DB_TOKEN`
 
+    After setting up the InfluxDB Server, the InfluxDB Server provides the possibility to visualize data in this database using browser with "http:<host>:<port>".
+    Default username: *influx_db_admin* and password: *mf9ZXfeLKuaL3HL7w*. You can also change these default values by editing  :envvar:`FASTIOT_INFLUX_DB_USER` and  :envvar:`FASTIOT_INFLUX_DB_PASSWORD`.
+
     >>> influxdb_client = await get_async_influxdb_client_from_env()
     """
     try:
