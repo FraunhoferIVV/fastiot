@@ -36,14 +36,10 @@ class BasicEnv:
     def config_dir(self):
         """ .. envvar:: FASTIOT_CONFIG_DIR
 
-        Use to get/set the config dir, defaults to :file:`/etc/fastiot` if not set.
+        Use to get the config dir, defaults to :file:`/etc/fastiot` if not set.
 
-        This should point to your deployment configuration dir, which is also copied to target either manually or using
-        the :func:`fastiot.cli.commands.deploy.deploy` CLI command.
-
-        This variable is either handled in your container or can be overwritten using e.g. a
-        :file:`local-testing-overwrite.env` in your config-dir. See the Tutorial :ref:`label-setting-up-pycharm` for
-        more details about setting env vars within PyCharm.
+        Usually, you don't need to specify this variable manually, instead use config-dir entry on deployments. This way,
+        this variable is automatically injected.
 
         On automatic project setups everything should work out fine for you!
         """

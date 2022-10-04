@@ -29,6 +29,15 @@ consult the corresponding API documentation.
         which is always async
         """
 
+      async def _stop(self):
+        """
+        The counterpart to the _start method. The stop method is executed when a shutdown is requested.
+        Use this method to close database connections and other resources created in the start method.
+
+        Please note that in a service-oriented architecture services might be shutdown immediately; so
+        don't rely on this method to get executed in a production environment.
+        """
+
       @loop
       def some_looping_method():
         """

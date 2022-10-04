@@ -30,7 +30,7 @@ Setup Project
     4. Activate VEnv: ``source venv/bin/activate``
     5. Install FastIoT: ``pip install fastiot``
     6. Create basic directory structure for your project: ``fiot create new-project my_project_name``
-        * For more options about creating projects see ``fiot --help``
-    7. Create a first service, if you want to: ``fiot create new-service a_service``
-    8. If working with PyCharm you have to mark the generated ``src`` directory as "Sources Root"
+        * For more options about creating projects see ``fiot create new-project --help``
+    7. Create a first service if you want to: ``fiot create new-service a_service``
+    8. If working with PyCharm you have to Mark the generated ``src`` directory as "Sources Root"
         For more information on PyCharm please refer to :ref:`label-setting-up-pycharm`

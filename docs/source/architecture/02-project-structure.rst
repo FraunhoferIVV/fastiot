@@ -14,9 +14,7 @@ For a new project this should usually be handled using the CLI (s. :ref:`first_p
 
 ``|   │   ├── .env`` => Environment variables
 
-``│   │   ├── deployment.yaml`` => Deployment configuration (data model :class:`fastiot.cli.model.deployment.DeploymentConfig`)
-
-``│   │   └── dev-overwrite.env`` => Environment variables to be overwritten for local tests
+``│   │   └── deployment.yaml`` => Deployment configuration (data model :class:`fastiot.cli.model.deployment.DeploymentConfig`)
 
 ``│   └── integration_test``  => An deployment to be started on the CI runner
 
@@ -30,15 +28,17 @@ For a new project this should usually be handled using the CLI (s. :ref:`first_p
 
 ``├── requirements.txt``  => Python Packages to be installed in your venv and in all containers
 
-``├── setup.py``  => If you want to build a library to be installed by other projects this is needed, use command :func:`fastiot.cli.commands.build_lib.build_lib`
+``├── setup.py``  => If you want to provide a library to be installed by other projects. If this is needed, use command :func:`fastiot.cli.commands.build_lib.build_lib`
 
-``├── src``  => All your code belongs in heere
+``├── src``  => All your code belongs in here
 
 ``│   ├── my_lib`` => The library
 
 ``│       └── […]`` => Some library code to be used by all services
 
 ``│   ├── my_services``
+
+``│   │   ├── __init__.py``
 
 ``│   │   ├── a_service``
 
@@ -50,9 +50,9 @@ For a new project this should usually be handled using the CLI (s. :ref:`first_p
 
 ``│   │   │   └── run.py`` => This is the entry point used by docker for your service not to be obfuscated when building using :func:`fastiot.cli.commands.build.build`. S. :ref:`tut-Service_Entry_Point` for details.
 
-``│   │   ├── […]``  => More services as you like
+``│   │   ├── […]``  => More services as needed
 
-``│   ├── […]``  => More packages with services if you like
+``│   ├── […]``  => More packages containing services if you like to split them into separated packages
 
 ``│   └── my_tests``  => Put any tests files here and configure the package accordingly in your :file:`configure.py`, may be started using the :func:`fastiot.cli.commands.run.run_unittests` command.
 

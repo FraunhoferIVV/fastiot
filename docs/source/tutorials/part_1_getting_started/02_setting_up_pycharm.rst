@@ -54,14 +54,13 @@ Now it’s time to make your module ready for the first start:
 
  1. Right Click on the run.py of your service
  2. Below Run and Debug there is a Python Symbol with "Create 'run'…", click it
- 3. In the Tab "EvnFile" activate "Enable EnvFile" and on the right select the + and add your .env-File from :file:`build/deployments/your_project/.env`
+ 3. In the Tab "EnvFile" activate "Enable EnvFile" and on the right select the + and add your .env-File from :file:`build/deployments/your_deployment/.env`
      *Hint:* You may need to make hidden files visible using the Eye-Icon in the selection field
-     *Hint:*  Instead of using your own deployment you can also refer to the already created deployment "integration_test", which should provide sufficient defaults.
- 4. Also add the :file:`local-testing-overwrite.env` just as in the previous step if found within the deployment.
-     *Explanation:* The default is to access e.g. the nats broker by the hostname ``nats`` within the docker-compose environment. To actually access the broker running on your machine you need to overwrite this with localhost, which is done using this file.
- 5. Change the working directory to the root of your project, so remove everything in the field starting at :file:`src` (:file:`src` *must not* be in the line any more).
- 6. You may provide a Name for the configuration, e.g. MyModule to differentiate between various run-Configs for all of your modules
- 7. Click OK
+     *Hint:* Instead of using your own deployment you can also refer to the already created deployment "integration_test", which should provide sufficient defaults.
+     *Hint:* Please make sure to add the env-File from build dir because the generated .env file will also append defaults for hosts and ports to services which are missing in the original .env file.
+ 4. Change the working directory to the root of your project, so remove everything in the field starting at :file:`src` (:file:`src` *must not* be in the line any more).
+ 5. Optional: You may provide a Name for the configuration, e.g. MyModule to differentiate between various run-Configs for all of your modules
+ 6. Click OK
 
 Technically your service is now able to start. But you usually will need at least a message broker to be running for
 everything to start up. Please refer to the next tutorial at :ref:`label-cli-intro` about how to create proper

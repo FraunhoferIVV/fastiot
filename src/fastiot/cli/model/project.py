@@ -81,7 +81,7 @@ class ProjectContext(BaseModel):
     extensions: List[str] = []
     """
     Use to add own extensions to the FastIoT CLI. The CLI will try to import your custom infrastructure services as
-    described in :ref:`tut-own_infrastructure_services`.
+    described in :ref:`tut-custom_infrastructure_services`.
 
     Make sure importing this service will import further commands and
     :class:`fastiot.cli.model.service.InfrastructureService`.

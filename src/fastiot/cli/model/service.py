@@ -76,7 +76,7 @@ class InfrastructureService(BaseModel):
     """
     Class to describe external services to be integrated in the deployments.
 
-    Please refer to :ref:`tut-own_infrastructure_services` for more information on adding your own infrastructure to
+    Please refer to :ref:`tut-custom_infrastructure_services` for more information on adding your own infrastructure to
     your project.
     """
     name: str = ""

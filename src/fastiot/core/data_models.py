@@ -38,7 +38,7 @@ MsgCls = Type[Msg]
 
 class FastIoTPublish(FastIoTData):
     """
-    Base datatype for publishing data. Please refer to :ref:`tut-own_data_types` for more information about creating
+    Base datatype for publishing data. Please refer to :ref:`tut-custom_data_types` for more information about creating
     your own data types.
     """
     @classmethod
@@ -66,7 +66,7 @@ MsgClsPub = Type[MsgPub]
 class FastIoTResponse(FastIoTData):
     """
     Base datatype for answering requests based on :class: `fastiot.core.data_models.FastIoTRequest`.
-    Please refer to :ref:`tut-own_data_types` for more information about creating your own data types.
+    Please refer to :ref:`tut-custom_data_types` for more information about creating your custom data types.
     """
     @classmethod
     def get_subject(cls):
@@ -80,7 +80,7 @@ MsgClsResp = Type[MsgResp]
 
 class FastIoTRequest(FastIoTData):
     """
-    Base datatype for handling requests. Please refer to :ref:`tut-own_data_types` for more information about creating
+    Base datatype for handling requests. Please refer to :ref:`tut-custom_data_types` for more information about creating
     your own data types.
     """
     _reply_cls: Optional[Type[FastIoTResponse]] = None

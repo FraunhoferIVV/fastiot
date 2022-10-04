@@ -1,4 +1,4 @@
-.. _tut-own_data_types:
+.. _tut-custom_data_types:
 ============================
 Creating your own data types
 ============================

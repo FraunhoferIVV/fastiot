@@ -1,7 +1,7 @@
-.. _tut-own_infrastructure_services:
-==================================================
-Adding own infrastructure services to your project
-==================================================
+.. _tut-custom_infrastructure_services:
+=====================================================
+Adding custom infrastructure services to your project
+=====================================================
 
 As the FastIoT will take care of generating :file:`docker-compose.yaml` files for your project and for integration tests
 it needs to know the services, e.g. databases, to load. Those services are named *Infrastructure Service* to

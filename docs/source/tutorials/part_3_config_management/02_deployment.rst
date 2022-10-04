@@ -12,9 +12,10 @@ Here we will provide a short description of the core concepts. A useful starting
 - name: A meaningful name for the deployment.
 - services: Dictionary of FastIoT Services (:class:`fastiot.cli.model.deployment.ServiceConfig`) within *and* from other projects.
 - infrastructure-services: Dictionary with external services defined in :mod:`fastiot.cli.common.infrastructure_services`
-  or created by yourself (s. :ref:`tut-own_infrastructure_services`)
-- docker_registry: Specify a docker registry to be used as base for the project
+  or created by yourself (s. :ref:`tut-custom_infrastructure_services`)
+- docker-registry: Specify a docker registry to be used as base for the project
 - tag: Specify a docker registry tag; per default "latest"
+- config-dir: Specify a configuration directory which is mounted inside the service at '/etc/fastiot'. See also :envvar:`FASTIOT_CONFIG_DIR`
 - deployment-target: A configuration based on :class:`fastiot.cli.model.deployment.DeploymentTargetSetup` for easy
   rollout of the project using Ansible.
 
