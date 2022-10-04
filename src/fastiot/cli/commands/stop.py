@@ -52,7 +52,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
         cmd += " rm --stop --force " + " ".join(service_names)
     else:
         cmd += " down"
-    if use_test_deployment or deployment_name == project_config.integration_test_deployment:
+    if use_test_deployment or deployment_name == context.integration_test_deployment:
         cmd += " --volumes"  # Remove test volumes right away
 
     logging.debug("Running command to stop the environment: %s in path %s", cmd, cwd)

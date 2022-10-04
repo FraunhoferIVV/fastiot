@@ -275,6 +275,9 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
         for env_var in service.environment:
             if env_var.env_var:
                 value = env.get(env_var.env_var, env_var.default)
+                if env_var.env_var not in env:
+                    # add env var if not available so that default is always set
+                    env_additions[env_var.env_var] = value
             else:
                 value = env_var.default
             service_environment[env_var.name] = value
