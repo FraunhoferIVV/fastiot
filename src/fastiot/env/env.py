@@ -368,6 +368,15 @@ class OPCUAEnv:
     def machine_monitoring_error_logfile(self) -> str:
         return os.getenv(FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, "/var/fastiot/logs/error.log")
 
+    @property
+    def organisation(self) -> str:
+        return os.getenv(FASTIOT_INFLUX_DB_ORG, "IVVDD")
+
+    @property
+    def bucket(self) -> str:
+        return os.getenv(FASTIOT_INFLUX_DB_BUCKET, 'things')
+
+
 
 class TimeScaleDBEnv:
     """

@@ -1,9 +1,7 @@
+import logging
 import sys
 import time
 
-import aiohttp
-
-from fastiot import logging
 from fastiot.env.env import env_influxdb
 from fastiot.exceptions import ServiceError
 
@@ -36,7 +34,7 @@ async def get_async_influxdb_client_from_env():
             client = InfluxDBClientAsync(
                 url=f"http://{env_influxdb.host}:{env_influxdb.port}",
                 token=env_influxdb.token,
-                org='IVVDD'
+                org=env_influxdb.organisation
             )
             health_check = await client.ping()
             if health_check:
@@ -52,3 +50,6 @@ async def get_async_influxdb_client_from_env():
             time.sleep(sleep_time)
         except aiohttp.client.ClientConnectorError:
             time.sleep(sleep_time)
+            time.sleep(0.2)
+        num_tries -= 1
+    raise ServiceError("Could not connect to InfluxDB")

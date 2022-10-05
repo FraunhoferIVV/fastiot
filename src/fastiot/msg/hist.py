@@ -22,6 +22,8 @@ class HistBeat(BaseModel):
 
 
 class HistObjectResp(FastIoTResponse):
+    error_code: int = 0
+    error_msg: str = ""
     values: List[dict]
 
 
@@ -32,6 +34,8 @@ class HistObjectReq(FastIoTRequest):
     :param dt_start: are used to limit the time range.
     :param dt_end: are used to limit the time range.
     :param limit: will limit the number of results.
+    :param sensor: is used to return only the value of the given sensor
+    :param machine: is used to return only the value of the given machine
     :param subject_name: will search only the objects, which are saved under this subject_name, **CAUTION!** This is not
      the request-reply subject name.
     :param query_dict: is an optional variable, you can also add your own query_dict, besides the default setting, which
