@@ -1,13 +1,16 @@
 import asyncio
-import logging
 import random
 from datetime import datetime
 
+from fastiot import logging
 from fastiot.core import FastIoTService, loop, reply, ReplySubject
 from fastiot.msg.thing import Thing
 
 
 class ExampleProducerService(FastIoTService):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._logger = logging('producer')
 
     @loop
     async def produce(self):
@@ -23,7 +26,7 @@ class ExampleProducerService(FastIoTService):
                 timestamp=datetime.utcnow()
             )
         )
-        logging.info("Published %d on sensor %s", value, subject.name)
+        self._logger.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
 
     @reply(ReplySubject(name="reply_test",
@@ -31,12 +34,11 @@ class ExampleProducerService(FastIoTService):
                         reply_cls=Thing))
     async def respond(self, topic: str, msg: Thing) -> Thing:
         """ Short demo on receiving a thing value and sending back the duplication of its value """
-        logging.info("Received request on topic %s with message %s.", topic, str(msg))
+        self._logger.info("Received request on topic %s with message %s.", topic, str(msg))
         new_thing_msg = msg
         new_thing_msg.value = 2 * msg.value
         return new_thing_msg
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     ExampleProducerService.main()
