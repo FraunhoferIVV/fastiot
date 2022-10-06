@@ -241,7 +241,11 @@ def _run_docker_bake_cmd(project_config, push, no_cache):
     # Prepare system for multi-arch builds
     os.environ['DOCKER_CLI_EXPERIMENTAL'] = 'enabled'
     qemu_platforms = {p.as_qemu_platform() for p in CPUPlatform}
-    for cmd in [f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
+
+    # We uninstall any registered qemu emulators first. Sometimes simply (re)-installing seems not to be enough and
+    # will cause random segfaults especially when running apt within the ARM64-container
+    for cmd in ['docker run --privileged --rm tonistiigi/binfmt --uninstall "qemu-*"',
+                f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
                 "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:latest --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
