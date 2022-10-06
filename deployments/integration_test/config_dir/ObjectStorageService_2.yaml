@@ -1,0 +1,6 @@
+search_index:
+  - "_subject"
+  - "_timestamp"
+collection: object_storage
+subject_name: 'test_custom_msg_list'
+

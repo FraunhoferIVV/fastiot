@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict
 
+from fastiot.core.subject_helper import sanitize_subject_name
 from fastiot.util.dict_helper import dict_subtract
 from fastiot.msg.hist import HistObjectReq
 
@@ -40,3 +41,14 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
         query_dict = query_dict | hist_object_req.query_dict
 
     return query_dict
+
+
+def get_collection_name(name: str) -> str:
+    """
+    This function is used to set the collection name for object storage, different message class
+    should be saved in the collection with their own name.
+    """
+    subject_name = sanitize_subject_name(name)
+    collection_name = 'object_storage.'+ subject_name.split('.')[1]
+    return collection_name
+

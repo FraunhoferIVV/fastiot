@@ -14,7 +14,8 @@ Your Object will be saved in Dictionary in such format:
   {'_id': 'xxx', '_subject': 'xxx', '_timestamp': 'xxx', 'Object': 'xxx'}
 
 
-In Order to use this Service, you must set a config file named ObjectStorageService.yaml in my_deployment/config_dir.
+In Order to use this Service, you must set a config file named ObjectStorageService.yaml or
+ObjectStorageService_1.yaml in my_deployment/config_dir.
 
 .. code:: yaml
 
@@ -22,7 +23,7 @@ In Order to use this Service, you must set a config file named ObjectStorageServ
    - "_subject"
    - "_timestamp"
   collection: 'object_storage'
-  subject: 'thing.*'
+  subject_name: 'thing.*'
 
 
 or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g.:
@@ -33,7 +34,7 @@ or the subject can be your own Data Model, which inherits :class:`fastiot.core.d
 
 You can assign the subject like following 'MyDataType' or 'my_data_type',
 both will return you a right subject name format: 'v1.my_data_type'.
-**CAUTION**: Thing will be instanced with different names. So by subscribing **thing** please always with a *****.
+**CAUTION!**: Thing will be instanced with different names. So by subscribing **thing** please always with a *****.
 For understanding you can reference this https://docs.nats.io/nats-concepts/subjects.
 
 
@@ -50,9 +51,9 @@ The code will look like:
 .. code:: python
 
   hist_req_msg = HistObjectReq(dt_start=datetime(), dt_end=datetime(), limit=10, subject_name='test_subject')
-  subject = ReplySubject(name='reply_object', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
+  subject = hist_req_msg.get_reply_subject(name='subject_name')
 
-
+**CAUTION!** This subject_name should be the same as, which you have defined in ObjectStorageService.yaml.
 This request will reply to you a List of Dictionary.
 Then you can convert it to your own data type using :func:`fastiot.util.object_helper.parse_object_list`.
 """

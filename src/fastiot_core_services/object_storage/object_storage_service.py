@@ -11,8 +11,9 @@ from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
 from fastiot.util.read_yaml import read_config
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
+from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
 from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data, build_query_dict, \
-    from_mongo_data
+    from_mongo_data, get_collection_name
 
 
 class ObjectStorageService(FastIoTService):
@@ -22,18 +23,22 @@ class ObjectStorageService(FastIoTService):
         self._logger = logging('object_storage')
         service_config = read_config(self)
 
-        self._mongo_client = get_mongodb_client_from_env()
-        database = self._mongo_client.get_database(env_mongodb.name)
-        self._mongo_object_db_col = database.get_collection(service_config['collection'])
+        self._mongodb_handler = MongoDBHandler()
+
+        database = self._mongodb_handler.get_database(env_mongodb.name)
+        self._mongo_object_db_col = database.get_collection(get_collection_name(service_config['subject_name']))
         mongo_indicies = service_config['search_index']
         for index_name in mongo_indicies:
-            self._mongo_client.create_index(collection=self._mongo_object_db_col,
-                                            index=[(index_name, pymongo.ASCENDING)],
-                                            index_name=f"{index_name}_ascending")
-        self.subject = Subject(name=sanitize_subject_name(service_config['subject']), msg_cls=dict)
+            self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
+                                               index=[(index_name, pymongo.ASCENDING)],
+                                               index_name=f"{index_name}_ascending")
+        self.subject = Subject(name=sanitize_subject_name(service_config['subject_name']), msg_cls=dict)
+        self.reply_subject = HistObjectReq.get_reply_subject(name=service_config['subject_name'],
+                                                             reply_cls=HistObjectResp)
 
     async def _start(self):
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)
+        await self.broker_connection.subscribe_reply_cb(subject=self.reply_subject, cb=self._cb_reply_hist_object)
 
     async def _cb_receive_data(self, subject_name: str, msg: dict):
         self._logger.debug("Received message %s", str(msg))
@@ -45,8 +50,7 @@ class ObjectStorageService(FastIoTService):
         self._logger.debug("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
-    @reply(HistObjectReq.get_reply_subject())
-    async def reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
+    async def _cb_reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
         self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)
         query_dict = build_query_dict(hist_object_req=hist_object_req)
         query_results = self._query_db(query_dict=query_dict, limit_nr=hist_object_req.limit)
