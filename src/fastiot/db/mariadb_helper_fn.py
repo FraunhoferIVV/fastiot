@@ -9,7 +9,7 @@ from fastiot.env.env import env_mariadb
 from fastiot.exceptions.exceptions import ServiceError
 
 
-def open_mariadb_connection_from_env(schema: Optional[str] = None):
+def get_mariadb_client_from_env(schema: Optional[str] = None):
     """
     Establishes a connection to a MariaDB instance and returns a Connection object.
 
@@ -20,21 +20,21 @@ def open_mariadb_connection_from_env(schema: Optional[str] = None):
     :envvar:`FASTIOT_MARIA_DB_HOST`, :envvar:`FASTIOT_MARIA_DB_PORT`, :envvar:`FASTIOT_MARIA_DB_USER`,
     :envvar:`FASTIOT_MARIA_DB_PASSWORD`, :envvar:`FASTIOT_MARIA_DB_SCHEMA_FASTIOTLIB`
 
-    >>> mariadb_connection = open_mariadb_connection_from_env(schema=None)
+    >>> mariadb_client = get_mariadb_client_from_env(schema=None)
     You should create a schema using `init_schema()` after opening the connection.
     """
-    db_connection = open_mariadb_connection(
+    db_client = get_mariadb_client(
         host=env_mariadb.host,
         port=env_mariadb.port,
         schema=schema,
         user=env_mariadb.user,
         password=env_mariadb.password
     )
-    return db_connection
+    return db_client
 
 
-def open_mariadb_connection(host: str, port: int, schema: Optional[str],
-                            user: str, password: str):
+def get_mariadb_client(host: str, port: int, schema: Optional[str],
+                       user: str, password: str):
     # We found that mariadb initial start time takes very long in some environments. Therefore we need a timeout much
     # greater then two minutes.
     try:
@@ -47,7 +47,7 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
 
     for _ in range(10):
         try:
-            db_connection = pymysql.connect(
+            db_client = pymysql.connect(
                 host=host,
                 port=port,
                 user=user,
@@ -55,7 +55,7 @@ def open_mariadb_connection(host: str, port: int, schema: Optional[str],
                 database=schema,
                 cursorclass=pymysql.cursors.DictCursor
             )
-            return db_connection
+            return db_client
         except pymysql.err.OperationalError as exception:
             logging('MariaDB').error("Error connecting to MariaDB: %s", str(exception))
             time.sleep(1)

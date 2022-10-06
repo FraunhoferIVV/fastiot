@@ -7,27 +7,27 @@ from fastiot.env.env import env_timescaledb
 from fastiot.exceptions import ServiceError
 
 
-def open_timescaledb_connection_from_env():
+def get_timescaledb_client_from_env():
     """
     For connecting TimeScaleDB, the environment variables can be set,
     if you want to use your own settings instead of default:
     :envvar:`FASTIOT_TIME_SCALE_DB_HOST`, :envvar:`FASTIOT_TIME_SCALE_DB_PORT`, :envvar:`FASTIOT_TIME_SCALE_DB_USER`,
     :envvar:`FASTIOT_TIME_SCALE_DB_PASSWORD`, :envvar:`FASTIOT_TIME_SCALE_DB_DATABASE`
 
-    >>> time_scale_db_connection = open_timescaledb_connection_from_env()
+    >>> time_scale_db_client = get_timescaledb_client_from_env()
     """
-    db_connection = open_timescaledb_connection(
+    db_client = get_timescaledb_client(
         host=env_timescaledb.host,
         port=env_timescaledb.port,
         user=env_timescaledb.user,
         password=env_timescaledb.password,
         database=env_timescaledb.database
     )
-    return db_connection
+    return db_client
 
 
-def open_timescaledb_connection(host: str, port: int, user: str, password: str,
-                                database: str = None):
+def get_timescaledb_client(host: str, port: int, user: str, password: str,
+                           database: str = None):
     try:
         # pylint: disable=import-outside-toplevel
         import psycopg2
@@ -37,7 +37,7 @@ def open_timescaledb_connection(host: str, port: int, user: str, password: str,
                                      "to make use of this helper.")
         sys.exit(5)
 
-    connection_parameters = {"user": user, "password": password, "host": host,
+    client_parameters = {"user": user, "password": password, "host": host,
                              "port": port, "database": database}
 
     # We found that the postgres connection with docker sometimes failed, because of the env variables in
@@ -46,8 +46,8 @@ def open_timescaledb_connection(host: str, port: int, user: str, password: str,
     num_tries = 300 / sleep_time
     while num_tries > 0:
         try:
-            db_connection = psycopg2.connect(**connection_parameters)
-            return db_connection
+            db_client = psycopg2.connect(**client_parameters)
+            return db_client
         except OperationalError:
             time.sleep(sleep_time)
         num_tries -= 1

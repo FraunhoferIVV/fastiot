@@ -47,10 +47,10 @@ class MongoClientWrapper:
             if db_compression == "zlib":
                 mongo_client_kwargs["zlibCompressionLevel"] = 9
 
-        self.client = MongoClient(**mongo_client_kwargs)
+        self._client = MongoClient(**mongo_client_kwargs)
 
         try:
-            self.client.admin.command('ping')
+            self._client.admin.command('ping')
             self._logger.info("Connection to database established")
         except ConnectionFailure:
             self._logger.exception("Connecting to database failed")
@@ -60,55 +60,15 @@ class MongoClientWrapper:
         self._codec_options = CodecOptions(uuid_representation=UUID_SUBTYPE)
 
     def __set_version_compatibility_to_current_version(self):
-        version_array = self.client.server_info()['versionArray']
+        version_array = self._client.server_info()['versionArray']
         version = f"{version_array[0]}.{version_array[1]}"
-        self.client.admin.command({"setFeatureCompatibilityVersion": version})
+        self._client.admin.command({"setFeatureCompatibilityVersion": version})
 
-    def health_check(self) -> bool:
-        connected_nodes = self.client.nodes
-        if connected_nodes is not None:
-            return True
-        return False
-
-    def get_database(self, name):
-        if name is None:
-            raise ValueError('database name is None, please assign a value')
-        return self.client.get_database(name, codec_options=self._codec_options)
-
-    def drop_database(self, name):
-        if name is None:
-            raise ValueError('database name is None, please assign a value')
-        self.client.drop_database(name)
-
-    def fsync(self):
-        self.client.admin.command('fsync', lock=True)
-
-    @staticmethod
-    def create_index(collection: Collection, index: List[Tuple[str, Union[int, Any]]], index_name: str) -> bool:
-        """
-        Creates the defined index in the defined collection if the index does not exist.
-        Otherwise no changes will be done to the database to save time consuming rebuilding of the index
-
-        :param collection: Collection (instance, not name) to create index in
-        :param index: Define index as wanted by pymongo create_index, eg. [(column_name, pymongo.ASCENDING)]
-        Instead of pymongo.ASCENDING you can also write 1, DESCENDING is -1
-        :param index_name: Define a unique name for the index. This name will be used to check if index has already been
-        created
-
-        return True if index was created, False if index has been created already
-        """
-        all_indices = [index['name'] for index in collection.list_indexes()]
-        if index_name not in all_indices:
-            collection.create_index(index, name=index_name)
-            return True
-
-        return False
-
-    def close(self):
-        self.client.close()
+    def get_client(self):
+        return self._client
 
 
-def get_mongodb_client_from_env() -> MongoClientWrapper:
+def get_mongodb_client_from_env():
     """
     For connecting Mongodb, the environment variables can be set,
     if you want to use your own settings instead of default:
@@ -124,7 +84,7 @@ def get_mongodb_client_from_env() -> MongoClientWrapper:
         db_password=env_mongodb.password,
         db_auth_source=env_mongodb.auth_source
     )
-    return db_client
+    return db_client.get_client()
 
 
 def time_series_data_to_mongodb_data_set(time_series_data: TimeSeriesData) -> Dict:
