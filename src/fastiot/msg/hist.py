@@ -22,9 +22,19 @@ class HistBeat(BaseModel):
 
 
 class HistObjectResp(FastIoTResponse):
+    """
+    This Class is used to answer the request for historical data.
+
+    :param values: the results of the request
+    :param error_msg: if an error occurred you can get a detailed description
+    :param error_code: error number
+
+
+    """
     error_code: int = 0
     error_msg: str = ""
     values: List[dict]
+
 
 
 class HistObjectReq(FastIoTRequest):
