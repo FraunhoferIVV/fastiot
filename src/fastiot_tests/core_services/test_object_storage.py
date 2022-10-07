@@ -56,6 +56,10 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         populate_test_env()
+        self._db_client = get_mongodb_client_from_env()
+        self._database = self._db_client.get_database(env_mongodb.name)
+        self._db_col = self._database.get_collection('object_storage')
+        self._db_col.delete_many({})
         self.service_task = None
         self.broker_connection = await NatsBrokerConnection.connect()
 
@@ -119,10 +123,9 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         hist_req_msg = HistObjectReq(dt_start=datetime(year=2022, month=10, day=9, second=0),
                                      dt_end=datetime(year=2022, month=10, day=9, second=10),
                                      limit=10, subject_name='v1.thing.sensor_0',
-                                     query_dict={'machine': 'test_machine'})
+                                     raw_query={'machine': 'test_machine'})
         subject = hist_req_msg.get_reply_subject(name='thing.*')
 
-        await self._start_service()
         reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
         values = [parse_object(v, Thing) for v in reply.values]
         self.assertEqual(expected_thing_list[0], values[0])
