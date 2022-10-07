@@ -41,17 +41,18 @@ class HistObjectReq(FastIoTRequest):
     .. code:: python
 
       query_dict = {'test_index': 'test'}
-      HistObjectReq(dt_start=dt_start, dt_end=dt_end,
+      hist_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end,
                     limit=10, subject_name=sanitize_subject('my_data_type'), query_dict=query_dict)
 
 
     After instancing HistObjectReq, a subject for requesting historical data must also be instanced, with the
-    subject_name 'reply_object'.
+    subject_name, which is the same as the subject_name(snake case format) in Service Config file.
 
     .. code:: python
 
-      subject = HistObjectReq.get_reply_subject()
-      ReplySubject(name='reply_object', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
+      subject = HistObjectReq.get_reply_subject('my_data_type')
+
+    A subject instance will be created.
 
     """
     _reply_cls = HistObjectResp
