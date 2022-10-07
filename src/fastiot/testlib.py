@@ -10,7 +10,8 @@ def populate_test_env():
     context = ProjectContext.default
 
     if os.path.exists(context.deployment_build_dir(context.integration_test_deployment)) is False:
-        raise RuntimeError(f"Expected test deployment '{context.integration_test_deployment}' to be configured. Please configure it via `fiot config`")
+        raise RuntimeError(f"Expected test deployment '{context.integration_test_deployment}' to be configured. "
+                           "Please configure it via `fiot config`")
 
     env = context.build_env_for_deployment(context.integration_test_deployment)
     if env_tests.use_internal_hostnames:

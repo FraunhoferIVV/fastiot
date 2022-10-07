@@ -14,43 +14,36 @@ class TimeSeriesService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.write_api = None
-        self.query_api = None
-        self.counter = 0
+        self.msg_counter_ = 0
         self.client = None
 
     async def _start(self):
         self.client = await get_async_influxdb_client_from_env()
-        self.write_api = self.client.write_api()
-        self.query_api = self.client.query_api()
+
+    async def _stop(self):
+        await self.client.close()
 
     @subscribe(subject=Thing.get_subject(env.subscribe_subject))
     async def consume(self, msg: Thing):
 
-        data = [{"measurement":
-                     str(msg.name),
-                 "tags":
-                     {"machine": str(msg.machine)},
-                 "fields":
-                     {"value": str(msg.value) + " " + str(msg.unit)},
+        data = [{"measurement": str(msg.name),
+                 "tags": {"machine": str(msg.machine)},
+                 "fields": {"value": str(msg.value) + " " + str(msg.unit)},
                  "time": msg.timestamp
                  }]
-        await self.write_api.write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data, precision='ms')
-        self.counter = self.counter + 1
-        if self.counter >= 10:
-            self.counter = 0
+        await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation,
+                                            record=data, precision='ms')
+        self.msg_counter_ = self.msg_counter_ + 1
+        if self.msg_counter_ >= 10:
+            self.msg_counter_ = 0
             logging.debug("10 datasets written")
 
-
-
-    @reply(HistObjectReq.get_reply_subject(name=env.reply_subject))
+    @reply(HistObjectReq.get_reply_subject(name=env.request_subject))
     async def reply(self, request: HistObjectReq):
         query = await self.generate_query(request)
 
         results: list = []
-        i: int = 0
-
-        tables = await self.query_api.query(query, org=env_influxdb.organisation)
+        tables = await self.client.query_api().query(query, org=env_influxdb.organisation)
 
         for table in tables:
             for row in table:
@@ -61,12 +54,16 @@ class TimeSeriesService(FastIoTService):
                                 })
         if len(results) > 0:
             return HistObjectResp(values=results)
-        else:
-            return HistObjectResp(values=results, error_msg="no data found", error_code="1")
+
+        logging.debug("No data found. Returning error code 1.")
+        return HistObjectResp(values=results, error_msg="no data found", error_code=1)
 
     @staticmethod
     async def generate_query(request: HistObjectReq) -> str:
-        limit: int = 20
+
+        if request.raw_query and isinstance(request.raw_query, str):
+            return request.raw_query
+
         query: str = f'from(bucket: "{env_influxdb.bucket}")'
         if request.dt_start is not None:
             query = query + f'|> range(start: {request.dt_start.isoformat().split("+")[0]}Z'
@@ -80,17 +77,13 @@ class TimeSeriesService(FastIoTService):
             query = query + f'|> filter(fn: (r) => r["_measurement"] == "{request.sensor}")'
         if request.machine is not None:
             query = query + f'|>filter(fn: (r) => r["machine"] =="{request.machine}")'
-        if request.limit is not None:
-            limit = request.limit
-        query = query + f'|> limit(n: {limit})' \
+
+        query = query + f'|> limit(n: {request.limit})' \
                         '|> group(columns:["time"])' \
                         '|> sort(columns: ["_time"])'
-        if not request.query_dict is None and request.query_dict.type() == "str":
-            query = request.query_dict
+
         return query
 
-    async def _stop(self):
-        await self.client.close()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

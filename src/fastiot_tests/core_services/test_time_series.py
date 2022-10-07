@@ -11,6 +11,7 @@ from fastiot.env.env import env_influxdb
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
+from fastiot_core_services.time_series.env import time_series_env
 from fastiot_core_services.time_series.time_series_service import TimeSeriesService
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.datetime.now(),
@@ -124,12 +125,13 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
         await self.client.close()
 
     async def test_error_code_1(self):
-        subject = HistObjectReq.get_reply_subject(name="things")
+        subject = HistObjectReq.get_reply_subject(name=time_series_env.request_subject)
         reply: HistObjectResp = await self.broker_connection.request(subject=subject,
                                                                      msg=HistObjectReq(machine="test_machine",
                                                                                        timeout=10))
         self.assertEqual(1, reply.error_code)
         await self.client.close()
+
 
 if __name__ == '__main__':
     unittest.main()
