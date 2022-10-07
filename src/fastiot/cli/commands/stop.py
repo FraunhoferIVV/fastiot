@@ -1,4 +1,5 @@
 """ Implements some stop commands for e.g. environments. """
+import getpass
 import logging
 import os
 import subprocess
@@ -45,7 +46,7 @@ def stop(deployment_name: Optional[str] = typer.Argument(default=None, shell_com
 
     cmd = "docker-compose "
 
-    project_name = project_name or context.project_namespace + "_" + deployment_name
+    project_name = project_name or getpass.getuser() + "__" + context.project_namespace + "__" + deployment_name
     cmd += "--project-name=" + project_name
 
     if service_names is not None and len(service_names) > 0:

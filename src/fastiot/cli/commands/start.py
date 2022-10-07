@@ -1,7 +1,7 @@
+import getpass
 import logging
 import os
 import subprocess
-from glob import glob
 from typing import Optional, List
 
 import typer
@@ -44,7 +44,7 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
         raise typer.Exit(-1)
 
     cmd = ["docker-compose"]
-    project_name = project_name or context.project_namespace + "_" + deployment_name
+    project_name = project_name or getpass.getuser() + "__" + context.project_namespace + "__" + deployment_name
     cmd.append("--project-name=" + project_name)
 
     cmd.append("up")
