@@ -1,0 +1,13 @@
+fastiot-service:
+  name: machine_monitoring
+
+  mount-config-dir: optional
+
+  healthcheck:
+    cmd: if [ -s "/var/fastiot/logs/error.log" ]; then; exit 1; fi
+    retries: 1
+
+  depends-on:
+    - nats
+
+  platforms: [ amd64, arm64 ]
