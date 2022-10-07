@@ -36,7 +36,6 @@ class HistObjectResp(FastIoTResponse):
     values: List[dict]
 
 
-
 class HistObjectReq(FastIoTRequest):
     """
     This class is used for requesting historical data.

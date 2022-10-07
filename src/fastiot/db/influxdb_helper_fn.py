@@ -12,16 +12,6 @@ class Client:
     client = None
 
 
-async def get_client():
-    if Client.client is None:
-        Client.client = await get_async_influxdb_client_from_env()
-    return Client.client
-
-async def set_test_client():
-    Client.client = await get_async_influxdb_client_from_env()
-
-
-
 async def get_async_influxdb_client_from_env():
     """
     For connecting Influxdb, the environment variables can be set,
@@ -35,6 +25,19 @@ async def get_async_influxdb_client_from_env():
 
     >>> influxdb_client = await get_async_influxdb_client_from_env()
     """
+
+    if Client.client is None:
+        Client.client = await create_async_influxdb_client_from_env()
+    return Client.client
+
+async def get_new_async_influx_client_from_env():
+    Client.client = await create_async_influxdb_client_from_env()
+    return Client.client
+
+
+
+async def create_async_influxdb_client_from_env():
+
     try:
         from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
         from influxdb_client.client.exceptions import InfluxDBError
