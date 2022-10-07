@@ -10,7 +10,7 @@ from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback
 from nats.aio.msg import Msg as NatsBrokerMsg
 from nats.aio.subscription import Subscription as BrokerSubscription
 
-from fastiot.core.data_models import Msg, Subject, ReplySubject, MsgClsPub, MsgClsReq, MsgCls, MsgClsResp
+from fastiot.core.data_models import Msg, MsgPub, MsgReq, MsgResp, Subject, ReplySubject, MsgClsPub, MsgClsReq, MsgCls, MsgClsResp
 from fastiot.core.serialization import serialize_from_bin, serialize_to_bin
 from fastiot.env import env_broker
 
@@ -193,12 +193,12 @@ class BrokerConnection(ABC):
         """
 
     @abstractmethod
-    async def _send(self, subject: Subject, msg: MsgCls, reply: Optional[Subject] = None):
+    async def _send(self, subject: Subject, msg: Msg, reply: Optional[Subject] = None):
         """
         Low level method to send msg to broker
         """
 
-    async def publish(self, subject: Subject, msg: MsgClsPub):
+    async def publish(self, subject: Subject, msg: MsgPub):
         """
         Publishes a message for a subject.
 
@@ -207,8 +207,8 @@ class BrokerConnection(ABC):
         """
         await self._send(subject=subject, msg=msg)
 
-    async def request(self, subject: ReplySubject, msg: MsgClsReq,
-                      timeout: float = env_broker.default_timeout) -> MsgClsResp:
+    async def request(self, subject: ReplySubject, msg: MsgReq,
+                      timeout: float = env_broker.default_timeout) -> MsgResp:
         """
         Send a request on a subject.
 
@@ -264,7 +264,7 @@ class BrokerConnection(ABC):
 
     def publish_sync(self,
                      subject: Subject,
-                     msg: Msg,
+                     msg: MsgPub,
                      timeout: float = 0.0):
         """
         Publishes a message for a subject. This method is thread-safe. Under the
@@ -281,7 +281,7 @@ class BrokerConnection(ABC):
 
     def publish_sync_nowait(self,
                             subject: Subject,
-                            msg: Msg) -> concurrent.futures.Future:
+                            msg: MsgPub) -> concurrent.futures.Future:
         """
         Publishes a message for a subject. This method is thread-safe. Under the
         hood, it uses run_threadsafe_nowait.
@@ -295,8 +295,8 @@ class BrokerConnection(ABC):
 
     def request_sync(self,
                      subject: ReplySubject,
-                     msg: Msg,
-                     timeout: float = env_broker.default_timeout) -> Any:
+                     msg: MsgReq,
+                     timeout: float = env_broker.default_timeout) -> MsgResp:
         """
         Performs a request on the subject. This method is thread-safe. Under the
         hood, it uses run_threadsafe.

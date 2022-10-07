@@ -52,7 +52,7 @@ class FastIoTService:
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
-        self._logger = logging
+        self._logger = logging()
 
         for name in dir(self):
             if name.startswith('__'):

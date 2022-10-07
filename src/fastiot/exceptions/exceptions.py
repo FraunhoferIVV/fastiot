@@ -15,3 +15,9 @@ class ShutdownRequestedInterruption(Exception):
     """
     Raised if an execution gets interrupted because a shutdown is requested
     """
+
+
+class CSVError(Exception):
+    """
+    Raised if csv import fails.
+    """

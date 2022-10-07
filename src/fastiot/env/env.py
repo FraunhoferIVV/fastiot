@@ -5,6 +5,7 @@ from typing import Optional
 
 from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
     TimeScaleDBService, NatsService
+from fastiot.env.model import OPCUARetrievalMode
 from fastiot.env.env_constants import *
 
 
@@ -316,6 +317,58 @@ class InfluxDBEnv:
         return os.getenv(FASTIOT_INFLUX_DB_TOKEN, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_TOKEN))
 
 
+class OPCUAEnv:
+    """
+    Environment variables for opc ua monitoring
+    """
+    @property
+    def endpoint_url(self) -> str:
+        return os.environ[FASTIOT_OPCUA_ENDPOINT_URL]
+
+    @property
+    def security_string(self) -> str:
+        return os.getenv(FASTIOT_OPCUA_SECURITY_STRING, '')
+
+    @property
+    def user(self) -> str:
+        return os.getenv(FASTIOT_OPCUA_USER, '')
+
+    @property
+    def password(self) -> str:
+        return os.getenv(FASTIOT_OPCUA_PASSWORD, '')
+
+    @property
+    def application_uri(self) -> str:
+        return os.getenv(FASTIOT_OPCUA_APPLICATION_URI, '')
+
+    @property
+    def max_allowed_data_delay(self) -> float:
+        """
+        The maximum allowed data delay for opc-ua connections in seconds. If no data changes happen over this timespan,
+        the connection to the machine is considered lost. This value must be positive. A value of zero means the
+        connection is never considered lost.
+        """
+        value = float(os.getenv(FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY, 0.0))
+        if value < 0.0:
+            raise ValueError(
+                'Environment variable "FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY" is negative which is invalid.'
+            )
+        return value
+
+    @property
+    def retrieval_mode(self) -> OPCUARetrievalMode:
+        return OPCUARetrievalMode(os.getenv(FASTIOT_OPCUA_RETRIEVAL_MODE, OPCUARetrievalMode.polling))
+
+    @property
+    def machine_monitoring_config_dir(self) -> str:
+        config_dir_relative = os.getenv(FASTIOT_MACHINE_MONITORING_CONFIG_NAME, "machine_monitoring")
+        return os.path.join(env_basic.config_dir, config_dir_relative)
+
+    @property
+    def machine_monitoring_error_logfile(self) -> str:
+        return os.getenv(FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, "/var/fastiot/logs/error.log")
+
+
 class TimeScaleDBEnv:
     """
     Environment variables for timescaledb :ref:`TimeScaleDB Service <TimeScaleDBService>`
@@ -375,4 +428,5 @@ env_mongodb = MongoDBEnv()
 env_mongodb_cols = MongoDBColConstants()
 env_mariadb = MariaDBEnv()
 env_influxdb = InfluxDBEnv()
+env_opcua = OPCUAEnv()
 env_timescaledb = TimeScaleDBEnv()
