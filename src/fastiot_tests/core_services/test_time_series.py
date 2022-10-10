@@ -1,14 +1,10 @@
 import asyncio
-import logging
-import unittest
 import datetime
+import unittest
 
 from fastiot.core.broker_connection import NatsBrokerConnection
-
-from fastiot.db.influxdb_helper_fn import get_new_async_influx_client_from_env, get_async_influxdb_client_from_env, \
-    create_async_influxdb_client_from_env
+from fastiot.db.influxdb_helper_fn import get_new_async_influx_client_from_env
 from fastiot.env.env import env_influxdb
-
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
