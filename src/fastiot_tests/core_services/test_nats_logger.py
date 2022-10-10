@@ -24,7 +24,7 @@ class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
         self.service_task.cancel()
 
     async def test_unfiltered(self):
-        with self.assertLogs('NatsLoggerService', level="INFO") as capture:
+        with self.assertLogs(level="INFO") as capture:
             try:
                 await self._start_service()
                 await self.broker_connection.publish(Thing.get_subject(name='unfiltered'), MESSAGE)
@@ -33,7 +33,7 @@ class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(MESSAGE.name in capture.output[0])
 
     async def test_filtered(self):
-        with self.assertLogs('NatsLoggerService', level="INFO") as capture:
+        with self.assertLogs(level="INFO") as capture:
             try:
                 os.environ[FASTIOT_NATS_LOGGER_FILTER_FIELD] = 'value'
                 os.environ[FASTIOT_NATS_LOGGER_FILTER_VALUE] = '25'
