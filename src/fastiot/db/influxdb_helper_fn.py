@@ -40,6 +40,7 @@ async def get_new_async_influx_client_from_env():
 
 async def create_async_influxdb_client_from_env():
     try:
+        # pylint: disable=import-outside-toplevel
         from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
         from influxdb_client.client.exceptions import InfluxDBError
         from aiohttp.client_exceptions import ClientError
@@ -56,7 +57,7 @@ async def create_async_influxdb_client_from_env():
                 url=f"http://{env_influxdb.host}:{env_influxdb.port}",
                 token=env_influxdb.token,
                 org=env_influxdb.organisation,
-                timeout=15*1000
+                timeout=15 * 1000
             )
             health_check = await client.ping()
             if health_check:

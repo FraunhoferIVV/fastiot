@@ -8,18 +8,18 @@ from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 
 
-class TestValue(FastIoTPublish):
+class FIOTTestValue(FastIoTPublish):
     real: float
     img: float
 
 
-class TestCustomMsg(FastIoTPublish):
-    x: TestValue
-    y: TestValue
+class CustomTestMsg(FastIoTPublish):
+    x: FIOTTestValue
+    y: FIOTTestValue
 
 
-class TestCustomMsgList(FastIoTPublish):
-    values: List[TestCustomMsg]
+class CustomTestMsgList(FastIoTPublish):
+    values: List[CustomTestMsg]
 
 
 class TestObjectHelper(unittest.TestCase):
@@ -47,19 +47,19 @@ class TestObjectHelper(unittest.TestCase):
         self.assertEqual(thing_list, converted_msg_list)
 
     def test_return_custom_object(self):
-        test_custom_msg = TestCustomMsgList(
-            values=[TestCustomMsg(x=TestValue(real=1, img=2),
-                                  y=TestValue(real=1, img=2))])
+        test_custom_msg = CustomTestMsgList(
+            values=[CustomTestMsg(x=FIOTTestValue(real=1, img=2),
+                                  y=FIOTTestValue(real=1, img=2))])
         test_custom_msg_dict = test_custom_msg.dict()
-        converted_msg = parse_object(test_custom_msg_dict, TestCustomMsgList)
+        converted_msg = parse_object(test_custom_msg_dict, CustomTestMsgList)
         self.assertEqual(test_custom_msg, converted_msg)
 
     def test_return_custom_object_list(self):
-        test_custom_msg_list = [TestCustomMsgList(
-            values=[TestCustomMsg(x=TestValue(real=1, img=2),
-                                  y=TestValue(real=1, img=2))]) for _ in range(2)]
+        test_custom_msg_list = [CustomTestMsgList(
+            values=[CustomTestMsg(x=FIOTTestValue(real=1, img=2),
+                                  y=FIOTTestValue(real=1, img=2))]) for _ in range(2)]
         test_custom_msg_dict_list = [test_custom_msg.dict() for test_custom_msg in test_custom_msg_list]
-        converted_msg_list = parse_object_list(test_custom_msg_dict_list, TestCustomMsgList)
+        converted_msg_list = parse_object_list(test_custom_msg_dict_list, CustomTestMsgList)
         self.assertEqual(test_custom_msg_list, converted_msg_list)
 
     def test_return_wrong_type(self):

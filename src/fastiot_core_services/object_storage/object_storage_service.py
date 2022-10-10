@@ -17,7 +17,6 @@ class ObjectStorageService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._logger = logging('object_storage')
         service_config = read_config(self)
 
         self._mongodb_handler = MongoDBHandler()
