@@ -309,12 +309,28 @@ class InfluxDBEnv:
         return str(os.getenv(FASTIOT_INFLUX_DB_PASSWORD, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_PASSWORD)))
 
     @property
-    def token(self) -> Optional[str]:
+    def token(self) -> str:
         """.. envvar:: FASTIOT_INFLUX_DB_TOKEN
 
         InfluxDB API token with permission to query (read) buckets and create (write) authorizations for devices
         """
         return os.getenv(FASTIOT_INFLUX_DB_TOKEN, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_TOKEN))
+
+    @property
+    def organisation(self) -> str:
+        """ .. envvar:: FASTIOT_INFLUX_DB_ORG
+
+        Set the organisation for InfluxDB, defaults to ``FastIoT`` if not set.
+        """
+        return os.environ.get(FASTIOT_INFLUX_DB_ORG, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_ORG))
+
+    @property
+    def bucket(self) -> str:
+        """ .. envvar:: FASTIOT_INFLUX_DB_BUCKET
+
+        Set the bucket for InfluxDB to store data, defaults to ``things`` if not set.
+        """
+        return os.environ.get(FASTIOT_INFLUX_DB_BUCKET, InfluxDBService().get_default_env(FASTIOT_INFLUX_DB_BUCKET))
 
 
 class OPCUAEnv:
@@ -367,6 +383,15 @@ class OPCUAEnv:
     @property
     def machine_monitoring_error_logfile(self) -> str:
         return os.getenv(FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, "/var/fastiot/logs/error.log")
+
+    @property
+    def organisation(self) -> str:
+        return os.getenv(FASTIOT_INFLUX_DB_ORG, "IVVDD")
+
+    @property
+    def bucket(self) -> str:
+        return os.getenv(FASTIOT_INFLUX_DB_BUCKET, 'things')
+
 
 
 class TimeScaleDBEnv:

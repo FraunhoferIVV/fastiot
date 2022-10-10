@@ -74,7 +74,7 @@ class FastIoTResponse(FastIoTData):
                                   "implemented.")
 
 
-MsgResp = Union[FastIoTPublish, dict]
+MsgResp = Union[FastIoTResponse, dict]
 MsgClsResp = Type[MsgResp]
 
 
@@ -113,7 +113,7 @@ class FastIoTRequest(FastIoTData):
         )
 
 
-MsgReq = Union[FastIoTPublish, dict]
+MsgReq = Union[FastIoTRequest, dict]
 MsgClsReq = Type[MsgReq]
 
 

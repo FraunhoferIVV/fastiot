@@ -3,6 +3,9 @@ fastiot_service:
 
   depends_on:
     - nats
-    - mongodb
+    - influxdb
 
   platforms: [amd64, arm64]
+
+  additional_pip_packages:
+    - influxdb-client[async]

@@ -36,8 +36,8 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
         query_dict = query_dict | {"_timestamp": {'$lte': hist_object_req.dt_end}}
     if hist_object_req.dt_start is not None and hist_object_req.dt_end is not None:
         query_dict = query_dict | {"_timestamp": {'$gte': hist_object_req.dt_start, '$lte': hist_object_req.dt_end}}
-    if hist_object_req.query_dict is not None:
-        query_dict = query_dict | hist_object_req.query_dict
+    if hist_object_req.raw_query is not None:
+        query_dict = query_dict | hist_object_req.raw_query
 
     return query_dict
 

@@ -4,9 +4,13 @@ from fastiot.db.influxdb_helper_fn import get_async_influxdb_client_from_env
 from fastiot.db.mariadb_helper_fn import get_mariadb_client_from_env, init_schema
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.db.time_scale_helper_fn import get_timescaledb_client_from_env
+from fastiot.testlib import populate_test_env
 
 
 class TestDataBases(unittest.TestCase):
+    def setUp(self):
+        populate_test_env()
+
     def test_mongo_db_connection(self):
         db_client = get_mongodb_client_from_env()
         self.assertTrue(db_client.admin.command('ping'))
@@ -23,7 +27,11 @@ class TestDataBases(unittest.TestCase):
 
 class TestDataBasesAsync(unittest.IsolatedAsyncioTestCase):
 
+    async def asyncSetUp(self):
+        populate_test_env()
     async def test_async_influxdb_connection(self):
+        populate_test_env()
+
         db_client = await get_async_influxdb_client_from_env()
         self.assertTrue(await db_client.ping())
         await db_client.close()
