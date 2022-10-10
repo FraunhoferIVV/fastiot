@@ -18,8 +18,13 @@ COPY install.sh ./
 COPY requirements.txt ./
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 
-{% if service.manifest.healthcheck == 'error_log' %}
-HEALTHCHECK --retries=1 CMD if [ -s "/var/fastiot/logs/error.log" ]; then; exit 1; fi
+{% if service.manifest.healthcheck.cmd != '' %}
+HEALTHCHECK \
+    --interval={{ service.manifest.healthcheck.interval }} \
+    --timeout={{ service.manifest.healthcheck.timeout }} \
+    --start-period={{ service.manifest.healthcheck.start_period }} \
+    --retries={{ service.manifest.healthcheck.retries }} \
+    CMD {{ service.manifest.healthcheck.cmd }}
 {% endif %}
 
 {% if service.manifest.vue %}

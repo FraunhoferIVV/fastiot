@@ -94,9 +94,9 @@ class CPUPlatform(str, Enum):
 
 class Healthcheck(BaseModel):
     cmd: str = ''
-    interval: float = 30.0
-    timeout: float = 30.0
-    start_period: float = 0.0
+    interval: str = "30s"
+    timeout: str = "30s"
+    start_period: str = "0s"
     retries: int = 3
 
 
