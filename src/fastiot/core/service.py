@@ -205,7 +205,10 @@ class FastIoTService:
     async def _loop_task_cb(self, loop_fn):
         while True:
             awaitable = await loop_fn()
-            await self.run_coro(awaitable)
+            try:
+                await self.run_coro(awaitable)
+            except ShutdownRequestedInterruption:
+                break
 
     async def _stop_service_annotations(self):
         for sub in self._subs:
