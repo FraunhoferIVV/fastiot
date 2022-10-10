@@ -20,7 +20,6 @@ class ObjectStorageService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._logger = logging('object_storage')
         service_config = read_config(self)
 
         self._mongodb_handler = MongoDBHandler()
@@ -41,17 +40,17 @@ class ObjectStorageService(FastIoTService):
         await self.broker_connection.subscribe_reply_cb(subject=self.reply_subject, cb=self._cb_reply_hist_object)
 
     async def _cb_receive_data(self, subject_name: str, msg: dict):
-        self._logger.debug("Received message %s", str(msg))
+        logging.debug("Received message %s", str(msg))
         if 'timestamp' in list(msg.keys()):
             timestamp = msg['timestamp']
         else:
             timestamp = datetime.utcnow()
         mongo_data = to_mongo_data(timestamp=timestamp, subject_name=subject_name, msg=msg)
-        self._logger.debug("Converted Mongo data is %s" % mongo_data)
+        logging.debug("Converted Mongo data is %s" % mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
     async def _cb_reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
-        self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)
+        logging.debug("Received request on subject %s with message %s", subject, hist_object_req)
         query_dict = build_query_dict(hist_object_req=hist_object_req)
         query_results = self._query_db(query_dict=query_dict, limit_nr=hist_object_req.limit)
         values = [from_mongo_data(result) for result in query_results]

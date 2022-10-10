@@ -41,7 +41,7 @@ def get_mariadb_client(host: str, port: int, schema: Optional[str],
         # pylint: disable=import-outside-toplevel
         import pymysql.cursors
     except (ImportError, ModuleNotFoundError):
-        logging('MariaDB').error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
+        logging.error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
                                  "to make use of this helper.")
         sys.exit(5)
 
@@ -57,7 +57,7 @@ def get_mariadb_client(host: str, port: int, schema: Optional[str],
             )
             return db_client
         except pymysql.err.OperationalError as exception:
-            logging('MariaDB').error("Error connecting to MariaDB: %s", str(exception))
+            logging.error("Error connecting to MariaDB: %s", str(exception))
             time.sleep(1)
     raise ServiceError("Giving up trials to connect to MariaDB")
 
@@ -70,4 +70,4 @@ def init_schema(connection, schema: str):
             )
         connection.commit()
     except pymysql.err.ProgrammingError as e:
-        logging('MariaDB').info('%s', str(e))
+        logging.info('%s', str(e))

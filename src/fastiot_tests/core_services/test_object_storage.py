@@ -71,7 +71,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         await self.broker_connection.close()
 
     async def test_thing_storage(self):
-        logging('thing_storage').info('test_thing_storage')
+        logging.info('test_thing_storage')
         self.get_mongo_col(service_id='1', collection_name='thing')
         self._db_col.delete_many({})
 
@@ -87,7 +87,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(values[0]['_subject'], 'v1.thing.sensor_0')
 
     async def test_object_storage(self):
-        logging('object_storage').info('test_object_storage')
+        logging.info('test_object_storage')
         self.get_mongo_col(service_id='2', collection_name='test_custom_msg_list')
         self._db_col.delete_many({})
         test_custom_msg_l = TestCustomMsgList(
@@ -102,7 +102,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(values[0]), 4)
 
     async def test_reqeust_response_thing(self):
-        logging('thing_request').info('test_thing_request')
+        logging.info('test_thing_request')
         self.get_mongo_col(service_id='1', collection_name='thing')
         self._db_col.delete_many({})
 
@@ -128,7 +128,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected_thing_list[0], values[0])
 
     async def test_request_response_object(self):
-        logging('object_storage').info('test_object_request')
+        logging.info('test_object_request')
         self.get_mongo_col(service_id='2', collection_name='TestCustomMsgList')
         await self._start_service()
 

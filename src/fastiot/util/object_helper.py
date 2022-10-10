@@ -23,7 +23,7 @@ def parse_object(dic: Dict, data_model: Type[Union[Type[FastIoTData], BaseModel]
     """
     if issubclass(data_model, FastIoTData) or issubclass(data_model, BaseModel):
         return data_model.parse_obj(dic)
-    logging('parse_object').error('Please use the Data Model, which inherits FastIoTData or BaseModel')
+    logging.error('Please use the Data Model, which inherits FastIoTData or BaseModel')
     return None
 
 

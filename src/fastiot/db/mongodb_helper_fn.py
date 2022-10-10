@@ -19,7 +19,6 @@ class MongoClientWrapper:
         *Note:* You have to manually install ``pymongo>=4.1,<5`` using your :file:`requirements.txt` to make use of this
         helper. Database clients are not automatically installed to keep the containers smaller.
         """
-        self._logger = logging('mongodb_helper')
         try:
             # pylint: disable=import-outside-toplevel
             from bson.binary import UUID_SUBTYPE
@@ -27,9 +26,9 @@ class MongoClientWrapper:
             from pymongo import MongoClient
             from pymongo.errors import ConnectionFailure
         except (ImportError, ModuleNotFoundError):
-            self._logger.error("You have to manually install "
-                               "`pymongo>=4.1,<5` using your `requirements.txt` to make use of "
-                               "this helper.")
+            logging.error("You have to manually install "
+                          "`pymongo>=4.1,<5` using your `requirements.txt` to make use of "
+                          "this helper.")
             sys.exit(5)
 
         mongo_client_kwargs = {
@@ -51,9 +50,9 @@ class MongoClientWrapper:
 
         try:
             self._client.admin.command('ping')
-            self._logger.info("Connection to database established")
+            logging.info("Connection to database established")
         except ConnectionFailure:
-            self._logger.exception("Connecting to database failed")
+            logging.exception("Connecting to database failed")
             raise ServiceError("Database is not available")
 
         self.__set_version_compatibility_to_current_version()

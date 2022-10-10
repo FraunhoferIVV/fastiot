@@ -52,8 +52,6 @@ class HistObjectReq(FastIoTRequest):
 
       subject = HistObjectReq.get_reply_subject('my_data_type')
 
-    A subject instance will be created.
-
     """
     _reply_cls = HistObjectResp
 

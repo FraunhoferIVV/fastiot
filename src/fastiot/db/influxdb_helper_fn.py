@@ -1,9 +1,9 @@
-import logging
 import sys
 import time
 
 import aiohttp
 
+from fastiot import logging
 from fastiot.env.env import env_influxdb
 from fastiot.exceptions import ServiceError
 
@@ -38,6 +38,7 @@ async def get_async_influxdb_client_from_env():
             )
             health_check = await client.ping()
             if health_check:
+                logging.info('Connected to InfluxDB Server!')
                 return client
             else:
                 num_tries -= 1

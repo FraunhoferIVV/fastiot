@@ -52,7 +52,6 @@ class FastIoTService:
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
-        self._logger = logging
 
         for name in dir(self):
             if name.startswith('__'):
@@ -90,7 +89,7 @@ class FastIoTService:
         try:
             await coro
         except Exception as e:
-            self._logger.exception("Uncaught exception raised inside task")
+            logging.exception("Uncaught exception raised inside task")
             err = e
         if err:
             await self.request_shutdown("Task failed with an exception")
@@ -181,7 +180,7 @@ class FastIoTService:
     async def request_shutdown(self, reason: str = ''):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
         if self._shutdown_event.is_set() is False and reason:
-            self._logger.info(f"Initial shutdown requested with reason: {reason}")
+            logging.info(f"Initial shutdown requested with reason: {reason}")
         self._shutdown_event.set()
 
     async def _start_service_annotations(self):

@@ -27,5 +27,5 @@ def dict_subtract(dict_1: Dict, dict_2: Dict) -> Dict:
             all(map(dict_2.pop, dict_1))
             return dict_2
     else:
-        logging('dict_subtract').error('No common keys in the dictionaries')
+        logging.error('No common keys in the dictionaries')
         return None

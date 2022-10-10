@@ -33,7 +33,7 @@ def get_timescaledb_client(host: str, port: int, user: str, password: str,
         import psycopg2
         from psycopg2 import OperationalError
     except (ImportError, ModuleNotFoundError):
-        logging('TimeScaleDB').error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
+        logging.error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
                                      "to make use of this helper.")
         sys.exit(5)
 

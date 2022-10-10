@@ -1,5 +1,5 @@
 from fastiot.cli.version import get_version
-from fastiot.logging import logging
+from fastiot.logger import logging
 from fastiot.cli.commands import *
 from fastiot.cli.common.infrastructure_services import *
 

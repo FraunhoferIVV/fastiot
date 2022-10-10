@@ -1,8 +1,7 @@
-import logging.config
 from typing import Dict
 
 
-def get_log_config(level: int = logging.INFO) -> Dict:
+def get_log_config(level: int = 20) -> Dict:
     """
     This function is used to set the logging configuration globally,
     now the console log should have this format:
@@ -14,7 +13,7 @@ def get_log_config(level: int = logging.INFO) -> Dict:
         'disable_existing_loggers': False,
         'formatters': {
             'standard': {
-                'format': '%(asctime)s.%(msecs)03d: %(levelname)-8s %(name)s: %(message)s',
+                'format': '%(asctime)s.%(msecs)03d: %(levelname)-8s %(filename)s/%(funcName)s:%(lineno)s: %(message)s',
                 'datefmt': '%Y-%m-%d %H:%M:%S'
             }
         },
