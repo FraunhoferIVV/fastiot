@@ -6,4 +6,5 @@ fastiot_service:
     - mongodb
 
   platforms: [amd64, arm64]
-
+  additional_pip_packages:
+    - pymongo

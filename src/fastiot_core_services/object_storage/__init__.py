@@ -7,15 +7,15 @@ see :func:`fastiot.db.mongodb_helper_fn.get_mongodb_client_from_env`
 This Service is intended for saving "Object" inheriting the :class:`fastiot.core.data_models.FastIoTData`,
 and requesting of historical object data.
 
-Your Object will be saved in Dictionary in such format:
+Your Object will be saved in Dictionary in such format, 'yyy' stands for the unpacked Attributes of Object:
 
 .. code:: python
 
-  {'_id': 'xxx', '_subject': 'xxx', '_timestamp': 'xxx', 'Object': 'xxx'}
+  {'_id': 'xxx', '_subject': 'xxx', '_timestamp': 'xxx', 'yyy': 'xxx', 'yyy': 'xxx}
 
 
 In Order to use this Service, you must set a config file named ObjectStorageService.yaml or
-ObjectStorageService_1.yaml in my_deployment/config_dir.
+ObjectStorageService_1.yaml in my_deployment/config_dir, for reading ObjectStorageService_1.yaml :envvar:`FASTIOT_SERVICE_ID` must be set.
 
 .. code:: yaml
 

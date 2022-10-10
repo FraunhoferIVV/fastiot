@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Dict
 
 from fastiot.core.subject_helper import sanitize_subject_name
-from fastiot.util.dict_helper import dict_subtract
 from fastiot.msg.hist import HistObjectReq
 
 
@@ -20,8 +19,8 @@ def from_mongo_data(mongo_data: dict) -> Dict:
     This function helps to convert mongodb data set back to the msg.
     """
     mongo_base_dict = {'_id': 'mongo_id', '_subject': 'subject_name', '_timestamp': 'timestamp'}
-    object_data = dict_subtract(mongo_data, mongo_base_dict)
-    return object_data
+    _ = {mongo_data.pop(key) for key in mongo_base_dict}
+    return mongo_data
 
 
 def build_query_dict(hist_object_req: HistObjectReq) -> Dict:

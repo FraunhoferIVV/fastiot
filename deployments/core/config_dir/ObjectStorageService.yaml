@@ -2,4 +2,4 @@ search_index:
   - "_subject"
   - "_timestamp"
 collection: object_storage
-subject: 'thing.*'
+subject_name: 'thing.*'
