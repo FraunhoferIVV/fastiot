@@ -96,7 +96,7 @@ class Healthcheck(BaseModel):
     cmd: str = ''
     interval: str = "30s"
     timeout: str = "30s"
-    start_period: str = "0s"
+    start_period: str = "1s"
     retries: int = 3
 
 

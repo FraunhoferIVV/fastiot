@@ -29,6 +29,7 @@ class TestDataBasesAsync(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         populate_test_env()
+
     async def test_async_influxdb_connection(self):
         populate_test_env()
 
