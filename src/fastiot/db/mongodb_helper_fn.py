@@ -1,7 +1,5 @@
 import sys
-from typing import Dict, List, Tuple, Union, Any
-
-from pymongo.collection import Collection
+from typing import Dict
 
 from fastiot import logging
 from fastiot.env import env_mongodb

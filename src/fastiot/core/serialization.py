@@ -14,8 +14,8 @@ def serialize_to_bin(msg_cls: MsgCls, msg: Msg) -> bytes:
                 f"of type '{type(msg)}' instead."
             )
         return ormsgpack.packb(msg, option=ormsgpack.OPT_SERIALIZE_PYDANTIC)
-    else:
-        return ormsgpack.packb(msg)
+
+    return ormsgpack.packb(msg)
 
 
 def serialize_from_bin(msg_cls: MsgCls, data: bytes) -> Msg:
@@ -25,6 +25,5 @@ def serialize_from_bin(msg_cls: MsgCls, data: bytes) -> Msg:
     unpacked = ormsgpack.unpackb(data)
     if issubclass(msg_cls, FastIoTData):
         return msg_cls(**unpacked)
-    else:
-        return unpacked
 
+    return unpacked

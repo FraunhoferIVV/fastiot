@@ -8,7 +8,8 @@ WILDCARD_SAME_LEVEL = '*'
 def sanitize_subject_name(subject_name: str) -> str:
     """
     This function will help you to check if the subject in right format and build it for you.
-    In FastIoT Framework, the right format base for subject_name is: "v1.my_message**", this will only subscribe till my_message level.
+    In FastIoT Framework, the right format base for subject_name is: "v1.my_message**", this will only subscribe till
+    my_message level.
     If you want to build a hierarchy for this topic, the subject_name must be "v1.my_topic.*" or "v1.my_topic.>"
 
     In summary, it will do the following for you:

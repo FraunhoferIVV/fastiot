@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Optional, Dict, Union, Type
+from typing import Optional, Dict, Union
 
 import yaml
 

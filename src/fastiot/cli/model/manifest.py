@@ -3,7 +3,7 @@ import os
 import tempfile
 from enum import Enum
 from shlex import quote as shlex_quote
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 import yaml
 from pydantic.main import BaseModel
@@ -79,7 +79,7 @@ class CPUPlatform(str, Enum):
         `linux/amd64`"""
         if self == self.amd64_2:
             return "linux/amd64/2"
-        elif self == self.armv7:
+        if self == self.armv7:
             return 'linux/arm/v7'
         return "linux/" + self
 

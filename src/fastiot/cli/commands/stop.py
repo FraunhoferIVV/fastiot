@@ -4,12 +4,12 @@ import logging
 import os
 import subprocess
 from typing import Optional, List
-from fastiot.cli.model.project import ProjectContext
 
 import typer
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
 

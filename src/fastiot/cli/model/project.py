@@ -114,7 +114,7 @@ class ProjectContext(BaseModel):
     def deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration
         (:attr:`fastiot.cli.model.project.ProjectConfig.deployments`) or by convention in deployments dir."""
-        return [key for key in self.deployments]
+        return list(self.deployments.keys())
 
     def deployment_by_name(self, name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """
@@ -130,15 +130,15 @@ class ProjectContext(BaseModel):
         env_filename = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, '.env')
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
-        else:
-            return {}
+
+        return {}
 
     def build_env_for_deployment(self, name: str) -> Dict[str, str]:
         env_filename = os.path.join(self.deployment_build_dir(name=name), '.env')
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
-        else:
-            return {}
+
+        return {}
 
     def build_env_for_internal_services_deployment(self, name: str) -> Dict[str, str]:
         docker_compose_file = os.path.join(self.deployment_build_dir(name=name), 'docker-compose.yaml')
@@ -149,8 +149,8 @@ class ProjectContext(BaseModel):
                     return result['x-env']
                 else:
                     return {}
-        else:
-            return {}
+
+        return {}
 
     def get_service_by_name(self, name: str) -> Service:
         """ Get a configured service from the project by name """

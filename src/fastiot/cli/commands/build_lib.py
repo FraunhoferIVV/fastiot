@@ -7,7 +7,6 @@ from enum import Enum
 from glob import glob
 from shutil import rmtree
 from typing import Optional, List
-from fastiot.cli.model.project import ProjectContext
 
 import typer
 

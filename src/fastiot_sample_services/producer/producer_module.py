@@ -8,8 +8,6 @@ from fastiot.msg.thing import Thing
 
 
 class ExampleProducerService(FastIoTService):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     @loop
     async def produce(self):

@@ -13,4 +13,3 @@ class ServiceComposeInfo(BaseModel):
     tmpfs: List[str] = []
 
     privileged: bool = False
-

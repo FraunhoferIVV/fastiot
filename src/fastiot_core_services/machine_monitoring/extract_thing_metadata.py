@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import List
-from fastiot.util.csv_reader import CSVReader
+
 from fastiot.msg.thing import Thing
+from fastiot.util.csv_reader import CSVReader
 
 
 def extract_thing_metadata_from_csv(file: str) -> List[Thing]:

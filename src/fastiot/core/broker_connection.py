@@ -10,7 +10,7 @@ from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback
 from nats.aio.msg import Msg as NatsBrokerMsg
 from nats.aio.subscription import Subscription as BrokerSubscription
 
-from fastiot.core.data_models import Msg, MsgPub, MsgReq, MsgResp, Subject, ReplySubject, MsgClsPub, MsgClsReq, MsgCls, MsgClsResp
+from fastiot.core.data_models import Msg, MsgPub, MsgReq, MsgResp, Subject, ReplySubject
 from fastiot.core.serialization import serialize_from_bin, serialize_to_bin
 from fastiot.env import env_broker
 

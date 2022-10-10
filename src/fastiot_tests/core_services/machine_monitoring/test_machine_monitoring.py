@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 import tempfile
 import threading
@@ -7,17 +6,16 @@ import unittest
 from unittest.mock import patch, Mock
 
 from opcua import Client, Server
-from fastiot.core import broker_connection
+
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.core_uuid import get_uuid
-from fastiot.env.env_constants import *
 from fastiot.env.env import env_opcua, env_broker
+from fastiot.env.env_constants import *
 from fastiot.env.model import OPCUARetrievalMode
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.ports import get_local_random_port
 from fastiot_core_services.machine_monitoring.machine_monitoring_module import MachineMonitoring
-
 
 module_id = "machine_monitoring"
 

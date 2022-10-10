@@ -80,8 +80,8 @@ MsgClsResp = Type[MsgResp]
 
 class FastIoTRequest(FastIoTData):
     """
-    Base datatype for handling requests. Please refer to :ref:`tut-custom_data_types` for more information about creating
-    your own data types.
+    Base datatype for handling requests. Please refer to :ref:`tut-custom_data_types` for more information about
+    creating your own data types.
     """
     _reply_cls: Optional[Type[FastIoTResponse]] = None
     """

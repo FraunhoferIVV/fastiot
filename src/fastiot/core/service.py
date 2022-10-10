@@ -191,7 +191,7 @@ class FastIoTService:
     async def request_shutdown(self, reason: str = ''):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
         if self._shutdown_event.is_set() is False and reason:
-            logging.info(f"Initial shutdown requested with reason: {reason}")
+            logging.info("Initial shutdown requested with reason: %s.", str(reason))
         self._shutdown_event.set()
 
     async def _start_annotated_loops(self):

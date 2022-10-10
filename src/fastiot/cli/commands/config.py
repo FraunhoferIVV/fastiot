@@ -222,7 +222,8 @@ def _create_ports(env: Dict[str, str], service_env: Dict[str, str], manifest: Se
     return ports
 
 
-def _create_volumes(env: Dict[str, str], service_env: Dict[str, str], config_dir: str, manifest: ServiceManifest) -> List[str]:
+def _create_volumes(env: Dict[str, str], service_env: Dict[str, str],
+                    config_dir: str, manifest: ServiceManifest) -> List[str]:
     volumes = []
     for volume in manifest.volumes:
         external_volume = env.get(volume.env_variable, volume.location)

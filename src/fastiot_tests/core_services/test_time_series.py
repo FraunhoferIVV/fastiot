@@ -100,8 +100,8 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
                      }]
             await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data,
                                                 precision='ms')
-        else:
-            await asyncio.sleep(0.05)  # Making sure the data is stored in the db
+
+        await asyncio.sleep(0.05)  # Making sure the data is stored in the db
         subject = HistObjectReq.get_reply_subject(name="things")
         reply: HistObjectResp = await self.broker_connection.request(subject=subject,
                                                                      msg=HistObjectReq(machine="test_machine",

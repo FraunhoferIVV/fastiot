@@ -22,8 +22,8 @@ def parse_bool_flag(env_var: str, default: bool) -> bool:
     """
     if env_var in os.environ:
         return os.environ[env_var].lower() == 'true'
-    else:
-        return default
+
+    return default
 
 
 class BasicEnv:
@@ -364,7 +364,7 @@ class OPCUAEnv:
         the connection to the machine is considered lost. This value must be positive. A value of zero means the
         connection is never considered lost.
         """
-        value = float(os.getenv(FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY, 0.0))
+        value = float(os.getenv(FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY, "0.0"))
         if value < 0.0:
             raise ValueError(
                 'Environment variable "FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY" is negative which is invalid.'
