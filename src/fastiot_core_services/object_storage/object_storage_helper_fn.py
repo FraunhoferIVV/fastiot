@@ -49,6 +49,5 @@ def get_collection_name(name: str) -> str:
     should be saved in the collection with their own name.
     """
     subject_name = sanitize_subject_name(name)
-    collection_name = 'object_storage.'+ subject_name.split('.')[1]
+    collection_name = 'object_storage.' + subject_name.split('.')[1]
     return collection_name
-

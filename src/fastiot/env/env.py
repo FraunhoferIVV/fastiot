@@ -38,8 +38,8 @@ class BasicEnv:
 
         Use to get the config dir, defaults to :file:`/etc/fastiot` if not set.
 
-        Usually, you don't need to specify this variable manually, instead use config-dir entry on deployments. This way,
-        this variable is automatically injected.
+        Usually, you don't need to specify this variable manually, instead use config-dir entry on deployments. This
+        way, this variable is automatically injected.
 
         On automatic project setups everything should work out fine for you!
         """
@@ -49,10 +49,10 @@ class BasicEnv:
     def log_level_no(self) -> int:
         """ .. envvar:: FASTIOT_LOG_LEVEL_NO
 
-        This environment variable is used to set the logging Level.
+        This environment variable is used to set the logging Level. Defaults to Info-Level (=20)
         Level for logging s. https://docs.python.org/3/library/logging.html#logging-levels
         """
-        return int(os.getenv(FASTIOT_LOG_LEVEL_NO, logging.INFO))
+        return int(os.getenv(FASTIOT_LOG_LEVEL_NO, str(logging.INFO)))
 
     @property
     def volume_dir(self) -> str:

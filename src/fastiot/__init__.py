@@ -1,5 +1,9 @@
+"""
+FastIoT Library
+===============
+"""
 from fastiot.cli.version import get_version
-from fastiot.logger import logging
+from fastiot.core.logger import logging
 from fastiot.cli.commands import *
 from fastiot.cli.common.infrastructure_services import *
 

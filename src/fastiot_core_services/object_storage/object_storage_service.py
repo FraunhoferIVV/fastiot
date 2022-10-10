@@ -26,8 +26,8 @@ class ObjectStorageService(FastIoTService):
 
         database = self._mongodb_handler.get_database(env_mongodb.name)
         self._mongo_object_db_col = database.get_collection(get_collection_name(service_config['subject_name']))
-        mongo_indicies = service_config['search_index']
-        for index_name in mongo_indicies:
+        mongo_indices = service_config['search_index']
+        for index_name in mongo_indices:
             self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
                                                index=[(index_name, pymongo.ASCENDING)],
                                                index_name=f"{index_name}_ascending")
@@ -46,7 +46,7 @@ class ObjectStorageService(FastIoTService):
         else:
             timestamp = datetime.utcnow()
         mongo_data = to_mongo_data(timestamp=timestamp, subject_name=subject_name, msg=msg)
-        logging.debug("Converted Mongo data is %s" % mongo_data)
+        logging.debug("Converted Mongo data is %s", mongo_data)
         self._mongo_object_db_col.insert_one(mongo_data)
 
     async def _cb_reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
