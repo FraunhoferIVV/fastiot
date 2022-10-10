@@ -2,10 +2,7 @@ import logging
 import sys
 import time
 
-import aiohttp
-
 from fastiot.env.env import env_influxdb
-from fastiot.exceptions import ServiceError
 
 
 class Client:
@@ -25,19 +22,21 @@ async def get_async_influxdb_client_from_env():
 
     >>> influxdb_client = await get_async_influxdb_client_from_env()
     """
-
     if Client.client is None:
         Client.client = await create_async_influxdb_client_from_env()
     return Client.client
 
+
 async def get_new_async_influx_client_from_env():
+    """
+    Instead of using the singleton like in :meth:`get_async_influxdb_client_from_env` a new connection to the database
+    will be established. This seems to be necessary in some test cases.
+    """
     Client.client = await create_async_influxdb_client_from_env()
     return Client.client
 
 
-
 async def create_async_influxdb_client_from_env():
-
     try:
         from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
         from influxdb_client.client.exceptions import InfluxDBError
@@ -78,4 +77,3 @@ async def create_async_influxdb_client_from_env():
         num_tries -= 1
     raise ServiceError("Could not connect to InfluxDB")
     """
-

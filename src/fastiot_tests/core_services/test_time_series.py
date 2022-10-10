@@ -5,7 +5,8 @@ import datetime
 
 from fastiot.core.broker_connection import NatsBrokerConnection
 
-from fastiot.db.influxdb_helper_fn import get_new_async_influx_client_from_env
+from fastiot.db.influxdb_helper_fn import get_new_async_influx_client_from_env, get_async_influxdb_client_from_env, \
+    create_async_influxdb_client_from_env
 from fastiot.env.env import env_influxdb
 
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
@@ -23,11 +24,13 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         populate_test_env()
         self.client = await get_new_async_influx_client_from_env()
-        self.write_api = self.client.write_api()
-        self.query_api = self.client.query_api()
         await self.delete_data()
         self.broker_connection = await NatsBrokerConnection.connect()
         await self._start_service()
+
+    async def asyncTearDown(self):
+        self.service_task.cancel()
+        await self.client.close()
 
     async def _start_service(self):
         service = TimeSeriesService(broker_connection=self.broker_connection)
@@ -46,9 +49,6 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
         await self.client.delete_api().delete(stop="2024-01-01T00:00:00Z", start="1970-01-01T00:00:00Z",
                                               bucket=env_influxdb.bucket, predicate='machine="test_machine"',
                                               org=env_influxdb.organisation)
-
-    async def asyncTearDown(self):
-        self.service_task.cancel()
 
     async def test_storage(self):
         await self.insert_data()
