@@ -45,7 +45,7 @@ class MachineMonitoring(FastIoTService):
             self._logger.warning(f'Config dir "{config_dir}" does not exist')
 
     async def _start(self):
-        if env_opcua.max_allowed_data_delay is not None:
+        if env_opcua.max_allowed_data_delay > 0.0:
             self._logger.info("Opcua max allowed data delay is set.")
         else:
             self._logger.info("Opcua max allowed data delay is not set.")

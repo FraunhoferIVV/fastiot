@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch, Mock
 
@@ -38,36 +39,47 @@ _machine_monitoring_sensors = {
 
 
 class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self):
-        populate_test_env()
-        os.environ[FASTIOT_CONFIG_DIR] = os.path.dirname(__file__)
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         random_port = get_local_random_port()
         os.environ[FASTIOT_OPCUA_ENDPOINT_URL] = f"opc.tcp://127.0.0.1:{random_port}"
+        cls._server_thread = threading.Thread(cls._start_server_cb(), daemon=True).start()
 
-        self._server = Server()
-        self._server.set_endpoint(env_opcua.endpoint_url)
-        self._server.set_server_name("Sim OpcUa Machine - Object Server")
+    @classmethod
+    def _start_server_cb(cls):
+        cls._server = Server()
+        cls._server.set_endpoint(env_opcua.endpoint_url)
+        cls._server.set_server_name("Sim OpcUa Machine - Object Server")
 
         # setup our own namespace, not really necessary but should as spec
         uri = "http://dummyMachine.device.io"
-        self._idx = self._server.register_namespace(uri)
+        cls._idx = cls._server.register_namespace(uri)
 
-        self._objects = self._server.get_objects_node()
-        machine_part1 = self._objects.add_object(self._idx, "MachPart1")
-        machine_part2 = self._objects.add_object(self._idx, "MachPart2")
+        cls._objects = cls._server.get_objects_node()
+        machine_part1 = cls._objects.add_object(cls._idx, "MachPart1")
+        machine_part2 = cls._objects.add_object(cls._idx, "MachPart2")
 
-        self._state_variable_int = machine_part1.add_variable(self._idx, "MainEngineInt", 1)
-        self._state_variable_bool = machine_part1.add_variable(self._idx, "MainEngineBool", False)
-        self._sim_variable = machine_part2.add_variable(self._idx, "SimVar", 20)
-        self._zero_variable = machine_part2.add_variable(self._idx, "ZeroVar", 0)
-        self._server.start()
+        cls._state_variable_int = machine_part1.add_variable(cls._idx, "MainEngineInt", 1)
+        cls._state_variable_bool = machine_part1.add_variable(cls._idx, "MainEngineBool", False)
+        cls._sim_variable = machine_part2.add_variable(cls._idx, "SimVar", 20)
+        cls._zero_variable = machine_part2.add_variable(cls._idx, "ZeroVar", 0)
+        cls._server.start()
 
+    @classmethod
+    def tearDownClass(cls):
+        cls._server.stop()
+        super().tearDownClass()
+
+    async def asyncSetUp(self):
+        populate_test_env()
+        os.environ[FASTIOT_CONFIG_DIR] = os.path.dirname(__file__)
         self.broker_connection = await NatsBrokerConnection.connect()
 
     async def ascyncTearDown(self):
         del os.environ[FASTIOT_CONFIG_DIR]
         await self.broker_connection.close()
-        self._server.stop()
 
     async def test_machine_monitoring_empty_config(self):
         async with MachineMonitoring(broker_connection=self.broker_connection):
@@ -94,7 +106,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             thing: Thing = await msg_queue.get()
             msg_queue.task_done()
             self.assertEqual('sim_machine', thing.machine)
-            self.assertEqual('SimVar', thing.name)
+            self.assertEqual('ns=2;i=5', thing.name)
             self.assertEqual(20, thing.value)
 
     async def test_publish_multiple_machine_data_msg_polling(self):
@@ -121,6 +133,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             machine_data: Thing = await asyncio.wait_for(msg_queue.get(), env_broker.default_timeout)
             msg_queue.task_done()
             self.assertEqual(10, machine_data.value)
+            self._sim_variable.set_value(20)
 
     async def test_publish_machine_data_zero_polling(self):
         os.environ[FASTIOT_OPCUA_RETRIEVAL_MODE] = OPCUARetrievalMode.polling.value
@@ -131,7 +144,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         await self._execute_publish_machine_data_zero()
 
     async def _execute_publish_machine_data_zero(self):
-        os.environ[FASTIOT_MACHINE_MONITORING_CONFIG_NAME] = 'config_zero_sensor'
+        os.environ[FASTIOT_MACHINE_MONITORING_CONFIG_NAME] = 'config_zero_var_sensor'
 
         msg_queue = asyncio.Queue()
 
