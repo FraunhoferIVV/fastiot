@@ -7,6 +7,8 @@ import yaml
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator
 
+from fastiot.util.case_conversions import kebab_case_to_snake_case
+
 
 class InfrastructureServiceConfig(BaseModel):
     external: bool = False
@@ -115,15 +117,7 @@ class DeploymentConfig(BaseModel):
     def from_yaml_file(filename) -> "DeploymentConfig":
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
-            if "config-dir" in config:
-                config["config_dir"] = config["config-dir"]
-                del config["config-dir"]
-            if "docker-registry" in config:
-                config["docker_registry"] = config["docker-registry"]
-                del config["docker-registry"]
-            if "infrastructure-services" in config:
-                config["infrastructure_services"] = config["infrastructure-services"]
-                del config["infrastructure-services"]
+            kebab_case_to_snake_case(config)
             if "infrastructure_services" in config:
                 for item, value in config["infrastructure_services"].items():
                     if value is None:

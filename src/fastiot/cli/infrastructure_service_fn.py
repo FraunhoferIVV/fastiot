@@ -1,8 +1,8 @@
 """ Some helpers to work with external services: importing, port handling, … """
-from socket import socket
 from typing import Dict
 
 from fastiot.cli.model import InfrastructureService
+from fastiot.util.ports import get_local_random_port
 
 
 def get_infrastructure_service_ports_randomly() -> Dict[str, int]:
@@ -17,9 +17,7 @@ def get_infrastructure_service_ports_randomly() -> Dict[str, int]:
     ports = {}
     for service in InfrastructureService.all.values():
         for port in service.ports:
-            with socket() as temp_socket:
-                temp_socket.bind(('', 0))
-                ports[port.env_var] = temp_socket.getsockname()[1]
+            ports[port.env_var] = get_local_random_port()
     return ports
 
 

@@ -43,6 +43,7 @@ package_data.append(requirements_file)
 mongo_db_deps = ["pymongo>=3.9.0"]
 maria_db_deps = ["PyMySQL>=0.9.3"]
 influx_db_deps = ["influxdb-client[async]>=1.32"]
+opcua_deps = ["opcua>=0.98.8,<1"]
 
 setup(
     name='fastiot',
@@ -61,7 +62,8 @@ setup(
         "MongoDB": mongo_db_deps,
         "MariaDB": maria_db_deps,
         "InfluxDB": influx_db_deps,
-        "all": [*mongo_db_deps, *maria_db_deps, *influx_db_deps]
+        "OPCUA": opcua_deps,
+        "all": [*mongo_db_deps, *maria_db_deps, *influx_db_deps, *opcua_deps]
     }
 )
 

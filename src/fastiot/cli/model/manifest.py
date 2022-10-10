@@ -10,6 +10,7 @@ from pydantic.main import BaseModel
 
 from fastiot.cli.cli_logging import get_cli_logger
 from fastiot.cli.constants import DEFAULT_BASE_IMAGE, MANIFEST_FILENAME
+from fastiot.util.case_conversions import kebab_case_to_snake_case
 
 
 class Port(BaseModel):
@@ -91,9 +92,12 @@ class CPUPlatform(str, Enum):
         return self.value
 
 
-class Healthcheck(str, Enum):
-    """ TODO: Add some description here! """
-    error_log = "error_log"
+class Healthcheck(BaseModel):
+    cmd: str = ''
+    interval: float = 30.0
+    timeout: float = 30.0
+    start_period: float = 0.0
+    retries: int = 3
 
 
 class Vue(BaseModel):
@@ -141,13 +145,22 @@ class ServiceManifest(BaseModel):
     If this does not work for you, you may also provide a :file:`Dockerfile` in your service which will automatically be
     used.
     """
-    volumes: List[Volume] = []  # Volumes to be mounted in the container
-    devices: List[Device] = []  # Devices, e.g. serial devices, to be mounted in the container
+    volumes: List[Volume] = []
+    """
+    Volumes to be mounted in the container
+    """
+    devices: List[Device] = []
+    """
+    Devices, e.g. serial devices, to be mounted in the container
+    """
     depends_on: List[str] = []
     """
     List of infrastructure services that need to be deployed
     """
     mount_config_dir: MountConfigDirEnum = MountConfigDirEnum.optional
+    """
+    Specify, if a config dir must be mounted.
+    """
     privileged: bool = False
     """
     Enable if this service needs privileged permissions inside docker, e.g. for hardware access
@@ -156,7 +169,10 @@ class ServiceManifest(BaseModel):
     """ Define the cpu platforms to build the container for. It defaults to amd64. If doing local builds the first one
     specified (or amd64 if none) will be used to build the image. """
 
-    healthcheck: Optional[Healthcheck] = None  # Configure healthcheck for the container
+    healthcheck: Healthcheck = Healthcheck()
+    """
+    Configure healthcheck for the container
+    """
     copy_dirs_to_container: List[str] = []
     """
     Directories which shall be copied to container. They must be specified relative to :file:`manifest.yaml`.
@@ -184,6 +200,8 @@ class ServiceManifest(BaseModel):
         """ Does the magic of import yaml to pydantic model"""
         with open(filename, 'r') as config_file:
             config = yaml.safe_load(config_file)
+            kebab_case_to_snake_case(config)
+
         manifest = ServiceManifest(**config['fastiot_service'])
 
         if check_service_name and manifest.name != check_service_name:

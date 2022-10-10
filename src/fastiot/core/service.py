@@ -2,7 +2,7 @@ import asyncio
 import signal
 from typing import List
 
-from fastiot import logging
+from fastiot.core.logger import logging
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
 from fastiot.env import env_basic
 from fastiot.exceptions.exceptions import ShutdownRequestedInterruption
@@ -52,6 +52,7 @@ class FastIoTService:
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
+        self._logger = logging
 
         for name in dir(self):
             if name.startswith('__'):
@@ -127,7 +128,7 @@ class FastIoTService:
                 self._shutdown_event.wait(),
                 timeout=timeout
             )
-        except TimeoutError:
+        except asyncio.exceptions.TimeoutError:
             result = False
         return result
 
@@ -139,23 +140,31 @@ class FastIoTService:
         :param coro: The coroutine to wait for
         :returns The result of the coroutine
         """
+        do_raise_err = True
         async def _wait_and_raise_interruption():
+            nonlocal do_raise_err
             await self.wait_for_shutdown()
-            raise ShutdownRequestedInterruption()
+            if do_raise_err:
+                raise ShutdownRequestedInterruption()
 
         for c in asyncio.as_completed([coro, _wait_and_raise_interruption()]):
-            return await c
+            result = await c
+            do_raise_err = False  # We don't want error to be raised if coroutine finished successfully.
+            return result
 
     async def __aenter__(self):
         self._shutdown_event.clear()
         await self._start()
-        await self._start_service_annotations()
+        await self._start_annotated_subs()
+        await self._start_annotated_loops()
+        await asyncio.sleep(0.0)  # pass control once so that stuff gets initialized
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.request_shutdown()
-        await self._stop_service_annotations()
+        await self._stop_subs()
         await self._stop()
+        await self._stop_tasks()
         return False
 
     async def run(self):
@@ -170,12 +179,14 @@ class FastIoTService:
         signal.signal(signal.SIGTERM, handler)
 
         await self._start()
-        await self._start_service_annotations()
+        await self._start_annotated_subs()
+        await self._start_annotated_loops()
 
         await self.wait_for_shutdown()
 
-        await self._stop_service_annotations()
+        await self._stop_subs()
         await self._stop()
+        await self._stop_tasks()
 
     async def request_shutdown(self, reason: str = ''):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
@@ -183,10 +194,11 @@ class FastIoTService:
             logging.info(f"Initial shutdown requested with reason: {reason}")
         self._shutdown_event.set()
 
-    async def _start_service_annotations(self):
+    async def _start_annotated_loops(self):
         for loop_fn in self._loop_fns:
             self.run_task(self._loop_task_cb(loop_fn=loop_fn))
 
+    async def _start_annotated_subs(self):
         for subscription_fn in self._subscription_fns:
             sub = await self.broker_connection.subscribe(
                 subject=subscription_fn._fastiot_subject,
@@ -204,11 +216,16 @@ class FastIoTService:
     async def _loop_task_cb(self, loop_fn):
         while True:
             awaitable = await loop_fn()
-            await self.run_coro(awaitable)
+            try:
+                await self.run_coro(awaitable)
+            except ShutdownRequestedInterruption:
+                break
 
-    async def _stop_service_annotations(self):
+    async def _stop_subs(self):
         for sub in self._subs:
             await sub.unsubscribe()
-        await asyncio.gather(*self._tasks, *[sub.unsubscribe() for sub in self._subs], return_exceptions=True)
         self._subs = []
+
+    async def _stop_tasks(self):
+        await asyncio.gather(*self._tasks, return_exceptions=True)
         self._tasks = []
