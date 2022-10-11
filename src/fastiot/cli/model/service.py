@@ -65,8 +65,11 @@ class InfrastructureServicePort(BaseModel):
 class InfrastructureServiceVolume(BaseModel):
     container_volume: str
     """ The volume inside the container """
-    default_volume_mount: str = 'tmpfs'
+    default_volume_mount: str
     """ The default location to mount the volume to. A value of 'tmpfs' will mount the container to a
+    temporary file system inside the RAM. """
+    default_volume_mount_for_integration_tests: str = 'tmpfs'
+    """ The default location to mount the volume to for integration tests. A value of 'tmpfs' will mount the container to a
     temporary file system inside the RAM. """
     env_var: str
     """ The env var which can be used for volume mount modification. """

@@ -106,6 +106,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             env_service_internal_modifications=env_service_internal_modifications,
             infrastructure_ports=infrastructure_ports,
             deployment_config=deployment_config,
+            is_integration_test_deployment=deployment_name == context.integration_test_deployment
         )
         services = _create_services_compose_infos(
             env=env,
@@ -254,6 +255,7 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                                                  env_service_internal_modifications: Dict[str, str],
                                                  infrastructure_ports: Dict[str, int],
                                                  deployment_config: DeploymentConfig,
+                                                 is_integration_test_deployment: bool
                                                  ) -> List[ServiceComposeInfo]:
     services_map = InfrastructureService.all
     result = []
@@ -299,10 +301,14 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
         service_volumes: List[str] = []
         service_temp_volumes: List[str] = []
         for volume in service.volumes:
+            default_volume_mount = volume.default_volume_mount
+            if is_integration_test_deployment:
+                default_volume_mount = volume.default_volume_mount_for_integration_tests
+
             if volume.env_var:
-                value = env.get(volume.env_var, str(volume.default_volume_mount))
+                value = env.get(volume.env_var, default_volume_mount)
             else:
-                value = str(volume.default_volume_mount)
+                value = default_volume_mount
 
             if value == 'tmpfs':
                 service_temp_volumes.append(volume.container_volume)
