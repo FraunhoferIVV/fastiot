@@ -69,7 +69,8 @@ class InfrastructureServiceVolume(BaseModel):
     """ The default location to mount the volume to. A value of 'tmpfs' will mount the container to a
     temporary file system inside the RAM. """
     default_volume_mount_for_integration_tests: str = 'tmpfs'
-    """ The default location to mount the volume to for integration tests. A value of 'tmpfs' will mount the container to a
+    """ The default location to mount the volume to for integration tests. If the deployment is defined as a integration test,
+    default volume mount is not evaluated, but this variable instead. A value of 'tmpfs' will mount the container to a
     temporary file system inside the RAM. """
     env_var: str
     """ The env var which can be used for volume mount modification. """
