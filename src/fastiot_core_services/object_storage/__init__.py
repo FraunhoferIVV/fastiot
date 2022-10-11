@@ -5,7 +5,8 @@ see :func:`fastiot.db.mongodb_helper_fn.get_mongodb_client_from_env`
 ========================================
 
 This Service is intended for saving "Object" inheriting the :class:`fastiot.core.data_models.FastIoTData`,
-and requesting of historical object data.
+and requesting of historical object data. This Service is also designed to save one data type, for demanding saving multiple
+data types, you can instance multiple Services, using config file.
 
 Your Object will be saved in Dictionary in such format, 'yyy' stands for the unpacked Attributes of Object:
 
