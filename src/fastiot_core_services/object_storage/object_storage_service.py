@@ -55,7 +55,12 @@ class ObjectStorageService(FastIoTService):
         query_dict = build_query_dict(hist_object_req=hist_object_req)
         query_results = self._query_db(query_dict=query_dict, limit_nr=hist_object_req.limit)
         values = [from_mongo_data(result) for result in query_results]
-        hist_object_resp = HistObjectResp(values=values)
+        if values:
+            hist_object_resp = HistObjectResp(values=values)
+        else:
+            hist_object_resp = HistObjectResp(
+                error_msg='No query results from Mongodb, please check Connection or query',
+                values=values)
         return hist_object_resp
 
     def _query_db(self, query_dict: Dict, limit_nr: int) -> List:
