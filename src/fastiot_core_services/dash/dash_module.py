@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from random import randint
 
@@ -6,9 +5,10 @@ import dash
 import plotly.graph_objects as go
 from dash import dcc, html
 
-from fastiot.core import FastIoTService, Subject, subscribe
+from fastiot.core import FastIoTService, Subject, subscribe, ReplySubject
 from fastiot.msg.thing import Thing
-from fastiot_sample_services.dash.utils import ServerThread
+from fastiot_core_services.dash.env import env_dash
+from fastiot_core_services.dash.utils import ServerThread
 
 
 class DashModule(FastIoTService):
@@ -27,6 +27,7 @@ class DashModule(FastIoTService):
     async def _start(self):
         """ Methods to start once the module is initialized """
         self.server.start()
+        self._logger.info('Started Dash Service at %s:%s', env_dash.dash_host, env_dash.dash_port)
 
     async def _stop(self):
         """ Methods to call on module shutdown """
@@ -52,14 +53,14 @@ class DashModule(FastIoTService):
                             y=self._received_values)
 
         random_value = randint(1, 50)
-        fancy_value: Thing = self.broker_connection.request_sync(subject=Subject(name='reply_test',
-                                                                                 msg_cls=Thing, reply_cls=Thing),
-                                                                 msg=Thing(machine="Test_Machine",
-                                                                           name='Some_Sensor',
-                                                                           value=random_value,
-                                                                           timestamp=datetime.now()),
-                                                                 timeout=10)
-        #fancy_value = Thing(machine="Test_Machine", name='Some_Sensor', value=random_value, timestamp=datetime.now())
+        fancy_value: Thing = self.broker_connection.request_sync(
+            subject=ReplySubject(name='reply_test',
+                                 msg_cls=Thing, reply_cls=Thing),
+            msg=Thing(machine="Test_Machine",
+                      name='Some_Sensor',
+                      value=random_value,
+                      timestamp=datetime.now()),
+            timeout=10)
 
         trace2 = go.Scatter(x=list(range(20)),
                             y=10 * [random_value, fancy_value.value])
@@ -74,7 +75,7 @@ class DashModule(FastIoTService):
 
     @subscribe(subject=Thing.get_subject('*'))
     async def _cb_received_data(self, subject: str, msg: Thing):
-        logging.info("Received message from sensor %s: %s", msg.name, str(msg))
+        self._logger.info("Received message from sensor %s: %s", msg.name, str(msg))
         self._received_values.append(msg.value)
         self._received_values = self._received_values[-20:]
 

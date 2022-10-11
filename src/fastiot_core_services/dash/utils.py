@@ -6,7 +6,7 @@ import threading
 
 from werkzeug.serving import make_server
 
-from fastiot_sample_services.dash.env import env_dash
+from fastiot_core_services.dash.env import env_dash
 
 
 class ServerThread(threading.Thread):
