@@ -98,9 +98,12 @@ class DeploymentConfig(BaseModel):
     Overrides any docker registry specified by CLI. """
     tag: str = ''
     """ Specify a docker tag which acts as a default tag for all services (not infrastructure services). Overrides any
-    docker tag specified by CLI """
-    config_dir: str = ''
-    """ Specify a config dir. The config dir will get mounted to /etc/fastiot """
+    docker tag specified by CLI. """
+    config_dir: str = 'config_dir'
+    """ Specify a config dir. The config dir will get mounted to /etc/fastiot 
+    
+        It defaults to :file:`config_dir`  
+    """
 
     @root_validator
     def check_services(cls, values):
