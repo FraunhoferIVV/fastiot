@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Dict
 
@@ -29,7 +30,8 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
     """
     query_dict = {}
     if hist_object_req.subject_name is not None:
-        query_dict = query_dict | {"_subject": hist_object_req.subject_name}
+        subject_substr = re.sub("\ |\*|", '', hist_object_req.subject_name).split('..')[0]
+        query_dict = query_dict | {"_subject": {'$regex': subject_substr}}
     if hist_object_req.dt_start is not None and hist_object_req.dt_end is None:
         query_dict = query_dict | {"_timestamp": {'$gte': hist_object_req.dt_start}}
     if hist_object_req.dt_end is not None and hist_object_req.dt_start is None:

@@ -50,8 +50,8 @@ The code will look like:
 
 .. code:: python
 
-  hist_req_msg = HistObjectReq(dt_start=datetime(), dt_end=datetime(), limit=10, subject_name='test_subject')
-  subject = hist_req_msg.get_reply_subject(name='subject_name')
+  hist_req_msg = HistObjectReq(dt_start=datetime(), dt_end=datetime(), limit=10, subject_name='my_data_type')
+  subject = hist_req_msg.get_reply_subject(name='my_data_type')
 
 **CAUTION!** This subject_name should be the same as, which you have defined in ObjectStorageService.yaml.
 This request will reply to you a List of Dictionary.

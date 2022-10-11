@@ -36,15 +36,29 @@ class HistObjectResp(FastIoTResponse):
 
 class HistObjectReq(FastIoTRequest):
     """
-    This class is used for requesting historical data.
+    This class is used for requesting historical data of your data type.
 
-    After instancing HistObjectReq, a subject for requesting historical data must also be instanced, with the
-    subject_name 'reply_object'.
+    You can instance a HistObjectReq object like following:
 
     .. code:: python
 
-      subject = HistObjectReq.get_reply_subject()
-      ReplySubject(name='reply_object', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
+      query_dict = {'test_index': 'test'}
+      hist_object_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10, subject_name=sanitize_subject('my_data_type'), raw_query=query_dict)
+
+    More details about sanitize_subject_name() see :func:`fastiot.core.subject_helper.sanitize_subject_name`
+    This subject_name inside the HistObjectReq is the subject_name, that your data type has.
+    Your data, which will be saved in mongodb, always contains this subject_name: 'v1.my_data_type'.
+
+    After instancing HistObjectReq, a subject for requesting historical data must also be instanced, with the
+    name 'my_data_type'.
+
+    .. code:: python
+
+      reply_subject = hist_object_req_msg.get_reply_subject('my_data_type')
+
+    Then you will have a ReplySubject object like:
+
+    >>> ReplySubject(name='v1.hist_object_req.my_data_type', msg_cls=HistObjectReq, reply_cls=HistObjectResp)
 
     """
     _reply_cls = HistObjectResp
@@ -69,11 +83,5 @@ class HistObjectReq(FastIoTRequest):
     receives it.
     The handling of argument is subject to each service and may be handled different e.g. if using an InfluxDB time
     series storage or a MongoDB based object storage.
-
-    .. code:: python
-
-      query_dict = {'test_index': 'test'}
-      HistObjectReq(dt_start=dt_start, dt_end=dt_end,
-                    limit=10, subject_name=sanitize_subject('my_data_type'), raw_query=query_dict)
 
     """

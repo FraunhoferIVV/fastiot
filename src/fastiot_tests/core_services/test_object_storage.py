@@ -116,7 +116,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
             self._db_col.insert_one(test_thing_msg_mongo_dict)
         hist_req_msg = HistObjectReq(dt_start=datetime(year=2022, month=10, day=9, second=0),
                                      dt_end=datetime(year=2022, month=10, day=9, second=10),
-                                     limit=10, subject_name='v1.thing.sensor_0',
+                                     limit=10, subject_name='v1.thing.*',
                                      raw_query={'machine': 'test_machine'})
         subject = hist_req_msg.get_reply_subject(name='thing.*')
 
@@ -144,9 +144,9 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
 
         hist_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10,
                                      subject_name=sanitize_subject_name('CustomTestMsgList'))
-        subject = hist_req_msg.get_reply_subject(name='custom_test_msg_list')
+        reply_subject = hist_req_msg.get_reply_subject(name='custom_test_msg_list')
 
-        reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
+        reply: HistObjectResp = await self.broker_connection.request(subject=reply_subject, msg=hist_req_msg, timeout=10)
         values = parse_object_list(reply.values, CustomTestMsgList)
         self.assertListEqual(expected_object_list, values)
 

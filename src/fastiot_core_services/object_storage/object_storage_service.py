@@ -17,11 +17,12 @@ class ObjectStorageService(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        service_config = read_config(self)
-
         self._mongodb_handler = MongoDBHandler()
-
         database = self._mongodb_handler.get_database(env_mongodb.name)
+        service_config = read_config(self)
+        if not service_config:
+            self._logger.warning('Please set the config as the same as in Documentation, to get over Errors.')
+
         self._mongo_object_db_col = database.get_collection(get_collection_name(service_config['subject_name']))
         mongo_indices = service_config['search_index']
         for index_name in mongo_indices:
