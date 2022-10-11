@@ -4,7 +4,7 @@ from typing import List, Dict
 import pymongo
 
 from fastiot.core import FastIoTService, Subject
-from fastiot.core.subject_helper import sanitize_subject_name
+from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
 from fastiot.env import env_mongodb
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.util.read_yaml import read_config
@@ -23,15 +23,18 @@ class ObjectStorageService(FastIoTService):
         if not service_config:
             self._logger.warning('Please set the config as the same as in Documentation, to get over Errors.')
 
-        self._mongo_object_db_col = database.get_collection(get_collection_name(service_config['subject_name']))
+        self._mongo_object_db_col = database.get_collection(
+            get_collection_name(service_config['collection'],
+                                service_config['subject_name']))
         mongo_indices = service_config['search_index']
         for index_name in mongo_indices:
             self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
                                                index=[(index_name, pymongo.ASCENDING)],
                                                index_name=f"{index_name}_ascending")
-        self.subject = Subject(name=sanitize_subject_name(service_config['subject_name']), msg_cls=dict)
-        self.reply_subject = HistObjectReq.get_reply_subject(name=service_config['subject_name'],
-                                                             reply_cls=HistObjectResp)
+        self.subject = Subject(name=sanitize_pub_subject_name(service_config['subject_name']), msg_cls=dict)
+        self.reply_subject = HistObjectReq.get_reply_subject(
+            name=filter_specific_sign(service_config['subject_name']),
+            reply_cls=HistObjectResp)
 
     async def _start(self):
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)

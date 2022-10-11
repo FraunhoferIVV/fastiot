@@ -5,7 +5,7 @@ HIERARCHY = '>'
 WILDCARD_SAME_LEVEL = '*'
 
 
-def sanitize_subject_name(subject_name: str) -> str:
+def sanitize_pub_subject_name(subject_name: str) -> str:
     """
     This function will help you to check if the subject in right format and build it for you.
     In FastIoT Framework, the right format base for subject_name is: "v1.my_message**", this will only subscribe till
@@ -38,3 +38,9 @@ def sanitize_subject_name(subject_name: str) -> str:
 def _convert_camelcase_to_snakecase(camel_list: list[str]) -> str:
     snake_list = [f"{re.sub(r'(?<!^)(?=[A-Z])', '_', camel).lower()}" for camel in camel_list]
     return '.'.join(snake_list)
+
+
+def filter_specific_sign(name: str) -> str:
+    sub_str = re.sub('\ |\*|', '', name)
+    sub_str_l = [s for s in sub_str.split('.') if s != '']
+    return '.'.join(sub_str_l)

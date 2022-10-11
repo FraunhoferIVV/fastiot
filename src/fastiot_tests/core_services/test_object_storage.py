@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.data_models import FastIoTData, FastIoTPublish
-from fastiot.core.subject_helper import sanitize_subject_name
+from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, FASTIOT_SERVICE_ID
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
@@ -44,9 +44,9 @@ def convert_message_to_mongo_data(msg: Type[Union[Type[FastIoTData], BaseModel, 
 
 class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
 
-    def get_mongo_col(self, service_id: str, collection_name: str):
+    def get_mongo_col(self, service_id: str, collection_name: str, subject_name: str):
         os.environ[FASTIOT_SERVICE_ID] = service_id
-        collection_name = get_collection_name(collection_name)
+        collection_name = get_collection_name(collection_name, subject_name)
         self._db_client = MongoDBHandler()
         database = self._db_client.get_database(env_mongodb.name)
         self._db_col = database.get_collection(collection_name)
@@ -72,7 +72,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         await self.broker_connection.close()
 
     async def test_thing_storage(self):
-        self.get_mongo_col(service_id='1', collection_name='thing')
+        self.get_mongo_col(service_id='1', collection_name='object_storage', subject_name='thing.*')
         await self._start_service()
         self._db_col.delete_many({})
         for i in range(5):
@@ -86,7 +86,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(values[0]['_subject'], 'v1.thing.sensor_0')
 
     async def test_object_storage(self):
-        self.get_mongo_col(service_id='2', collection_name='custom_test_msg_list')
+        self.get_mongo_col(service_id='2', collection_name='object_storage', subject_name='custom_test_msg_list')
         self._db_col.delete_many({})
         test_custom_msg_l = CustomTestMsgList(
             values=[CustomTestMsg(x=FIOTTestValue(real=1, img=2),
@@ -100,7 +100,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(values[0]), 4)
 
     async def test_request_response_thing(self):
-        self.get_mongo_col(service_id='1', collection_name='thing')
+        self.get_mongo_col(service_id='1', collection_name='object_storage', subject_name='thing.*')
         await self._start_service()
         self._db_col.delete_many({})
 
@@ -118,14 +118,15 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
                                      dt_end=datetime(year=2022, month=10, day=9, second=10),
                                      limit=10, subject_name='v1.thing.*',
                                      raw_query={'machine': 'test_machine'})
-        subject = hist_req_msg.get_reply_subject(name='thing.*')
+        subject = hist_req_msg.get_reply_subject(name=filter_specific_sign('thing.*'))
 
         reply: HistObjectResp = await self.broker_connection.request(subject=subject, msg=hist_req_msg, timeout=10)
         values = [parse_object(v, Thing) for v in reply.values]
         self.assertEqual(expected_thing_list[0], values[0])
+        self.assertEqual(len(expected_thing_list), len(values))
 
     async def test_request_response_object(self):
-        self.get_mongo_col(service_id='2', collection_name='CustomTestMsgList')
+        self.get_mongo_col(service_id='2', collection_name='object_storage', subject_name='CustomTestMsgList')
         await self._start_service()
 
         expected_object_list = []
@@ -143,7 +144,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
             self._db_col.insert_one(test_object_msg_mongo_dict)
 
         hist_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10,
-                                     subject_name=sanitize_subject_name('CustomTestMsgList'))
+                                     subject_name=sanitize_pub_subject_name('CustomTestMsgList'))
         reply_subject = hist_req_msg.get_reply_subject(name='custom_test_msg_list')
 
         reply: HistObjectResp = await self.broker_connection.request(subject=reply_subject, msg=hist_req_msg, timeout=10)
