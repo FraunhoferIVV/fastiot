@@ -1,8 +1,7 @@
 """ Data model for fastiot service manifests """
-import os
 import subprocess
-import tempfile
 from enum import Enum
+from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 import yaml
@@ -101,7 +100,7 @@ class Healthcheck(BaseModel):
     """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n 
     seconds. """
     interval: str = "30s"
-    """ Intervall to check the service """
+    """ Interval to check the service """
     timeout: str = "30s"
     """ Timeout for the command"""
     start_period: str = "1s"
@@ -236,13 +235,11 @@ class ServiceManifest(BaseModel):
             if ret != 0:
                 raise OSError(f"Could not pull image {docker_image_name} from registry.")
 
-        with tempfile.TemporaryDirectory() as tempdir:
-            tempfile_name = os.path.join(tempdir, MANIFEST_FILENAME)
-            export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME} > {tempfile_name}"
-            get_cli_logger().info('Exporting manifest from docker image: %s', docker_image_name)
-            get_cli_logger().debug('Using command `%s`', export_cmd)
-            ret = os.system(export_cmd)
+        export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME}"
+        get_cli_logger().info('Exporting manifest from docker image: %s', docker_image_name)
+        get_cli_logger().debug('Using command `%s`', export_cmd)
+        with NamedTemporaryFile() as tmp_file:
+            ret = subprocess.call(export_cmd.split(), stdout=tmp_file, stderr=subprocess.STDOUT)
             if ret != 0:
                 raise OSError(f"Could not read manifest.yaml file from docker image {docker_image_name}")
-
-            return cls.from_yaml_file(filename=tempfile_name)
+            return cls.from_yaml_file(filename=tmp_file.name)
