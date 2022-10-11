@@ -26,9 +26,10 @@ class TimeSeriesService(FastIoTService):
     @subscribe(subject=Thing.get_subject(env.subscribe_subject))
     async def consume(self, msg: Thing):
 
+        # TODO: Add unit from `msg.unit`
         data = [{"measurement": str(msg.name),
                  "tags": {"machine": str(msg.machine)},
-                 "fields": {"value": str(msg.value) + " " + str(msg.unit)},
+                 "fields": {"value": msg.value},
                  "time": msg.timestamp
                  }]
         await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation,
