@@ -1,4 +1,3 @@
-
 fastiot_service:
   name: dash
 
@@ -6,7 +5,7 @@ fastiot_service:
 
   ports: # List all ports of the module
     - port: 5801
-      env_variable: "EXAMPLE_SAM_DASH_PORT"
+      env_variable: "FASTIOT_SAMPLE_DASH_PORT"
 
   depends_on:
     - nats

@@ -246,7 +246,8 @@ class ServiceManifest(BaseModel):
             tmp_file.seek(0)  # Make sure to start writing at the very beginning of the file
             start_write = False
             for line in lines:
-                if not start_write and line.startswith(b'fastiot_service:'):  # Now in the cat output and the yaml part
+                if not start_write and (line.startswith(b'fastiot_service:') or line.startswith(b'fastiot-service:')):
+                    # Now in the cat output and the yaml part
                     start_write = True
                 if start_write:
                     tmp_file.write(line)
