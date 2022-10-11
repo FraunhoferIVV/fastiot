@@ -1,5 +1,6 @@
 fastiot_service:
   name: object_storage
+  mount_config_dir: required
 
   depends_on:
     - nats
