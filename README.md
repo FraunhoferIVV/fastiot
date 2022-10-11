@@ -14,7 +14,7 @@ As for now the overall framework has only been used and tested on Linux systems.
 A full documentation is available at http://docs.dev.ivv-dd.fhg.de/fastiot/_latest/
 
 If you use this framework in your scientific projects please cite: 
-> Konstantin Merker, Tilman Klaeger, Lukas Oehm. „A Holistic Approach for Rapid Development of IIoT Systems“, 2022. https://doi.org/10.48550/arXiv.2201.13243.
+> Konstantin Merker, Tilman Klaeger, Lukas Oehm. "A Holistic Approach for Rapid Development of IIoT Systems"“", 2022. https://doi.org/10.48550/arXiv.2201.13243.
 
 ## License
 
@@ -70,4 +70,21 @@ To run services locally, in your IDE or within a container you may also refer to
 
 ## Developing FastIoT
 
-Simply check out this project and install the dependencies listed in `requirements.txt`. 
+Simply check out this project and install the dependencies listed in `requirements.txt`. To run all tests and sample 
+services you may also install additional packages listed in `requirements-complete.txt`. 
+
+### Project structure
+
+A detailed structure for all projects based on FastIoT is listed in the documentation. Here just the few most important 
+parts are listed:
+
+* `src/fastiot`: The core library and base with CLI, message handling, …
+* `src/fastiot_core_services`: Core Services to use directly in any project
+* `src/fastiot_sample_services`: Some examples about how to write services. Maybe used as copy and paste template for own services.
+
+### Release process
+
+Currently, and subject to change, new commits in the main-branch will rise the version number automatically and count 
+from the last tag set.
+
+Once the interfaces are proven to be stable, development will take place in specific dev branches and only be merged to main for a new release.
