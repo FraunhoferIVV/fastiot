@@ -99,7 +99,7 @@ class DeploymentConfig(BaseModel):
     tag: str = ''
     """ Specify a docker tag which acts as a default tag for all services (not infrastructure services). Overrides any
     docker tag specified by CLI. """
-    config_dir: str = 'config_dir'
+    config_dir: str = './config_dir'
     """ Specify a config dir. The config dir will get mounted to /etc/fastiot 
     
         It defaults to :file:`config_dir`  
