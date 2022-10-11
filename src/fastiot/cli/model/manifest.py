@@ -1,8 +1,8 @@
 """ Data model for fastiot service manifests """
 import os
+import subprocess
 import tempfile
 from enum import Enum
-from shlex import quote as shlex_quote
 from typing import List, Optional
 
 import yaml
@@ -93,9 +93,17 @@ class CPUPlatform(str, Enum):
 
 
 class Healthcheck(BaseModel):
+    """
+    Configuration options for Docker Healtcheck. This allows for automatic restarting the service if the service
+    does not provide the configured life sign.
+    """
     cmd: str = ''
+    """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n 
+    seconds. """
     interval: str = "30s"
+    """ Intervall to check the service """
     timeout: str = "30s"
+    """ Timeout for the command"""
     start_period: str = "1s"
     retries: int = 3
 
@@ -224,15 +232,16 @@ class ServiceManifest(BaseModel):
 
         if pull_always:
             cmd = f"docker pull {docker_image_name}"
-            ret = os.system(shlex_quote(cmd))
+            ret = subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             if ret != 0:
                 raise OSError(f"Could not pull image {docker_image_name} from registry.")
 
         with tempfile.TemporaryDirectory() as tempdir:
-            tempfile_name = f"{tempdir}/{MANIFEST_FILENAME}"
+            tempfile_name = os.path.join(tempdir, MANIFEST_FILENAME)
             export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME} > {tempfile_name}"
-            get_cli_logger().info('Exporting manifest from docker image command: %s', export_cmd)
-            ret = os.system(shlex_quote(export_cmd))
+            get_cli_logger().info('Exporting manifest from docker image: %s', docker_image_name)
+            get_cli_logger().debug('Using command `%s`', export_cmd)
+            ret = os.system(export_cmd)
             if ret != 0:
                 raise OSError(f"Could not read manifest.yaml file from docker image {docker_image_name}")
 

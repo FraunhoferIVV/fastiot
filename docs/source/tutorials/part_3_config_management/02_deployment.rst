@@ -49,6 +49,9 @@ Short Example
       tag: 0.9
       environment:
         MY_SPECIAL_VAR: 'Something'
+    other_project_service:
+       image: other_project/special_service
+       docker_registry: maybe.other.registry
 
   infrastructure-services:
     nats:
