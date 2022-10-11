@@ -229,17 +229,27 @@ class ServiceManifest(BaseModel):
         if True in [char in dangerous_chars for char in docker_image_name]:
             raise ValueError(f"Image name {docker_image_name} seems to be invalid. Aborting action.")
 
-        if pull_always:
-            cmd = f"docker pull {docker_image_name}"
-            ret = subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            if ret != 0:
-                raise OSError(f"Could not pull image {docker_image_name} from registry.")
+        pull_str = "--pull always" if pull_always else ""
 
-        export_cmd = f"docker run --rm {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME}"
+        export_cmd = f"docker run --rm {pull_str} {docker_image_name} cat /opt/fastiot/{MANIFEST_FILENAME}"
         get_cli_logger().info('Exporting manifest from docker image: %s', docker_image_name)
         get_cli_logger().debug('Using command `%s`', export_cmd)
         with NamedTemporaryFile() as tmp_file:
             ret = subprocess.call(export_cmd.split(), stdout=tmp_file, stderr=subprocess.STDOUT)
             if ret != 0:
                 raise OSError(f"Could not read manifest.yaml file from docker image {docker_image_name}")
+
+            # Remove any disturbing docker outputs from the file created from stdout
+            tmp_file.seek(0)
+            lines = tmp_file.readlines()
+            tmp_file.truncate(0)  # Empty file
+            tmp_file.seek(0)  # Make sure to start writing at the very beginning of the file
+            start_write = False
+            for line in lines:
+                if not start_write and line.startswith(b'fastiot_service:'):  # Now in the cat output and the yaml part
+                    start_write = True
+                if start_write:
+                    tmp_file.write(line)
+            tmp_file.seek(0)  # This ensures actual writing
+
             return cls.from_yaml_file(filename=tmp_file.name)
