@@ -1,7 +1,6 @@
 import datetime
-import logging
-import time
 
+from fastiot import logging
 from fastiot.core import FastIoTService, subscribe, reply
 from fastiot.db.influxdb_helper_fn import get_async_influxdb_client_from_env
 from fastiot.env.env import env_influxdb
@@ -38,7 +37,7 @@ class TimeSeriesService(FastIoTService):
         self.msg_counter_ = self.msg_counter_ + 1
         if self.msg_counter_ >= 10:
             self.msg_counter_ = 0
-            logging.debug("10 datasets written")
+            logging.info("10 datasets written")
 
     @reply(HistObjectReq.get_reply_subject(name=env.request_subject))
     async def reply(self, request: HistObjectReq):
@@ -88,5 +87,4 @@ class TimeSeriesService(FastIoTService):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     TimeSeriesService.main()
