@@ -20,6 +20,7 @@ class ExampleProducerService(FastIoTService):
                 name=sensor_name,
                 machine='FastIoT_Example_Machine',
                 value=value,
+                unit="m",
                 timestamp=datetime.utcnow()
             )
         )

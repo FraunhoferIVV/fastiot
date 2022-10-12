@@ -14,8 +14,9 @@ By default, this module stores any message written under "Thing". The data is st
     "measurement": name of the sensor
     "tags":
         "machine": name of the machine
+        "unit": the unit of your value
     "fields":
-        "value": you value," ",the unit of your value
+        "value": your value
     "time": the time the data was recorded
 
 You can request the data with an :class:`fastiot.msg.hist.HistObjectReq` with topic ``things``. By default, it returns

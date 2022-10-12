@@ -1,6 +1,6 @@
 import datetime
-import logging
 
+from fastiot import logging
 from fastiot.core import FastIoTService, subscribe, reply
 from fastiot.db.influxdb_helper_fn import get_async_influxdb_client_from_env
 from fastiot.env.env import env_influxdb
@@ -26,9 +26,9 @@ class TimeSeriesService(FastIoTService):
     @subscribe(subject=Thing.get_subject(env.subscribe_subject))
     async def consume(self, msg: Thing):
 
-        # TODO: Add unit from `msg.unit`
         data = [{"measurement": str(msg.name),
-                 "tags": {"machine": str(msg.machine)},
+                 "tags": {"machine": str(msg.machine),
+                          "unit": str(msg.unit)},
                  "fields": {"value": msg.value},
                  "time": msg.timestamp
                  }]
@@ -37,7 +37,7 @@ class TimeSeriesService(FastIoTService):
         self.msg_counter_ = self.msg_counter_ + 1
         if self.msg_counter_ >= 10:
             self.msg_counter_ = 0
-            logging.debug("10 datasets written")
+            logging.info("10 datasets written")
 
     @reply(HistObjectReq.get_reply_subject(name=env.request_subject))
     async def reply(self, request: HistObjectReq):
@@ -51,6 +51,7 @@ class TimeSeriesService(FastIoTService):
                 results.append({"machine": row.values.get("machine"),
                                 "sensor": row.get_measurement(),
                                 "value": row.get_value(),
+                                "unit": row.values.get("unit"),
                                 "timestamp": row.get_time(),
                                 })
         if len(results) > 0:
@@ -67,18 +68,17 @@ class TimeSeriesService(FastIoTService):
 
         query: str = f'from(bucket: "{env_influxdb.bucket}")'
         if request.dt_start is not None:
-            query = query + f'|> range(start: {request.dt_start.isoformat().split("+")[0]}Z'
+            query = query + f'|> range(start: {str(request.dt_start.timestamp()).split(".")[0]}'
             if request.dt_end is not None:
-                query = query + f', stop: {request.dt_end.isoformat().split("+")[0]}Z'
+                query = query + f', stop: {str(request.dt_end.timestamp()).split(".")[0]}'
             query = query + ')'
         else:
             start = datetime.datetime.utcnow() - datetime.timedelta(days=30)
-            query = query + "|> range(start:" + str(start.isoformat().split("+")[0]) + "Z)"
+            query = query + "|> range(start:" + str(str(start.timestamp()).split(".")[0]) + ")"
         if request.sensor is not None:
             query = query + f'|> filter(fn: (r) => r["_measurement"] == "{request.sensor}")'
         if request.machine is not None:
             query = query + f'|>filter(fn: (r) => r["machine"] =="{request.machine}")'
-
         query = query + f'|> limit(n: {request.limit})' \
                         '|> group(columns:["time"])' \
                         '|> sort(columns: ["_time"])'
@@ -87,5 +87,4 @@ class TimeSeriesService(FastIoTService):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     TimeSeriesService.main()
