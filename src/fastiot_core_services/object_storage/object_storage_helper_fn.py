@@ -43,14 +43,3 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
 
     return query_dict
 
-
-def get_collection_name(collection_name: str, name: str) -> str:
-    """
-    This function is used to set the collection name for object storage, different message class
-    should be saved in the collection with their own name.
-    """
-    subject_name = sanitize_pub_subject_name(name)
-    sub_subject_name_l = subject_name.split('.')[1:]
-    sub_subject_name = '.'.join(sub_subject_name_l)
-    collection_name = collection_name + '.' + filter_specific_sign(sub_subject_name)
-    return collection_name

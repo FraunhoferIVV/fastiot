@@ -10,7 +10,7 @@ from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.util.read_yaml import read_config
 from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
 from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data, build_query_dict, \
-    from_mongo_data, get_collection_name
+    from_mongo_data
 
 
 class ObjectStorageService(FastIoTService):
@@ -23,9 +23,7 @@ class ObjectStorageService(FastIoTService):
         if not service_config:
             self._logger.warning('Please set the config as the same as in Documentation, to get over Errors.')
 
-        self._mongo_object_db_col = database.get_collection(
-            get_collection_name(service_config['collection'],
-                                service_config['subject_name']))
+        self._mongo_object_db_col = database.get_collection(service_config['collection'])
         mongo_indices = service_config['search_index']
         for index_name in mongo_indices:
             self._mongodb_handler.create_index(collection=self._mongo_object_db_col,

@@ -16,7 +16,7 @@ from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.object_helper import parse_object, parse_object_list
 from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
-from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data, get_collection_name
+from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data
 from fastiot_core_services.object_storage.object_storage_service import ObjectStorageService
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
@@ -44,9 +44,8 @@ def convert_message_to_mongo_data(msg: Type[Union[Type[FastIoTData], BaseModel, 
 
 class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
 
-    def get_mongo_col(self, service_id: str, collection_name: str, subject_name: str):
+    def get_mongo_col(self, service_id: str, collection_name: str):
         os.environ[FASTIOT_SERVICE_ID] = service_id
-        collection_name = get_collection_name(collection_name, subject_name)
         self._db_client = MongoDBHandler()
         database = self._db_client.get_database(env_mongodb.name)
         self._db_col = database.get_collection(collection_name)
@@ -72,7 +71,8 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         await self.broker_connection.close()
 
     async def test_thing_storage(self):
-        self.get_mongo_col(service_id='1', collection_name='object_storage', subject_name='thing.*')
+        # this collection_name should be the same as the collection in ObjectStorageService_1.yaml
+        self.get_mongo_col(service_id='1', collection_name='things')
         await self._start_service()
         self._db_col.delete_many({})
         for i in range(5):
@@ -86,7 +86,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(values[0]['_subject'], 'v1.thing.sensor_0')
 
     async def test_object_storage(self):
-        self.get_mongo_col(service_id='2', collection_name='object_storage', subject_name='custom_test_msg_list')
+        self.get_mongo_col(service_id='2', collection_name='custom_test_msg_list')
         self._db_col.delete_many({})
         test_custom_msg_l = CustomTestMsgList(
             values=[CustomTestMsg(x=FIOTTestValue(real=1, img=2),
@@ -100,7 +100,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(values[0]), 4)
 
     async def test_request_response_thing(self):
-        self.get_mongo_col(service_id='1', collection_name='object_storage', subject_name='thing.*')
+        self.get_mongo_col(service_id='1', collection_name='things')
         await self._start_service()
         self._db_col.delete_many({})
 
@@ -126,7 +126,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(expected_thing_list), len(values))
 
     async def test_request_response_object(self):
-        self.get_mongo_col(service_id='2', collection_name='object_storage', subject_name='CustomTestMsgList')
+        self.get_mongo_col(service_id='2', collection_name='custom_test_msg_list')
         await self._start_service()
 
         expected_object_list = []

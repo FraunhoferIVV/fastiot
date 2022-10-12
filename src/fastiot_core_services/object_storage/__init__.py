@@ -23,10 +23,12 @@ ObjectStorageService_1.yaml in my_deployment/config_dir, for reading ObjectStora
   search_index:
    - "_subject"
    - "_timestamp"
-  collection: 'object_storage'
+  collection: 'thing'
   subject_name: 'thing.*'
 
 
+"_subject" and "_timestamp" is the basic index for MongoDB, **collection** is the Mongodb Collection, which you want to store your data in,
+**subject_name** is the subject, where you send your data.
 or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g.:
 
 .. code:: python
