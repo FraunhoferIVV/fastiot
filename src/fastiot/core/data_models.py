@@ -1,3 +1,4 @@
+from abc import ABC
 import random
 import re
 from typing import Type, Union, Optional
@@ -7,7 +8,7 @@ from pydantic import BaseModel
 from fastiot.core.subject_helper import MSG_FORMAT_VERSION
 
 
-class FastIoTData(BaseModel):
+class FastIoTData(BaseModel, ABC):
     """ Basemodel for all data types / data models to be transferred over the broker between the services.
     This is basically a Pydantic model with the additional handling of subjects. So any Pydantic model should work here,
     as long as it can be serialized using the library ``ormsgpack``.
@@ -36,7 +37,7 @@ Msg = Union[FastIoTData, dict]
 MsgCls = Type[Msg]
 
 
-class FastIoTPublish(FastIoTData):
+class FastIoTPublish(FastIoTData, ABC):
     """
     Base datatype for publishing data. Please refer to :ref:`tut-custom_data_types` for more information about creating
     your own data types.
@@ -63,7 +64,7 @@ MsgPub = Union[FastIoTPublish, dict]
 MsgClsPub = Type[MsgPub]
 
 
-class FastIoTResponse(FastIoTData):
+class FastIoTResponse(FastIoTData, ABC):
     """
     Base datatype for answering requests based on :class: `fastiot.core.data_models.FastIoTRequest`.
     Please refer to :ref:`tut-custom_data_types` for more information about creating your custom data types.
@@ -78,23 +79,22 @@ MsgResp = Union[FastIoTResponse, dict]
 MsgClsResp = Type[MsgResp]
 
 
-class FastIoTRequest(FastIoTData):
+class FastIoTRequest(FastIoTData, ABC):
     """
     Base datatype for handling requests. Please refer to :ref:`tut-custom_data_types` for more information about
     creating your own data types.
     """
-    _reply_cls: Optional[Type[FastIoTResponse]] = None
+    _reply_cls: Type[FastIoTResponse]
     """
     This is the best way to describe the datatype (class) your request will be answered with. As an alternative you may
     manually define a :class:`fastiot.core.data_models.ReplySubject`.
     """
     @classmethod
-    def get_reply_subject(cls, reply_cls: Optional["MsgCls"] = None, name: str = "") -> "ReplySubject":
+    def get_reply_subject(cls, name: str = "") -> "ReplySubject":
         """
         This method returns the corresponding reply subject for the data model as
          :class:`fastiot.core.data_models.ReplySubject`.
 
-        :param reply_cls: The corresponding reply class.
         :param name: The name of the subject. Please pay special attention to this parameter: The default is set to
                      ``""``. This works well for data models without hierarchies. In this case you will just subscribe
                      to ``v1.my_special_data_model``. If you use many sensors, like in the data model
@@ -102,14 +102,12 @@ class FastIoTRequest(FastIoTData):
                      ``v1.thing.my_sensor``. If you want to subscribe to all sensors use ``*`` as name. See more in
                      :ref:`publish-subscribe`
         """
-        if not reply_cls:
-            reply_cls = cls._reply_cls
-        if not reply_cls:
+        if not cls._reply_cls:
             raise TypeError("Reply class needs to be defined for class.")
         return ReplySubject(
             name=cls._get_subject_name(name=name),
             msg_cls=cls,
-            reply_cls=reply_cls
+            reply_cls=cls._reply_cls
         )
 
 
