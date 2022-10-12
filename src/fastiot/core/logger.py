@@ -16,10 +16,9 @@ def setup_logger(name: Optional[str] = 'root'):
       logging.info('info message')
 
     """
-    import logging
-    import logging.config
-    logging.config.dictConfig(get_log_config(env_basic.log_level_no))
-    return logging.getLogger(name)
+    from logging import getLogger, config  # pylint:disable=import-outside-toplevel
+    config.dictConfig(get_log_config(env_basic.log_level_no))
+    return getLogger(name)
 
 
 def get_log_config(level: int = 20) -> Dict:
@@ -34,7 +33,7 @@ def get_log_config(level: int = 20) -> Dict:
         'disable_existing_loggers': False,
         'formatters': {
             'standard': {
-                'format': '%(asctime)s.%(msecs)03d: %(levelname)-8s %(filename)s/%(funcName)s:%(lineno)s: %(message)s',
+                'format': '%(asctime)s.%(msecs)03d: %(levelname)-8s %(filename)s:%(lineno)s: %(message)s',
                 'datefmt': '%Y-%m-%d %H:%M:%S'
             }
         },
