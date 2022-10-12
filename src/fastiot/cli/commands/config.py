@@ -57,7 +57,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                 help="If this is set to True (default), it will try to import port "
                                                      "mounts from .env-file from build and use them if possible. Port "
                                                      "offset is ignored for imported ports.",
-                                                     envvar=FASTIOT_USE_PORT_IMPORT)):
+                                                envvar=FASTIOT_USE_PORT_IMPORT)):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
