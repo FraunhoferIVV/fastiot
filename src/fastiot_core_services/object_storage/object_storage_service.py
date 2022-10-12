@@ -32,9 +32,7 @@ class ObjectStorageService(FastIoTService):
                                                index=[(index_name, pymongo.ASCENDING)],
                                                index_name=f"{index_name}_ascending")
         self.subject = Subject(name=sanitize_pub_subject_name(service_config['subject_name']), msg_cls=dict)
-        self.reply_subject = HistObjectReq.get_reply_subject(
-            name=filter_specific_sign(service_config['subject_name']),
-            reply_cls=HistObjectResp)
+        self.reply_subject = HistObjectReq.get_reply_subject(name=filter_specific_sign(service_config['subject_name']))
 
     async def _start(self):
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)
