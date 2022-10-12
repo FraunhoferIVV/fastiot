@@ -26,14 +26,18 @@ class TimeSeriesService(FastIoTService):
     @subscribe(subject=Thing.get_subject(env.subscribe_subject))
     async def consume(self, msg: Thing):
 
-        # TODO: Add unit from `msg.unit`
         data = [{"measurement": str(msg.name),
-                 "tags": {"machine": str(msg.machine)},
+                 "tags": {"machine": str(msg.machine),
+                          "unit": str(msg.unit)},
                  "fields": {"value": msg.value},
                  "time": msg.timestamp
                  }]
         await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation,
                                             record=data, precision='ms')
+        query = \
+            f'from(bucket: "{env_influxdb.bucket}") ' \
+            '|> range(start: 2019-07-25T21:47:00Z)'
+        tables = await self.client.query_api().query(query, org=env_influxdb.organisation)
         self.msg_counter_ = self.msg_counter_ + 1
         if self.msg_counter_ >= 10:
             self.msg_counter_ = 0
@@ -51,6 +55,7 @@ class TimeSeriesService(FastIoTService):
                 results.append({"machine": row.values.get("machine"),
                                 "sensor": row.get_measurement(),
                                 "value": row.get_value(),
+                                "unit": row.values.get("unit"),
                                 "timestamp": row.get_time(),
                                 })
         if len(results) > 0:

@@ -36,7 +36,7 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
     async def insert_data(self):
         for i in range(5):
             thing_msg = Thing(machine='test_machine', name=f'sensor_{i}',
-                              value=1, timestamp=f"2019-07-25T21:48:0{i}Z")
+                              value=1, unit=f"{i}", timestamp=f"2019-07-25T21:48:0{i}Z")
 
             await self.broker_connection.publish(Thing.get_subject(thing_msg.name), thing_msg)
             await asyncio.sleep(0.01)
@@ -70,9 +70,10 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
             data = [{"measurement":
                          f'sensor_{i}',
                      "tags":
-                         {"machine": 'test_machine'},
+                         {"machine": 'test_machine',
+                          "unit": f"{i}"},
                      "fields":
-                         {"value": "1" + " "},
+                         {"value": f"{i}"},
                      "time": datetime.datetime.utcnow()
                      }]
             await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data,
@@ -87,6 +88,8 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
         for i in range(5):
             self.assertEqual(f'sensor_{i}'
                              , reply.values[i].get("sensor"))
+            self.assertEqual(f'{i}'
+                             , reply.values[i].get("unit"))
         await self.delete_data()
         await self.client.close()
 
@@ -94,8 +97,9 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
         for i in range(5):
 
             data = [{"measurement": f'sensor_{i}',
-                     "tags": {"machine": 'test_machine'},
-                     "fields": {"value": "1" + " "},
+                     "tags": {"machine": 'test_machine',
+                              "unit": "m"},
+                     "fields": {"value": "1" },
                      "time": f"2019-07-25T21:48:0{i}Z"
                      }]
             await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data,
@@ -112,7 +116,8 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
         for i in range(4):
             self.assertEqual({"machine": 'test_machine',
                                 "sensor": f'sensor_{i}',
-                                "value": "1 ",
+                                "value": "1",
+                                "unit": "m",
                                 "timestamp": f"2019-07-25T21:48:0{i}+00:00",
                                 }, reply.values[i])
         with self.assertRaises(IndexError):
