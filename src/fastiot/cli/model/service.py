@@ -63,17 +63,17 @@ class InfrastructureServicePort(BaseModel):
 
 
 class InfrastructureServiceVolume(BaseModel):
+    """
+    An infrastructure service volume.
+    """
     container_volume: str
-    """ The volume inside the container """
-    default_volume_mount: str
-    """ The default location to mount the volume to. A value of 'tmpfs' will mount the container to a
-    temporary file system inside the RAM. """
-    default_volume_mount_for_integration_tests: str = 'tmpfs'
-    """ The default location to mount the volume to for integration tests. If the deployment is defined as a integration test,
-    default volume mount is not evaluated, but this variable instead. A value of 'tmpfs' will mount the container to a
-    temporary file system inside the RAM. """
+    """ The volume inside the container. Per default it gets mounted to tmpfs if the deployment is a test integration
+    deployment and otherwise to volume dir -> project namespace -> deployment name -> service name e.g.
+    /var/fastiot/fastiot/core/mariadb """
     env_var: str
-    """ The env var which can be used for volume mount modification. """
+    """ The env var which can be used for volume mount modification. If the env var is set to 'tmpfs', it will mount the
+    volume to a temporary file system inside the RAM. If the env var is set to '', the volume isn't mounted. If env var
+    is set to a relative path (not starting with '/') it is interpreted relative to volume dir. """
 
 
 class InfrastructureService(BaseModel):

@@ -59,7 +59,7 @@ class BasicEnv:
     def volume_dir(self) -> str:
         """ .. envvar:: FASTIOT_VOLUME_DIR
 
-        Use this variable to set the mount dir for your project
+        Use this variable to set the default mount dir for your project
         """
         return os.getenv(FASTIOT_VOLUME_DIR, '/var/fastiot')
 

@@ -8,20 +8,6 @@ from fastiot.core.data_models import Subject, FastIoTResponse, FastIoTRequest
 from fastiot.msg.thing import Thing
 
 
-class HistBeat(BaseModel):
-    dt_start: datetime
-    name: str
-
-    @classmethod
-    def get_stream_subject(cls, name: str):
-        return Subject(
-            name=f"v1.hist.{name}",
-            msg_cls=HistBeat,
-            reply_cls=Thing,
-            stream_mode=True
-        )
-
-
 class HistObjectResp(FastIoTResponse):
     """
     This Class is used to answer the request for historical data.

@@ -63,7 +63,6 @@ class MariaDBService(InfrastructureService):
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/mysql',
-            default_volume_mount='/var/fastiot/volumes/mariadb',
             env_var=FASTIOT_MARIA_DB_VOLUME
         )
     ]
@@ -100,7 +99,6 @@ class MongoDBService(InfrastructureService):
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/data/db',
-            default_volume_mount='/var/fastiot/volumes/mongodb',
             env_var=FASTIOT_MONGO_DB_VOLUME
         )
     ]
@@ -158,7 +156,6 @@ class InfluxDBService(InfrastructureService):
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/influxdb2',
-            default_volume_mount='/var/fastiot/volumes/influxdb2',
             env_var=FASTIOT_INFLUX_DB_VOLUME
         )
     ]
@@ -200,7 +197,6 @@ class TimeScaleDBService(InfrastructureService):
     volumes: List[InfrastructureServiceVolume] = [
         InfrastructureServiceVolume(
             container_volume='/var/lib/postgresql/data',
-            default_volume_mount='/var/fastiot/volumes/timescaledb',
             env_var=FASTIOT_TIME_SCALE_DB_VOLUME
         )
     ]

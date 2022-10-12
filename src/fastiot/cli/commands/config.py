@@ -17,7 +17,8 @@ from fastiot.cli.model.manifest import MountConfigDirEnum
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.model.service import InfrastructureService
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
-from fastiot.env import FASTIOT_CONFIG_DIR
+from fastiot.env import FASTIOT_CONFIG_DIR, env_basic
+from fastiot.env.env_constants import FASTIOT_VOLUME_DIR
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -106,7 +107,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             env_service_internal_modifications=env_service_internal_modifications,
             infrastructure_ports=infrastructure_ports,
             deployment_config=deployment_config,
-            is_integration_test_deployment=deployment_name == context.integration_test_deployment
+            is_integration_test_deployment=deployment_name == context.integration_test_deployment,
+            project_namespace=context.project_namespace
         )
         services = _create_services_compose_infos(
             env=env,
@@ -255,7 +257,8 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                                                  env_service_internal_modifications: Dict[str, str],
                                                  infrastructure_ports: Dict[str, int],
                                                  deployment_config: DeploymentConfig,
-                                                 is_integration_test_deployment: bool
+                                                 is_integration_test_deployment: bool,
+                                                 project_namespace: str
                                                  ) -> List[ServiceComposeInfo]:
     services_map = InfrastructureService.all
     result = []
@@ -301,18 +304,22 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
         service_volumes: List[str] = []
         service_temp_volumes: List[str] = []
         for volume in service.volumes:
-            default_volume_mount = volume.default_volume_mount
-            if is_integration_test_deployment:
-                default_volume_mount = volume.default_volume_mount_for_integration_tests
+            root_volume = env.get(FASTIOT_VOLUME_DIR, env_basic.volume_dir)
+            value = 'tmpfs'
+            if not is_integration_test_deployment:
+                # set default for none integration test volumes
+                value = f"{root_volume}/{project_namespace}/{deployment_config.name}/{name}"
 
             if volume.env_var:
-                value = env.get(volume.env_var, default_volume_mount)
-            else:
-                value = default_volume_mount
+                if volume.env_var in env:
+                    # set configured volume
+                    value = env[volume.env_var]
+                    if value != 'tmpfs' and value != '' and value[0] != '/':
+                        value = os.path.join(root_volume, value)
 
             if value == 'tmpfs':
                 service_temp_volumes.append(volume.container_volume)
-            else:
+            elif value:
                 service_volumes.append(f'{value}:{volume.container_volume}')
 
         result.append(ServiceComposeInfo(
