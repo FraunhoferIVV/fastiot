@@ -7,7 +7,7 @@ import typer
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
-    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS
+    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
     get_infrastructure_service_ports_randomly
@@ -52,7 +52,12 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                           "every following service one port number "
                                                           "higher.\n You may set this to 0 to get "
                                                           "random, available ports instead.",
-                                                     envvar=FASTIOT_PORT_OFFSET)):
+                                                     envvar=FASTIOT_PORT_OFFSET),
+           use_port_import: bool = typer.Option(True,
+                                                help="If this is set to True (default), it will try to import port "
+                                                     "mounts from .env-file from build and use them if possible. Port "
+                                                     "offset is ignored for imported ports.",
+                                                     envvar=FASTIOT_USE_PORT_IMPORT)):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
@@ -91,6 +96,12 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         infrastructure_ports = get_infrastructure_service_ports_randomly()
     else:
         infrastructure_ports = get_infrastructure_service_ports_monotonically_increasing(offset=port_offset)
+
+    if use_port_import:
+        temp_build_env = context.build_env_for_deployment(context.integration_test_deployment)
+        for key, value in temp_build_env.items():
+            if key in infrastructure_ports:
+                infrastructure_ports[key] = int(value)
 
     for deployment_name in deployment_names:
         deployment_dir = context.deployment_build_dir(name=deployment_name)
