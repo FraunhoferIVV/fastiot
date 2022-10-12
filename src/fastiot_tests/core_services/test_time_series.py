@@ -99,7 +99,7 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
             data = [{"measurement": f'sensor_{i}',
                      "tags": {"machine": 'test_machine',
                               "unit": "m"},
-                     "fields": {"value": "1" },
+                     "fields": {"value": 1},
                      "time": f"2019-07-25T21:48:0{i}Z"
                      }]
             await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data,
@@ -112,11 +112,10 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
                                                                                        dt_start='2019-07-25T21:47:00Z',
                                                                                        dt_end='2019-07-25T21:48:04Z',
                                                                                        timeout=10))
-
         for i in range(4):
             self.assertEqual({"machine": 'test_machine',
                                 "sensor": f'sensor_{i}',
-                                "value": "1",
+                                "value": 1,
                                 "unit": "m",
                                 "timestamp": f"2019-07-25T21:48:0{i}+00:00",
                                 }, reply.values[i])
