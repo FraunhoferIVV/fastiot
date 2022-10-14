@@ -16,3 +16,6 @@ fastiot_service:
   additional_pip_packages:
     - dash~=2.6.1
     - plotly~=5.9.0
+    - dash-bootstrap-components
+    - numpy
+    - pandas
