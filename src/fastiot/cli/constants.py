@@ -10,6 +10,10 @@ MANIFEST_FILENAME = 'manifest.yaml'
 GENERATED_FILENAME = 'generated.py'
 DOCKER_BUILD_DIR = 'docker'
 IMPORT_NAME_CONFIGURE_PY = 'fastiot_configure'
+BUILDER_NAME = 'fastiot_builder'
+BUILD_MODE_DEBUG = 'debug'
+BUILD_MODE_RELEASE = 'release'
+BUILD_MODES = [BUILD_MODE_DEBUG, BUILD_MODE_RELEASE]
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 

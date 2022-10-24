@@ -1,13 +1,16 @@
-group "default" {
+{% for mode in modes %}
+group "{{ mode }}" {
     targets = [
     {% for target in targets %}
-      "{{ target.manifest.name }}",
+      "{{ target.manifest.name }}-{{ mode }}",
     {% endfor %}
     ]
 }
+{% endfor %}
 
 {% for target in targets %}
-target "{{ target.manifest.name }}" {
+{% for mode in modes %}
+target "{{ target.manifest.name }}-{{ mode }}" {
     context = "."
     dockerfile = "./build/docker/Dockerfile.{{ target.manifest.name }}"
     tags = [
@@ -15,6 +18,9 @@ target "{{ target.manifest.name }}" {
       "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}",
     {% endfor %}
     ]
+{% if mode == "debug" %}
+    target = "debug"
+{% endif %}
     cache-from = [ {{ target.cache_from }} ]
     cache-to = [ {{ target.cache_to }} ]
     platforms = [
@@ -24,4 +30,5 @@ target "{{ target.manifest.name }}" {
     ]
     pull = true
 }
+{% endfor %}
 {% endfor %}

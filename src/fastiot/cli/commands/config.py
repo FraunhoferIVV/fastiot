@@ -210,7 +210,13 @@ def _get_full_image_name(deployment_config, docker_registry, service_config, tag
         temp_tag = deployment_config.tag
     else:
         temp_tag = tag
-    full_image_name = f"{temp_docker_registry}/{service_config.image}:{temp_tag}"
+
+    full_image_name = service_config.image
+    if temp_docker_registry:
+        full_image_name = f"{temp_docker_registry}/{full_image_name}"
+    if temp_tag:
+        full_image_name = f"{full_image_name}:{temp_tag}"
+
     return full_image_name
 
 

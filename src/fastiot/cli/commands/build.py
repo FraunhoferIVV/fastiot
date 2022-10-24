@@ -1,16 +1,17 @@
 """ Build command """
 import logging
+import os
 import os.path
 import re
 import subprocess
 from glob import glob
-from typing import List, Optional
+from typing import List, Optional, final
 from shutil import copyfile
 
 import typer
 from pydantic import BaseModel
 
-from fastiot.cli.constants import FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
+from fastiot.cli.constants import BUILD_MODE_DEBUG, BUILD_MODE_RELEASE, BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
     DOCKER_BUILD_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service
@@ -18,7 +19,7 @@ from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
 def _mode_completion() -> List[str]:
-    return ['debug', 'release']
+    return BUILD_MODES
 
 
 def _mode_callback(mode: str):
@@ -102,22 +103,23 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
             raise typer.Exit(0)
         services = _find_test_deployment_services(context)
 
-    _create_all_docker_files(context, build_mode=mode, services=services)
+    _create_all_docker_files(context, services=services)
     tags = tag.split(',')
-    _docker_bake(context, tags=tags, services=services, dry=dry, push=push, docker_registry=docker_registry,
-                 docker_registry_cache=docker_registry_cache, platform=platform, no_cache=no_cache)
+    _docker_bake(context, tags=tags, build_mode=mode, services=services, dry=dry, push=push,
+                 docker_registry=docker_registry, docker_registry_cache=docker_registry_cache, platform=platform,
+                 no_cache=no_cache)
 
     logging.info("Successfully built project. For reference you may consult the dockerfiles in your build directory.")
 
 
-def _create_all_docker_files(context: ProjectContext, build_mode: str, services: Optional[List[str]] = None):
+def _create_all_docker_files(context: ProjectContext, services: Optional[List[str]] = None):
     for service in context.services:
         if services is None or service.name in services:
             service.read_manifest()
-            _create_docker_file(service, context, build_mode)
+            _create_docker_file(service, context)
 
 
-def _create_docker_file(service: Service, context: ProjectContext, build_mode: str):
+def _create_docker_file(service: Service, context: ProjectContext):
     build_dir = os.path.join(context.project_root_dir, context.build_dir, DOCKER_BUILD_DIR)
     os.makedirs(build_dir, exist_ok=True)
 
@@ -136,7 +138,6 @@ def _create_docker_file(service: Service, context: ProjectContext, build_mode: s
                                                         project_config=context,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
-                                                        build_mode=build_mode,
                                                         maintainer=_get_maintainer()
                                                         )
                              )
@@ -157,6 +158,7 @@ def _get_maintainer() -> str:
 
 def _docker_bake(context: ProjectContext,
                  tags: List[str],
+                 build_mode: str,
                  services: Optional[List[str]] = None,
                  dry: bool = False,
                  platform: str = '',
@@ -214,12 +216,13 @@ def _docker_bake(context: ProjectContext,
                            DOCKER_BUILD_DIR, 'docker-bake.hcl'), "w") as docker_bake_hcl:
         dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
         docker_bake_hcl.write(dockerfile_template.render(targets=targets,
+                                                         modes=BUILD_MODES,
                                                          project_config=context,
                                                          tags=tags,
                                                          docker_registry=docker_registry))
 
     if not dry:
-        _run_docker_bake_cmd(context, push, no_cache)
+        _run_docker_bake_cmd(context, build_mode, push, no_cache)
 
 
 def _find_test_deployment_services(project_config: ProjectContext) -> List[str]:
@@ -237,33 +240,39 @@ def _find_test_deployment_services(project_config: ProjectContext) -> List[str]:
     return services
 
 
-def _run_docker_bake_cmd(project_config, push, no_cache):
+def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
     # Prepare system for multi-arch builds
     os.environ['DOCKER_CLI_EXPERIMENTAL'] = 'enabled'
+    os.environ['DOCKER_BUILDKIT'] = '1'
     qemu_platforms = {p.as_qemu_platform() for p in CPUPlatform}
 
     # We uninstall any registered qemu emulators first. Sometimes simply (re)-installing seems not to be enough and
     # will cause random segfaults especially when running apt within the ARM64-container
     for cmd in ['docker run --privileged --rm tonistiigi/binfmt --uninstall "qemu-*"',
                 f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
-                "docker buildx create --name fastiot_builder --driver-opt image=moby/buildkit:latest --use",
+                f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:latest --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
-    docker_cmd = f"docker buildx bake -f {project_config.build_dir}/{DOCKER_BUILD_DIR}/docker-bake.hcl"
-    if push:
-        docker_cmd += " --push"
-    else:
-        docker_cmd += " --load"
-    if no_cache:
-        docker_cmd += " --no-cache"
-    exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
-    if exit_code != 0:
-        logging.error("docker buildx bake failed with exit code %s", str(exit_code))
-        if not no_cache:
+    try:
+        docker_cmd = f"docker buildx bake -f {project_config.build_dir}/{DOCKER_BUILD_DIR}/docker-bake.hcl"
+        if push:
+            docker_cmd += " --push"
+        else:
+            docker_cmd += " --load"
+        if no_cache:
             docker_cmd += " --no-cache"
-            exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
+        # set target group
+        docker_cmd += f" {build_mode}"
+        exit_code = subprocess.call(f"{docker_cmd}".split(), cwd=project_config.project_root_dir)
+        if exit_code != 0:
+            logging.error("docker buildx bake failed with exit code %s.", str(exit_code))
             raise typer.Exit(exit_code)
+    finally:
+        docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
+        docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
+        subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
 def _make_caches(docker_registry_cache: str,
