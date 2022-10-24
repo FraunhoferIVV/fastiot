@@ -70,7 +70,6 @@ class ProjectContext(BaseModel):
     """ Name of the package in the :file:`src` directory where automated tests are stored. Common is to use something
     like :file:`myproject_tests`."""
 
-    imports_for_test_deployment_env_vars: List[str] = []
     npm_test_dir: str = ''
 
     build_dir: str = 'build'

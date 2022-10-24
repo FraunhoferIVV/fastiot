@@ -18,6 +18,4 @@ fastiot_service:
     dst: static
 
   additional_pip_packages:
-    - fastapi
-    - aiofiles
-    - uvicorn[standard]
+    - fastiot[fastapi]

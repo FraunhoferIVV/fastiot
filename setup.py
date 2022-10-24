@@ -40,10 +40,14 @@ def get_package_data_for_templates() -> List[str]:
 package_data = get_package_data_for_templates()
 package_data.append(requirements_file)
 
-mongo_db_deps = ["pymongo>=3.9.0"]
-maria_db_deps = ["PyMySQL>=0.9.3"]
-influx_db_deps = ["influxdb-client[async]>=1.32"]
-opcua_deps = ["opcua>=0.98.8,<1"]
+mongodb_deps = ["pymongo>=4.1,<5"]
+mariadb_deps = ["PyMySQL>=1.0,<2"]
+postgredb_deps = ["psycopg2>=2.9.3,<3"]
+influxdb_deps = ["influxdb-client[async]>=1.32,<2"]
+opcua_deps = ["opcua>=0.98.8,<1", "asyncua"]
+dash_deps = ["dash~=2.6.1", "plotly~=5.9.0"]
+fastapi_deps = ["fastapi", "aiofiles", "uvicorn[standard]"]
+compile_deps = ["nuitka"]
 
 setup(
     name='fastiot',
@@ -59,11 +63,17 @@ setup(
     python_requires='~=3.8',
     install_requires=install_requires,
     extras_require={
-        "MongoDB": mongo_db_deps,
-        "MariaDB": maria_db_deps,
-        "InfluxDB": influx_db_deps,
-        "OPCUA": opcua_deps,
-        "all": [*mongo_db_deps, *maria_db_deps, *influx_db_deps, *opcua_deps]
+        "mongodb": mongodb_deps,
+        "mariadb": mariadb_deps,
+        "postgredb": postgredb_deps,
+        "influxdb": influxdb_deps,
+        "opcua": opcua_deps,
+        "dash": dash_deps,
+        "fastapi": fastapi_deps,
+        "compile": compile_deps,
+        "all": [
+            *mongodb_deps, *mariadb_deps, *postgredb_deps, *influxdb_deps, *opcua_deps, *dash_deps, *fastapi_deps,
+            *compile_deps
+        ]
     }
 )
-

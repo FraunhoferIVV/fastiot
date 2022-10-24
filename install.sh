@@ -14,4 +14,3 @@ python3 -m pip install --extra-index-url https://www.piwheels.org/simple/ \
     --no-cache-dir -r $DIR_NAME/requirements.txt
 
 fi
-
