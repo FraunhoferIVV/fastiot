@@ -24,13 +24,12 @@ dashboards:
         machine: test_machine
         service: producer
 
-  - name: Historic Sensor Data Mongo
+  - name: Historic Sensor Data Influx
     live_data: False
-
     refresh_time: 1000
     time_shown: 120
     customer: producer
-    db: mongodb
+    db: influxdb
     sensors:
       - name: my_sensor_1
         machine: test_machine

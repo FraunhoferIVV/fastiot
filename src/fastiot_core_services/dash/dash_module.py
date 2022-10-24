@@ -16,7 +16,8 @@ from fastiot.util.read_yaml import read_config
 from fastiot_core_services.dash.env import env_dash
 from fastiot_core_services.dash.model.historic_sensor import HistoricSensor
 from fastiot_core_services.dash.model.live_sensor import LiveSensor
-from fastiot_core_services.dash.utils import ServerThread, thing_series_from_mongodb_data_set
+from fastiot_core_services.dash.utils import ServerThread, thing_series_from_mongodb_data_set, \
+    thing_series_from_influxdb_data_set
 
 
 class DashModule(FastIoTService):
@@ -30,7 +31,6 @@ class DashModule(FastIoTService):
         self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], prevent_initial_callbacks=True)
         self.server = ServerThread(self.app.server)
         self.setup_live_sensors()
-        self.data_resolution = 1
         self.start_datetime = None
         self.end_datetime = None
         self.__down = False
@@ -183,7 +183,6 @@ class DashModule(FastIoTService):
         html_navbar = dbc.Navbar(
             dbc.Row(
                 [
-
                     # Use row and col to control vertical alignment of logo / brand
                     dbc.Col(
                         [
@@ -231,41 +230,17 @@ class DashModule(FastIoTService):
                             r = list(result)
                             self._logger.info(f'got results from mongodb is {r}')
                             historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
-
-                            """for r in result:
-                                if historic_sensor.historic_sensor_data is None:
-                                    historic_sensor.historic_sensor_data = time_series_data_from_mongodb_data_set(r)
-                                else:
-                                    historic_sensor.historic_sensor_data = self.append_time_series(
-                                        historic_sensor.historic_sensor_data, time_series_data_from_mongodb_data_set(r))"""
-
                             historic_sensor.historic_sensor_data.remove_until(start_time)
                             historic_sensor.historic_sensor_data.remove_from(end_time)
-                        """if "influxdb" in dashboard.get("db"):
+                        elif "influxdb" in dashboard.get("db"):
                             query_results = influx_query_wrapper(
+                                influx_query,
+                                sensor.get("machine"),
                                 sensor.get("name"),
                                 start_time.isoformat(),
-                                end_time.isoformat(),
-                                self.data_resolution)
-                            values = []
-                            for table in query_results:
-                                for record in table.records:
-                                    values.append((record.get_time(), record.get_value()))
-                            try:
-                                result = TimeSeriesData(
-                                    machine_id=sensor.get("machine"),
-                                    sensor_name=sensor.get("name"),
-                                    dt_start=values[0][0],
-                                    dt_end=values[-1][0],
-                                    values=values,
-                                    customer_id="",
-                                    module_id="",
-                                    measurement_id="",
-                                    modified_at=""
-                                )
-                                historic_sensor.historic_sensor_data = result
-                            except IndexError:
-                                print("Sensor " + sensor.get("name") + " failed to load")"""
+                                end_time.isoformat())
+                            historic_sensor.historic_sensor_data = \
+                                thing_series_from_influxdb_data_set(query_results.to_json())
                         self.historic_sensor_list.append(historic_sensor)
 
         finally:
@@ -298,8 +273,6 @@ class DashModule(FastIoTService):
         self.end_datetime = end_datetime
         self.setup_historic_sensors(start_datetime, end_datetime)
         traces = []
-        if value is not None:
-            self.data_resolution = value
 
         for sensor in dashboard.get("sensors"):
             values = []

@@ -2,8 +2,9 @@
 
 As of know it seems to be working but it is only lightly tested. Please use with caution!
 """
+import json
 import threading
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from werkzeug.serving import make_server
 
@@ -42,3 +43,14 @@ def thing_series_to_mongodb_data_set(thing_series: ThingSeries) -> List[Dict]:
     return [to_mongo_data(timestamp=thing.timestamp, subject_name=thing.get_subject(thing.name).name,
                           msg=thing.dict()) for thing in thing_series.thing_list]
 
+
+def thing_series_from_influxdb_data_set(json_str: Union[List, str]) -> ThingSeries:
+    if json_str != '[]':
+        results = json.loads(json_str)
+        thing_list = [
+            Thing(machine=record["machine"], name=record["_measurement"],
+                  value=record["_value"], timestamp=record["_time"]) for record in results]
+        dt_start = thing_list[0].timestamp
+        dt_end = thing_list[-1].timestamp
+        return ThingSeries(dt_start=dt_start, dt_end=dt_end, thing_list=thing_list)
+    return ThingSeries()

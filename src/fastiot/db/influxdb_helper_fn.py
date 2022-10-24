@@ -72,29 +72,22 @@ async def create_async_influxdb_client_from_env():
     raise ServiceError("Could not connect to InfluxDB")
 
 
-async def influx_query(sensor_name, start_time, end_time, data_resolution):
-    client = await create_async_influxdb_client_from_env()
-    query = \
-        f"""from(bucket:"sensors")
-                   |> range(start: {start_time}Z, stop:  {end_time}Z)
-                   |> filter(fn: (r) =>
-                      r.sensor_name == "hist::\\"pr:{sensor_name}\\"" and
-                      r._field == "value_float"
-                   )
-                   |> timedMovingAverage(every: {data_resolution}m, period: {data_resolution}m)
-
-                   """
-    result = await client.query_api().query(org='CTAG_IVV', query=query)
+async def influx_query(machine, name, start_time, end_time):
+    client = await get_new_async_influx_client_from_env()
+    query = f'from(bucket: "{env_influxdb.bucket}")' \
+            f'|> range(start: {start_time}Z, stop: {end_time}Z)' \
+            f'|> group(columns: ["time"])' \
+            f'|> sort(columns: ["_time"])' \
+            f'|> filter(fn: (r) => r["machine"] == "{machine}")' \
+            f'|> filter(fn: (r) => r["_field"] == "value")' \
+            f'|> filter(fn: (r) => r["_measurement"] == "{name}")'
+    result = await client.query_api().query(org=env_influxdb.organisation, query=query)
+    await client.close()
     return result
-
-#async def influx_query(sensor, name):
-#    return '1' + sensor + name
 
 
 def influx_query_wrapper(coro, *args):
-
-    loop = asyncio.get_event_loop()
     coroutine = coro(*args)
-    r = loop.run_until_complete(coroutine)
+    r = asyncio.run(coroutine)
     return r
 

@@ -90,6 +90,11 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
             historic_sensor_list.append(historic_sensor)
         pass
 
+    async def delete_data(self):
+        await self.influx_client.delete_api().delete(stop="2024-01-01T00:00:00Z", start="1970-01-01T00:00:00Z",
+                                                     bucket=env_influxdb.bucket, predicate='machine="test_machine"',
+                                                     org=env_influxdb.organisation)
+
     async def write_thing_to_influxdb(self):
         thing_list = []
         count = 0
@@ -97,7 +102,7 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
             for j in range(5):
                 count += 1
                 thing = Thing(machine="test_machine", name=f"my_sensor_{i}", measurement_id="12345",
-                              value=(i + 1) * (j + 1), timestamp=get_time_now() + timedelta(seconds=count))
+                              value=(i + 1) * (j + 1), timestamp=datetime(year=2022, month=10, day=23, second=count))
                 thing_list.append(thing)
 
         for thing in thing_list:
@@ -110,25 +115,25 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
             await self.influx_client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation,
                                                        record=data, precision='ms')
 
-
     async def test_influxdb_query(self):
+        await self.delete_data()
         await self.write_thing_to_influxdb()
         dt_start = datetime(year=2019, month=7, day=25, second=1).isoformat()
         dt_end = (get_time_now() + timedelta(seconds=30)).isoformat()
         machine = "test_machine"
         name = "my_sensor_1"
-        data_resolution = 0
 
-        query = \
-            f'from(bucket: "{env_influxdb.bucket}") ' \
-            f'|> range(start: {dt_start}Z, stop: {dt_end}Z)' \
-            '|> group(columns: ["time"])' \
-            '|> sort(columns: ["_time"])' \
-            '|> filter(fn: (r) => r["machine"] == "test_machine")'
-        #\
-            #f'|> timeMovingAverage(every: {data_resolution}m, period: {data_resolution}m)'
+        query = f'from(bucket: "{env_influxdb.bucket}")' \
+                f'|> range(start: {dt_start}Z, stop: {dt_end}Z)' \
+                f'|> group(columns: ["time"])' \
+                f'|> sort(columns: ["_time"])' \
+                f'|> filter(fn: (r) => r["_measurement"] == "{name}")' \
+                f'|> filter(fn: (r) => r["machine"] == "{machine}")'
         tables = await self.influx_client.query_api().query(query=query, org=env_influxdb.organisation)
-        print(tables)
+        i = 0
+        for table in tables:
+            for row in table:
+                self.assertEqual(f'my_sensor_{i}', row.get_measurement())
 
 
 if __name__ == '__main__':
