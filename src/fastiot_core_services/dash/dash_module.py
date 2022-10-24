@@ -1,11 +1,14 @@
+import io
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from random import randint
 
+import pandas as pd
 import dash
 import plotly.graph_objects as go
 from dash import dcc, html
 import dash_bootstrap_components as dbc
+from flask import send_file
 
 from fastiot.core import FastIoTService, Subject, subscribe, ReplySubject
 from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
@@ -247,7 +250,7 @@ class DashModule(FastIoTService):
             client_mongodb.close()
 
     def download_excel(self, *args, **kwargs):
-        """if self.start_datetime and self.end_datetime and self.historic_sensor_list:
+        if self.start_datetime and self.end_datetime and self.historic_sensor_list:
             self._logger.info(f"Download excel file from {str(self.start_datetime)} to {str(self.end_datetime)}")
             self.setup_historic_sensors(self.start_datetime, self.end_datetime)
             df = HistoricSensor.to_df(historic_sensor_list=self.historic_sensor_list)
@@ -263,7 +266,7 @@ class DashModule(FastIoTService):
                              download_name=f'{self.start_datetime}-{self.end_datetime} Data.xlsx')
         else:
             self._logger.warning('Please set the start_datetime and end_datetime in DatePicker firstly, '
-                                 'to download the excel file')"""
+                                 'to download the excel file')
         pass
 
     def show_graph(self, dashboard, start_date_str, end_date_str, value, *args, **kwargs):

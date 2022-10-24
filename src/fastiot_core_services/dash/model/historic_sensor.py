@@ -6,6 +6,8 @@ from calendar import timegm
 # import pandas as pd
 
 # from sam.msg import TimeSeriesData
+import numpy as np
+import pandas as pd
 import pytz
 from pydantic import BaseModel, validator
 
@@ -26,7 +28,6 @@ class ThingSeries(BaseModel):
             vars["dt_start"] = vars["thing_list"][0].timestamp
             vars["dt_end"] = vars["thing_list"][-1].timestamp
             super().__init__(**vars)
-
 
     def remove_until(self, timestamp: datetime):
         """
@@ -93,16 +94,17 @@ class HistoricSensor:
                         return 0
         return timegm(result.utctimetuple())"""
 
-    """@staticmethod
+    @staticmethod
     def to_df(historic_sensor_list: List['HistoricSensor']):
         historic_sensor_df_list = [
-            pd.DataFrame(historic_sensor.historic_sensor_data.values, columns=['datetime', historic_sensor.name])
+            pd.DataFrame(
+                [(thing.timestamp, thing.value) for thing in historic_sensor.historic_sensor_data.thing_list],
+                columns=['datetime', historic_sensor.name])
             for counter, historic_sensor in enumerate(historic_sensor_list)]
 
-        historic_sensors_df = pd.concat(historic_sensor_df_list, axis=1)
+        historic_sensors_df = pd.concat(historic_sensor_df_list, axis=0)
         _, i = np.unique(historic_sensors_df.columns, return_index=True)
         historic_sensors_df = historic_sensors_df.iloc[:, i]
 
         historic_sensors_df = historic_sensors_df.set_index('datetime')
-        return historic_sensors_df"""
-
+        return historic_sensors_df
