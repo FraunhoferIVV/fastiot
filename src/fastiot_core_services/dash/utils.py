@@ -3,10 +3,15 @@
 As of know it seems to be working but it is only lightly tested. Please use with caution!
 """
 import threading
+from typing import Dict, List, Optional
 
 from werkzeug.serving import make_server
 
+from fastiot.msg import Thing
+from fastiot.msg.custom_db_data_type_conversion import from_mongo_data, to_mongo_data
+from fastiot.util.object_helper import parse_object, parse_object_list
 from fastiot_core_services.dash.env import env_dash
+from fastiot_core_services.dash.model.historic_sensor import ThingSeries
 
 
 class ServerThread(threading.Thread):
@@ -22,3 +27,18 @@ class ServerThread(threading.Thread):
 
     def shutdown(self):
         self.srv.shutdown()
+
+
+def thing_series_from_mongodb_data_set(data_set_list: List[Dict]) -> ThingSeries:
+    if data_set_list:
+        thing_list = parse_object_list(dict_list=data_set_list, data_model=Thing)
+        dt_start = thing_list[0].timestamp
+        dt_end = thing_list[-1].timestamp
+        return ThingSeries(dt_start=dt_start, dt_end=dt_end, thing_list=thing_list)
+    return ThingSeries()
+
+
+def thing_series_to_mongodb_data_set(thing_series: ThingSeries) -> List[Dict]:
+    return [to_mongo_data(timestamp=thing.timestamp, subject_name=thing.get_subject(thing.name).name,
+                          msg=thing.dict()) for thing in thing_series.thing_list]
+

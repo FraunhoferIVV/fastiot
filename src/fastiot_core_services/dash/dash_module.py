@@ -8,6 +8,7 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 from fastiot.core import FastIoTService, Subject, subscribe, ReplySubject
+from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, env_mongodb_cols
 from fastiot.msg.thing import Thing
@@ -15,7 +16,7 @@ from fastiot.util.read_yaml import read_config
 from fastiot_core_services.dash.env import env_dash
 from fastiot_core_services.dash.model.historic_sensor import HistoricSensor
 from fastiot_core_services.dash.model.live_sensor import LiveSensor
-from fastiot_core_services.dash.utils import ServerThread
+from fastiot_core_services.dash.utils import ServerThread, thing_series_from_mongodb_data_set
 
 
 class DashModule(FastIoTService):
@@ -41,7 +42,7 @@ class DashModule(FastIoTService):
         self.initial_start_date = self.initial_date(self.config.get("initial_start_date"))
         self.initial_end_date = self.initial_date(self.config.get("initial_end_date"))
         self._setup_dash()
-        await self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
+        self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
 
     async def _stop(self):
         """ Methods to call on module shutdown """
@@ -207,40 +208,41 @@ class DashModule(FastIoTService):
         html_elements.extend(html_cards)
         return html_elements
 
-    async def setup_historic_sensors(self, start_time: datetime, end_time: datetime):
+    def setup_historic_sensors(self, start_time: datetime, end_time: datetime):
         self.historic_sensor_list.clear()
         client_mongodb = get_mongodb_client_from_env()
         try:
             mongodb = client_mongodb.get_database(env_mongodb.name)
-            col_mongo = mongodb.get_collection(env_mongodb_cols.time_series)
+            col_mongo = mongodb.get_collection(self.config.get("collection"))
             for dashboard in self.config.get("dashboards"):
                 if not dashboard.get("live_data"):
                     for sensor in dashboard.get("sensors"):
                         historic_sensor = HistoricSensor(sensor.get("name"),
                                                          sensor.get("machine"),
                                                          dashboard.get("customer"),
-                                                         sensor.get("module")
+                                                         sensor.get("service")
                                                          )
-                        if "mongo" in dashboard.get("db_type"):
+                        if "mongodb" in dashboard.get("db"):
                             result = col_mongo.find({
-                                "sensor_name": sensor.get("name"),
-                                "machine_id": sensor.get("machine"),
-                                'dt_start': {'$gte': start_time},
-                                'dt_end': {'$lte': end_time}
-
+                                "name": historic_sensor.name,
+                                "machine": historic_sensor.machine,
+                                'timestamp': {'$gte': start_time, '$lte': end_time}
                             })
-                            for r in result:
+                            r = list(result)
+                            self._logger.info(f'got results from mongodb is {r}')
+                            historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
+
+                            """for r in result:
                                 if historic_sensor.historic_sensor_data is None:
                                     historic_sensor.historic_sensor_data = time_series_data_from_mongodb_data_set(r)
                                 else:
                                     historic_sensor.historic_sensor_data = self.append_time_series(
-                                        historic_sensor.historic_sensor_data, time_series_data_from_mongodb_data_set(r))
+                                        historic_sensor.historic_sensor_data, time_series_data_from_mongodb_data_set(r))"""
 
-                                historic_sensor.historic_sensor_data.remove_until(start_time)
-                                historic_sensor.historic_sensor_data.remove_from(end_time)
-                        else:
-
-                            query_results = influx_query(
+                            historic_sensor.historic_sensor_data.remove_until(start_time)
+                            historic_sensor.historic_sensor_data.remove_from(end_time)
+                        """if "influxdb" in dashboard.get("db"):
+                            query_results = influx_query_wrapper(
                                 sensor.get("name"),
                                 start_time.isoformat(),
                                 end_time.isoformat(),
@@ -263,11 +265,31 @@ class DashModule(FastIoTService):
                                 )
                                 historic_sensor.historic_sensor_data = result
                             except IndexError:
-                                print("Sensor " + sensor.get("name") + " failed to load")
+                                print("Sensor " + sensor.get("name") + " failed to load")"""
                         self.historic_sensor_list.append(historic_sensor)
 
         finally:
             client_mongodb.close()
+
+    def download_excel(self, *args, **kwargs):
+        """if self.start_datetime and self.end_datetime and self.historic_sensor_list:
+            self._logger.info(f"Download excel file from {str(self.start_datetime)} to {str(self.end_datetime)}")
+            self.setup_historic_sensors(self.start_datetime, self.end_datetime)
+            df = HistoricSensor.to_df(historic_sensor_list=self.historic_sensor_list)
+
+            # Convert DF
+            strIO = io.BytesIO()
+            excel_writer = pd.ExcelWriter(strIO, engine='xlsxwriter')
+            df.to_excel(excel_writer, sheet_name='labor')
+            excel_writer.save()
+            excel_data = strIO.getvalue()
+            strIO.seek(0)
+            return send_file(strIO, as_attachment=True,
+                             download_name=f'{self.start_datetime}-{self.end_datetime} Data.xlsx')
+        else:
+            self._logger.warning('Please set the start_datetime and end_datetime in DatePicker firstly, '
+                                 'to download the excel file')"""
+        pass
 
     def show_graph(self, dashboard, start_date_str, end_date_str, value, *args, **kwargs):
         start_datetime = datetime.fromisoformat(start_date_str)
@@ -281,19 +303,19 @@ class DashModule(FastIoTService):
 
         for sensor in dashboard.get("sensors"):
             values = []
-            timestamp = []
+            timestamps = []
             for historic_sensor in self.historic_sensor_list:
                 if historic_sensor.name == sensor.get("name") and \
                         historic_sensor.machine == sensor.get("machine") and \
                         dashboard.get("customer") == historic_sensor.customer and \
-                        sensor.get("module") == historic_sensor.module:
-                    if historic_sensor.historic_sensor_data is not None:
-                        for sensor_info in historic_sensor.historic_sensor_data.values:
-                            timestamp.append(sensor_info[0])
-                            values.append(sensor_info[1])
+                        sensor.get("service") == historic_sensor.service:
+                    if historic_sensor.historic_sensor_data.thing_list:
+                        for thing in historic_sensor.historic_sensor_data.thing_list:
+                            timestamps.append(thing.timestamp)
+                            values.append(thing.value)
 
             trace1 = go.Scatter(
-                x=timestamp,
+                x=timestamps,
                 y=values,
                 name=sensor.get("name")
             )
