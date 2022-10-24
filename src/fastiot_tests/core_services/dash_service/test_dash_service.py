@@ -113,8 +113,22 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
 
     async def test_influxdb_query(self):
         await self.write_thing_to_influxdb()
-        dt_start = get_time_now() - timedelta(seconds=10)
-        dt_end = get_time_now() - timedelta(seconds=50)
+        dt_start = datetime(year=2019, month=7, day=25, second=1).isoformat()
+        dt_end = (get_time_now() + timedelta(seconds=30)).isoformat()
+        machine = "test_machine"
+        name = "my_sensor_1"
+        data_resolution = 0
+
+        query = \
+            f'from(bucket: "{env_influxdb.bucket}") ' \
+            f'|> range(start: {dt_start}Z, stop: {dt_end}Z)' \
+            '|> group(columns: ["time"])' \
+            '|> sort(columns: ["_time"])' \
+            '|> filter(fn: (r) => r["machine"] == "test_machine")'
+        #\
+            #f'|> timeMovingAverage(every: {data_resolution}m, period: {data_resolution}m)'
+        tables = await self.influx_client.query_api().query(query=query, org=env_influxdb.organisation)
+        print(tables)
 
 
 if __name__ == '__main__':
