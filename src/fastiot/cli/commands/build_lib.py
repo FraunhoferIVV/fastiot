@@ -39,22 +39,25 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         logging.info("No library package configured in configure.py. Exiting.")
         return
 
-    styles = []
     if build_style == BuildLibStyles.all:
         if context.lib_compilation_mode == CompileSettingsEnum.only_compiled:
-            styles.append(BuildLibStyles.compiled)
+            styles = [BuildLibStyles.compiled]
         elif context.lib_compilation_mode == CompileSettingsEnum.only_source:
-            styles += [BuildLibStyles.wheel, BuildLibStyles.sdist]
+            styles = [BuildLibStyles.wheel, BuildLibStyles.sdist]
+        elif context.lib_compilation_mode == CompileSettingsEnum.all_variants:
+            styles = [BuildLibStyles.wheel, BuildLibStyles.sdist, BuildLibStyles.compiled]
         else:
-            styles += [BuildLibStyles.wheel, BuildLibStyles.sdist, BuildLibStyles.compiled]
+            raise NotImplementedError()
     else:
         styles = [build_style]
 
     env = os.environ.copy()
     env['MAKEFLAGS'] = f"-j{len(os.sched_getaffinity(0))}"
-    command_args = {BuildLibStyles.wheel: 'bdist_wheel -q',
-                    BuildLibStyles.sdist: 'sdist -q',
-                    BuildLibStyles.compiled: 'bdist_nuitka'}
+    command_args = {
+        BuildLibStyles.wheel: 'bdist_wheel -q',
+        BuildLibStyles.sdist: 'sdist -q',
+        BuildLibStyles.compiled: 'bdist_nuitka'
+    }
 
     setup_py = os.path.join(context.library_setup_py_dir, 'setup.py')
     for style in styles:
