@@ -130,10 +130,7 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
                 f'|> filter(fn: (r) => r["_measurement"] == "{name}")' \
                 f'|> filter(fn: (r) => r["machine"] == "{machine}")'
         tables = await self.influx_client.query_api().query(query=query, org=env_influxdb.organisation)
-        i = 0
-        for table in tables:
-            for row in table:
-                self.assertEqual(f'my_sensor_{i}', row.get_measurement())
+        self.assertEqual(len(tables[0].records), 5)
 
 
 if __name__ == '__main__':

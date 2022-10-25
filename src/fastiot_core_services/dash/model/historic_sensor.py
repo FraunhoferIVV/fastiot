@@ -2,10 +2,6 @@ from datetime import datetime
 from typing import Optional, List
 from calendar import timegm
 
-# import numpy as np
-# import pandas as pd
-
-# from sam.msg import TimeSeriesData
 import numpy as np
 import pandas as pd
 import pytz

@@ -36,7 +36,6 @@ class DashModule(FastIoTService):
         self.setup_live_sensors()
         self.start_datetime = None
         self.end_datetime = None
-        self.__down = False
 
     async def _start(self):
         """ Methods to start once the module is initialized """
