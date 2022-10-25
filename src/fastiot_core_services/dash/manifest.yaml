@@ -21,4 +21,4 @@ fastiot_service:
     - numpy
     - pandas
     - xlsxwriter
-    - nest-asyncio
+    - nest_asyncio
