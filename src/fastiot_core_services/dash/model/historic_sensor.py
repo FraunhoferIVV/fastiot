@@ -105,6 +105,7 @@ class HistoricSensor:
         historic_sensors_df = pd.concat(historic_sensor_df_list, axis=0)
         _, i = np.unique(historic_sensors_df.columns, return_index=True)
         historic_sensors_df = historic_sensors_df.iloc[:, i]
+        historic_sensors_df['datetime'] = historic_sensors_df['datetime'].dt.tz_localize(None)
 
         historic_sensors_df = historic_sensors_df.set_index('datetime')
         return historic_sensors_df

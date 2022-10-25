@@ -19,3 +19,4 @@ fastiot_service:
     - dash-bootstrap-components
     - numpy
     - pandas
+    - xlsxwriter
