@@ -201,6 +201,10 @@ class ServiceManifest(BaseModel):
     requirements directory for the specified additional requirements and copy them inside the container. The install.sh
     must be handle to install these.
     """
+    compile: bool = True
+    """
+    If your service  shouldent be compiled you can change the compile to False
+    """
 
     @staticmethod
     def from_yaml_file(filename: str, check_service_name: str = '') -> "ServiceManifest":
