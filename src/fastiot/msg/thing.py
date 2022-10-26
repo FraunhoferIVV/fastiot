@@ -39,3 +39,13 @@ class Thing(FastIoTPublish):
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
+
+class Address(FastIoTPublish):
+    publisher: str
+    """instance who published the Data"""
+
+    client: str
+    """client to querry database"""
+
+    address: str
+    """address where the data is stored"""
