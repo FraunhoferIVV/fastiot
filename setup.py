@@ -21,7 +21,7 @@ for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
             if req != '' and not req.startswith('#'):
                 req_list.append(req)
     if req_name == 'requirements.txt':
-        install_requires.extend('req_list')
+        install_requires.extend(req_list)
     else:
         middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
         extras_require[middle_name] = req_list
