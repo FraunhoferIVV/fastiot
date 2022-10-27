@@ -1,18 +1,18 @@
-fastiot_service:
+fastiot-service:
   name: dash
 
-  mount_config_dir: required
+  mount-config-dir: required
 
   ports: # List all ports of the module
     - port: 5802
-      env_variable: "FASTIOT_DASH_PORT"
+      env-variable: "FASTIOT_DASH_PORT"
 
-  depends_on:
+  depends-on:
     - nats
 
   platforms:
     - amd64
     - arm64
 
-  additional_requirements:
+  additional-requirements:
     - dash

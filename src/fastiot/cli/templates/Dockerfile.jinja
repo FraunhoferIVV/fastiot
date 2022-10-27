@@ -15,12 +15,12 @@ ENV PYTHONPATH=$PYTHONPATH:/opt/fastiot/src
 
 # Install requirements
 COPY install.sh ./
-COPY requirements/requirements.txt ./requirements
+COPY requirements/requirements.txt ./requirements/
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 
 {% if service.manifest.additional_requirements %}
 {% for req in service.manifest.additional_requirements %}
-COPY requirements/requirements.{{ req }}.txt ./requirements
+COPY requirements/requirements.{{ req }}.txt ./requirements/
 {% endfor %}
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 {% endif %}
