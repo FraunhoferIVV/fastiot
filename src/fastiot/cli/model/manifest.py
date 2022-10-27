@@ -97,7 +97,7 @@ class Healthcheck(BaseModel):
     does not provide the configured life sign.
     """
     cmd: str = ''
-    """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n 
+    """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n
     seconds. """
     interval: str = "30s"
     """ Interval to check the service """
@@ -191,15 +191,11 @@ class ServiceManifest(BaseModel):
     see :class:`fastiot.cli.model.manifest.Vue`
     """
 
-    additional_pip_packages: Optional[List[str]] = []
+    additional_requirements: List[str] = []
     """
-    If one specific module needs more packages installed than the other you may add those here.
-
-    **Caution**: It is recommended to use the projects global :file:`requirements.txt` to install additional packages
-                 in your project. This way all packages will be installed at once and this container stage will later
-                 be shared among all services of your project, so no additional space is needed. The major benefit is
-                 to have all requirements being compatible with each other. Using this option here this cannot be
-                 guaranteed.
+    If a specific service needs more packages installed than the others, you may add these here. It will look in the
+    requirements directory for the specified additional requirements and copy them inside the container. The install.sh
+    must be handle to install these.
     """
 
     @staticmethod

@@ -7,5 +7,5 @@ fastiot_service:
 
   platforms: [amd64, arm64]
 
-  additional_pip_packages:
-    - fastiot[influxdb]
+  additional_requirements:
+    - influxdb

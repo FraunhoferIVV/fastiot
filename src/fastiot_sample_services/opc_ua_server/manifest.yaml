@@ -11,5 +11,5 @@ fastiot_service:
   platforms:
     - amd64
 
-  additional_pip_packages:
-    - asyncua
+  additional_requirements:
+    - opcua

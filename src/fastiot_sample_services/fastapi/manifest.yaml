@@ -17,5 +17,5 @@ fastiot_service:
     src: vue
     dst: static
 
-  additional_pip_packages:
-    - fastiot[fastapi]
+  additional_requirements:
+    - fastapi

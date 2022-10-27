@@ -60,7 +60,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     # Create necessary directories
     if not os.path.exists(context.project_root_dir):
         os.makedirs(context.project_root_dir)
-    for directory in [os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
+    for directory in ['requirements',
+                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
                       os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
@@ -81,7 +82,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                        ('README.md', 'new_project/README.md.j2'),
                        ('deployments/integration_test/.env', 'new_project/.env.j2'),
                        ('deployments/production/.env', 'new_project/.env.production.j2'),
-                       ('requirements.txt', 'new_project/requirements.txt.j2')]:
+                       ('requirements/requirements.txt', 'new_project/requirements.txt.j2')]:
 
         # For each potential service create a unique password for the production deployment.
         password_fields = []
