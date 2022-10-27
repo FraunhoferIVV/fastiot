@@ -1,2 +1,7 @@
 dash~=2.6.1
 plotly~=5.9.0
+numpy
+pandas
+dash-bootstrap-components
+xlsxwriter
+nest_asyncio

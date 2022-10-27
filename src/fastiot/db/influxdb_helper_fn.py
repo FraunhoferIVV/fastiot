@@ -70,3 +70,24 @@ async def create_async_influxdb_client_from_env():
         num_tries -= 1
 
     raise ServiceError("Could not connect to InfluxDB")
+
+
+async def influx_query(machine, name, start_time, end_time):
+    client = await get_new_async_influx_client_from_env()
+    query = f'from(bucket: "{env_influxdb.bucket}")' \
+            f'|> range(start: {start_time}Z, stop: {end_time}Z)' \
+            f'|> group(columns: ["time"])' \
+            f'|> sort(columns: ["_time"])' \
+            f'|> filter(fn: (r) => r["machine"] == "{machine}")' \
+            f'|> filter(fn: (r) => r["_field"] == "value")' \
+            f'|> filter(fn: (r) => r["_measurement"] == "{name}")'
+    result = await client.query_api().query(org=env_influxdb.organisation, query=query)
+    await client.close()
+    return result
+
+
+def influx_query_wrapper(coro, *args):
+    coroutine = coro(*args)
+    r = asyncio.run(coroutine)
+    return r
+

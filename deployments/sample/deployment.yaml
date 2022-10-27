@@ -1,6 +1,6 @@
 services:
   producer:
-  consumer:
+  #consumer:
 
 infrastructure-services:
   nats:

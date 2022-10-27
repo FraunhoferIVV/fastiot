@@ -4,14 +4,15 @@ fastiot_service:
   mount_config_dir: required
 
   ports: # List all ports of the module
-    - port: 5801
-      env_variable: "FASTIOT_SAMPLE_DASH_PORT"
+    - port: 5802
+      env_variable: "FASTIOT_DASH_PORT"
 
   depends_on:
     - nats
 
   platforms:
     - amd64
+    - arm64
 
   additional_requirements:
     - dash
