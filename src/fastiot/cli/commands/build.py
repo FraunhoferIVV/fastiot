@@ -289,8 +289,9 @@ def _make_caches(docker_registry_cache: str,
 
     if docker_registry_cache:
         for tag in tags:
-            caches_from.append(f'"type=registry,ref={docker_registry_cache}/{project_namespace}/'
-                               f'{docker_cache_image}:{tag}"')
+            caches_from.append(
+                f'"type=registry,ref={docker_registry_cache}/{project_namespace}/{docker_cache_image}:{tag}"'
+            )
         if extra_caches:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
