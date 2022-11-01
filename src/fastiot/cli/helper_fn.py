@@ -5,22 +5,22 @@ from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from fastiot.cli.constants import TEMPLATES_DIR, DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME, TEMPLATES_DIR
 from fastiot.cli.model import Service, DeploymentConfig
 
 
-_jinja_env = None
+_jinja_envs: Dict[str, Environment] = {}
 
 
-def get_jinja_env():
-    global _jinja_env
-    if _jinja_env is None:
-        _jinja_env = Environment(
-            loader=FileSystemLoader(searchpath=TEMPLATES_DIR),
+def get_jinja_env(template_dir: str = TEMPLATES_DIR):
+    global _jinja_envs
+    if template_dir not in _jinja_envs:
+        _jinja_envs[template_dir] = Environment(
+            loader=FileSystemLoader(searchpath=template_dir),
             trim_blocks=True,
             undefined=StrictUndefined
         )
-    return _jinja_env
+    return _jinja_envs[template_dir]
 
 
 def find_services(package: Optional[str] = None,

@@ -5,6 +5,7 @@ FastIoT Library
 from fastiot.cli.version import get_version
 from fastiot.core.logger import logging
 from fastiot.cli.commands import *
+from fastiot.cli.common.docker_templates import *
 from fastiot.cli.common.infrastructure_services import *
 
 try:

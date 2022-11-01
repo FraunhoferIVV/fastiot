@@ -83,7 +83,7 @@ class ProjectContext(BaseModel):
     described in :ref:`tut-custom_infrastructure_services`.
 
     Make sure importing this service will import further commands and
-    :class:`fastiot.cli.model.service.InfrastructureService`.
+    :class:`fastiot.cli.model.infrastructure_service.InfrastructureService`.
     Most of the times this is done filling the :file:`__init__.py` correspondingly.
     """
 

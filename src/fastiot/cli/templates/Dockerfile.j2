@@ -2,7 +2,7 @@
 
 ### Stage: Base ###
 
-FROM {{ service.manifest.base_image }} as base
+FROM {{ manifest.base_image }} as base
 RUN apt-get update -y && apt-get upgrade -y && apt-get clean -y
 
 # As a convention, the workdir should always be the project root dir inside the container.
@@ -17,40 +17,40 @@ COPY install.sh ./
 COPY requirements/requirements.txt ./requirements/
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 
-{% if service.manifest.additional_requirements %}
-{% for req in service.manifest.additional_requirements %}
+{% if manifest.additional_requirements %}
+{% for req in manifest.additional_requirements %}
 COPY requirements/requirements.{{ req }}.txt ./requirements/
 {% endfor %}
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 {% endif %}
 
-{% if service.manifest.healthcheck.cmd != '' %}
+{% if manifest.healthcheck.cmd != '' %}
 HEALTHCHECK \
-    --interval={{ service.manifest.healthcheck.interval }} \
-    --timeout={{ service.manifest.healthcheck.timeout }} \
-    --start-period={{ service.manifest.healthcheck.start_period }} \
-    --retries={{ service.manifest.healthcheck.retries }} \
-    CMD {{ service.manifest.healthcheck.cmd }}
+    --interval={{ manifest.healthcheck.interval }} \
+    --timeout={{ manifest.healthcheck.timeout }} \
+    --start-period={{ manifest.healthcheck.start_period }} \
+    --retries={{ manifest.healthcheck.retries }} \
+    CMD {{ manifest.healthcheck.cmd }}
 {% endif %}
 
-{% if service.manifest.vue %}
-### Stage: vue.js ###
-FROM node:14-buster-slim as build-vue
-WORKDIR /opt/vue_app
-COPY src/{{ service.package }}/{{ service.name }}/{{service.manifest.vue.src}}/package*.json /opt/vue_app/
-RUN npm install
-COPY src/{{ service.package }}/{{ service.name }}/{{service.manifest.vue.src}} /opt/vue_app/
+{% if manifest.npm %}
+### Stage: npm ###
+FROM node:14-buster-slim as build-npm
+COPY src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}} src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}
+WORKDIR src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}
+RUN npm ci
 RUN npm run build
+WORKDIR /opt/fastiot
 {% endif %}
 
 ### Stage: Debug ###
 FROM base as debug
 # In debug mode we just want to copy everything from source to make it easier.
-{% if service.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ service.manifest.vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ service.manifest.vue.dst }}
+{% if manifest.npm %}
+COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}/{{ manifest.npm.dist }} src/{{ service.package }}/{{ service.name }}/{{ manifest.npm.src }}/{{ manifest.npm.dist }}
 {% endif %}
-{% if project_config.library_package %}
-COPY src/{{project_config.library_package}} /opt/fastiot/src/{{project_config.library_package}}
+{% if context.library_package %}
+COPY src/{{context.library_package}} /opt/fastiot/src/{{context.library_package}}
 {% endif %}
 COPY src/{{ service.package }} /opt/fastiot/src/{{ service.package }}
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
@@ -68,8 +68,8 @@ COPY configure.py /opt/fastiot/
 
 COPY src /opt/fastiot/src
 
-{% if project_config.library_package %}
-RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ project_config.library_package }}
+{% if context.library_package %}
+RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ context.library_package }}
 {% endif %}
 
 RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot/output {{ service.package }}
@@ -81,12 +81,12 @@ FROM base
 # Nuitka compiles "__file__"-variable relative to current location. So we have to place everything inside "/opt/fastiot/src".
 COPY --from=compile_lib /opt/fastiot/output/*.so /opt/fastiot/src/
 COPY --from=compile_lib /opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py /opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py
-{% for service_dir_to_copy in service.manifest.copy_dirs_to_container %}
+{% for service_dir_to_copy in manifest.copy_dirs_to_container %}
 COPY --from=compile_lib /opt/fastiot/src/{{ service.package }}/{{ service.name }}/{{ service_dir_to_copy }} /opt/fastiot/src/{{ service.package }}/{{ service.name }}/{{ module_dir_to_copy }}
 {% endfor %}
 
-{% if service.manifest.vue %}
-COPY --from=build-vue /opt/vue_app/{{ service.manifest.vue.configured_dist }} src/{{ service.package }}/{{ service.name }}/{{ service.manifest.vue.dst }}
+{% if manifest.npm %}
+COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}/{{ manifest.npm.dist }} src/{{ service.package }}/{{ service.name }}/{{ manifest.npm.src }}/{{ manifest.npm.dist }}
 {% endif %}
 
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml

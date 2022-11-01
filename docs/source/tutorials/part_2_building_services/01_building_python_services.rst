@@ -7,7 +7,7 @@ a multistage Dockerfile template will be used. As of today it supports the stage
 In release mode all modules will be compiled via Nuitka and only the binary for the module will
 be placed inside the image.
 
-The template can be found within the :mod:`fastiot.cli` at :file:`src/fastiot/cli/templates/docker-compose.yaml.jinja`.
+The template can be found within the :mod:`fastiot.cli` at :file:`src/fastiot/cli/templates/docker-compose.yaml.j2`.
 The template is used via the CLI and generates the Dockerfile in the build directory (typical :file:`build`) within
 your project. You may use the command ``fiot build --dry`` to only generate the docker files and not start the
 build immediately.

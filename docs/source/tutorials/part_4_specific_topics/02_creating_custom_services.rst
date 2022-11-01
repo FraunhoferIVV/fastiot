@@ -12,9 +12,9 @@ Various services are already preconfigured and you only need to add those to you
 
 To add your own service you have to follow a few basic steps:
 
-1. Create the Service inheriting either from :class:`fastiot.cli.model.service.InfrastructureService` or if you only
+1. Create the Service inheriting either from :class:`fastiot.cli.model.infrastructure_service.InfrastructureService` or if you only
    have some minor adjustments inherit from any service inheriting from
-   :class:`fastiot.cli.model.service.InfrastructureService` itself.
+   :class:`fastiot.cli.model.infrastructure_service.InfrastructureService` itself.
    You may add those class anywhere in your project. It is recommended to use something like
    ``your_project_lib.extension.services``.
 2. Add the corresponding import, e.g.  ``your_project_lib.extension.services`` to your :file:`configure.py` in your

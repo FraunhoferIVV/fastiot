@@ -12,9 +12,10 @@ import typer
 from pydantic import BaseModel
 
 from fastiot.cli.constants import BUILD_MODE_DEBUG, BUILD_MODE_RELEASE, BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
-    DOCKER_BUILD_DIR
+    DOCKER_BUILD_DIR, TEMPLATES_DIR
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service
+from fastiot.cli.model.docker_template import DockerTemplate
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
@@ -115,7 +116,6 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
 def _create_all_docker_files(context: ProjectContext, services: Optional[List[str]] = None):
     for service in context.services:
         if services is None or service.name in services:
-            service.read_manifest()
             _create_docker_file(service, context)
 
 
@@ -133,9 +133,12 @@ def _create_docker_file(service: Service, context: ProjectContext):
 
     else:
         with open(docker_filename, "w") as dockerfile:
-            dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
+            manifest = service.read_manifest()
+            template = DockerTemplate.get(manifest.template)
+            dockerfile_template = get_jinja_env(template_dir=template.dir).get_template(template.filename)
             dockerfile.write(dockerfile_template.render(service=service,
-                                                        project_config=context,
+                                                        manifest=manifest,
+                                                        context=context,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
                                                         maintainer=_get_maintainer()
@@ -214,7 +217,7 @@ def _docker_bake(context: ProjectContext,
 
     with open(os.path.join(context.project_root_dir, context.build_dir,
                            DOCKER_BUILD_DIR, 'docker-bake.hcl'), "w") as docker_bake_hcl:
-        dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
+        dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.j2')
         docker_bake_hcl.write(dockerfile_template.render(targets=targets,
                                                          modes=BUILD_MODES,
                                                          project_config=context,

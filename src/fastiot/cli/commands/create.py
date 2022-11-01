@@ -14,7 +14,7 @@ from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model.project import ProjectContext
-from fastiot.cli.model.service import InfrastructureService
+from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.typer_app import create_cmd
 
 

@@ -13,9 +13,9 @@ fastiot_service:
   platforms:
     - amd64
 
-  vue:
+  npm:
     src: vue
-    dst: static
+    dist: dist
 
   additional_requirements:
     - fastapi

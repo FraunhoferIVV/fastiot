@@ -58,7 +58,7 @@ def _write_ansible_playbook(deployment_name, deployment):
 
     try:
         jinja_env = get_jinja_env()
-        playbook_template = jinja_env.get_template('ansible-playbook.yaml.template')
+        playbook_template = jinja_env.get_template('ansible-playbook.yaml.j2')
 
         playbook_document = playbook_template.render(deployment_name=deployment_name,
                                                      deployment_target=deployment.deployment_target)
@@ -67,7 +67,7 @@ def _write_ansible_playbook(deployment_name, deployment):
             playbook_file.write(playbook_document)
 
         jinja_env = get_jinja_env()
-        inventory_template = jinja_env.get_template('ansible_hosts.template')
+        inventory_template = jinja_env.get_template('ansible_hosts.j2')
         inventory_document = inventory_template.render(deployment_target=deployment.deployment_target)
 
         with open(os.path.join(output_dir, "hosts"), "w") as inventory_file:
