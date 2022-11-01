@@ -73,5 +73,5 @@ def find_deployments(deployments: Optional[List[str]] = None, path: str = '') ->
     return deploy_configs
 
 
-def _default_cache(package: str, service: str) -> str:
-    return f"{package}-{service}-cache"
+def _default_cache(package: str, _: str) -> str:
+    return f"{package}-cache"
