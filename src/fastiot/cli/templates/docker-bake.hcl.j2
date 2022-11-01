@@ -18,7 +18,7 @@ target "{{ target.manifest.name }}-{{ mode }}" {
       "{{ docker_registry }}{{ project_config.project_namespace }}/{{ target.manifest.name }}:{{ tag }}",
     {% endfor %}
     ]
-{% if mode == "debug" %}
+{% if mode == "debug" or target.manifest.compile == False %}
     target = "debug"
 {% endif %}
     cache-from = [ {{ target.cache_from }} ]

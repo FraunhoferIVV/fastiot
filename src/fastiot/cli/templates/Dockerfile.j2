@@ -52,8 +52,9 @@ COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.np
 {% if context.library_package %}
 COPY src/{{context.library_package}} /opt/fastiot/src/{{context.library_package}}
 {% endif %}
-COPY src/{{ service.package }} /opt/fastiot/src/{{ service.package }}
+COPY src/{{ service.package }}/{{ service.name }} /opt/fastiot/src/{{ service.package }}/{{ service.name }}
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
+MAINTAINER {{ maintainer }}
 CMD ["python",  "/opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py"]
 
 

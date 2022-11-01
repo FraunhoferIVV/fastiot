@@ -201,6 +201,11 @@ class ServiceManifest(BaseModel):
     requirements directory for the specified additional requirements and copy them inside the container. The install.sh
     must be handle to install these.
     """
+    compile: bool = True
+    """
+    If your service  should not be compiled can change to False. Per default your service will be compiled using Nuitka
+    to have some obfuscation in the code and potentially speed up the program.
+    """
 
     @staticmethod
     def from_yaml_file(filename: str, check_service_name: str = '') -> "ServiceManifest":
