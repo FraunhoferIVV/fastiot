@@ -203,7 +203,8 @@ class ServiceManifest(BaseModel):
     """
     compile: bool = True
     """
-    If your service  shouldent be compiled you can change the compile to False
+    If your service  should not be compiled can change to False. Per default your service will be compiled using Nuitka
+    to have some obfuscation in the code and potentially speed up the program.
     """
 
     @staticmethod
