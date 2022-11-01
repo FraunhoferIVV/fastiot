@@ -3,7 +3,7 @@
 ### Stage: Base ###
 
 FROM {{ manifest.base_image }} as base
-RUN apt-get update -y && apt-get upgrade -y && apt-get clean -y
+RUN apt-get update && apt-get upgrade -y && apt-get clean -y  && rm -rf /var/lib/apt/lists/*
 
 # As a convention, the workdir should always be the project root dir inside the container.
 WORKDIR /opt/fastiot
@@ -62,7 +62,7 @@ CMD ["python",  "/opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.p
 FROM base as compile_lib
 # In release mode we want to compile everything and only copy compiled artifacts into release container.
 # The compilation takes place in this stage, so we need to compile it accordingly.
-RUN apt-get install -y gcc make build-essential && apt-get clean -y
+RUN  apt-get update && apt-get install -y gcc make build-essential && apt-get clean -y
 RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} "fastiot[compile]"
 
 COPY configure.py /opt/fastiot/
