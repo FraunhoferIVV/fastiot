@@ -253,7 +253,7 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
     # will cause random segfaults especially when running apt within the ARM64-container
     for cmd in ['docker run --privileged --rm tonistiigi/binfmt --uninstall "qemu-*"',
                 f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
-                f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:latest --use",
+                f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:master --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
@@ -274,8 +274,8 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
     finally:
         docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
         docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
-        subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        #subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        #subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
 def _make_caches(docker_registry_cache: str,
