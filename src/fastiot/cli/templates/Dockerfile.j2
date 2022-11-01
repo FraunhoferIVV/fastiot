@@ -17,13 +17,6 @@ COPY install.sh ./
 COPY requirements/requirements.txt ./requirements/
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 
-{% if manifest.additional_requirements %}
-{% for req in manifest.additional_requirements %}
-COPY requirements/requirements.{{ req }}.txt ./requirements/
-{% endfor %}
-RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
-{% endif %}
-
 {% if manifest.healthcheck.cmd != '' %}
 HEALTHCHECK \
     --interval={{ manifest.healthcheck.interval }} \
@@ -45,6 +38,12 @@ WORKDIR /opt/fastiot
 
 ### Stage: Debug ###
 FROM base as debug
+{% if manifest.additional_requirements %}
+{% for req in manifest.additional_requirements %}
+COPY requirements/requirements.{{ req }}.txt ./requirements/
+{% endfor %}
+RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
+{% endif %}
 # In debug mode we just want to copy everything from source to make it easier.
 {% if manifest.npm %}
 COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}/{{ manifest.npm.dist }} src/{{ service.package }}/{{ service.name }}/{{ manifest.npm.src }}/{{ manifest.npm.dist }}
@@ -78,6 +77,13 @@ RUN fiot extras nuitka-compile --src-dir=/opt/fastiot/src --out-dir=/opt/fastiot
 
 ### Stage: Release ###
 FROM base
+
+{% if manifest.additional_requirements %}
+{% for req in manifest.additional_requirements %}
+COPY requirements/requirements.{{ req }}.txt ./requirements/
+{% endfor %}
+RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
+{% endif %}
 
 # Nuitka compiles "__file__"-variable relative to current location. So we have to place everything inside "/opt/fastiot/src".
 COPY --from=compile_lib /opt/fastiot/output/*.so /opt/fastiot/src/
