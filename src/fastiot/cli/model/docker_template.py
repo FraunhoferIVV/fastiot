@@ -5,9 +5,17 @@ from fastiot.util.classproperty import classproperty
 
 
 class DockerTemplate(BaseModel):
+    """
+    Docker template base class. Inherit from this class to define dockerfile templates. Via python's __subclasses__
+    mechanism they get imported and can be used in the service's manifest.
+    """
+
     name: str
+    """ The template name used for referencing """
     dir: str
+    """ The template dir where this template is located """
     filename: str = 'Dockerfile.j2'
+    """ The filename of the template. Must reference a file inside template dir. """
 
     @classproperty
     def all(cls) -> Dict[str, "DockerTemplate"]:
