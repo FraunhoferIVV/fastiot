@@ -3,6 +3,7 @@ from typing import Optional
 
 FASTIOT_NATS_LOGGER_FILTER_FIELD = 'FASTIOT_NATS_LOGGER_FILTER_FIELD'
 FASTIOT_NATS_LOGGER_FILTER_VALUE = 'FASTIOT_NATS_LOGGER_FILTER_VALUE'
+FASTIOT_NATS_LOGGER_SUBJECT = 'FASTIOT_NATS_LOGGER_SUBJECT'
 
 
 class NatsLoggerConstants:
@@ -16,7 +17,7 @@ class NatsLoggerConstants:
         how to specify (wildcard) subjects please refer to the nats.io documentation at
         https://docs.nats.io/nats-concepts/subjects
         """
-        return os.environ.get('FASTIOT_NATS_LOGGER_SUBJECT', 'v1.>')
+        return os.environ.get(FASTIOT_NATS_LOGGER_SUBJECT, 'v1.>')
 
     @property
     def filter_field(self) -> Optional[str]:

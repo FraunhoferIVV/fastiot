@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from fastiot.cli.constants import BUILD_MODE_DEBUG, BUILD_MODE_RELEASE, BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
     DOCKER_BUILD_DIR, TEMPLATES_DIR
+from fastiot.cli.env import env_cli
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service
 from fastiot.cli.model.docker_template import DockerTemplate
@@ -272,10 +273,11 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
             logging.error("docker buildx bake failed with exit code %s.", str(exit_code))
             raise typer.Exit(exit_code)
     finally:
-        docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
-        docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
-        #subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        #subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        if not env_cli.is_ci_runner:  # Stop and remove the buildkit container
+            docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
+            docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
+            subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
 def _make_caches(docker_registry_cache: str,
