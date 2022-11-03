@@ -37,6 +37,19 @@ def import_configure(project_context: ProjectContext, file_name: str = ''):
         project_context.services = find_services(path=project_context.project_root_dir)
 
 
+def configure_py_to_dict(file_name: str = "") -> dict:
+    """ Reads the :file:`configure.py` in the project root dir (if not specified otherwise) and returns its values as a
+    dictionary.
+    Use this method if you want to use config options not available in the default context
+    (:class:`fastiot.cli.model.project.ProjectContext`) in your own commands."""
+    file_name = file_name or os.path.join(os.getcwd(), CONFIGURE_FILE_NAME)
+    try:
+        return _import_configure_py(file_name).__dict__
+    except FileNotFoundError:
+        logging.warning("No file configure.py found in %s. Trying to continue.", os.path.dirname(file_name))
+        return {}
+
+
 def _import_configure_py(file_name):
     if not os.path.isfile(file_name):
         raise FileNotFoundError(f"Could not find configure file '{file_name}'.")
