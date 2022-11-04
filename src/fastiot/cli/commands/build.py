@@ -90,7 +90,10 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
     Per default, it builds all images. Optionally, you can specify a single image to build.
     """
     logging.info("Starting build of project!")
-    logging.info("Using Docker registry %s to tag images", docker_registry)
+    if docker_registry:
+        logging.info("Using Docker registry %s to tag images", docker_registry)
+    else:
+        logging.info("Not using a docker registry for image tagging")
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
@@ -300,14 +303,20 @@ def _make_caches(docker_registry_cache: str,
         if extra_caches:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
-    if not push:  # We are most probably in a local environment, so try to use this cache as well
-        caches_from.append('"type=local,src=.docker-cache"')
+    local_cache = '.docker-cache'
+    if os.path.isdir(local_cache):
+        # If local cache is found we add it. Please not that this might get ignored if option --no-cache is used.
+        # That's why this log message is quite generic to not confuse the user.
+        logging.info("Local cache available.")
+        caches_from.append(f'"type=local,src={local_cache}"')
+    else:
+        logging.info("Currently no local cache available.")
 
     if push and docker_registry_cache:
         cache_to = f'"type=registry,ref={docker_registry_cache}/{project_namespace}/' \
                    f'{docker_cache_image}:{tags[0]},mode=max"'
     elif not push:
-        cache_to = '"type=local,dest=.docker-cache,mode=max"'
+        cache_to = f'"type=local,dest={local_cache},mode=max"'
     else:
         cache_to = ""
 
