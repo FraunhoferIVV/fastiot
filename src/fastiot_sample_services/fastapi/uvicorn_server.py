@@ -8,7 +8,7 @@ import uvicorn
 class UvicornAsyncServer(uvicorn.Server):
     """Uvicorn async server  """
 
-    def __init__(self, app, host='0.0.0.0', port=8080):
+    def __init__(self, app, port: int, host='0.0.0.0'):
         """Create an Uvicorn test server
 
         Args:

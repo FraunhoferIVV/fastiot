@@ -7,4 +7,3 @@ infrastructure-services:
   mongodb:
 
 config-dir: ./config_dir
-

@@ -11,3 +11,6 @@ fastiot-service:
     - nats
 
   platforms: [ amd64, arm64 ]
+
+  additional_requirements:
+    - opcua

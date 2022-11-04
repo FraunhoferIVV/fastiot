@@ -40,7 +40,7 @@ class FastAPIModule(FastIoTService):
         self.app.get("/get_some_data")(self._handle_get)
         self.app.post("/post_some_data")(self._handle_post)
         self.app.mount("/",
-                       StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static"),
+                       StaticFiles(directory=os.path.join(os.path.dirname(__file__), "vue", "dist"),
                                    html=True),
                        name="static")
         # This will serve static files created with a vue.js framework.

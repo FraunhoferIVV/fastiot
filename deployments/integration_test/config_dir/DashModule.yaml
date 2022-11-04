@@ -1,0 +1,46 @@
+initial_start_date: now-00:30:00
+initial_end_date: now
+db:
+collection: things
+dashboards:
+  - name: Live Sensor Data
+    live_data: True
+
+    refresh_time: 1000
+    time_shown: 120
+    customer: producer
+    db: mongodb
+    sensors:
+      - name: my_sensor_1
+        machine: test_machine
+        service: producer
+      - name: my_sensor_2
+        machine: test_machine
+        service: producer
+      - name: my_sensor_3
+        machine: test_machine
+        service: producer
+      - name: my_sensor_4
+        machine: test_machine
+        service: producer
+
+  - name: Historic Sensor Data Influx
+    live_data: False
+    refresh_time: 1000
+    time_shown: 120
+    customer: producer
+    db: influxdb
+    sensors:
+      - name: my_sensor_1
+        machine: test_machine
+        module: producer
+      - name: my_sensor_2
+        machine: test_machine
+        service: producer
+      - name: my_sensor_3
+        machine: test_machine
+        service: producer
+      - name: my_sensor_4
+        machine: test_machine
+        service: producer
+

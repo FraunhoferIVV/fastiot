@@ -1,7 +1,6 @@
 from typing import List
 
-from fastiot.cli.model import InfrastructureService
-from fastiot.cli.model.service import InfrastructureServicePort
+from fastiot.cli.model.infrastructure_service import InfrastructureService, InfrastructureServicePort
 
 
 class SomeTestService(InfrastructureService):

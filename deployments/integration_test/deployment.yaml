@@ -6,4 +6,3 @@ infrastructure-services:
   timescaledb:
 
 config-dir: ./config_dir
-

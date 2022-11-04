@@ -12,9 +12,11 @@ import typer
 from pydantic import BaseModel
 
 from fastiot.cli.constants import BUILD_MODE_DEBUG, BUILD_MODE_RELEASE, BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
-    DOCKER_BUILD_DIR
+    DOCKER_BUILD_DIR, TEMPLATES_DIR
+from fastiot.cli.env import env_cli
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service
+from fastiot.cli.model.docker_template import DockerTemplate
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
@@ -88,7 +90,10 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
     Per default, it builds all images. Optionally, you can specify a single image to build.
     """
     logging.info("Starting build of project!")
-    logging.info("Using Docker registry %s to tag images", docker_registry)
+    if docker_registry:
+        logging.info("Using Docker registry %s to tag images", docker_registry)
+    else:
+        logging.info("Not using a docker registry for image tagging")
 
     # Workaround as currently (6/2022) an optional list will not result in None but in an empty tuple, which is nasty
     # to check
@@ -115,7 +120,6 @@ def build(services: Optional[List[str]] = typer.Argument(None, help="The service
 def _create_all_docker_files(context: ProjectContext, services: Optional[List[str]] = None):
     for service in context.services:
         if services is None or service.name in services:
-            service.read_manifest()
             _create_docker_file(service, context)
 
 
@@ -133,9 +137,12 @@ def _create_docker_file(service: Service, context: ProjectContext):
 
     else:
         with open(docker_filename, "w") as dockerfile:
-            dockerfile_template = get_jinja_env().get_template('Dockerfile.jinja')
+            manifest = service.read_manifest()
+            template = DockerTemplate.get(manifest.template)
+            dockerfile_template = get_jinja_env(template_dir=template.dir).get_template(template.filename)
             dockerfile.write(dockerfile_template.render(service=service,
-                                                        project_config=context,
+                                                        manifest=manifest,
+                                                        context=context,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
                                                         maintainer=_get_maintainer()
@@ -214,7 +221,7 @@ def _docker_bake(context: ProjectContext,
 
     with open(os.path.join(context.project_root_dir, context.build_dir,
                            DOCKER_BUILD_DIR, 'docker-bake.hcl'), "w") as docker_bake_hcl:
-        dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.jinja')
+        dockerfile_template = get_jinja_env().get_template('docker-bake.hcl.j2')
         docker_bake_hcl.write(dockerfile_template.render(targets=targets,
                                                          modes=BUILD_MODES,
                                                          project_config=context,
@@ -250,7 +257,7 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
     # will cause random segfaults especially when running apt within the ARM64-container
     for cmd in ['docker run --privileged --rm tonistiigi/binfmt --uninstall "qemu-*"',
                 f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
-                f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:latest --use",
+                f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:master --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
@@ -269,10 +276,11 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
             logging.error("docker buildx bake failed with exit code %s.", str(exit_code))
             raise typer.Exit(exit_code)
     finally:
-        docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
-        docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
-        subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        if not env_cli.is_ci_runner:  # Stop and remove the buildkit container
+            docker_cmd_stop_builder = ["docker", "buildx", "stop", BUILDER_NAME]
+            docker_cmd_rm_builder = ["docker", "buildx", "rm", BUILDER_NAME]
+            subprocess.call(docker_cmd_stop_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            subprocess.call(docker_cmd_rm_builder, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
 def _make_caches(docker_registry_cache: str,
@@ -289,19 +297,26 @@ def _make_caches(docker_registry_cache: str,
 
     if docker_registry_cache:
         for tag in tags:
-            caches_from.append(f'"type=registry,ref={docker_registry_cache}/{project_namespace}/'
-                               f'{docker_cache_image}:{tag}"')
+            caches_from.append(
+                f'"type=registry,ref={docker_registry_cache}/{project_namespace}/{docker_cache_image}:{tag}"'
+            )
         if extra_caches:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
-    if not push:  # We are most probably in a local environment, so try to use this cache as well
-        caches_from.append('"type=local,src=.docker-cache"')
+    local_cache = '.docker-cache'
+    if os.path.isdir(local_cache):
+        # If local cache is found we add it. Please not that this might get ignored if option --no-cache is used.
+        # That's why this log message is quite generic to not confuse the user.
+        logging.info("Local cache available.")
+        caches_from.append(f'"type=local,src={local_cache}"')
+    else:
+        logging.info("Currently no local cache available.")
 
     if push and docker_registry_cache:
         cache_to = f'"type=registry,ref={docker_registry_cache}/{project_namespace}/' \
                    f'{docker_cache_image}:{tags[0]},mode=max"'
     elif not push:
-        cache_to = '"type=local,dest=.docker-cache,mode=max"'
+        cache_to = f'"type=local,dest={local_cache},mode=max"'
     else:
         cache_to = ""
 

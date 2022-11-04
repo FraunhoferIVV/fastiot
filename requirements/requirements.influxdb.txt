@@ -1,0 +1,1 @@
+influxdb-client[async]>=1.32,<2

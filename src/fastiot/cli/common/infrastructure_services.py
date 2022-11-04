@@ -1,8 +1,7 @@
 from typing import List
 
-from fastiot.cli.model import InfrastructureService
-from fastiot.cli.model.service import InfrastructureServicePort, InfrastructureServiceEnvVar, \
-    InfrastructureServiceVolume
+from fastiot.cli.model.infrastructure_service import InfrastructureService, InfrastructureServicePort, \
+    InfrastructureServiceEnvVar, InfrastructureServiceVolume
 from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, \
     FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
     FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN, \

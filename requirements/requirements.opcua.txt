@@ -1,0 +1,2 @@
+opcua>=0.98.8,<1
+asyncua

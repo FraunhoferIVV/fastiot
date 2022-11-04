@@ -13,11 +13,9 @@ fastiot_service:
   platforms:
     - amd64
 
-  vue:
+  npm:
     src: vue
-    dst: static
+    dist: dist
 
-  additional_pip_packages:
+  additional_requirements:
     - fastapi
-    - aiofiles
-    - uvicorn[standard]

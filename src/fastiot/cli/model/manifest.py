@@ -97,7 +97,7 @@ class Healthcheck(BaseModel):
     does not provide the configured life sign.
     """
     cmd: str = ''
-    """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n 
+    """ Command to run. This could e.g. be a curl request to your API or check wether a logfile gets updated every n
     seconds. """
     interval: str = "30s"
     """ Interval to check the service """
@@ -107,15 +107,14 @@ class Healthcheck(BaseModel):
     retries: int = 3
 
 
-class Vue(BaseModel):
-    """ Use this part if your project contains a frontend created with vue.js """
+class NPM(BaseModel):
+    """ Use this part if your project contains a frontend created with npm, e.g. a vue.js application """
 
-    src: str  # Source path relative to your application where the vue.js code is located
-    dst: str  # Destination path where the build static files will be placed, e.g. 'static'
-    configured_dist: str = 'dist'
+    src: str  # Source path relative to your application where the code is located
+    dist: str = 'dist'
     """
-    Destination where vue.js will place its files for distribution. If not changed vue.js will have save its files
-    in the `<vue-path>/dist` which is also the default here.
+    Destination where npm will place its files for distribution. If not changed npm will have save its files
+    in the `<src>/dist` which is also the default here.
     If you have something like::
 
         service.exports = {
@@ -124,7 +123,8 @@ class Vue(BaseModel):
         }
 
 
-    in your :file:`vue.config.js` use the `outputDir` variable as relative path here.
+    in your npm config or in case of vue js application in the file :file:`vue.config.js` use the `outputDir` variable
+    as relative path here.
     """
 
 
@@ -144,6 +144,10 @@ class ServiceManifest(BaseModel):
     Provide a list with some name for the service and a port that this container will open, e.g. when operating
     as a webserver.`
     """
+    template: str = 'python3'
+    """ Specify the template to use. You can provide your custom Templates by overwriting
+    :class:`fastiot.cli.model.docker_template.DockerTemplate`. Make sure that you imported it e.g. via configure.py's
+    extensions property. """
     base_image: str = DEFAULT_BASE_IMAGE
     """ Use this to provide an alternative base image, otherwise
     :const:`fastiot.cli.constants.DEFAULT_BASE_IMAGE` will be used.
@@ -185,21 +189,22 @@ class ServiceManifest(BaseModel):
     Directories which shall be copied to container. They must be specified relative to :file:`manifest.yaml`.
     """
 
-    vue: Optional[Vue] = None
+    npm: Optional[NPM] = None
     """
     If your project contains a vue.js application you can automatically build it here. For required configuration
     see :class:`fastiot.cli.model.manifest.Vue`
     """
 
-    additional_pip_packages: Optional[List[str]] = []
+    additional_requirements: List[str] = []
     """
-    If one specific module needs more packages installed than the other you may add those here.
-
-    **Caution**: It is recommended to use the projects global :file:`requirements.txt` to install additional packages
-                 in your project. This way all packages will be installed at once and this container stage will later
-                 be shared among all services of your project, so no additional space is needed. The major benefit is
-                 to have all requirements being compatible with each other. Using this option here this cannot be
-                 guaranteed.
+    If a specific service needs more packages installed than the others, you may add these here. It will look in the
+    requirements directory for the specified additional requirements and copy them inside the container. The install.sh
+    must be handle to install these.
+    """
+    compile: bool = True
+    """
+    If your service  should not be compiled can change to False. Per default your service will be compiled using Nuitka
+    to have some obfuscation in the code and potentially speed up the program.
     """
 
     @staticmethod

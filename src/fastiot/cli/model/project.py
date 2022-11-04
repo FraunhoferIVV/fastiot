@@ -70,7 +70,6 @@ class ProjectContext(BaseModel):
     """ Name of the package in the :file:`src` directory where automated tests are stored. Common is to use something
     like :file:`myproject_tests`."""
 
-    imports_for_test_deployment_env_vars: List[str] = []
     npm_test_dir: str = ''
 
     build_dir: str = 'build'
@@ -84,7 +83,7 @@ class ProjectContext(BaseModel):
     described in :ref:`tut-custom_infrastructure_services`.
 
     Make sure importing this service will import further commands and
-    :class:`fastiot.cli.model.service.InfrastructureService`.
+    :class:`fastiot.cli.model.infrastructure_service.InfrastructureService`.
     Most of the times this is done filling the :file:`__init__.py` correspondingly.
     """
 

@@ -16,7 +16,7 @@ from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.object_helper import parse_object, parse_object_list
 from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
-from fastiot_core_services.object_storage.object_storage_helper_fn import to_mongo_data
+from fastiot.msg.custom_db_data_type_conversion import to_mongo_data
 from fastiot_core_services.object_storage.object_storage_service import ObjectStorageService
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")

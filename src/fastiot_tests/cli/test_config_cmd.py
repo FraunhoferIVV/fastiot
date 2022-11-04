@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 from fastiot.cli import find_deployments
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, FASTIOT_CONFIGURE_FILE
 from fastiot.cli.model import ProjectContext, Service, InfrastructureService
-from fastiot.cli.model.service import InfrastructureServicePort
+from fastiot.cli.model.infrastructure_service import InfrastructureServicePort
 from fastiot.cli.typer_app import app, _import_infrastructure_services
 from fastiot.util.read_yaml import read_config
 

@@ -15,7 +15,7 @@ from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
 from fastiot.cli.model.manifest import MountConfigDirEnum
 from fastiot.cli.model.project import ProjectContext
-from fastiot.cli.model.service import InfrastructureService
+from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 from fastiot.env import FASTIOT_CONFIG_DIR, env_basic
 from fastiot.env.env_constants import FASTIOT_VOLUME_DIR
@@ -138,7 +138,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                         ignore=lambda _, __: ['deployment.yaml'])
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
-            docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.jinja')
+            docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.j2')
             docker_compose_file.write(docker_compose_template.render(
                 docker_net_name=net,
                 environment_for_docker_compose_file=env_service_internal_modifications,
