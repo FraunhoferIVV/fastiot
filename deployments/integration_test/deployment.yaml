@@ -4,5 +4,6 @@ infrastructure-services:
   mongodb:
   influxdb:
   timescaledb:
+  redis:
 
 config-dir: ./config_dir
