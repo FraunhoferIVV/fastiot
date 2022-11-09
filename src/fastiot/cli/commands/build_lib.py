@@ -60,6 +60,10 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     }
 
     setup_py = os.path.join(context.library_setup_py_dir, 'setup.py')
+    if not os.path.isfile(setup_py):
+        logging.warning("Can not build library without a `setup.py` in project root dir. Exiting.")
+        return
+
     for style in styles:
         cmd = f"{sys.executable} {setup_py} {command_args.get(style)}"
         exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
