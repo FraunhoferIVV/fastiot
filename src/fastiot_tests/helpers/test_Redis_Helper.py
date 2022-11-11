@@ -25,6 +25,15 @@ class TestRedisHelper(unittest.IsolatedAsyncioTestCase):
     async def test_getData(self):
         helper = RedisHelper(self.broker_connection)
         client = await getRedisClient()
-        await helper.sendData(data="12343", source="sensor1")
+        await helper.sendData(data="1234", source="sensor1")
         data = await helper.getData("0")
-        self.assertEqual("12343", data.decode("ascii"))
+        self.assertEqual("1234", data.decode("ascii"))
+
+    async def test_deleteData(self):
+        helper = RedisHelper(self.broker_connection)
+        client = await getRedisClient()
+        for i in range(50):
+            await helper.sendData(data="1234", source="sensor1")
+        data = await helper.getData("0")
+        self.assertEqual(10, len(helper.usedIds))
+        self.assertEqual("1234", data.decode("ascii"))
