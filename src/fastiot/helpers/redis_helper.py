@@ -38,8 +38,7 @@ class RedisHelper:
         self.maxDataSets = 10
         self.idCounter = 0
 
-
-    async def _createId(self) -> int:
+    async def _create_id(self) -> int:
         if self.idCounter >= (self.maxDataSets *2):
             self.idCounter = 0
         while self.idCounter in self.usedIds:
@@ -47,27 +46,33 @@ class RedisHelper:
         self.usedIds.append(self.idCounter)
         return self.idCounter
 
-    async def sendData(self, data, source: str):
-        id = await self._createId()
+    async def send_data(self, data, subject):
+        id = await self._create_id()
         client = await getRedisClient()
         data = serialize_to_bin(data.__class__, data)
         await self.delete()
         client.set(name=id, value=data)
-        subject = Redis.get_subject(source)
         await self.broker_connection.publish(
             subject=subject,
             msg=Redis(id=id))
-        logging.info("Saved data at %d from sensor %s", id, subject.name)
+        logging.info("Saved data at %d from  %s", id, subject.name)
 
-
-    async def getData(self, address: str):
+    async def get_data(self, address: str):
         client = await getRedisClient()
         return serialize_from_bin("".__class__, client.get(address))
 
     async def delete(self):
         client = await getRedisClient()
-        while len(self.usedIds) >= self.maxDataSets:
+        while len(self.usedIds) > self.maxDataSets:
             delete = self.usedIds[0]
             client.delete(delete)
             self.usedIds.remove(delete)
-            logging.info("Removed Data with Id %d", delete)
+            logging.debug("Removed Data with Id %d", delete)
+
+    async def deleteall(self):
+        client = await getRedisClient()
+        while len(self.usedIds) > 0:
+            delete = self.usedIds[0]
+            client.delete(delete)
+            self.usedIds.remove(delete)
+            logging.debug("Removed Data with Id %d", delete)
