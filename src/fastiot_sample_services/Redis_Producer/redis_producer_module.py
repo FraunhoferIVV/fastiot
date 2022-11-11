@@ -22,7 +22,7 @@ class ExampleRedisProducerService(FastIoTService):
     @loop
     async def produce(self):
         sensor_name = f'my_sensor_{random.randint(1, 5)}'
-        data = f'{random.randint(20, 30)}'
+        data = random.randint(20, 30)
         await self.helper.sendData(data=data, source=sensor_name)
         return asyncio.sleep(2)
 

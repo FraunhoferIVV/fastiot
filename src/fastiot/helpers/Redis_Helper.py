@@ -1,10 +1,9 @@
-import asyncio
 import logging
 
-from fastiot.core import FastIoTService
-from fastiot.core.serialization import serialize_to_bin
+
 from fastiot.env.env import env_redis
 from fastiot.msg.thing import Redis
+from fastiot.core.serialization import serialize_to_bin, serialize_from_bin
 import redis
 
 class RedisClient:
@@ -28,30 +27,34 @@ class RedisHelper:
         self.broker_connection = broker_connection
         self.usedIds = []
         self.maxDataSets = 10
+        self.idCounter = 0
 
 
     async def _createId(self) -> int:
-        i: int = 0
-        while i in self.usedIds:
-            i = i + 1
-        self.usedIds.append(i)
-        return i
+        if self.idCounter >= (self.maxDataSets *2):
+            self.idCounter = 0
+        while self.idCounter in self.usedIds:
+            self.idCounter = self.idCounter + 1
+        self.usedIds.append(self.idCounter)
+        return self.idCounter
 
-    async def sendData(self,data, source: str):
+    async def sendData(self,data , source: str):
         id = await self._createId()
         client = await getRedisClient()
-        client.set(name=id, value=data)
+        data = serialize_to_bin(data.__class__, data)
         subject = Redis.get_subject(source)
+        client.set(name=id, value=data)
         await self.broker_connection.publish(
             subject=subject,
             msg=Redis(id=id))
-        logging.info("Saved data at %d from sensor %s",id, subject.name)
+        logging.info("Saved data at %d from sensor %s",id , subject.name)
         await self.delete()
 
     async def getData(self, address: str):
         client = await getRedisClient()
-        data = client.get(address)
-        return data
+        return serialize_from_bin("".__class__, client.get(address))
+
+
 
     async def delete(self):
         client = await getRedisClient()
@@ -59,4 +62,4 @@ class RedisHelper:
             delete = self.usedIds[0]
             client.delete(delete)
             self.usedIds.remove(delete)
-            logging.debug("removed Data with Id %d", delete)
+            logging.info("Removed Data with Id %d", delete)
