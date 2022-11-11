@@ -11,17 +11,19 @@ from fastiot.msg.thing import Thing
 
 class ExampleRedisProducerService(FastIoTService):
 
-    broker = None
+    def __int__(self):
+        broker = None
+        helper = None
 
     async def _start(self):
         self.broker = await NatsBrokerConnection.connect()
+        self.helper = RedisHelper(self.broker_connection)
 
     @loop
     async def produce(self):
         sensor_name = f'my_sensor_{random.randint(1, 5)}'
         data = f'{random.randint(20, 30)}'
-        helper = RedisHelper(self.broker_connection)
-        await helper.sendData(data=data, source=sensor_name)
+        await self.helper.sendData(data=data, source=sensor_name)
         return asyncio.sleep(2)
 
 
