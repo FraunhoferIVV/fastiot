@@ -1,10 +1,11 @@
 import logging
 
-
-from fastiot.env.env import env_redis
-from fastiot.msg.thing import Redis
-from fastiot.core.serialization import serialize_to_bin, serialize_from_bin
 import redis
+
+from fastiot.core.serialization import serialize_to_bin, serialize_from_bin
+from fastiot.env.env import env_redis
+from fastiot.msg import RedisMsg
+
 
 class RedisClient:
     client = None
@@ -23,12 +24,13 @@ async def getRedisClient():
 
 class RedisHelper:
     """
-    Saves files in the redis Database and sends the ID of the files  as  :class:`fastiot.msg.thing.Redis`.
+    Saves files in the redis Database and sends the ID of the files  as  :class:`fastiot.msg.redis.RedisMsg`.
 
-    You can send files by using :meth:`sendData` you must specify the data to send and the subject under wich the data
-    should be published. The max number of Datasets you can store at once is specified by :var: self.maxDataSets .
+    You can send files by using :meth:`send_data` you must specify the data to send and the subject under which the data
+    should be published. The max number of Datasets you can store at once is specified by :var: `self.maxDataSets` .
     If you add a Dataset above the given limit the first Dataset stored is deleted. When you have problems that an ID
-    is overwritten before you accessed the data you can change the :var: 'idBuffer' to have more Ids before an ID is reused.
+    is overwritten before you accessed the data you can change the :var:`idBuffer` to have more Ids before an ID is
+    reused.
 
     You can access the stored data with :meth:`getData`. The Id of the Data has to be provided. and the returned data
     will be deserialized with :meth:`serialize_from_bin`.
@@ -57,7 +59,7 @@ class RedisHelper:
         client.set(name=id, value=data)
         await self.broker_connection.publish(
             subject=subject,
-            msg=Redis(id=id))
+            msg=RedisMsg(id=id))
         logging.info("Saved data at %d from  %s", id, subject.name)
 
     async def get_data(self, address: str):
