@@ -6,40 +6,50 @@ from fastiot.msg.thing import Redis
 import redis
 
 class RedisClient:
-    def __int__(self):
-        self.client = None
+    client = None
 
-    async def connect(self):
-        self.client = redis.Redis(
-            host=env_redis.host,
-            port=env_redis.port)
-        return self.client.ping
+async def connectRedis():
+    client = redis.Redis(
+        host=env_redis.host,
+        port=env_redis.port)
+    return client
 
-    async def getclient(self):
-        if self.client is None:
-            self.connect()
-        return self.client
-
-"""
-class RedisHelper(FastIoTService):
+async def getRedisClient():
+    if RedisClient.client is None:
+        RedisClient.client = await connectRedis()
+    return RedisClient.client
 
 
-    async def sendData(self,data, subject: str):
+class RedisHelper:
+
+    def __init__(self, broker_connection):
+        self.broker_connection = broker_connection
+        self.usedIds = []
 
 
-        #client = getClient() # gibt client für die Daten
-        #saveData() # hochzählende addrese für die daten
+    async def _createId(self) -> int:
+        i: int = 0
+        while i in self.usedIds:
+            i = i + 1
+        self.usedIds.append(i)
+        return i
+
+    async def sendData(self,data, source: str):
+        client = await getRedisClient()
+        id = await self._createId()
+        client.set(name=id, value=data)
+        subject = Redis.get_subject(source)
         await self.broker_connection.publish(
             subject=subject,
-            msg=Redis(address=adress, client=client, publisher=subject)
-            )
-        )
+            msg=Redis(id=id))
 
-    async def getData(address:str, client):
-            data = client.getAddress(address)
+    async def getData(self, address: str):
+            client = await getRedisClient()
+            data = client.get(address)
             return data
-
+"""
     async def delete():
         # löscht Daten nach bestimmter zeit
         pass
 """
+
