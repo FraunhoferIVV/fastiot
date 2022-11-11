@@ -22,6 +22,15 @@ async def getRedisClient():
 
 
 class RedisHelper:
+    """
+    Saves files in the redis Database and sends the id of the files  as  :class:`fastiot.msg.thing.Redis`.
+
+    You can send files by using :meth:`sendData` you must specify the data to send and the source of the data.
+    The max number of Datasets you can store is specified by :var: self.maxDataSets .
+    If you add an Dataset above the given limit the first Dataset stored is deleted.
+
+    You can access the stored data with :meth:`getData`. The returned data will be deserialized with :meth:`serialize_from_bin`.
+    """
 
     def __init__(self, broker_connection):
         self.broker_connection = broker_connection
@@ -38,27 +47,26 @@ class RedisHelper:
         self.usedIds.append(self.idCounter)
         return self.idCounter
 
-    async def sendData(self,data , source: str):
+    async def sendData(self, data, source: str):
         id = await self._createId()
         client = await getRedisClient()
         data = serialize_to_bin(data.__class__, data)
-        subject = Redis.get_subject(source)
+        await self.delete()
         client.set(name=id, value=data)
+        subject = Redis.get_subject(source)
         await self.broker_connection.publish(
             subject=subject,
             msg=Redis(id=id))
-        logging.info("Saved data at %d from sensor %s",id , subject.name)
-        await self.delete()
+        logging.info("Saved data at %d from sensor %s", id, subject.name)
+
 
     async def getData(self, address: str):
         client = await getRedisClient()
         return serialize_from_bin("".__class__, client.get(address))
 
-
-
     async def delete(self):
         client = await getRedisClient()
-        while len(self.usedIds) > self.maxDataSets:
+        while len(self.usedIds) >= self.maxDataSets:
             delete = self.usedIds[0]
             client.delete(delete)
             self.usedIds.remove(delete)
