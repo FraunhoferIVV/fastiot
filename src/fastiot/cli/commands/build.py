@@ -303,8 +303,8 @@ def _make_caches(docker_registry_cache: str,
         if extra_caches:
             for cache in extra_caches:
                 caches_from.append(f'"type=registry,ref={docker_registry_cache}/{cache}"')
-    local_cache = '.docker-cache'
-    if os.path.isdir(local_cache):
+    local_cache = os.path.join(ProjectContext.default.project_root_dir, '.docker-cache')
+    if os.path.isdir(local_cache) and not push:
         # If local cache is found we add it. Please not that this might get ignored if option --no-cache is used.
         # That's why this log message is quite generic to not confuse the user.
         logging.info("Local cache available.")
