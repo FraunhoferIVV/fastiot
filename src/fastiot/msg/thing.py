@@ -39,9 +39,3 @@ class Thing(FastIoTPublish):
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
-
-
-
-class Redis(FastIoTPublish):
-    id: str
-    """Id under wich the data is stored"""
