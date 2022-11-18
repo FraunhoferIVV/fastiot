@@ -3,7 +3,7 @@ import unittest
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.serialization import serialize_from_bin
 from fastiot.helpers.redis_helper import getRedisClient, RedisHelper
-from fastiot.msg.thing import RedisMsg
+from fastiot.msg.redis import RedisMsg
 from fastiot.testlib import populate_test_env
 
 
