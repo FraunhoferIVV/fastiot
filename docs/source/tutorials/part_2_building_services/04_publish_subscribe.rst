@@ -106,8 +106,7 @@ For a fully working example you may also consult :class:`fastiot_sample_services
 If you want to send larger Files you can use
 :class:`fastiot.helpers.redis_helper.RedisHelper`
 .
-As an example for an implementation of
-:class:`fastiot.helpers.redis_helper.RedisHelper`
+As an example for an implementation
 you can use
 :class:`fastiot_sample_services.redis_producer.redis_producer_module.ExampleRedisProducerService`
 
