@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 
 def get_time_now() -> datetime:
-    return datetime.utcnow()
+    return ensure_tzinfo(datetime.utcnow())
 
 
 def ensure_tzinfo(v):
