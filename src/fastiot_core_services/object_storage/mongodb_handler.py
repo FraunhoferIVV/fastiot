@@ -1,3 +1,4 @@
+from datetime import timezone
 from typing import List, Tuple, Union, Any
 
 from bson.binary import UUID_SUBTYPE
@@ -20,7 +21,9 @@ class MongoDBHandler:
     def get_database(self, name):
         if name is None:
             raise ValueError('database name is None, please assign a value')
-        return self._db_client.get_database(name, codec_options=CodecOptions(uuid_representation=UUID_SUBTYPE))
+        return self._db_client.get_database(name,
+                                            codec_options=CodecOptions(uuid_representation=UUID_SUBTYPE,
+                                                                       tz_aware=True, tzinfo=timezone.utc))
 
     def drop_database(self, name):
         if name is None:
