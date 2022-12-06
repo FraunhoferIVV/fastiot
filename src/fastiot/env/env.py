@@ -4,7 +4,7 @@ import os
 from typing import Optional
 
 from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
-    TimeScaleDBService, NatsService
+    TimeScaleDBService, NatsService, RedisService
 from fastiot.env.model import OPCUARetrievalMode
 from fastiot.env.env_constants import *
 
@@ -446,6 +446,34 @@ class TimeScaleDBEnv:
                              TimeScaleDBService().get_default_env(FASTIOT_TIME_SCALE_DB_DATABASE)))
 
 
+class RedisEnv:
+    @property
+    def host(self) -> str:
+        """ .. envvar:: FASTIOT_INFLUX_DB_HOST
+
+        Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
+        ``localhost`` when developing against a local influxdb.
+        """
+        return os.getenv(FASTIOT_REDIS_HOST, 'localhost')
+
+    @property
+    def port(self) -> int:
+        """ .. envvar:: FASTIOT_INFLUX_DB_PORT
+
+        Use to get/set the Redis port, defaults to 8086. """
+        return int(os.getenv(FASTIOT_REDIS_PORT, RedisService().get_default_port()))
+
+    @property
+    def password(self) -> Optional[str]:
+        """ .. envvar:: FASTIOT_REDIS_PASSWORD
+
+        Use to get/set the Redis password.
+        """
+        return os.getenv(FASTIOT_REDIS_PASSWORD,
+                         RedisService().get_default_env(FASTIOT_REDIS_PASSWORD))
+
+
+
 env_basic = BasicEnv()
 env_tests = TestsEnv()
 env_broker = BrokerEnv()
@@ -455,3 +483,4 @@ env_mariadb = MariaDBEnv()
 env_influxdb = InfluxDBEnv()
 env_opcua = OPCUAEnv()
 env_timescaledb = TimeScaleDBEnv()
+env_redis = RedisEnv()

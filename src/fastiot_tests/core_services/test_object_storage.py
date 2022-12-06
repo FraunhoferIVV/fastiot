@@ -1,7 +1,7 @@
 import asyncio
 import os
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Type, Union
 
 from pydantic import BaseModel
@@ -112,7 +112,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
             test_thing_msg_mongo_dict = convert_message_to_mongo_data(
                 msg=thing_msg.dict(),
                 subject=Thing.get_subject(f'sensor_{i}').name,
-                timestamp=datetime(year=2022, month=10, day=9, second=i))
+                timestamp=datetime(year=2022, month=10, day=9, second=i, tzinfo=timezone.utc))
             self._db_col.insert_one(test_thing_msg_mongo_dict)
         hist_req_msg = HistObjectReq(dt_start=datetime(year=2022, month=10, day=9, second=0),
                                      dt_end=datetime(year=2022, month=10, day=9, second=10),

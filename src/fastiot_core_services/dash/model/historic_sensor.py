@@ -7,6 +7,7 @@ import pandas as pd
 import pytz
 from pydantic import BaseModel, validator
 
+from fastiot.core.time import ensure_tzinfo
 from fastiot.msg import Thing
 
 
@@ -18,12 +19,12 @@ class ThingSeries(BaseModel):
     dt_end: Optional[datetime]
     thing_list: List[Thing] = []
 
-    def __init__(self, **vars):
-        super().__init__(**vars)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         if self.thing_list:
-            vars["dt_start"] = vars["thing_list"][0].timestamp
-            vars["dt_end"] = vars["thing_list"][-1].timestamp
-            super().__init__(**vars)
+            kwargs["dt_start"] = kwargs["thing_list"][0].timestamp
+            kwargs["dt_end"] = kwargs["thing_list"][-1].timestamp
+            super().__init__(**kwargs)
 
     def remove_until(self, timestamp: datetime):
         """
@@ -35,6 +36,8 @@ class ThingSeries(BaseModel):
 
         :param timestamp: Timestamp used for removal.
         """
+
+        timestamp = ensure_tzinfo(timestamp)
         if self.thing_list:
             while len(self.thing_list) > 1:
                 if self.thing_list[0].timestamp <= timestamp:
@@ -44,6 +47,7 @@ class ThingSeries(BaseModel):
             self.dt_start = self.thing_list[0].timestamp
 
     def remove_from(self, timestamp: datetime):
+        timestamp = ensure_tzinfo(timestamp)
         if self.thing_list:
             while len(self.thing_list) > 1:
                 if self.thing_list[-1].timestamp >= timestamp:

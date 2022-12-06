@@ -1,0 +1,6 @@
+fastiot_service:
+  name: redis_producer
+
+  platforms:
+    - amd64
+    - arm64

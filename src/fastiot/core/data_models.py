@@ -1,11 +1,14 @@
 from abc import ABC
 import random
 import re
+from datetime import datetime
 from typing import Type, Union, Optional
 
 from pydantic import BaseModel
+from pydantic.class_validators import root_validator
 
 from fastiot.core.subject_helper import MSG_FORMAT_VERSION
+from fastiot.core.time import ensure_tzinfo
 
 
 class FastIoTData(BaseModel, ABC):
@@ -32,6 +35,12 @@ class FastIoTData(BaseModel, ABC):
             subject_name += "." + name
         return subject_name
 
+    @root_validator
+    def set_timezones(cls, values):
+        for name, value in values.items():
+            if isinstance(value, datetime):
+                values[name] = ensure_tzinfo(value)
+        return values
 
 Msg = Union[FastIoTData, dict]
 MsgCls = Type[Msg]

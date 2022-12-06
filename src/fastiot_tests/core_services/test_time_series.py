@@ -1,8 +1,9 @@
 import asyncio
-import datetime
 import unittest
+from datetime import datetime, timezone
 
 from fastiot.core.broker_connection import NatsBrokerConnection
+from fastiot.core.time import get_time_now
 from fastiot.db.influxdb_helper_fn import get_new_async_influx_client_from_env
 from fastiot.env.env import env_influxdb
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
@@ -11,7 +12,7 @@ from fastiot.testlib import populate_test_env
 from fastiot_core_services.time_series.env import time_series_env
 from fastiot_core_services.time_series.time_series_service import TimeSeriesService
 
-THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.datetime.now(),
+THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=get_time_now(),
               measurement_id="1")
 
 
@@ -74,7 +75,7 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
                           "unit": f"{i}"},
                      "fields":
                          {"value": f"{i}"},
-                     "time": datetime.datetime.utcnow()
+                     "time": get_time_now()
                      }]
             await self.client.write_api().write(bucket=env_influxdb.bucket, org=env_influxdb.organisation, record=data,
                                                 precision='ms')
@@ -114,11 +115,12 @@ class TestTimeSeries(unittest.IsolatedAsyncioTestCase):
                                                                                        timeout=10))
         for i in range(4):
             self.assertEqual({"machine": 'test_machine',
-                                "sensor": f'sensor_{i}',
-                                "value": 1,
-                                "unit": "m",
-                                "timestamp": f"2019-07-25T21:48:0{i}+00:00",
-                                }, reply.values[i])
+                              "sensor": f'sensor_{i}',
+                              "value": 1,
+                              "unit": "m",
+                              "timestamp": datetime(2019, 7,25,21,48,i, tzinfo=timezone.utc),
+                              },
+                             reply.values[i])
         with self.assertRaises(IndexError):
             reply.values[4]
         await self.delete_data()
