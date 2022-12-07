@@ -117,23 +117,32 @@ class ProjectContext(BaseModel):
 
     def deployment_by_name(self, name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """
-        deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
-                                       name, DEPLOYMENTS_CONFIG_FILE)
+        deployment_file = os.path.join(self.deployment_dir(name=name), DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
+
+    def deployment_dir(self, name: str) -> str:
+        """ Returns the deployment build dir for specific deployment """
+        return os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name)
 
     def deployment_build_dir(self, name: str) -> str:
         """ Returns the deployment build dir for specific deployment """
         return os.path.join(self.project_root_dir, self.build_dir, DEPLOYMENTS_CONFIG_DIR, name)
 
+    def env_file_for_deployment(self, name: str) -> str:
+        return os.path.join(self.deployment_dir(name=name), '.env')
+
     def env_for_deployment(self, name: str) -> Dict[str, str]:
-        env_filename = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, '.env')
+        env_filename = self.env_file_for_deployment(name=name)
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
 
         return {}
 
+    def build_env_file_for_deployment(self, name: str) -> str:
+        return os.path.join(self.deployment_build_dir(name=name), '.env')
+
     def build_env_for_deployment(self, name: str) -> Dict[str, str]:
-        env_filename = os.path.join(self.deployment_build_dir(name=name), '.env')
+        env_filename = self.build_env_file_for_deployment(name=name)
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
 
