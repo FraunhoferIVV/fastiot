@@ -1,0 +1,21 @@
+config_dir: ./config_dir
+deployment_target:
+  hosts:
+    localhost:
+      ip: 127.0.0.1
+  link_prometheus: false
+  remote_user: ubuntu
+docker_registry: ''
+infrastructure_services:
+  mongodb:
+    external: false
+  nats:
+    external: false
+name: full
+services:
+  consumer: null
+  fastapi: null
+  producer: null
+  test: null
+tag: ''
+version: 1
