@@ -124,7 +124,7 @@ class NPM(BaseModel):
 
 
     in your npm config or in case of vue js application in the file :file:`vue.config.js` use the `outputDir` variable
-    as relative path here.
+    as relative path here, e.g. ``dist: ../static``
     """
 
 
