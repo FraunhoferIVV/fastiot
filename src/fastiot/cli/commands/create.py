@@ -1,6 +1,7 @@
 """
 Commands for generating new projects and services.
 """
+import getpass
 import logging
 import os
 import random
@@ -65,6 +66,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     for directory in ['requirements',
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
+                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "full"),
                       os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
                       os.path.join("src", f"{project_name}_services")]:
@@ -80,11 +82,15 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         shutil.copy(os.path.join(templates_dir, src), os.path.join(context.project_root_dir, dest))
 
     # Loop over many templates used to create a new project
-    for dest, temp in [(CONFIGURE_FILE_NAME, 'new_project/configure.py.j2'),
-                       ('README.md', 'new_project/README.md.j2'),
-                       ('deployments/integration_test/.env', 'new_project/.env.j2'),
-                       ('deployments/production/.env', 'new_project/.env.production.j2'),
-                       ('requirements/requirements.txt', 'new_project/requirements.txt.j2')]:
+    for temp, dest in [('configure.py.j2', CONFIGURE_FILE_NAME),
+                       ('README.md.j2', 'README.md'),
+                       ('.env.j2', os.path.join('deployments', 'integration_test', '.env')),
+                       ('deployment.yaml.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR,
+                                                           'production', DEPLOYMENTS_CONFIG_FILE)),
+                       ('deployment.yaml.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', DEPLOYMENTS_CONFIG_FILE)),
+                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'production', '.env')),
+                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', '.env')),
+                       ('requirements.txt.j2', os.path.join('requirements', 'requirements.txt'))]:
 
         # For each potential service create a unique password for the production deployment.
         password_fields = []
@@ -93,12 +99,13 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         env_vars = [f"{f}={_create_random_password(24)}" for f in password_fields]
 
         with open(os.path.join(context.project_root_dir, dest), "w") as template_file:
-            template = get_jinja_env().get_template(temp)
+            template = get_jinja_env().get_template(os.path.join('new_project', temp))
             template_file.write(template.render(
                 project_namespace=project_name,
                 version=__version__,
                 major_version=int(__version__.split(".", maxsplit=1)[0]),
-                env_vars=env_vars
+                env_vars=env_vars,
+                user=getpass.getuser()
             ))
 
     logging.info("Project created successfully")
