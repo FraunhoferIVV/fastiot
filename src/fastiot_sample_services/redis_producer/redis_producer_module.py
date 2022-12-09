@@ -4,7 +4,7 @@ import random
 from datetime import datetime
 
 from fastiot.core import FastIoTService, loop, subscribe
-from fastiot.helpers.redis_helper import RedisHelper
+from fastiot.db.redis_helper import RedisHelper
 from fastiot.msg import Thing, RedisMsg
 from fastiot.util.object_helper import parse_object
 

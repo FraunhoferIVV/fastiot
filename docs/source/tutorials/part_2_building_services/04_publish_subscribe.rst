@@ -104,7 +104,7 @@ For a fully working example you may also consult :class:`fastiot_sample_services
           return asyncio.sleep(2)
 
 If you want to send larger Files you can use
-:class:`fastiot.helpers.redis_helper.RedisHelper`
+:class:`fastiot.db.redis_helper.RedisHelper`
 .
 As an example for an implementation
 you can use
