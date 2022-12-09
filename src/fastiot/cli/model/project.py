@@ -117,23 +117,32 @@ class ProjectContext(BaseModel):
 
     def deployment_by_name(self, name: str) -> DeploymentConfig:
         """ Returns a specific deployment by its name. """
-        deployment_file = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR,
-                                       name, DEPLOYMENTS_CONFIG_FILE)
+        deployment_file = os.path.join(self.deployment_dir(name=name), DEPLOYMENTS_CONFIG_FILE)
         return DeploymentConfig.from_yaml_file(deployment_file)
+
+    def deployment_dir(self, name: str) -> str:
+        """ Returns the deployment build dir for specific deployment """
+        return os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name)
 
     def deployment_build_dir(self, name: str) -> str:
         """ Returns the deployment build dir for specific deployment """
         return os.path.join(self.project_root_dir, self.build_dir, DEPLOYMENTS_CONFIG_DIR, name)
 
+    def env_file_for_deployment(self, name: str) -> str:
+        return os.path.join(self.deployment_dir(name=name), '.env')
+
     def env_for_deployment(self, name: str) -> Dict[str, str]:
-        env_filename = os.path.join(self.project_root_dir, DEPLOYMENTS_CONFIG_DIR, name, '.env')
+        env_filename = self.env_file_for_deployment(name=name)
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
 
         return {}
 
+    def build_env_file_for_deployment(self, name: str) -> str:
+        return os.path.join(self.deployment_build_dir(name=name), '.env')
+
     def build_env_for_deployment(self, name: str) -> Dict[str, str]:
-        env_filename = os.path.join(self.deployment_build_dir(name=name), '.env')
+        env_filename = self.build_env_file_for_deployment(name=name)
         if os.path.isfile(env_filename):
             return parse_env_file(env_filename)
 
@@ -178,7 +187,45 @@ def parse_env_file(env_filename: str) -> Dict[str, str]:
                 continue
             parts = line.split('=', maxsplit=2)
             parts = [p.strip() for p in parts]
+            log_info = f"Cannot parse env file: Invalid line {i_line + 1}: "
             if len(parts) == 1 or parts[0].replace("_", "").isalnum() is False:
-                raise ValueError(f"Cannot parse env file: Invalid line {i_line + 1}: {line}")
+                raise ValueError(f"{log_info}{line}")
+            parts[1] = _parse_env_value(value=parts[1], log_info=log_info)
             environment[parts[0]] = parts[1]
     return environment
+
+def _parse_env_value(value: str, log_info: str) -> str:
+    """
+    A mini parser which takes care of env value parsing including encapsulation of char " and char '
+    """
+    if len(value) == 0:
+        return value
+    if value.startswith(" "):
+        raise ValueError(f"{log_info}Env value should not start with space")
+    if value[0] not in ['"', "'"]:
+        bracket = ""
+    else:
+        bracket = value[0]
+        value = value[1:]
+    parsed = []
+    encapsulated = False
+    parsing_finished = False
+    for v in value:
+        if parsing_finished == True:
+            if value != ' ':
+                raise ValueError(f"{log_info}Didn't expected char '{value}' because parsing is finished")
+            encapsulated = False
+            continue
+
+        if encapsulated:
+            encapsulated = False
+            parsed.append(v)
+        elif v == '\\':
+            encapsulated = True
+        elif v == bracket:
+            parsing_finished = True
+        else:
+            parsed.append(v)
+    if encapsulated:
+        raise ValueError(f"{log_info}Didn't expect '\\' at end of var")
+    return ''.join(parsed)

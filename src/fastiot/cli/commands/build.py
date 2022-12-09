@@ -20,7 +20,7 @@ from fastiot.cli.model.docker_template import DockerTemplate
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
 
-def _mode_completion() -> List[str]:
+def _mode_completion(*args, **kwargs) -> List[str]:
     return BUILD_MODES
 
 

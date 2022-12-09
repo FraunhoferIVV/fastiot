@@ -1,4 +1,5 @@
-from ormsgpack import ormsgpack
+import msgpack
+
 
 from fastiot.core.data_models import FastIoTData, Msg, MsgCls
 
@@ -13,16 +14,16 @@ def serialize_to_bin(msg_cls: MsgCls, msg: Msg) -> bytes:
                 f"Expected msg to be of type '{msg_cls}', but it is instead "
                 f"of type '{type(msg)}' instead."
             )
-        return ormsgpack.packb(msg, option=ormsgpack.OPT_SERIALIZE_PYDANTIC)
+        return msgpack.packb(msg.dict(), datetime=True)
 
-    return ormsgpack.packb(msg)
+    return msgpack.packb(msg, datetime=True)
 
 
 def serialize_from_bin(msg_cls: MsgCls, data: bytes) -> Msg:
     """
     Serializes a msg from binary.
     """
-    unpacked = ormsgpack.unpackb(data)
+    unpacked = msgpack.unpackb(data, timestamp=3)
     if issubclass(msg_cls, FastIoTData):
         return msg_cls(**unpacked)
 

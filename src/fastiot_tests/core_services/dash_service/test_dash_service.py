@@ -1,7 +1,7 @@
 import asyncio
 import os
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from fastiot.core.broker_connection import NatsBrokerConnection
@@ -106,6 +106,7 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
                 thing_list.append(thing)
 
         for thing in thing_list:
+            thing.timestamp = thing.timestamp.replace(tzinfo=None)
             data = [{"measurement": str(thing.name),
                      "tags": {"machine": str(thing.machine),
                               "unit": str(thing.unit)},
@@ -118,13 +119,13 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
     async def test_influxdb_query(self):
         await self.delete_data()
         await self.write_thing_to_influxdb()
-        dt_start = datetime(year=2019, month=7, day=25, second=1).isoformat()
+        dt_start = datetime(year=2019, month=7, day=25, second=1, tzinfo=timezone.utc).isoformat()
         dt_end = (get_time_now() + timedelta(seconds=30)).isoformat()
         machine = "test_machine"
         name = "my_sensor_1"
 
         query = f'from(bucket: "{env_influxdb.bucket}")' \
-                f'|> range(start: {dt_start}Z, stop: {dt_end}Z)' \
+                f'|> range(start: {dt_start}, stop: {dt_end})' \
                 f'|> group(columns: ["time"])' \
                 f'|> sort(columns: ["_time"])' \
                 f'|> filter(fn: (r) => r["_measurement"] == "{name}")' \

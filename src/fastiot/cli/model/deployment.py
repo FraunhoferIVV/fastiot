@@ -126,3 +126,8 @@ class DeploymentConfig(BaseModel):
                     if value is None:
                         config["infrastructure_services"][item] = InfrastructureServiceConfig()
         return DeploymentConfig(**{'name': os.path.basename(os.path.dirname(filename)), **config})
+
+    def to_yaml_file(self, filename: str):
+        with open(filename, 'w') as manifest_file:
+            manifest_file.seek(0)
+            yaml.safe_dump(self.dict(), manifest_file)

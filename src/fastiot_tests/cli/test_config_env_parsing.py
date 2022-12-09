@@ -34,6 +34,26 @@ class TestEnvFileParser(unittest.TestCase):
             cfg = parse_env_file(f.name)
             self.assertEqual({}, cfg)
 
+    def test_double_quotation_marks(self):
+        with NamedTemporaryFile(mode="w") as f:
+            f.write('var="new_\\"test"  \n')
+            f.seek(0)
+            cfg = parse_env_file(f.name)
+            self.assertEqual('new_"test', cfg['var'])
+
+    def test_single_quotation_marks(self):
+        with NamedTemporaryFile(mode="w") as f:
+            f.write("var='new_\\'test'  \n")
+            f.seek(0)
+            cfg = parse_env_file(f.name)
+            self.assertEqual("new_'test", cfg['var'])
+
+    def test_var_with_special_chars(self):
+        with NamedTemporaryFile(mode="w") as f:
+            f.write("var=\"new.test\"")
+            f.seek(0)
+            cfg = parse_env_file(f.name)
+            self.assertEqual("new.test", cfg['var'])
 
 if __name__ == '__main__':
     unittest.main()

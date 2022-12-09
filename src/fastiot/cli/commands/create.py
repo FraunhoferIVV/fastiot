@@ -1,6 +1,7 @@
 """
 Commands for generating new projects and services.
 """
+import getpass
 import logging
 import os
 import random
@@ -11,8 +12,10 @@ from typing import Optional
 import typer
 
 from fastiot import __version__
-from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME, \
+    DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.model import DeploymentConfig
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.typer_app import create_cmd
@@ -63,6 +66,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     for directory in ['requirements',
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
+                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "full"),
                       os.path.join("src", f"{project_name}"),
                       os.path.join("src", f"{project_name}_tests"),
                       os.path.join("src", f"{project_name}_services")]:
@@ -78,11 +82,15 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         shutil.copy(os.path.join(templates_dir, src), os.path.join(context.project_root_dir, dest))
 
     # Loop over many templates used to create a new project
-    for dest, temp in [(CONFIGURE_FILE_NAME, 'new_project/configure.py.j2'),
-                       ('README.md', 'new_project/README.md.j2'),
-                       ('deployments/integration_test/.env', 'new_project/.env.j2'),
-                       ('deployments/production/.env', 'new_project/.env.production.j2'),
-                       ('requirements/requirements.txt', 'new_project/requirements.txt.j2')]:
+    for temp, dest in [('configure.py.j2', CONFIGURE_FILE_NAME),
+                       ('README.md.j2', 'README.md'),
+                       ('.env.j2', os.path.join('deployments', 'integration_test', '.env')),
+                       ('deployment.yaml.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR,
+                                                           'production', DEPLOYMENTS_CONFIG_FILE)),
+                       ('deployment.yaml.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', DEPLOYMENTS_CONFIG_FILE)),
+                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'production', '.env')),
+                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', '.env')),
+                       ('requirements.txt.j2', os.path.join('requirements', 'requirements.txt'))]:
 
         # For each potential service create a unique password for the production deployment.
         password_fields = []
@@ -91,12 +99,13 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
         env_vars = [f"{f}={_create_random_password(24)}" for f in password_fields]
 
         with open(os.path.join(context.project_root_dir, dest), "w") as template_file:
-            template = get_jinja_env().get_template(temp)
+            template = get_jinja_env().get_template(os.path.join('new_project', temp))
             template_file.write(template.render(
                 project_namespace=project_name,
                 version=__version__,
                 major_version=int(__version__.split(".", maxsplit=1)[0]),
-                env_vars=env_vars
+                env_vars=env_vars,
+                user=getpass.getuser()
             ))
 
     logging.info("Project created successfully")
@@ -150,6 +159,7 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
                 path=f"{service_package}.{service_name}.{service_name}_service"
             ))
 
+    _add_service_to_deployment(service_name)
     logging.info("Service %s.%s created successfully", service_package, service_name)
 
 
@@ -186,3 +196,16 @@ def _find_service_package(project_config, service_package):
         raise typer.Exit(4)
     service_package = service_package or service_package_list[0]
     return service_package
+
+
+def _add_service_to_deployment(service_name: str):
+    """
+    Add the fresh service to the "full" deployment.
+    """
+    deployment_file = os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', DEPLOYMENTS_CONFIG_FILE)
+    deployment = DeploymentConfig.from_yaml_file(deployment_file)
+
+    if service_name not in deployment.services:
+        deployment.services[service_name] = None
+        deployment.to_yaml_file(deployment_file)
+

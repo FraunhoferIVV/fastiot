@@ -135,7 +135,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
 
         deployment_source_dir = os.path.join(context.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
         shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
-                        ignore=lambda _, __: ['deployment.yaml'])
+                        ignore=lambda _, __: ['deployment.yaml', '.env'])
 
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.j2')
@@ -145,10 +145,31 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 services=services + infrastructure_services,
                 env_file=env or env_additions
             ))
-        if env_additions:
-            with open(os.path.join(deployment_dir, '.env'), "a") as env_file:
+
+        env_filename = context.env_file_for_deployment(name=deployment_name)
+        env_file_content = ""
+        if os.path.exists(env_filename):
+            with open(env_filename, "r") as env_file:
+                env_file_content = env_file.read()
+
+        with open(context.build_env_file_for_deployment(name=deployment_name), "w") as env_file:
+            env_file.write(
+                f"# Note: This file is generated. Please do not modify this file but instead go to the .env-file "
+                f"located at \n"
+                f"# '{env_filename}'.\n\n")
+
+            if env_file_content.strip() != '':
+                env_file.write(f"# The following content has been copied from there:\n\n")
+                env_file.write(env_file_content)
+            else:
+                env_file.write(f"# Currently this file is empty or non-existent so there is nothing to copy from "
+                               f"there.\n")
+
+            if env_additions:
+                env_file.write("\n# The following content has been injected via fastiot cli:\n")
                 for key, value in env_additions.items():
                     env_file.write(f"\n{key}={value}")
+                env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
 
     logging.info("Successfully created configurations!")
 
