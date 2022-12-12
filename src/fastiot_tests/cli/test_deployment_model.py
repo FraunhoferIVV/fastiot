@@ -23,7 +23,7 @@ services:
     image: fastiot/machine_learning
     environment:
       <<: *env_machine2
-      FASTIOT_LOG_LEVEL_NO: 20 # DEBUG
+      FASTIOT_LOG_LEVEL: 20 # INFO
 
 infrastructure_services:
   nats:
@@ -35,7 +35,7 @@ config_dir: ./config_dir
 environment:
   FASTIOT_CUSTOMER: packaging_sealing_demo
   FASTIOT_MACHINE_ID: machine1
-  FASTIOT_LOG_LEVEL_NO: 20
+  FASTIOT_LOG_LEVEL: 20
 
 docker_registry: "docker.dev.ivv-dd.fhg.de"
 """

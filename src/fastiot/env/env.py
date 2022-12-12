@@ -1,7 +1,7 @@
 """ Module to hold basic environment variables """
 import logging
 import os
-from typing import Optional
+from typing import Optional, Union
 
 from fastiot.cli.common.infrastructure_services import MongoDBService, MariaDBService, InfluxDBService, \
     TimeScaleDBService, NatsService, RedisService
@@ -47,13 +47,30 @@ class BasicEnv:
         return os.getenv(FASTIOT_CONFIG_DIR, '/etc/fastiot')
 
     @property
-    def log_level_no(self) -> int:
-        """ .. envvar:: FASTIOT_LOG_LEVEL_NO
+    def log_level(self) -> int:
+        """ .. envvar:: FASTIOT_LOG_LEVEL
 
         This environment variable is used to set the logging Level. Defaults to Info-Level (=20)
         Level for logging s. https://docs.python.org/3/library/logging.html#logging-levels
         """
-        return int(os.getenv(FASTIOT_LOG_LEVEL_NO, str(logging.INFO)))
+        if FASTIOT_LOG_LEVEL not in os.environ:
+            return logging.INFO
+
+        try:
+            return int(os.environ[FASTIOT_LOG_LEVEL])
+        except:
+            pass
+
+        try:
+            return int(logging.getLevelName(os.environ[FASTIOT_LOG_LEVEL].upper()))
+        except:
+            pass
+
+        raise ValueError(
+            f"Env variable '{FASTIOT_LOG_LEVEL}' is set to '{os.environ[FASTIOT_LOG_LEVEL]}' "
+            "which is not a valid log level."
+        )
+
 
     @property
     def volume_dir(self) -> str:

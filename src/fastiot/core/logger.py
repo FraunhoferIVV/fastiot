@@ -5,7 +5,7 @@ from fastiot.env import env_basic
 def setup_logger(name: Optional[str] = 'root'):
     """
     This logging is a wrapper for logging from python, you can use it like following.
-    Also the :envvar:`FASTIOT_LOG_LEVEL_NO` must be set to the expected level.
+    Also the :envvar:`FASTIOT_LOG_LEVEL` must be set to the expected level.
     s. https://docs.python.org/3/library/logging.html#logging-levels
 
     .. code:: python
@@ -17,7 +17,7 @@ def setup_logger(name: Optional[str] = 'root'):
 
     """
     from logging import getLogger, config  # pylint:disable=import-outside-toplevel
-    config.dictConfig(get_log_config(env_basic.log_level_no))
+    config.dictConfig(get_log_config(env_basic.log_level))
     return getLogger(name)
 
 
