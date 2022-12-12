@@ -16,6 +16,5 @@ services:
   consumer: null
   fastapi: null
   producer: null
-  test: null
 tag: ''
 version: 1
