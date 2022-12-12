@@ -5,14 +5,14 @@ import os.path
 import re
 import subprocess
 from glob import glob
-from typing import List, Optional, final
+from typing import List, Optional
 from shutil import copyfile
 
 import typer
 from pydantic import BaseModel
 
-from fastiot.cli.constants import BUILD_MODE_DEBUG, BUILD_MODE_RELEASE, BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
-    DOCKER_BUILD_DIR, TEMPLATES_DIR
+from fastiot.cli.constants import BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
+    DOCKER_BUILD_DIR
 from fastiot.cli.env import env_cli
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service

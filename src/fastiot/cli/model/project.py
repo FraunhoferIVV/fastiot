@@ -1,7 +1,7 @@
 """ data model for project configuration """
 import os
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pydantic.main import BaseModel
 import yaml

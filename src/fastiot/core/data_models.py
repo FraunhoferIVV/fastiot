@@ -2,7 +2,7 @@ from abc import ABC
 import random
 import re
 from datetime import datetime
-from typing import Type, Union, Optional
+from typing import Type, Union
 
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator
