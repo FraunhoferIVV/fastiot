@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """ Basic script to start the fiot command line program """
 import logging
+import os
+import sys
 
 from fastiot.cli import typer_app
 from fastiot.env import env_basic
@@ -10,6 +12,11 @@ from fastiot.cli.model.project import ProjectContext  # noqa  # pylint: disable=
 if __name__ == '__main__':
     # entry point for fastiot command
     logging.basicConfig(level=env_basic.log_level)
+
+    # import src dir if located and available
+    _src_dir = os.path.join(os.getcwd(), 'src')
+    if os.path.isdir(_src_dir) and _src_dir not in sys.path:
+        sys.path.append(_src_dir)
 
     # trigger context creation
     context = ProjectContext.default
