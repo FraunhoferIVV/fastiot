@@ -49,21 +49,29 @@ class FastIoTService:
         self._subscription_fns = []
         self._reply_subscription_fns = []
         self._loop_fns = []
+
         self._tasks: List[asyncio.Task] = []
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
         self._logger = logging
 
+    def _setup_annotations(self):
+        # We cannot setup annotations inside __init__ because some services may have properties which rely on the
+        # __init__ method to finish and would otherwise raise exceptions, e.g. a service that reads the config in the
+        # __init__ and provides it's values via properties.
+        self._subscription_fns = []
+        self._reply_subscription_fns = []
+        self._loop_fns = []
         for name in dir(self):
             if name.startswith('__'):
                 continue
             attr = self.__getattribute__(name)
-            if hasattr(attr, '_fastiot_is_loop'):
-                self._loop_fns.append(attr)
             if hasattr(attr, '_fastiot_subject'):
                 self._subscription_fns.append(attr)
             if hasattr(attr, '_fastiot_reply_subject'):
                 self._reply_subscription_fns.append(attr)
+            if hasattr(attr, '_fastiot_is_loop'):
+                self._loop_fns.append(attr)
 
     async def _start(self):
         """ Optionally overwrite this method to run any async start commands like ``await self._server.start()``` """
@@ -154,6 +162,7 @@ class FastIoTService:
 
     async def __aenter__(self):
         self._shutdown_event.clear()
+        self._setup_annotations()
         await self._start()
         await self._start_annotated_subs()
         await self._start_annotated_loops()
@@ -178,6 +187,7 @@ class FastIoTService:
 
         signal.signal(signal.SIGTERM, handler)
 
+        self._setup_annotations()
         await self._start()
         await self._start_annotated_subs()
         await self._start_annotated_loops()
