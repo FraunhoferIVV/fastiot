@@ -49,7 +49,7 @@ class FastIoTData(BaseModel, ABC):
     @no_type_check
     def __setattr__(self, name, value):
         """
-        To be able to use properties with setters
+        Override this magic function to activate the @property setter
         """
         try:
             super().__setattr__(name, value)
