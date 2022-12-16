@@ -1,8 +1,9 @@
+import inspect
 from abc import ABC
 import random
 import re
 from datetime import datetime
-from typing import Type, Union
+from typing import Type, Union, no_type_check
 
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator
@@ -14,7 +15,7 @@ from fastiot.core.time import ensure_tzinfo
 class FastIoTData(BaseModel, ABC):
     """ Basemodel for all data types / data models to be transferred over the broker between the services.
     This is basically a Pydantic model with the additional handling of subjects. So any Pydantic model should work here,
-    as long as it can be serialized using the library ``ormsgpack``.
+    as long as it can be serialized using the library ``msgpack``.
 
     The subject is constructed from the model name, e.g. if your data model is called ``MySpecialModel`` a subject
     ``v1.my_special_subject`` will be created. If you want to have more control over the subject name you may overwrite
@@ -25,6 +26,9 @@ class FastIoTData(BaseModel, ABC):
     For your own data models please use :class:`fastiot.core.data_models.FastIoTPublish` for data that is simply
     published over the broker. For Request and Response please use :class:`fastiot.core.data_models.FastIoTRequest` and
     :class:`fastiot.core.data_models.FastIoTResponse`.
+
+    This class also implements the magic methode __setattr__, there is a known bug in BaseModel,
+    the private attributes cannot be set with the @property, this overrode methode makes it possible.
     """
 
     @classmethod
@@ -41,6 +45,24 @@ class FastIoTData(BaseModel, ABC):
             if isinstance(value, datetime):
                 values[name] = ensure_tzinfo(value)
         return values
+
+    @no_type_check
+    def __setattr__(self, name, value):
+        """
+        To be able to use properties with setters
+        """
+        try:
+            super().__setattr__(name, value)
+        except ValueError as e:
+            setters = inspect.getmembers(
+                self.__class__,
+                predicate=lambda x: isinstance(x, property) and x.fset is not None
+            )
+            if name in [setter[0] for setter in setters]:
+                object.__setattr__(self, name, value)
+            else:
+                raise e
+
 
 Msg = Union[FastIoTData, dict]
 MsgCls = Type[Msg]
