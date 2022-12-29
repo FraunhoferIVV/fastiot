@@ -18,7 +18,7 @@ To add your own service you have to follow a few basic steps:
    You may add those class anywhere in your project. It is recommended to use something like
    ``your_project_lib.extension.services``.
 2. Add the corresponding import, e.g.  ``your_project_lib.extension.services`` to your :file:`configure.py` in your
-   project root dir using the :attr:`fastiot.cli.model.project.ProjectConfig.extensions`. Make sure this will really
+   project root dir using the :attr:`fastiot.cli.model.project.ProjectContext.extensions`. Make sure this will really
    import the class.
 
 You should now be able to add your infrastructure service to your deployment configurations.

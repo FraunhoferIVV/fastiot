@@ -64,7 +64,7 @@ class ProjectContext(BaseModel):
 
     integration_test_deployment: str = ''
     """ If you need any services to be started for automatic testing your project you may define the name of this
-    special deployment found within the :attr:`fastiot.cli.model.project.ProjectConfig.deployments`."""
+    special deployment found within the :attr:`fastiot.cli.model.project.ProjectContext.deployments`."""
 
     test_package: str = ''
     """ Name of the package in the :file:`src` directory where automated tests are stored. Common is to use something
@@ -112,7 +112,7 @@ class ProjectContext(BaseModel):
     @property
     def deployment_names(self) -> List[str]:
         """ Returns a list of all deployment names configured by configuration
-        (:attr:`fastiot.cli.model.project.ProjectConfig.deployments`) or by convention in deployments dir."""
+        (:attr:`fastiot.cli.model.project.ProjectContext.deployments`) or by convention in deployments dir."""
         return list(self.deployments.keys())
 
     def deployment_by_name(self, name: str) -> DeploymentConfig:

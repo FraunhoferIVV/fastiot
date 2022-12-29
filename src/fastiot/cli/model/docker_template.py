@@ -23,7 +23,7 @@ class DockerTemplate(BaseModel):
         :class:`fastiot.cli.model.infrastructure_service.InfrastructureService`.
 
         To append own services you simply have to inherit from this class and put them into your project. Then import
-        those parts using :attr:`fastiot.cli.model.project.ProjectConfig.extensions`. This method will try to import
+        those parts using :attr:`fastiot.cli.model.project.ProjectContext.extensions`. This method will try to import
         anything from there and for services.
         """
         template_classes = DockerTemplate.__subclasses__()
