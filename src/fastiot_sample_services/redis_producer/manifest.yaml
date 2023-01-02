@@ -3,4 +3,3 @@ fastiot_service:
 
   platforms:
     - amd64
-    - arm64
