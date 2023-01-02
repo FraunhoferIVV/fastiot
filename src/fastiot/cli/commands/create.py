@@ -203,6 +203,9 @@ def _add_service_to_deployment(service_name: str):
     Add the fresh service to the "full" deployment.
     """
     deployment_file = os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', DEPLOYMENTS_CONFIG_FILE)
+    if not os.path.exists(deployment_file):
+        logging.debug("No deployment `full` found to add new service automatically. Skipping.")
+        return
     deployment = DeploymentConfig.from_yaml_file(deployment_file)
 
     if service_name not in deployment.services:
