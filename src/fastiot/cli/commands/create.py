@@ -115,8 +115,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
 def new_service(service_name: str = typer.Argument("", help="The service name to generate"),
                 service_package: Optional[str] = typer.Option(None, '-p', '--package',
                                                               help="Specify the package to create the "
-                                                                   "service in. If left empty the first "
-                                                                   "package configured will be used."),
+                                                                   "service in. If left empty and only one package is "
+                                                                   "found this one will be used."),
                 force: Optional[bool] = typer.Option(False, '-f', '--force',
                                                      help="Create service even if if an existing service has the same "
                                                           "name."),
@@ -186,7 +186,7 @@ def _find_service_package(project_config, service_package):
         raise typer.Exit(4)
     # nothing given
     if not service_package and len(service_package_list) > 1:
-        logging.error("More than one service package found. Please choose one manually. "
+        logging.error("More than one service package found. Please choose one manually using the option `-p`. "
                       "Detected packages: %s", ", ".join(service_package_list))
         raise typer.Exit(4)
     # package given
