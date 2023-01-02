@@ -85,14 +85,17 @@ def _git_version() -> str:
     if git_tag:
         # Match "[major].[minor]-[commits since tag as patch]" where the latest part "-[...]" is optional. Also a char
         # 'v' is optional at the beginning.
-        match = re.search(r"^v?(\d+)\.(\d+)(?:-(\d+)-g[\w\d]+)?$", git_tag)
+        match = re.search(r"^v?(\d+)\.(\d+)(?:.(\d+)|)(?:-(\d+)-g[\w\d]+)?$", git_tag)
         if match:
             major = match.group(1)
             minor = match.group(2)
-            patch = match.group(3)
+            patch_static = match.group(3)
+            if not patch_static:
+                patch_static = '0'
+            patch = match.group(4)
             if not patch:
                 patch = '0'
-            patch = int(patch)
+            patch = int(patch) + int(patch_static)
         else:
             raise ValueError(f"Invalid version tag '{git_tag}'.")
 
