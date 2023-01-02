@@ -103,6 +103,9 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             if key in infrastructure_ports:
                 infrastructure_ports[key] = int(value)
 
+    if not isinstance(net, str):  # Workaround for https://github.com/tiangolo/typer/issues/106
+        net = net.default
+
     for deployment_name in deployment_names:
         deployment_dir = context.deployment_build_dir(name=deployment_name)
         shutil.rmtree(deployment_dir, ignore_errors=True)
@@ -140,7 +143,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.j2')
             docker_compose_file.write(docker_compose_template.render(
-                docker_net_name=str(net),
+                docker_net_name=net,
                 environment_for_docker_compose_file=env_service_internal_modifications,
                 services=services + infrastructure_services,
                 env_file=env or env_additions

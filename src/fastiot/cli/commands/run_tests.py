@@ -10,6 +10,7 @@ import typer
 
 from fastiot.cli.commands.start import start
 from fastiot.cli.commands.stop import stop
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, app
 
@@ -49,11 +50,11 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
                      "Skipping the step")
         return
 
-    if not os.path.isfile(os.path.join(context.project_root_dir, 'src', context.test_package,
-                                       'generated.py')):
+    if not os.path.isfile(os.path.join(context.project_root_dir, 'build', DEPLOYMENTS_CONFIG_DIR,
+                                       context.integration_test_deployment, '.env')):
         from fastiot.cli.commands.config import config  # pylint: disable=import-outside-toplevel
 
-        logging.warning("No file `generated.py` found in testpackage %s.\n"
+        logging.warning("No generated configuration could found in build/%s.\n"
                         "\tRunning config command to create one now.", context.test_package)
         config(use_test_deployment=True, port_offset=0)
 
