@@ -208,7 +208,7 @@ class RedisService(InfrastructureService):
     Here, all relevant environment variables are listed to build a Redis Service,
     """
     name: str = 'redis'
-    image: str = 'redis:4'
+    image: str = 'redis:7'
     ports: List[InfrastructureServicePort] = [
         InfrastructureServicePort(
             container_port=6379,
