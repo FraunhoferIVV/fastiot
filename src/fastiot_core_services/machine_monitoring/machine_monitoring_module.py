@@ -92,7 +92,7 @@ class MachineMonitoring(FastIoTService):
         self._apply_changes_to_thing(sensor_data, val)
 
     async def _poll_monitored_node_values(self):
-        while await self.wait_for_shutdown(0.2) is False:
+        while env_opcua.polling_delay == 0.0 or await self.wait_for_shutdown(env_opcua.polling_delay) is False:
             for thing in self._things.values():
                 opc_node = self._opcua_client.get_node(thing.name)
                 val = opc_node.get_value()
