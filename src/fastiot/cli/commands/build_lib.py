@@ -39,6 +39,9 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         logging.info("No library package configured in configure.py. Exiting.")
         return
 
+    if not isinstance(build_style, str):
+        build_style = build_style.default
+
     if build_style == BuildLibStyles.all:
         if context.lib_compilation_mode == CompileSettingsEnum.only_compiled:
             styles = [BuildLibStyles.compiled]
