@@ -110,7 +110,7 @@ class MachineMonitoring(FastIoTService):
             self._thing_queue.task_done()
 
             await self.broker_connection.publish(
-                subject=enqueued_thing.get_subject(),
+                subject=enqueued_thing.default_subject,
                 msg=enqueued_thing
             )
             self._data_received_event_for_max_allowed_data_delay.set()

@@ -97,7 +97,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         msg_queue = asyncio.Queue()
 
         await self.broker_connection.subscribe_msg_queue(
-            subject=Thing.get_subject(),
+            subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
         async with MachineMonitoring(broker_connection=self.broker_connection):
@@ -120,7 +120,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
 
         msg_queue = asyncio.Queue()
         await self.broker_connection.subscribe_msg_queue(
-            subject=Thing.get_subject(),
+            subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
         async with MachineMonitoring(broker_connection=self.broker_connection):
@@ -147,7 +147,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         msg_queue = asyncio.Queue()
 
         await self.broker_connection.subscribe_msg_queue(
-            subject=Thing.get_subject(),
+            subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
         async with MachineMonitoring(broker_connection=self.broker_connection):
