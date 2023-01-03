@@ -9,9 +9,12 @@ from opcua import Client, Server
 
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.core_uuid import get_uuid
-from fastiot.env.env import env_opcua, env_broker
+from fastiot.env.env import env_broker
+from fastiot_core_services.machine_monitoring.env import env_opcua, FASTIOT_OPCUA_ENDPOINT_URL, \
+    FASTIOT_OPCUA_RETRIEVAL_MODE, OPCUARetrievalMode, FASTIOT_MACHINE_MONITORING_CONFIG_NAME, \
+    FASTIOT_OPCUA_SECURITY_STRING, FASTIOT_OPCUA_USER, FASTIOT_OPCUA_PASSWORD, FASTIOT_OPCUA_APPLICATION_URI, \
+    FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY
 from fastiot.env.env_constants import *
-from fastiot.env.model import OPCUARetrievalMode
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.ports import get_local_random_port

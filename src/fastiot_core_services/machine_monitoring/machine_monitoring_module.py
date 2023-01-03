@@ -1,15 +1,13 @@
 import asyncio
-from dataclasses import dataclass
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from opcua import Client
 
 from fastiot.core import FastIoTService, loop
 from fastiot.core.time import get_time_now
-from fastiot.env.env import env_opcua
-from fastiot.env.model import OPCUARetrievalMode
 from fastiot.msg.thing import Thing
+from fastiot_core_services.machine_monitoring.env import env_opcua, OPCUARetrievalMode
 from fastiot_core_services.machine_monitoring.extract_thing_metadata import extract_thing_metadata_from_csv
 
 
