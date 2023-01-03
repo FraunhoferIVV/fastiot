@@ -55,7 +55,7 @@ class MachineMonitoring(FastIoTService):
         if len(self._things) > 0:
             if env_opcua.retrieval_mode is OPCUARetrievalMode.subscription:
                 self._setup_monitoring_subscriptions()
-            elif env_opcua.retrieval_mode is OPCUARetrievalMode.polling:
+            elif env_opcua.retrieval_mode in [OPCUARetrievalMode.polling, OPCUARetrievalMode.polling_always]:
                 self.run_task(self._poll_monitored_node_values())
             else:
                 raise NotImplementedError()
@@ -141,7 +141,7 @@ class MachineMonitoring(FastIoTService):
         return asyncio.sleep(0.0)
 
     def _apply_changes_to_thing(self, thing: Thing, new_val):
-        if thing.value == new_val:
+        if env_opcua.retrieval_mode == OPCUARetrievalMode.polling and thing.value == new_val:
             return
 
         thing.value = new_val

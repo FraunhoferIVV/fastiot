@@ -392,8 +392,8 @@ class OPCUAEnv:
     def polling_delay(self) -> float:
         """
         The polling delay specifies the delay between polling opcua node cycles. This value is only applied if retrieval
-        mode is polling, which is the default behavior. Otherwise this variable is ignored. Must be positive. A value
-        of zero means no wait interval which may result in high server load.
+        mode is polling, which is the default behavior, or polling_always. Otherwise this variable is ignored. Must be
+        positive. A value of zero means no wait interval which may result in high server load.
         """
         value = float(os.getenv(FASTIOT_OPCUA_POLLING_DELAY, "0.2"))
         if value < 0.0:
