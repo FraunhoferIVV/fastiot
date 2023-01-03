@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from fastiot.core.core_uuid import get_uuid
-from fastiot.core.data_models import FastIoTPublish
+from fastiot.core.data_models import FastIoTPublish, Subject
 
 
 MEASUREMENT_ID = get_uuid()
@@ -39,3 +39,11 @@ class Thing(FastIoTPublish):
     """
     unit: str = ""
     """ Optional add a unit, e.g. 's' to the measurement. """
+
+    @property
+    def default_subject(self) -> Subject:
+        """
+        Returns a default subject for this thing to be published on. For more fine-grained behavior, please consider
+        using get_subject instead.
+        """
+        return self.get_subject(name=f"{self.machine}.{self.name}")

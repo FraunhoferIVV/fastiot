@@ -31,12 +31,12 @@ class MachineMonitoring(FastIoTService):
             things_filename = os.path.join(config_dir, "machine_monitoring_things.csv")
 
             if os.path.isfile(things_filename):
-                for thing in extract_thing_metadata_from_csv(things_filename):
-                    if thing.name in self._things:
-                        self._logger.warning(f'Thing with name "{thing.name}" skipped because it is '
+                for nodeid, thing in extract_thing_metadata_from_csv(things_filename).items():
+                    if nodeid in self._things:
+                        self._logger.warning(f'Thing with nodeid "{nodeid}" skipped because it is '
                                              f'already included')
                     else:
-                        self._things[thing.name] = thing
+                        self._things[nodeid] = thing
                 self._logger.info(f'File "{things_filename}" successfully imported.')
             else:
                 self._logger.info(f'File "{things_filename}" does not exist. Skipping import of sensors.')
@@ -80,21 +80,21 @@ class MachineMonitoring(FastIoTService):
 
     def _setup_monitoring_subscriptions(self):
         opcua_nodes = []
-        for thing in self._things.values():
-            opcua_node = self._opcua_client.get_node(thing.name)
+        for nodeid in self._things.keys():
+            opcua_node = self._opcua_client.get_node(nodeid)
             opcua_nodes.append(opcua_node)
 
         self._opcua_client_subscription = self._opcua_client.create_subscription(0, self)
         self._opcua_client_subscription.subscribe_data_change(opcua_nodes)
 
     def datachange_notification(self, node, val, data):
-        sensor_data = self._things[node.nodeid.to_string()]
-        self._apply_changes_to_thing(sensor_data, val)
+        thing = self._things[node.nodeid.to_string()]
+        self._apply_changes_to_thing(thing, val)
 
     async def _poll_monitored_node_values(self):
         while env_opcua.polling_delay == 0.0 or await self.wait_for_shutdown(env_opcua.polling_delay) is False:
-            for thing in self._things.values():
-                opc_node = self._opcua_client.get_node(thing.name)
+            for nodeid, thing in self._things.items():
+                opc_node = self._opcua_client.get_node(nodeid)
                 val = opc_node.get_value()
                 self._apply_changes_to_thing(thing, val)
 

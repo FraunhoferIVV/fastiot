@@ -1,2 +1,2 @@
-name,machine
-ns=2;i=5,sim_machine
+nodeid,thing_name,machine
+ns=2;i=5,a_sensor,sim_machine

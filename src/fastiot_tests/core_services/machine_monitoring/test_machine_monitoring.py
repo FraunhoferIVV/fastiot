@@ -104,7 +104,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             thing: Thing = await msg_queue.get()
             msg_queue.task_done()
             self.assertEqual('sim_machine', thing.machine)
-            self.assertEqual('ns=2;i=5', thing.name)
+            self.assertEqual('a_sensor', thing.name)
             self.assertEqual(20, thing.value)
 
     async def test_publish_multiple_machine_data_msg_polling(self):
