@@ -38,10 +38,6 @@ class TestConfigCommand(unittest.TestCase):
         self.runner = CliRunner()
 
     def tearDown(self):
-        try:
-            os.remove(os.path.join(self.assets_dir_, 'src', 'generated.py'))
-        except FileNotFoundError:
-            pass
         os.chdir(self._initial_cwd)
         if FASTIOT_CONFIGURE_FILE in os.environ:
             del os.environ[FASTIOT_CONFIGURE_FILE]
