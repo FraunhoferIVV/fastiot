@@ -221,7 +221,10 @@ def _create_services_compose_infos(env: Dict[str, str],
     return result
 
 
-def _get_full_image_name(deployment_config, docker_registry, service_config, tag):
+def _get_full_image_name(deployment_config: DeploymentConfig,
+                         docker_registry: str,
+                         service_config: ServiceConfig,
+                         tag: str):
     if service_config.docker_registry:
         temp_docker_registry = service_config.docker_registry
     elif deployment_config.docker_registry:

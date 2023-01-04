@@ -36,22 +36,6 @@ class ServiceConfig(BaseModel):
     environment: Dict[str, str] = {}
     """ Includes all environment variables specifically for this service """
 
-    @property
-    def is_local_docker_registry(self) -> bool:
-        return self.docker_registry == ''
-
-    @property
-    def docker_registry_image_prefix(self) -> str:
-        if self.is_local_docker_registry:
-            return ""
-
-        return f"{self.docker_registry}/"
-
-    @property
-    def full_image_name(self) -> str:
-        # TODO: Check case if local docker registry is set somewhere else (CLI, env var)
-        return f"{self.docker_registry_image_prefix}{self.image}:{self.tag}"
-
 
 class AnsibleHost(BaseModel):
     """
@@ -100,9 +84,9 @@ class DeploymentConfig(BaseModel):
     """ Specify a docker tag which acts as a default tag for all services (not infrastructure services). Overrides any
     docker tag specified by CLI. """
     config_dir: str = './config_dir'
-    """ Specify a config dir. The config dir will get mounted to /etc/fastiot 
-    
-        It defaults to :file:`config_dir`  
+    """ Specify a config dir. The config dir will get mounted to /etc/fastiot
+
+        It defaults to :file:`config_dir`
     """
 
     @root_validator
