@@ -2,6 +2,7 @@
 import os
 from enum import Enum
 from typing import Dict, List
+from pydantic import validator
 
 from pydantic.main import BaseModel
 import yaml
@@ -33,7 +34,7 @@ class ProjectContext(BaseModel):
     project_namespace: str = ''
     """ Namespace of the project used e.g. on the docker registry. This should be your project name."""
 
-    project_root_dir: str = os.getcwd()
+    project_root_dir: str = '.'
     """ Project root directory. As the cli is intended to be run from the project root directory the default using the
     current working directory should be fine."""
 
@@ -41,7 +42,7 @@ class ProjectContext(BaseModel):
     """ Define a python package within your :file:`src` directory containing library methods to be shared between your
     services. If not specified no library will be built."""
 
-    library_setup_py_dir: str = os.getcwd()
+    library_setup_py_dir: str = '.'
     """ Path where to find the :file:`setup.py` to build your library for exporting. The default with the current
      working directory should be fine, if you put your :file:`setup.py` at the toplevel of your project (common)."""
 
@@ -108,6 +109,12 @@ class ProjectContext(BaseModel):
 
     # we need this line for Pycharm IDE to detect type-hinting properly. Maybe it is fixed in the future
     default: "ProjectContext"
+
+    @validator("project_root_dir", "library_setup_py_dir", always=True)
+    def default_to_abspath(cls, v, values):
+        # We cannot rely on using abspath or getcwd as a default argument as the cwd might be changed, e.g. if
+        # fiot is called inside a subdir of the project. That's why we need to convert it via a validator.
+        return os.path.abspath(v)
 
     @property
     def deployment_names(self) -> List[str]:
