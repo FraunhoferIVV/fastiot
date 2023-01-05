@@ -6,7 +6,7 @@ from asyncio import get_running_loop
 from inspect import signature
 from typing import Any, Callable, Coroutine, Optional
 
-from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback
+from nats.aio.client import Client as BrokerClient, Callback as BrokerCallback, ErrorCallback as BrokerErrorCallback
 from nats.aio.msg import Msg as NatsBrokerMsg
 from nats.aio.subscription import Subscription as BrokerSubscription
 
@@ -26,26 +26,14 @@ class Subscription(ABC):
         Cancels the subscription
         """
 
-    @abstractmethod
-    def check_pending_error(self):
-        """
-        Checks if an error is pending and raises it.
-        """
-
-    @abstractmethod
-    async def raise_pending_error(self):
-        """
-        Waits for a pending error and raises it. Useful for testing.
-        """
-
 
 class NatsBrokerSubscription(Subscription):
     def __init__(self,
-                 max_pending_errors: int = 1000,
+                 subscription_error_cb: Optional[BrokerErrorCallback] = None,
                  **kwargs):
         super().__init__(**kwargs)
         self._subscription = None
-        self._pending_errors = asyncio.Queue(maxsize=max_pending_errors)
+        self._subscription_error_cb = subscription_error_cb
 
     def _set_subscription(self, subscription: BrokerSubscription):
         self._subscription = subscription
@@ -54,16 +42,6 @@ class NatsBrokerSubscription(Subscription):
         if self._subscription is None:
             raise RuntimeError("Expected a subscription object")
         await self._subscription.unsubscribe()
-
-    def check_pending_error(self):
-        if self._pending_errors.empty() is False:
-            next_error = self._pending_errors.get_nowait()
-            self._pending_errors.task_done()
-            raise next_error
-
-    async def raise_pending_error(self):
-        next_error = await self._pending_errors.get()
-        raise next_error
 
 
 class NatsBrokerSubscriptionSubject(NatsBrokerSubscription):
@@ -77,6 +55,7 @@ class NatsBrokerSubscriptionSubject(NatsBrokerSubscription):
         self._num_cb_params = len(signature(cb).parameters)
 
     async def received_nats_msg_cb(self, nats_msg: NatsBrokerMsg):
+        err = None
         try:
             msg = serialize_from_bin(self._subject.msg_cls, nats_msg.data)
             if self._num_cb_params == 1:
@@ -94,10 +73,10 @@ class NatsBrokerSubscriptionSubject(NatsBrokerSubscription):
                 )
 
         except Exception as e:
-            if self._pending_errors.full() is False:
-                self._pending_errors.put_nowait(e)
-        finally:
-            pass
+            err = e
+
+        if err and self._subscription_error_cb:
+            await self._subscription_error_cb(err)
 
 
 class NatsBrokerSubscriptionReplySubject(NatsBrokerSubscription):
@@ -115,6 +94,7 @@ class NatsBrokerSubscriptionReplySubject(NatsBrokerSubscription):
         self._cb_with_subject = len(cb_signature.parameters) == 2
 
     async def received_nats_msg_cb(self, nats_msg: NatsBrokerMsg):
+        err = None
         try:
             msg = serialize_from_bin(self._subject.msg_cls, nats_msg.data)
             if self._num_cb_params == 1:
@@ -133,11 +113,12 @@ class NatsBrokerSubscriptionReplySubject(NatsBrokerSubscription):
                 msg_cls=self._subject.reply_cls
             )
             await self._send_reply_fn(reply_subject, reply_msg)
+
         except Exception as e:
-            if self._pending_errors.full() is False:
-                self._pending_errors.put_nowait(e)
-        finally:
-            pass
+            err = e
+
+        if err and self._subscription_error_cb:
+            await self._subscription_error_cb(err)
 
 
 class BrokerConnection(ABC):
@@ -319,7 +300,8 @@ class NatsBrokerConnection(BrokerConnection):
 
     @classmethod
     async def connect(cls,
-                      closed_cb: Optional[BrokerCallback] = None
+                      closed_cb: Optional[BrokerCallback] = None,
+                      subscription_error_cb: Optional[BrokerErrorCallback] = None
                       ) -> "NatsBrokerConnection":
         """
         Connects a nats instance and returns a nats broker connection.
@@ -330,12 +312,14 @@ class NatsBrokerConnection(BrokerConnection):
             closed_cb=closed_cb
         )
         return cls(
-            client=client
+            client=client,
+            subscription_error_cb=subscription_error_cb
         )
 
-    def __init__(self, client: BrokerClient):
+    def __init__(self, client: BrokerClient, subscription_error_cb: Optional[BrokerErrorCallback] = None):
         super().__init__()
         self._client = client
+        self._subscription_error_cp = subscription_error_cb
         self._loop = get_running_loop()
 
     async def close(self):
@@ -348,6 +332,7 @@ class NatsBrokerConnection(BrokerConnection):
         result = NatsBrokerSubscriptionSubject(
             subject=subject,
             cb=cb,
+            subscription_error_cb=self._subscription_error_cp
         )
         subscription = await self._client.subscribe(
             subject=subject.name,

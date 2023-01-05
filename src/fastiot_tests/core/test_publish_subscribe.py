@@ -34,6 +34,7 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self):
         self.service_task.cancel()
+        await self.broker_connection.close()
 
     async def test_publish_subscribe(self):
         subject = Thing.get_subject(name='test_msg')
@@ -57,6 +58,31 @@ class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
         subject = ReplySubject(name="ping_with_subject", msg_cls=Thing, reply_cls=Thing)
         response = await self.broker_connection.request(subject=subject, msg=request)
         self.assertEqual(response, request)
+
+
+class TestPublishSubscribeException(unittest.IsolatedAsyncioTestCase):
+
+    async def test_raise_exception_in_subscription(self):
+        async def cb(*_):
+            raise ValueError()
+
+        err = None
+        event = asyncio.Event()
+        async def error_cb(exception):
+            nonlocal err
+            err = exception
+            event.set()
+
+        subject = Thing.get_subject()
+        broker_connection = await NatsBrokerConnection.connect(subscription_error_cb=error_cb)
+        subscription = await broker_connection.subscribe(subject=subject, cb=cb)
+        try:
+            await broker_connection.publish(subject, THING)
+            await asyncio.wait_for(event.wait(), 10)
+            self.assertIsInstance(err, ValueError)
+        finally:
+            await subscription.unsubscribe()
+            await broker_connection.close()
 
 
 if __name__ == '__main__':

@@ -30,8 +30,15 @@ class FastIoTService:
                 if app is not None:
                     await app.request_shutdown("Lost connection to broker")
 
+            async def subscription_error_cb(err: Exception):
+                nonlocal app
+                if app is not None:
+                    logging.error(err)
+                    await app.request_shutdown("Error raised inside broker subscription")
+
             broker_connection = await NatsBrokerConnection.connect(
-                closed_cb=closed_cb
+                closed_cb=closed_cb,
+                subscription_error_cb=subscription_error_cb
             )
             try:
                 app = cls(broker_connection=broker_connection, **kwargs)
