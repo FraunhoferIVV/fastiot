@@ -16,3 +16,5 @@ fastiot-service:
 
   additional-requirements:
     - dash
+    - influxdb
+    - mongodb

@@ -5,4 +5,3 @@ pandas
 dash-bootstrap-components
 xlsxwriter
 nest_asyncio
-pymongo>=4.1,<5
