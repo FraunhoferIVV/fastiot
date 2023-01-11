@@ -211,10 +211,7 @@ class DashModule(FastIoTService):
 
     def setup_historic_sensors(self, start_time: datetime, end_time: datetime):
         self.historic_sensor_list.clear()
-        client_mongodb = get_mongodb_client_from_env()
         try:
-            mongodb = client_mongodb.get_database(env_mongodb.name)
-            col_mongo = mongodb.get_collection(self.config.get("collection"))
             for dashboard in self.config.get("dashboards"):
                 if not dashboard.get("live_data"):
                     for sensor in dashboard.get("sensors"):
@@ -224,6 +221,9 @@ class DashModule(FastIoTService):
                                                          sensor.get("service")
                                                          )
                         if "mongodb" in dashboard.get("db"):
+                            client_mongodb = get_mongodb_client_from_env()
+                            mongodb = client_mongodb.get_database(env_mongodb.name)
+                            col_mongo = mongodb.get_collection(self.config.get("collection"))
                             result = col_mongo.find({
                                 "name": historic_sensor.name,
                                 "machine": historic_sensor.machine,
@@ -246,7 +246,8 @@ class DashModule(FastIoTService):
                         self.historic_sensor_list.append(historic_sensor)
 
         finally:
-            client_mongodb.close()
+            if "mongodb" in dashboard.get("db"):
+                client_mongodb.close()
 
     def download_excel(self, *args, **kwargs):
         if self.start_datetime and self.end_datetime and self.historic_sensor_list:
