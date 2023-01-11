@@ -27,7 +27,6 @@ class DashModule(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._subscriptions = []
         self.config = read_config(self)
         self.live_sensor_list = []
         self.historic_sensor_list = []
@@ -36,6 +35,7 @@ class DashModule(FastIoTService):
         self.setup_live_sensors()
         self.start_datetime = None
         self.end_datetime = None
+        self._mongo_collection = None
 
     async def _start(self):
         """ Methods to start once the module is initialized """
@@ -45,6 +45,15 @@ class DashModule(FastIoTService):
         self.initial_end_date = self.initial_date(self.config.get("initial_end_date"))
         self._setup_dash()
         self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
+
+        await self._setup_mongodb()
+
+    async def _setup_mongodb(self):
+        configured_databases = [d.get('db') for d in self.config['dashboards']]
+        if "mongodb" in configured_databases:
+            client_mongodb = get_mongodb_client_from_env()
+            mongodb = client_mongodb.get_database(env_mongodb.name)
+            self._mongo_collection = mongodb.get_collection(self.config.get("collection"))
 
     async def _stop(self):
         """ Methods to call on module shutdown """
@@ -211,43 +220,36 @@ class DashModule(FastIoTService):
 
     def setup_historic_sensors(self, start_time: datetime, end_time: datetime):
         self.historic_sensor_list.clear()
-        try:
-            for dashboard in self.config.get("dashboards"):
-                if not dashboard.get("live_data"):
-                    for sensor in dashboard.get("sensors"):
-                        historic_sensor = HistoricSensor(sensor.get("name"),
-                                                         sensor.get("machine"),
-                                                         dashboard.get("customer"),
-                                                         sensor.get("service")
-                                                         )
-                        if "mongodb" in dashboard.get("db"):
-                            client_mongodb = get_mongodb_client_from_env()
-                            mongodb = client_mongodb.get_database(env_mongodb.name)
-                            col_mongo = mongodb.get_collection(self.config.get("collection"))
-                            result = col_mongo.find({
-                                "name": historic_sensor.name,
-                                "machine": historic_sensor.machine,
-                                'timestamp': {'$gte': start_time, '$lte': end_time}
-                            })
-                            r = list(result)
-                            self._logger.info(f'got results from mongodb is {r}')
-                            historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
-                            historic_sensor.historic_sensor_data.remove_until(start_time)
-                            historic_sensor.historic_sensor_data.remove_from(end_time)
-                        elif "influxdb" in dashboard.get("db"):
-                            query_results = influx_query_wrapper(
-                                influx_query,
-                                sensor.get("machine"),
-                                sensor.get("name"),
-                                start_time.isoformat(),
-                                end_time.isoformat())
-                            historic_sensor.historic_sensor_data = \
-                                thing_series_from_influxdb_data_set(query_results.to_json())
-                        self.historic_sensor_list.append(historic_sensor)
+        for dashboard in self.config.get("dashboards"):
+            if not dashboard.get("live_data"):
+                for sensor in dashboard.get("sensors"):
+                    historic_sensor = HistoricSensor(sensor.get("name"),
+                                                     sensor.get("machine"),
+                                                     dashboard.get("customer"),
+                                                     sensor.get("service")
+                                                     )
+                    if "mongodb" in dashboard.get("db"):
+                        result = self._mongo_collection.find({
+                            "name": historic_sensor.name,
+                            "machine": historic_sensor.machine,
+                            'timestamp': {'$gte': start_time, '$lte': end_time}
+                        })
+                        r = list(result)
+                        self._logger.info(f'got results from mongodb is {r}')
+                        historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
+                        historic_sensor.historic_sensor_data.remove_until(start_time)
+                        historic_sensor.historic_sensor_data.remove_from(end_time)
+                    elif "influxdb" in dashboard.get("db"):
+                        query_results = influx_query_wrapper(
+                            influx_query,
+                            sensor.get("machine"),
+                            sensor.get("name"),
+                            start_time.isoformat(),
+                            end_time.isoformat())
+                        historic_sensor.historic_sensor_data = \
+                            thing_series_from_influxdb_data_set(query_results.to_json())
+                    self.historic_sensor_list.append(historic_sensor)
 
-        finally:
-            if "mongodb" in dashboard.get("db"):
-                client_mongodb.close()
 
     def download_excel(self, *args, **kwargs):
         if self.start_datetime and self.end_datetime and self.historic_sensor_list:
