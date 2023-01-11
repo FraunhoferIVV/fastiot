@@ -36,10 +36,10 @@ class TestRedisHelper(unittest.IsolatedAsyncioTestCase):
 
     async def test_delete_data(self):
         helper = RedisHelper(self.broker_connection)
-        helper.maxDataSets = 3
+        helper.max_data_sets = 3
         for i in range(6):
             subject = RedisMsg.get_subject(f"sensor{i}")
             await helper.send_data(data="1234", subject=subject)
         data = await helper.get_data("4")
-        self.assertEqual(3, len(helper.usedIds))
+        self.assertEqual(3, len(helper.used_ids))
         self.assertEqual("1234", data)

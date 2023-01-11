@@ -162,8 +162,8 @@ class ProjectContext(BaseModel):
                 result = yaml.safe_load(file)
                 if 'x-env' in result:
                     return result['x-env']
-                else:
-                    return {}
+
+                return {}
 
         return {}
 
@@ -218,7 +218,7 @@ def _parse_env_value(value: str, log_info: str) -> str:
     encapsulated = False
     parsing_finished = False
     for v in value:
-        if parsing_finished == True:
+        if parsing_finished:
             if value != ' ':
                 raise ValueError(f"{log_info}Didn't expected char '{value}' because parsing is finished")
             encapsulated = False

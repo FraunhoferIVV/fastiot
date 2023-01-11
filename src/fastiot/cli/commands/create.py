@@ -211,4 +211,3 @@ def _add_service_to_deployment(service_name: str):
     if service_name not in deployment.services:
         deployment.services[service_name] = None
         deployment.to_yaml_file(deployment_file)
-

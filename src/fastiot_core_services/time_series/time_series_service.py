@@ -68,13 +68,13 @@ class TimeSeriesService(FastIoTService):
 
         query: str = f'from(bucket: "{env_influxdb.bucket}")'
         if request.dt_start is not None:
-            query = query + f'|> range(start: {str(request.dt_start.timestamp()).split(".")[0]}'
+            query = query + f'|> range(start: {str(request.dt_start.timestamp()).split(".", maxsplit=1)[0]}'
             if request.dt_end is not None:
-                query = query + f', stop: {str(request.dt_end.timestamp()).split(".")[0]}'
+                query = query + f', stop: {str(request.dt_end.timestamp()).split(".", maxsplit=1)[0]}'
             query = query + ')'
         else:
             start = datetime.datetime.utcnow() - datetime.timedelta(days=30)
-            query = query + "|> range(start:" + str(str(start.timestamp()).split(".")[0]) + ")"
+            query = query + "|> range(start:" + str(str(start.timestamp()).split(".", maxsplit=1)[0]) + ")"
         if request.sensor is not None:
             query = query + f'|> filter(fn: (r) => r["_measurement"] == "{request.sensor}")'
         if request.machine is not None:

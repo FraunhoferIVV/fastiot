@@ -64,7 +64,7 @@ def _import_extensions(extensions):
     for extension in extensions:
         try:
             importlib.import_module(extension)
-            logging.debug(f"Imported extension '{extension}' successfully")
+            logging.debug("Imported extension '%s' successfully", extension)
         except ImportError:
             # This will cause some commands to be missed, but a message at this places disturbs autocompletion.
-            logging.debug(f"Import error raised during import of extension '{extension}'")
+            logging.debug("Import error raised during import of extension '%s'", extension)

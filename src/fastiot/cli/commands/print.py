@@ -85,8 +85,8 @@ def print_cmd(name: str = typer.Argument(..., help=_name_help, callback=check_na
                         continue
                 print(service.name)
     elif name == 'deployments':
-        for deployment in context.deployments:
-            print(deployment)
+        for context_deployment in context.deployments:
+            print(context_deployment)
     elif name == 'integration_test_deployment':
         if context.integration_test_deployment:
             print(context.integration_test_deployment)

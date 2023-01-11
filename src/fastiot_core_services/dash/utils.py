@@ -4,13 +4,13 @@ As of know it seems to be working but it is only lightly tested. Please use with
 """
 import json
 import threading
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from werkzeug.serving import make_server
 
 from fastiot.msg import Thing
-from fastiot.msg.custom_db_data_type_conversion import from_mongo_data, to_mongo_data
-from fastiot.util.object_helper import parse_object, parse_object_list
+from fastiot.msg.custom_db_data_type_conversion import to_mongo_data
+from fastiot.util.object_helper import parse_object_list
 from fastiot_core_services.dash.env import env_dash
 from fastiot_core_services.dash.model.historic_sensor import ThingSeries
 

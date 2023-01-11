@@ -22,7 +22,8 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
           service_names: Optional[List[str]] = typer.Argument(default=None,
                                                               help="Optionally specify services to be started "
                                                                    "from the environment."),
-          detach: bool = typer.Option(False, "-d", "--detach", help="Use to run this task in the background (detached)"),
+          detach: bool = typer.Option(False, "-d", "--detach",
+                                      help="Use to run this task in the background (detached)"),
           project_name: str = typer.Option('', help="Manually set project name for docker-compose"),
           use_test_deployment: Optional[bool] = typer.Option(False,
                                                              help="Explicitly set the deployment_name to specified "

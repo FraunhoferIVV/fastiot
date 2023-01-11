@@ -1,11 +1,9 @@
 from datetime import datetime
 from typing import Optional, List
-from calendar import timegm
 
 import numpy as np
 import pandas as pd
-import pytz
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
 from fastiot.core.time import ensure_tzinfo
 from fastiot.msg import Thing

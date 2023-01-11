@@ -22,4 +22,3 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
         query_dict = query_dict | hist_object_req.raw_query
 
     return query_dict
-

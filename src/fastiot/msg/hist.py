@@ -2,10 +2,7 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from pydantic.main import BaseModel
-
-from fastiot.core.data_models import Subject, FastIoTResponse, FastIoTRequest
-from fastiot.msg.thing import Thing
+from fastiot.core.data_models import FastIoTResponse, FastIoTRequest
 
 
 class HistObjectResp(FastIoTResponse):
@@ -29,7 +26,8 @@ class HistObjectReq(FastIoTRequest):
     .. code:: python
 
       query_dict = {'test_index': 'test'}
-      hist_object_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10, subject_name=sanitize_subject('my_data_type'), raw_query=query_dict)
+      hist_object_req_msg = HistObjectReq(dt_start=dt_start, dt_end=dt_end, limit=10,
+                                          subject_name=sanitize_subject('my_data_type'), raw_query=query_dict)
 
     More details about sanitize_subject_name() see :func:`fastiot.core.subject_helper.sanitize_subject_name`
     This subject_name inside the HistObjectReq is the subject_name, that your data type has.

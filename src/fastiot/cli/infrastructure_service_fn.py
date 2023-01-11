@@ -37,4 +37,3 @@ def get_infrastructure_service_ports_monotonically_increasing(offset: int) -> Di
             ports[port.env_var] = offset
             offset += 1
     return ports
-

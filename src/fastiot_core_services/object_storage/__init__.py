@@ -5,8 +5,8 @@ see :func:`fastiot.db.mongodb_helper_fn.get_mongodb_client_from_env`
 ========================================
 
 This Service is intended for saving "Object" inheriting the :class:`fastiot.core.data_models.FastIoTData`,
-and requesting of historical object data. This Service is also designed to save one data type, for demanding saving multiple
-data types, you can instance multiple Services, using config file.
+and requesting of historical object data. This Service is also designed to save one data type, for demanding saving
+multiple data types, you can instance multiple Services, using config file.
 
 Your Object will be saved in Dictionary in such format, 'yyy' stands for the unpacked Attributes of Object:
 
@@ -16,7 +16,8 @@ Your Object will be saved in Dictionary in such format, 'yyy' stands for the unp
 
 
 In Order to use this Service, you must set a config file named ObjectStorageService.yaml or
-ObjectStorageService_1.yaml in my_deployment/config_dir, for reading ObjectStorageService_1.yaml :envvar:`FASTIOT_SERVICE_ID` must be set.
+ObjectStorageService_1.yaml in my_deployment/config_dir, for reading ObjectStorageService_1.yaml
+:envvar:`FASTIOT_SERVICE_ID` must be set.
 
 .. code:: yaml
 
@@ -27,8 +28,8 @@ ObjectStorageService_1.yaml in my_deployment/config_dir, for reading ObjectStora
   subject_name: 'thing.*'
 
 
-"_subject" and "_timestamp" is the basic index for MongoDB, **collection** is the Mongodb Collection, which you want to store your data in,
-**subject_name** is the subject, where you send your data.
+"_subject" and "_timestamp" is the basic index for MongoDB, **collection** is the Mongodb Collection, which you want to
+store your data in, **subject_name** is the subject, where you send your data.
 or the subject can be your own Data Model, which inherits :class:`fastiot.core.data_models.FastIoTData`, e.g.:
 
 .. code:: python

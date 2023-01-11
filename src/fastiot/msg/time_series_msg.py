@@ -19,7 +19,6 @@ class TimeSeriesData(FastIoTData):
         return time_series_dict
 
     @staticmethod
-    def from_dict(dict: Dict) -> 'TimeSeriesData':
-        time_series_data = TimeSeriesData.parse_obj(dict)
+    def from_dict(timeseries_dict: Dict) -> 'TimeSeriesData':
+        time_series_data = TimeSeriesData.parse_obj(timeseries_dict)
         return time_series_data
-

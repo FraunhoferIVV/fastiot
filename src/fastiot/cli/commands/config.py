@@ -162,7 +162,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 f"# '{env_filename}'.\n\n")
 
             if env_file_content.strip() != '':
-                env_file.write(f"# The following content has been copied from there:\n\n")
+                env_file.write("# The following content has been copied from there:\n\n")
                 env_file.write(env_file_content)
             else:
                 env_file.write(f"# Currently this file is empty or non-existent so there is nothing to copy from "

@@ -11,8 +11,8 @@ from shutil import copyfile
 import typer
 from pydantic import BaseModel
 
-from fastiot.cli.constants import BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, MANIFEST_FILENAME, \
-    DOCKER_BUILD_DIR
+from fastiot.cli.constants import BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, \
+    MANIFEST_FILENAME, DOCKER_BUILD_DIR
 from fastiot.cli.env import env_cli
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import ProjectContext, ServiceManifest, CPUPlatform, Service

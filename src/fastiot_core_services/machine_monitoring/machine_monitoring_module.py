@@ -85,7 +85,7 @@ class MachineMonitoring(FastIoTService):
         self._opcua_client_subscription = self._opcua_client.create_subscription(0, self)
         self._opcua_client_subscription.subscribe_data_change(opcua_nodes)
 
-    def datachange_notification(self, node, val, data):
+    def datachange_notification(self, node, val, _):
         thing = self._things[node.nodeid.to_string()]
         self._apply_changes_to_thing(thing, val)
 

@@ -96,13 +96,13 @@ class CSVReader:
         row = self._csv_reader_iter.__next__()
         if self._csv_reader.line_num == 1:  # skip header line
             row = self._csv_reader_iter.__next__()
-        result = {  # we assume that no error checks are needed here because we checked csv file before
-            header: row for header, row in zip(self._header_fields, row)
-        }
+        result = dict(zip(self._header_fields, row))
+        # we assume that no error checks are needed here because we checked csv file before
+
         return result
 
     def _parse_header_line(self, row: List[str]):
-        headers_temp = [field for field in row]
+        headers_temp = list(row)
         for required_field in self._required_fields:
             if required_field not in headers_temp:
                 raise CSVError(f"Error parsing file '{self.filename}' Line 1: Required field '{required_field}' "

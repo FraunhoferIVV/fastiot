@@ -1,19 +1,18 @@
 import io
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
-from random import randint
 
-import pandas as pd
 import dash
+import dash_bootstrap_components as dbc
+import pandas as pd
 import plotly.graph_objects as go
 from dash import dcc, html
-import dash_bootstrap_components as dbc
 from flask import send_file
 
-from fastiot.core import FastIoTService, Subject, subscribe, ReplySubject
+from fastiot.core import FastIoTService, subscribe
 from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
-from fastiot.env import env_mongodb, env_mongodb_cols
+from fastiot.env import env_mongodb
 from fastiot.msg.thing import Thing
 from fastiot.util.read_yaml import read_config
 from fastiot_core_services.dash.env import env_dash
@@ -250,26 +249,24 @@ class DashModule(FastIoTService):
                             thing_series_from_influxdb_data_set(query_results.to_json())
                     self.historic_sensor_list.append(historic_sensor)
 
-
     def download_excel(self, *args, **kwargs):
         if self.start_datetime and self.end_datetime and self.historic_sensor_list:
-            self._logger.info(f"Download excel file from {str(self.start_datetime)} to {str(self.end_datetime)}")
+            self._logger.info("Download excel file from %s to %s", str(self.start_datetime), str(self.end_datetime))
             self.setup_historic_sensors(self.start_datetime, self.end_datetime)
             df = HistoricSensor.to_df(historic_sensor_list=self.historic_sensor_list)
 
             # Convert DF
-            strIO = io.BytesIO()
-            excel_writer = pd.ExcelWriter(strIO, engine='xlsxwriter')
+            str_io = io.BytesIO()
+            excel_writer = pd.ExcelWriter(str_io, engine='xlsxwriter')
             df.to_excel(excel_writer, sheet_name='labor')
             excel_writer.save()
-            excel_data = strIO.getvalue()
-            strIO.seek(0)
-            return send_file(strIO, as_attachment=True,
+            excel_data = str_io.getvalue()
+            str_io.seek(0)
+            return send_file(str_io, as_attachment=True,
                              download_name=f'{self.start_datetime}-{self.end_datetime} Data.xlsx')
-        else:
-            self._logger.warning('Please set the start_datetime and end_datetime in DatePicker firstly, '
-                                 'to download the excel file')
-        pass
+
+        self._logger.warning('Please set the start_datetime and end_datetime in DatePicker first '
+                             'to download the excel file')
 
     def show_graph(self, dashboard, start_date_str, end_date_str, value, *args, **kwargs):
         start_datetime = datetime.fromisoformat(start_date_str)
@@ -331,15 +328,15 @@ class GraphCallbacks:
     def update_graph(self, refresh, *args, **kwargs):
         if refresh == 'stop':
             return dash.no_update
-        else:
-            traces = self.module.update_graph(self.dashboard, *args, **kwargs)
-            return {
-                'data': traces,
-                'layout':
-                    go.Layout(
-                        title='Live Data',
-                        barmode='stack')
-            }
+
+        traces = self.module.update_graph(self.dashboard, *args, **kwargs)
+        return {
+            'data': traces,
+            'layout':
+                go.Layout(
+                    title='Live Data',
+                    barmode='stack')
+        }
 
 
 if __name__ == '__main__':

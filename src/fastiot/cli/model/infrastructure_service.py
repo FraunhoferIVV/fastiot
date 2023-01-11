@@ -1,5 +1,4 @@
 """ Some helpers to work with external services: importing, port handling, … """
-from typing import Dict
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel

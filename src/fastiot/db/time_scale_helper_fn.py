@@ -34,11 +34,11 @@ def get_timescaledb_client(host: str, port: int, user: str, password: str,
         from psycopg2 import OperationalError
     except (ImportError, ModuleNotFoundError):
         logging.error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
-                                     "to make use of this helper.")
+                      "to make use of this helper.")
         sys.exit(5)
 
     client_parameters = {"user": user, "password": password, "host": host,
-                             "port": port, "database": database}
+                         "port": port, "database": database}
 
     # We found that the postgres connection with docker sometimes failed, because of the env variables in
     # docker-compose.yaml are not really set. Try docker-compose up -d --force-recreate to start the test environment.
