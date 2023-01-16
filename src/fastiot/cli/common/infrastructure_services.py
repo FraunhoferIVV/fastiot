@@ -10,6 +10,7 @@ from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_
     FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD, FASTIOT_TIME_SCALE_DB_DATABASE, \
     FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME, FASTIOT_MARIA_DB_USER, FASTIOT_REDIS_PORT, \
     FASTIOT_REDIS_HOST, FASTIOT_REDIS_PASSWORD, FASTIOT_REDIS_VOLUME
+from fastiot.env.env_constants import FASTIOT_ELASTICSEARCH_HOST, FASTIOT_ELASTICSEARCH_PASSWORD, FASTIOT_ELASTICSEARCH_PORT, FASTIOT_ELASTICSEARCH_VOLUME
 
 
 class NatsService(InfrastructureService):
@@ -230,5 +231,54 @@ class RedisService(InfrastructureService):
         InfrastructureServiceVolume(
             container_volume='/data',
             env_var=FASTIOT_REDIS_VOLUME
+        )
+    ]
+
+
+class ElasticSearch(InfrastructureService):
+    """ .. _ElasticSearch:
+
+    Here, all relevant environment variables are listed to build an ElasticSearch Service,
+    """
+    name: str = 'docker.elastic.co/elasticsearch/elasticsearch'
+    image: str = 'docker.elastic.co/elasticsearch/elasticsearch:7.17.8'
+
+    host_name_env_var = FASTIOT_ELASTICSEARCH_HOST
+    password_env_vars: List[str] = [FASTIOT_ELASTICSEARCH_PASSWORD]
+
+    ports: List[InfrastructureServicePort] = [
+        InfrastructureServicePort(
+            container_port=9200,
+            default_port_mount=9200,
+            env_var=FASTIOT_ELASTICSEARCH_PORT
+        )
+    ]
+    environment: List[InfrastructureServiceEnvVar] = [
+        InfrastructureServiceEnvVar(
+            name='ELASTIC_PASSWORD',
+            default='12345',
+            env_var=FASTIOT_ELASTICSEARCH_PASSWORD
+        ),
+        InfrastructureServiceEnvVar(
+            name='ES_JAVA_OPTS',
+            default='"-Xmx256m -Xms256m"',
+        ),
+        InfrastructureServiceEnvVar(
+            name='discovery.type',
+            default='single-node',
+        ),
+        InfrastructureServiceEnvVar(
+            name='cluster.name',
+            default='"single-node-cluster"',
+        ),
+        InfrastructureServiceEnvVar(
+            name='network.host',
+            default='0.0.0.0',
+        ),
+    ]
+    volumes: List[InfrastructureServiceVolume] = [
+        InfrastructureServiceVolume(
+            container_volume='/usr/share/elasticsearch/data',
+            env_var=FASTIOT_ELASTICSEARCH_VOLUME
         )
     ]
