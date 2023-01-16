@@ -261,7 +261,7 @@ class ElasticSearch(InfrastructureService):
         ),
         InfrastructureServiceEnvVar(
             name='ES_JAVA_OPTS',
-            default='"-Xmx256m -Xms256m"',
+            default='-Xmx256m -Xms256m',
         ),
         InfrastructureServiceEnvVar(
             name='discovery.type',
@@ -269,7 +269,7 @@ class ElasticSearch(InfrastructureService):
         ),
         InfrastructureServiceEnvVar(
             name='cluster.name',
-            default='"single-node-cluster"',
+            default='single-node-cluster',
         ),
         InfrastructureServiceEnvVar(
             name='network.host',
