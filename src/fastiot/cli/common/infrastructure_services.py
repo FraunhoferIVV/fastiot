@@ -240,7 +240,7 @@ class ElasticSearch(InfrastructureService):
 
     Here, all relevant environment variables are listed to build an ElasticSearch Service,
     """
-    name: str = 'docker.elastic.co/elasticsearch/elasticsearch'
+    name: str = 'elasticsearch'
     image: str = 'docker.elastic.co/elasticsearch/elasticsearch:7.17.8'
 
     host_name_env_var = FASTIOT_ELASTICSEARCH_HOST
