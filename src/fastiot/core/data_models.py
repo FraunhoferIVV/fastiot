@@ -37,6 +37,7 @@ class FastIoTData(BaseModel, ABC):
         subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()}"
         if name:
             subject_name += "." + name
+        subject_name = subject_name.replace(" ", "")  # remove spaces as they are invalid in subject name
         return subject_name
 
     @root_validator
