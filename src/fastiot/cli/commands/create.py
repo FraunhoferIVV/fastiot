@@ -77,6 +77,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     for src, dest in [('.dockerignore', '.'),
                       ('.gitignore', '.'),
                       ('install.sh', '.'),
+                      ('__init__.py', os.path.join("src", f"{project_name}")),
                       ('deployment.yaml', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'integration_test')),
                       ('dummy_test.py', os.path.join("src", f"{project_name}_tests"))]:
         shutil.copy(os.path.join(templates_dir, src), os.path.join(context.project_root_dir, dest))
