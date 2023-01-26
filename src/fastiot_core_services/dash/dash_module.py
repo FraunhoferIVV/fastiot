@@ -127,6 +127,7 @@ class DashModule(FastIoTService):
             )
             traces.append(trace1)
         return traces
+
     def setup_html(self, start_date, end_date):
         html_cards = []
         html_navbar_elements = []
