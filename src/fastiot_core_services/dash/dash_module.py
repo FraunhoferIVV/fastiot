@@ -102,7 +102,6 @@ class DashModule(FastIoTService):
                     dash.dependencies.Output(str(i_dashboard), 'figure'),
                     [dash.dependencies.Input(str(i_dashboard) + 'date-picker', 'start_date'),
                      dash.dependencies.Input(str(i_dashboard) + 'date-picker', 'end_date'),
-                     dash.dependencies.Input(str(i_dashboard) + 'Input', 'value'),
                      dash.dependencies.Input(str(i_dashboard) + 'button', 'n_clicks')]
                 )(GraphCallbacks(module=self, dashboard=dashboard).show_graph)
 
@@ -160,13 +159,6 @@ class DashModule(FastIoTService):
             else:
                 html_card_elements.extend([
                     html.Button('Click to reload', id=str(i_dashboard) + 'button', n_clicks=0)])
-                html_card_elements.extend([
-                    dcc.Input(
-                        id=str(i_dashboard) + "Input",
-                        type='number',
-                        placeholder="Resolution of the data in minutes"
-                    )
-                ])
                 html_card_elements.extend([
                     dcc.Graph(id=str(i_dashboard))
                 ])
@@ -268,7 +260,7 @@ class DashModule(FastIoTService):
         self._logger.warning('Please set the start_datetime and end_datetime in DatePicker first '
                              'to download the excel file')
 
-    def show_graph(self, dashboard, start_date_str, end_date_str, value, *args, **kwargs):
+    def show_graph(self, dashboard, start_date_str, end_date_str, *args, **kwargs):
         start_datetime = datetime.fromisoformat(start_date_str)
         end_datetime = datetime.fromisoformat(end_date_str)
         self.start_datetime = start_datetime
