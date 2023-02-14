@@ -9,7 +9,8 @@ import plotly.graph_objects as go
 from dash import dcc, html
 from flask import send_file
 
-from fastiot.core import FastIoTService, subscribe
+from fastiot.core import FastIoTService, subscribe, Subject
+from fastiot.core.subject_helper import sanitize_pub_subject_name
 from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
@@ -35,6 +36,7 @@ class DashModule(FastIoTService):
         self.start_datetime = None
         self.end_datetime = None
         self._mongo_collection = None
+        self.subject = Subject(name=sanitize_pub_subject_name(self.config['subject_name']), msg_cls=Thing)
 
     async def _start(self):
         """ Methods to start once the module is initialized """
@@ -44,6 +46,8 @@ class DashModule(FastIoTService):
         self.initial_end_date = self.initial_date(self.config.get("initial_end_date"))
         self._setup_dash()
         self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
+
+        await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_received_data)
 
         await self._setup_mongodb()
 
@@ -290,9 +294,8 @@ class DashModule(FastIoTService):
             traces.append(trace1)
         return traces
 
-    @subscribe(subject=Thing.get_subject('*'))
     async def _cb_received_data(self, subject: str, msg: Thing):
-        self._logger.info("Received message from sensor %s: %s", msg.name, str(msg))
+        self._logger.debug("Received message from sensor %s: %s", msg.name, str(msg))
         for dashboard in self.config.get("dashboards"):
             for sensor in dashboard.get("sensors"):
                 if sensor.get("name") == msg.name:
@@ -308,7 +311,6 @@ class GraphCallbacks:
     dashboard: {}
 
     def show_graph(self, *args, **kwargs):
-
         traces = self.module.show_graph(self.dashboard, *args, **kwargs)
         return {
             'data': traces,
