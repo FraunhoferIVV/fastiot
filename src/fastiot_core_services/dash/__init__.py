@@ -18,7 +18,7 @@ This concerns manly the connection data, like Ip address, port, the name of the 
 
 necessary yaml file
 ::
-
+    subject_name: 'thing.*' or 'thing.>' # this subject_name defines in which format the message is subscribed.
     #dashboards shown in the web applications.
     initial_start_date: now-30:00:00   #initial date shown in historic data. This can be set with either one of these
     initial_end_date: now              #formats:now, now-hh:mm:ss or Iso- Format: YYYY-MM-DDThh:mm:ss
