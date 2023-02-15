@@ -5,6 +5,8 @@
 FROM {{ manifest.base_image }} as base
 RUN apt-get update && apt-get upgrade -y && apt-get clean -y  && rm -rf /var/lib/apt/lists/*
 
+RUN useradd fastiot -u 777
+
 # As a convention, the workdir should always be the project root dir inside the container.
 WORKDIR /opt/fastiot
 
@@ -42,7 +44,7 @@ FROM base as debug
 {% for req in manifest.additional_requirements %}
 COPY requirements/requirements.{{ req }}.txt ./requirements/
 {% endfor %}
-RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
+RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh  --root-user-action=ignore
 {% endif %}
 # In debug mode we just want to copy everything from source to make it easier.
 {% if manifest.npm %}
@@ -54,6 +56,12 @@ COPY src/{{context.library_package}} /opt/fastiot/src/{{context.library_package}
 COPY src/{{ service.package }}/{{ service.name }} /opt/fastiot/src/{{ service.package }}/{{ service.name }}
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
 MAINTAINER {{ maintainer }}
+
+{%if not manifest.privileged%}
+USER fastiot
+{%endif%}
+
+
 CMD ["python",  "/opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py"]
 
 
@@ -62,7 +70,7 @@ FROM base as compile_lib
 # In release mode we want to compile everything and only copy compiled artifacts into release container.
 # The compilation takes place in this stage, so we need to compile it accordingly.
 RUN  apt-get update && apt-get install -y gcc make build-essential && apt-get clean -y
-RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} "fastiot[compile]"
+RUN python3 -m pip install --extra-index-url http://{{ extra_pypi }} --trusted-host {{ extra_pypi }} "fastiot[compile]" --root-user-action=ignore
 
 COPY configure.py /opt/fastiot/
 
@@ -98,4 +106,9 @@ COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.np
 
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
 MAINTAINER {{ maintainer }}
+
+{%if not manifest.privileged%}
+USER fastiot
+{%endif%}
+
 CMD ["python",  "/opt/fastiot/src/{{ service.package }}/{{ service.name }}/run.py"]
