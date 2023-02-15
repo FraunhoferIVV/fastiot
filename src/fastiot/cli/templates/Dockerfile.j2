@@ -13,6 +13,7 @@ WORKDIR /opt/fastiot
 # As a convention, the python source files should always be placed inside src-dir.
 RUN mkdir /opt/fastiot/src
 ENV PYTHONPATH=$PYTHONPATH:/opt/fastiot/src
+ENV PIP_ROOT_USER_ACTION=ignore
 
 # Install requirements
 COPY install.sh ./
