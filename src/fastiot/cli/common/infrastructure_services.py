@@ -105,6 +105,16 @@ class MongoDBService(InfrastructureService):
     ]
 
 
+class MongoDB4Service(MongoDBService):
+    """ .. _MongoDB4Service
+
+    Infrastructure service for a MongoDB in version 4. This is the latest version to work with a Raspberry Pi 4
+    (s. https://stackoverflow.com/questions/68419196 for more details)
+    """
+    name: str = 'mongodb4'
+    image: str = 'mongo:4'
+
+
 class InfluxDBService(InfrastructureService):
     """ .. _InfluxDBService:
 
