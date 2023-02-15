@@ -45,11 +45,10 @@ class DashModule(FastIoTService):
         self.initial_start_date = self.initial_date(self.config.get("initial_start_date"))
         self.initial_end_date = self.initial_date(self.config.get("initial_end_date"))
         self._setup_dash()
+        await self._setup_mongodb()
         self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
 
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_received_data)
-
-        await self._setup_mongodb()
 
     async def _setup_mongodb(self):
         configured_databases = [d.get('db') for d in self.config['dashboards']]
