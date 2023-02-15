@@ -264,7 +264,7 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
     try:
         docker_cmd = f"docker buildx bake -f {project_config.build_dir}/{DOCKER_BUILD_DIR}/docker-bake.hcl"
         if push:
-            docker_cmd += " --push"
+            docker_cmd += " --push --provenance=false"
         else:
             docker_cmd += " --load"
         if no_cache:
