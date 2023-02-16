@@ -230,7 +230,7 @@ class DashModule(FastIoTService):
                             'timestamp': {'$gte': start_time, '$lte': end_time}
                         })
                         r = list(result)
-                        self._logger.info(f'got results from mongodb is {r}')
+                        self._logger.info(f'got {len(r)} results from mongodb')
                         historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
                         historic_sensor.historic_sensor_data.remove_until(start_time)
                         historic_sensor.historic_sensor_data.remove_from(end_time)
