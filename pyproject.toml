@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.dev162+toml"
+version = "0.2.dev163+toml"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -52,6 +52,7 @@ all = [
     "Redis>4",
     "tomli~=2.0.1",
     "tomli_w",
+    "build",
     "dash~=2.6.1",
     "plotly~=5.9.0",
     "numpy",

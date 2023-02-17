@@ -113,7 +113,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     # create toml
     create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"), description=description, project_name=project_name, authors = getpass.getuser())
 
-    logging.info("Project created successfully")
+    logging.info("Project created successfully. Check pyproject.toml for correct configuration")
 
 
 @create_cmd.command()

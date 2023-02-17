@@ -35,7 +35,10 @@ def _styles_completion() -> List[str]:
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
                                                           help="Compile all styles configured for the project or force "
-                                                               "compiled, wheel or sdist")):
+                                                               "compiled, wheel or sdist"),
+              update: Optional[bool] = typer.Argument(True, '-n' ,'--no-update',
+                                                help=" pyproject.toml will not be updated "),
+):
     """ Compile the project library according to the project configuration. """
 
     context = ProjectContext.default
@@ -70,19 +73,19 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     if not os.path.isfile(pyproject_toml):
         logging.warning("Can not build library without a `pyproject.toml in project root dir.")
     else:
+        if update:
+            install_requires,extras_require = read_requirements()
 
-        install_requires,extras_require = read_requirements()
-
-        toml = open("pyproject.toml", "rb")
-        toml_dict = tomli.load(toml)
-        toml.close()
-        toml_dict["project"]["dependencies"] = install_requires
-        toml_dict["project"]["optional-dependencies"] = extras_require
-        if get_version(complete=True) != "git-unspecified":
-            toml_dict["project"]["version"] = get_version(complete=True)
-        toml = open("pyproject.toml", "wb")
-        tomli_w.dump(toml_dict, toml)
-        toml.close()
+            toml = open("pyproject.toml", "rb")
+            toml_dict = tomli.load(toml)
+            toml.close()
+            toml_dict["project"]["dependencies"] = install_requires
+            toml_dict["project"]["optional-dependencies"] = extras_require
+            if get_version(complete=True) != "git-unspecified":
+                toml_dict["project"]["version"] = get_version(complete=True)
+            toml = open("pyproject.toml", "wb")
+            tomli_w.dump(toml_dict, toml)
+            toml.close()
 
         cmd = f"{sys.executable} -m build"
         exit_code = subprocess.call(cmd.split())
