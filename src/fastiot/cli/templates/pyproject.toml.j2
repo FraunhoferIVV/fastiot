@@ -1,0 +1,24 @@
+[build-system]
+requires = [
+    "setuptools",
+    "setuptools-scm",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{projectname}}"
+version = "0.0.0"           # gets automatic changed
+authors = [{name = "{{authors}}" },]
+description = "{{description}}"
+readme = "README.md"
+requires-python = "{{python_version}}"
+dependencies = []            # gets automatic changed
+
+[project.optional-dependencies]
+all = []
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["{{projectname}}", "{{projectname}}_service"]
+exclude = ["{{projectname}}_tests"]

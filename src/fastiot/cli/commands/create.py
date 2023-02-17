@@ -14,7 +14,7 @@ import typer
 from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME, \
     DEPLOYMENTS_CONFIG_FILE
-from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.helper_fn import get_jinja_env, create_toml
 from fastiot.cli.model import DeploymentConfig
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.model.infrastructure_service import InfrastructureService
@@ -32,7 +32,9 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 force: bool = typer.Option(False, '-f', '--force',
                                            help="Create project even if an existing project has been found."),
                 target_directory: str = typer.Option('.', '-d', '--directory',
-                                                     help="The directory the project will be stored")
+                                                     help="The directory the project will be stored"),
+                description: str = typer.Option('', '-- description',
+                                                help="The short description of the project")
                 ):
     """
     Function to create a new project with its directory structure and all needed files for a quick start.
@@ -108,6 +110,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 env_vars=env_vars,
                 user=getpass.getuser()
             ))
+    # create toml
+    create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"), description=description)
 
     logging.info("Project created successfully")
 
