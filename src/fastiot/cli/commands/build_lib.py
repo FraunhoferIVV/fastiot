@@ -30,15 +30,38 @@ class BuildLibStyles(str, Enum):
 
 def _styles_completion() -> List[str]:
     return [s.value for s in BuildLibStyles]
+def read_requirements():
+    requirement_files = glob("requirements*.txt",
+                             root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
+    requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
+                             requirement_files]
+    install_requires = []
+    extras_require = {'all': []}
+    for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
+        req_list = []
+        with open(req_name_abs) as f:
+            for req in f.read().splitlines():
+                req = req.strip()
+                if req != '' and not req.startswith('#'):
+                    req_list.append(req)
+        if req_name == 'requirements.txt':
+            install_requires.extend(req_list)
+        else:
+            middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
+            extras_require[middle_name] = req_list
+        extras_require['all'].extend(req_list)
+    if not install_requires:
+        raise RuntimeError("Could not find a requirements.txt")
+    return install_requires, extras_require
+
 
 
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
-                                                          help="Compile all styles configured for the project or force "
+                                                          help="Compile all styles configured for the project or force (just for setup.py) "
                                                                "compiled, wheel or sdist"),
-              update: Optional[bool] = typer.Argument(True, '-n' ,'--no-update',
-                                                help=" pyproject.toml will not be updated "),
-):
+              update: Optional[bool] = typer.Option(True, '-u' ,'--update',
+                                                help="set false to not overwrite pyproject.toml ")):
     """ Compile the project library according to the project configuration. """
 
     context = ProjectContext.default
@@ -113,34 +136,3 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         if exit_code != 0:
             logging.error("Building library with style %s failed with exit code %s", str(style.value), str(exit_code))
             raise typer.Exit(exit_code)
-
-
-def read_requirements():
-    requirement_files = glob("requirements*.txt",
-                             root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
-    requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
-                             requirement_files]
-    install_requires = []
-    extras_require = {'all': []}
-    for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
-        req_list = []
-        with open(req_name_abs) as f:
-            for req in f.read().splitlines():
-                req = req.strip()
-                if req != '' and not req.startswith('#'):
-                    # PEP 508
-                    req_split = req.split(",")
-                    if len(req_split) == 2:
-                        req = req_split[0].split("+")[0] + "," + req_split[1]
-                    else:
-                        req = req_split[0].split("+")[0]
-                    req_list.append(req)
-        if req_name == 'requirements.txt':
-            install_requires.extend(req_list)
-        else:
-            middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
-            extras_require[middle_name] = req_list
-        extras_require['all'].extend(req_list)
-    if not install_requires:
-        raise RuntimeError("Could not find a requirements.txt")
-    return install_requires, extras_require

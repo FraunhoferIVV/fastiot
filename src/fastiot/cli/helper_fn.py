@@ -1,3 +1,4 @@
+import getpass
 import glob
 import os
 import sys
@@ -76,12 +77,12 @@ def find_deployments(deployments: Optional[List[str]] = None, path: str = '') ->
 def _default_cache(package: str, service: str) -> str:
     return f"{package}-cache"
 
-def create_toml(path:str, description:str, project_name:str, authors:str):
+def create_toml(path:str, description:str, project_name:str):
     with open(path, "w") as template_file:
         template = get_jinja_env().get_template("pyproject.toml.j2")
         template_file.write(template.render(
             projectname=project_name,
-            authors=authors,
+            authors=getpass.getuser(),
             description=description,
             python_version=sys.version.split(' ')[0],
             )

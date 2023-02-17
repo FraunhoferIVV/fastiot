@@ -8,7 +8,7 @@ import typer
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
-from fastiot.cli.helper_fn import get_jinja_env
+from fastiot.cli.helper_fn import get_jinja_env, create_toml
 from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
     get_infrastructure_service_ports_randomly
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
@@ -173,6 +173,11 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 for key, value in env_additions.items():
                     env_file.write(f"\n{key}={value}")
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
+
+    pyproject_toml = os.path.join(context.library_setup_py_dir, 'pyproject.toml')
+    if not os.path.isfile(pyproject_toml):
+        create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"),description="",project_name=context.project_namespace)
+
 
     logging.info("Successfully created configurations!")
 

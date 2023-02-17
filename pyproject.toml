@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.dev163+toml"
+version = "0.2.dev165+toml"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
