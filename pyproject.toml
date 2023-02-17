@@ -7,14 +7,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.dev165+toml"
+version = "0.2.167"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
     { email = "konstantin.merker@ivv-dd.fraunhofer.de" },
 ]
 description = "FastIoT Platform"
-readme = "long_discription.txt"
+readme = "README.md"
 requires-python = "~=3.8"
 dependencies = [
     "pydantic>=1.9.0,<2",
@@ -27,6 +27,7 @@ dependencies = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
+    "wheel",
 ]
 
 [project.optional-dependencies]
@@ -43,6 +44,13 @@ all = [
     "opcua>=0.98.8,<1",
     "asyncua",
     "psycopg2-binary>=2.9.3,<3",
+    "dash~=2.6.1",
+    "plotly~=5.9.0",
+    "numpy",
+    "pandas",
+    "dash-bootstrap-components",
+    "xlsxwriter",
+    "nest_asyncio",
     "pydantic>=1.9.0,<2",
     "msgpack>=1,<2",
     "nats-py>=2.1.0,<3",
@@ -53,13 +61,7 @@ all = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
-    "dash~=2.6.1",
-    "plotly~=5.9.0",
-    "numpy",
-    "pandas",
-    "dash-bootstrap-components",
-    "xlsxwriter",
-    "nest_asyncio",
+    "wheel",
 ]
 compile = [
     "Nuitka>=1.1.7,<2",
