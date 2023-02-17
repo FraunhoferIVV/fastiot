@@ -1,0 +1,110 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastiot"
+version = "1.1"     # will be edit by skript
+authors = [
+    {name="Fraunhofer Institute for Process Engineering and Packaging IVV"},
+    {email="tilman.klaeger@ivv-dd.fraunhofer.de"},
+    {email="konstantin.merker@ivv-dd.fraunhofer.de"},
+]
+
+description = "FastIoT Platform"
+readme = "long_discription.txt"
+requires-python = "~=3.8"
+
+dependencies = [
+    "pydantic >=1.9.0,<2",
+    "msgpack >=1,<2",
+    "nats-py >=2.1.0,<3",
+    "PyYAML >=5,<7",
+    "typer[all]>=0.4.1,<1" ,
+    "Jinja2 >= 2,<4",
+    "Redis >=4",
+    ]
+
+[tool.setuptools]
+
+packages = [
+    "fastiot",
+    "fastiot.cli",
+    "fastiot.core",
+    "fastiot.db",
+    "fastiot.env",
+    "fastiot.exceptions",
+    "fastiot.msg",
+    "fastiot.util",
+    "fastiot.cli.commands",
+    "fastiot.cli.common",
+    "fastiot.cli.model",
+]
+
+[project.optional-dependencies]
+all = [
+    "Nuitka>=1.1.7,<2",
+    "ordered-set",
+    "pytest>=7.2,<8",
+    "fastapi",
+    "aiofiles",
+    "uvicorn[standard]",
+    "influxdb-client[async]>=1.32,<2",
+    "PyMySQL>=1.0,<2",
+    "pymongo>=4.1,<5",
+    "opcua>=0.98.8,<1",
+    "asyncua",
+    "psycopg2-binary>=2.9.3,<3",
+    "pydantic>=1.9.0,<2",
+    "msgpack>=1,<2",
+    "nats-py>=2.1.0,<3",
+    "PyYAML>=5,<7",
+    "typer[all]>=0.4.1,<1",
+    "Jinja2>=2,<4",
+    "Redis>4",
+    "dash~=2.6.1",
+    "plotly~=5.9.0",
+    "numpy",
+    "pandas",
+    "dash-bootstrap-components",
+    "xlsxwriter",
+    "nest_asyncio",
+]
+compile = [
+    "Nuitka>=1.1.7,<2",
+    "ordered-set",
+]
+dev = [
+    "pytest>=7.2,<8",
+]
+fastapi = [
+    "fastapi",
+    "aiofiles",
+    "uvicorn[standard]",
+]
+influxdb = [
+    "influxdb-client[async]>=1.32,<2",
+]
+mariadb = [
+    "PyMySQL>=1.0,<2",
+]
+mongodb = [
+    "pymongo>=4.1,<5",
+]
+opcua = [
+    "opcua>=0.98.8,<1",
+    "asyncua",
+]
+postgredb = [
+    "psycopg2-binary>=2.9.3,<3",
+]
+dash = [
+    "dash~=2.6.1",
+    "plotly~=5.9.0",
+    "numpy",
+    "pandas",
+    "dash-bootstrap-components",
+    "xlsxwriter",
+    "nest_asyncio",
+]
+
