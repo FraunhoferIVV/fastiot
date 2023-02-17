@@ -62,6 +62,19 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         BuildLibStyles.compiled: 'bdist_nuitka'
     }
 
+    pyproject_toml = os.path.join(context.library_setup_py_dir, 'pyproject.toml')
+    if not os.path.isfile(pyproject_toml):
+        logging.warning("Can not build library without a `pyproject.toml in project root dir. Exiting.")
+
+    else:
+        cmd = f"{sys.executable} -m build"
+        exit_code = subprocess.call(cmd.split())
+
+        if exit_code != 0:
+            logging.error("Building library  failed with exit code %s", str(exit_code))
+            raise typer.Exit(exit_code)
+        return
+
     setup_py = os.path.join(context.library_setup_py_dir, 'setup.py')
     if not os.path.isfile(setup_py):
         logging.warning("Can not build library without a `setup.py` in project root dir. Exiting.")
