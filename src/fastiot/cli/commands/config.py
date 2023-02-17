@@ -175,11 +175,6 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                     env_file.write(f"\n{key}={value}")
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
 
-    pyproject_toml = os.path.join(context.library_setup_py_dir, 'pyproject.toml')
-    if not os.path.isfile(pyproject_toml):
-        create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"),description="",project_name=context.project_namespace)
-
-
     logging.info("Successfully created configurations!")
 
 

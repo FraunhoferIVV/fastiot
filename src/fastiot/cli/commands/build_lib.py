@@ -29,6 +29,8 @@ class BuildLibStyles(str, Enum):
 
 def _styles_completion() -> List[str]:
     return [s.value for s in BuildLibStyles]
+
+
 def read_requirements():
     requirement_files = glob("requirements*.txt",
                              root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
@@ -54,19 +56,20 @@ def read_requirements():
     return install_requires, extras_require
 
 
-
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
-                                                          help="Compile all styles configured for the project or force (just for setup.py) "
-                                                               "compiled, wheel or sdist"),
-              update: Optional[bool] = typer.Option(True, '-u' ,'--update',
-                                                help="set false to not overwrite pyproject.toml ")):
+                                                          help="Compile all styles configured for the project or force "
+                                                               "(just for setup.py) compiled, wheel or sdist"),
+              update: Optional[bool] = typer.Option(True, '-u', '--update',
+                                                    help="set false to not overwrite pyproject.toml ")):
     """ Compile the project library according to the project configuration. """
 
     context = ProjectContext.default
     if not context.library_package:
         logging.info("No library package configured in configure.py. Exiting.")
         return
+
+    logging.info("Starting to build library.")
 
     if not isinstance(build_style, str):
         build_style = build_style.default
@@ -85,37 +88,47 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
 
     env = os.environ.copy()
     env['MAKEFLAGS'] = f"-j{len(os.sched_getaffinity(0))}"
+
+    pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
+    if not os.path.isfile(pyproject_toml):
+        logging.warning("Can not build library without a `pyproject.toml in project root dir.\n"
+                        "You may use the command `fiot create pyproject-toml` to create a basic `pyproject.toml` to "
+                        "build a library.\n\n"
+                        "Now trying to use obsolete setup.py instead.")
+        _build_lib_with_setup_py(styles, env)
+        return
+
+    if update:
+        install_requires, extras_require = read_requirements()
+
+        with open(pyproject_toml, "rb") as toml:
+            toml_dict = tomli.load(toml)
+            toml_dict["project"]["dependencies"] = install_requires
+            toml_dict["project"]["optional-dependencies"] = extras_require
+            if get_version(complete=True) != "git-unspecified":
+                toml_dict["project"]["version"] = get_version(complete=True)
+
+        with open(pyproject_toml, "wb") as toml:
+            tomli_w.dump(toml_dict, toml)
+
+    cmd = f"{sys.executable} -m build"
+    exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
+
+    if exit_code != 0:
+        logging.error("Building library failed with exit code %s", str(exit_code))
+        raise typer.Exit(exit_code)
+
+    logging.info("Successfully built library")
+
+
+def _build_lib_with_setup_py(styles, env):
+    context = ProjectContext.default
+
     command_args = {
         BuildLibStyles.wheel: 'bdist_wheel -q',
         BuildLibStyles.sdist: 'sdist -q',
         BuildLibStyles.compiled: 'bdist_nuitka'
     }
-
-    pyproject_toml = os.path.join(context.library_setup_py_dir, 'pyproject.toml')
-    if not os.path.isfile(pyproject_toml):
-        logging.warning("Can not build library without a `pyproject.toml in project root dir.")
-    else:
-        if update:
-            install_requires,extras_require = read_requirements()
-
-            toml = open("pyproject.toml", "rb")
-            toml_dict = tomli.load(toml)
-            toml.close()
-            toml_dict["project"]["dependencies"] = install_requires
-            toml_dict["project"]["optional-dependencies"] = extras_require
-            if get_version(complete=True) != "git-unspecified":
-                toml_dict["project"]["version"] = get_version(complete=True)
-            toml = open("pyproject.toml", "wb")
-            tomli_w.dump(toml_dict, toml)
-            toml.close()
-
-        cmd = f"{sys.executable} -m build"
-        exit_code = subprocess.call(cmd.split())
-
-        if exit_code != 0:
-            logging.error("Building library  failed with exit code %s", str(exit_code))
-            raise typer.Exit(exit_code)
-        return
 
     setup_py = os.path.join(context.library_setup_py_dir, 'setup.py')
     if not os.path.isfile(setup_py):
@@ -135,3 +148,5 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         if exit_code != 0:
             logging.error("Building library with style %s failed with exit code %s", str(style.value), str(exit_code))
             raise typer.Exit(exit_code)
+
+    logging.info("Successfully built library using obsolete setup.py")
