@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import string
+import sys
 from typing import Optional
 
 import typer
@@ -27,12 +28,28 @@ def _create_random_password(length: int = 16) -> str:
     return "".join(password)
 
 
+def create_toml(path: str, project_name: str, short_description: str = ""):
+
+    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+
+    with open(path, "w") as template_file:
+        template = get_jinja_env().get_template("pyproject.toml.j2")
+        template_file.write(template.render(
+            projectname=project_name,
+            authors=getpass.getuser(),
+            description=short_description,
+            python_version=python_version,
+        ))
+
+
 @create_cmd.command()
 def new_project(project_name: str = typer.Argument(None, help="The project name to generate"),
                 force: bool = typer.Option(False, '-f', '--force',
                                            help="Create project even if an existing project has been found."),
                 target_directory: str = typer.Option('.', '-d', '--directory',
-                                                     help="The directory the project will be stored")
+                                                     help="The directory the project will be stored"),
+                description: str = typer.Option('', '--description',
+                                                help="The short description of the project")
                 ):
     """
     Function to create a new project with its directory structure and all needed files for a quick start.
@@ -108,8 +125,12 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 env_vars=env_vars,
                 user=getpass.getuser()
             ))
+    # create toml
+    create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"),
+                short_description=description,
+                project_name=project_name)
 
-    logging.info("Project created successfully")
+    logging.info("Project created successfully. Check pyproject.toml for correct configuration")
 
 
 @create_cmd.command()
@@ -162,6 +183,26 @@ def new_service(service_name: str = typer.Argument("", help="The service name to
 
     _add_service_to_deployment(service_name)
     logging.info("Service %s.%s created successfully", service_package, service_name)
+
+
+@create_cmd.command()
+def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--description',
+                                                             help="The short description of the project"),
+                   force: Optional[bool] = typer.Option(False, '-f', '--force',
+                                                        help="Overwrites existing pyproject.toml")):
+    """ Creates a new pyproject.toml to build the library."""
+    logging.info("Creating a pyproject.toml")
+
+    context = ProjectContext.default
+    pyproject_file = os.path.join(context.project_root_dir, "pyproject.toml")
+
+    if not os.path.isfile(pyproject_file) or force:
+        create_toml(path=pyproject_file,
+                    short_description=description,
+                    project_name=context.project_namespace)
+        logging.info("Successfully created pyproject.toml. Please see the file and make adjustments as needed.")
+    else:
+        logging.error("Not overwriting existing pyproject.toml. Use --force option to overwrite anyways.")
 
 
 def _sanitize_service_name(service_name):
