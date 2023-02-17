@@ -11,7 +11,6 @@ from typing import Optional, List
 import tomli
 import tomli_w
 import typer
-from setuptools import find_packages
 
 from fastiot import get_version
 from fastiot.cli.model import CompileSettingsEnum

@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import string
+import sys
 from typing import Optional
 
 import typer
@@ -14,7 +15,7 @@ import typer
 from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME, \
     DEPLOYMENTS_CONFIG_FILE
-from fastiot.cli.helper_fn import get_jinja_env, create_toml
+from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import DeploymentConfig
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.model.infrastructure_service import InfrastructureService
@@ -25,6 +26,17 @@ def _create_random_password(length: int = 16) -> str:
     chars = list(string.ascii_letters + string.digits + "_-.,:%?!*")
     password = [random.choice(chars) for _ in range(length)]
     return "".join(password)
+
+def create_toml(path:str, description:str, project_name:str):
+    with open(path, "w") as template_file:
+        template = get_jinja_env().get_template("pyproject.toml.j2")
+        template_file.write(template.render(
+            projectname=project_name,
+            authors=getpass.getuser(),
+            description=description,
+            python_version=sys.version.split(' ')[0],
+            )
+        )
 
 
 @create_cmd.command()

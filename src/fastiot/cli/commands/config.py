@@ -5,10 +5,11 @@ from typing import Optional, List, Dict
 
 import typer
 
+from fastiot.cli.commands.create import create_toml
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
-from fastiot.cli.helper_fn import get_jinja_env, create_toml
+from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
     get_infrastructure_service_ports_randomly
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
