@@ -1,44 +1,31 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = [
+    "setuptools",
+    "setuptools-scm",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "1.1"     # will be edit by skript
+version = "0.2.dev157+toml"
 authors = [
-    {name="Fraunhofer Institute for Process Engineering and Packaging IVV"},
-    {email="tilman.klaeger@ivv-dd.fraunhofer.de"},
-    {email="konstantin.merker@ivv-dd.fraunhofer.de"},
+    { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
+    { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
+    { email = "konstantin.merker@ivv-dd.fraunhofer.de" },
 ]
-
 description = "FastIoT Platform"
 readme = "long_discription.txt"
 requires-python = "~=3.8"
-
 dependencies = [
-    "pydantic >=1.9.0,<2",
-    "msgpack >=1,<2",
-    "nats-py >=2.1.0,<3",
-    "PyYAML >=5,<7",
-    "typer[all]>=0.4.1,<1" ,
-    "Jinja2 >= 2,<4",
-    "Redis >=4",
-    ]
-
-[tool.setuptools]
-
-packages = [
-    "fastiot",
-    "fastiot.cli",
-    "fastiot.core",
-    "fastiot.db",
-    "fastiot.env",
-    "fastiot.exceptions",
-    "fastiot.msg",
-    "fastiot.util",
-    "fastiot.cli.commands",
-    "fastiot.cli.common",
-    "fastiot.cli.model",
+    "pydantic>=1.9.0,<2",
+    "msgpack>=1,<2",
+    "nats-py>=2.1.0,<3",
+    "PyYAML>=5,<7",
+    "typer[all]>=0.4.1,<1",
+    "Jinja2>=2,<4",
+    "Redis>4",
+    "tomli~=2.0.1",
+    "tomli_w",
 ]
 
 [project.optional-dependencies]
@@ -62,6 +49,8 @@ all = [
     "typer[all]>=0.4.1,<1",
     "Jinja2>=2,<4",
     "Redis>4",
+    "tomli~=2.0.1",
+    "tomli_w",
     "dash~=2.6.1",
     "plotly~=5.9.0",
     "numpy",
@@ -108,3 +97,17 @@ dash = [
     "nest_asyncio",
 ]
 
+[tool.setuptools]
+packages = [
+    "fastiot",
+    "fastiot.cli",
+    "fastiot.core",
+    "fastiot.db",
+    "fastiot.env",
+    "fastiot.exceptions",
+    "fastiot.msg",
+    "fastiot.util",
+    "fastiot.cli.commands",
+    "fastiot.cli.common",
+    "fastiot.cli.model",
+]

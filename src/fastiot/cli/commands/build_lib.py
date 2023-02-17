@@ -8,8 +8,12 @@ from glob import glob
 from shutil import rmtree
 from typing import Optional, List
 
+import tomli
+import tomli_w
 import typer
+from setuptools import find_packages
 
+from fastiot import get_version
 from fastiot.cli.model import CompileSettingsEnum
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, extras_cmd
@@ -64,9 +68,46 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
 
     pyproject_toml = os.path.join(context.library_setup_py_dir, 'pyproject.toml')
     if not os.path.isfile(pyproject_toml):
-        logging.warning("Can not build library without a `pyproject.toml in project root dir. Exiting.")
-
+        logging.warning("Can not build library without a `pyproject.toml in project root dir.")
     else:
+#--------
+        requirement_files = glob("requirements*.txt", root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
+        requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in requirement_files]
+        install_requires = []
+        extras_require = {'all': []}
+
+        for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
+            req_list = []
+            with open(req_name_abs) as f:
+                for req in f.read().splitlines():
+                    req = req.strip()
+                    if req != '' and not req.startswith('#'):
+                        req_list.append(req)
+            if req_name == 'requirements.txt':
+                install_requires.extend(req_list)
+            else:
+                middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
+                extras_require[middle_name] = req_list
+            extras_require['all'].extend(req_list)
+
+        if not install_requires:
+            raise RuntimeError("Could not find a requirements.txt")
+
+
+        toml = open("pyproject.toml", "rb")
+        toml_dict = tomli.load(toml)
+        toml.close()
+        print(toml_dict)
+        toml_dict["project"]["dependencies"] = install_requires
+        toml_dict["project"]["version"] = get_version(complete=True)
+        toml_dict["tool"]["setuptools"]["packages"] = find_packages("src", include=["fastiot", "fastiot.*"])
+        toml_dict["project"]["optional-dependencies"]  = extras_require
+        toml = open("pyproject.toml", "wb")
+        tomli_w.dump(toml_dict, toml)
+        toml.close()
+
+
+        # TODO test if this is working for all Projects
         cmd = f"{sys.executable} -m build"
         exit_code = subprocess.call(cmd.split())
 
