@@ -100,8 +100,6 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         print(toml_dict)
         toml_dict["project"]["dependencies"] = install_requires
         toml_dict["project"]["version"] = get_version(complete=True)
-        toml_dict["tool"]["setuptools"]["packages"] = find_packages("src", include=["fastiot", "fastiot.*"])
-        toml_dict["project"]["optional-dependencies"]  = extras_require
         toml = open("pyproject.toml", "wb")
         tomli_w.dump(toml_dict, toml)
         toml.close()
