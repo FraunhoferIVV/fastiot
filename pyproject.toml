@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.dev159+toml"
+version = "0.2.dev161+toml"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -26,6 +26,7 @@ dependencies = [
     "Redis>4",
     "tomli~=2.0.1",
     "tomli_w",
+    "build",
 ]
 
 [project.optional-dependencies]

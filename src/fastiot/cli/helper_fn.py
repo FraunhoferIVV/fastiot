@@ -1,5 +1,4 @@
 import glob
-import getpass
 import os
 import sys
 from pathlib import Path
@@ -7,9 +6,8 @@ from typing import Dict, List, Optional
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from fastiot import __version__
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME, TEMPLATES_DIR
-from fastiot.cli.model import Service, DeploymentConfig, ProjectContext
+from fastiot.cli.model import Service, DeploymentConfig
 
 _jinja_envs: Dict[str, Environment] = {}
 
@@ -78,13 +76,13 @@ def find_deployments(deployments: Optional[List[str]] = None, path: str = '') ->
 def _default_cache(package: str, service: str) -> str:
     return f"{package}-cache"
 
-def create_toml(path:str,description):
-    context = ProjectContext.default
+def create_toml(path:str, description:str, project_name:str, authors:str):
     with open(path, "w") as template_file:
         template = get_jinja_env().get_template("pyproject.toml.j2")
         template_file.write(template.render(
-            projectname=context.project_namespace,
-            authors=getpass.getuser(),
+            projectname=project_name,
+            authors=authors,
             description=description,
             python_version=sys.version.split(' ')[0],
-        ))
+            )
+        )

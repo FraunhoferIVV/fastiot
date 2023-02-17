@@ -7,3 +7,4 @@ Jinja2>=2,<4
 Redis>4
 tomli~=2.0.1
 tomli_w
+build

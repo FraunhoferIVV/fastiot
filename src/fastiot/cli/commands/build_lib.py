@@ -82,6 +82,12 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
                 for req in f.read().splitlines():
                     req = req.strip()
                     if req != '' and not req.startswith('#'):
+                        # PEP 508
+                        req_split = req.split(",")
+                        if len(req_split) == 2:
+                            req = req_split[0].split("+") [0] +","+  req_split[1]
+                        else:
+                            req = req_split[0].split("+")[0]
                         req_list.append(req)
             if req_name == 'requirements.txt':
                 install_requires.extend(req_list)
@@ -98,7 +104,8 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         toml_dict = tomli.load(toml)
         toml.close()
         toml_dict["project"]["dependencies"] = install_requires
-        toml_dict["project"]["version"] = get_version(complete=True)
+        if get_version(complete=True) != "git-unspecified":
+            toml_dict["project"]["version"] = get_version(complete=True)
         toml = open("pyproject.toml", "wb")
         tomli_w.dump(toml_dict, toml)
         toml.close()
