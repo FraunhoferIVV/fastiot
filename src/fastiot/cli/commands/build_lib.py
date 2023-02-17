@@ -70,48 +70,20 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     if not os.path.isfile(pyproject_toml):
         logging.warning("Can not build library without a `pyproject.toml in project root dir.")
     else:
-#--------
-        requirement_files = glob("requirements*.txt", root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
-        requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in requirement_files]
-        install_requires = []
-        extras_require = {'all': []}
 
-        for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
-            req_list = []
-            with open(req_name_abs) as f:
-                for req in f.read().splitlines():
-                    req = req.strip()
-                    if req != '' and not req.startswith('#'):
-                        # PEP 508
-                        req_split = req.split(",")
-                        if len(req_split) == 2:
-                            req = req_split[0].split("+") [0] +","+  req_split[1]
-                        else:
-                            req = req_split[0].split("+")[0]
-                        req_list.append(req)
-            if req_name == 'requirements.txt':
-                install_requires.extend(req_list)
-            else:
-                middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
-                extras_require[middle_name] = req_list
-            extras_require['all'].extend(req_list)
-
-        if not install_requires:
-            raise RuntimeError("Could not find a requirements.txt")
-
+        install_requires,extras_require = read_requirements()
 
         toml = open("pyproject.toml", "rb")
         toml_dict = tomli.load(toml)
         toml.close()
         toml_dict["project"]["dependencies"] = install_requires
+        toml_dict["project"]["optional-dependencies"] = extras_require
         if get_version(complete=True) != "git-unspecified":
             toml_dict["project"]["version"] = get_version(complete=True)
         toml = open("pyproject.toml", "wb")
         tomli_w.dump(toml_dict, toml)
         toml.close()
 
-
-        # TODO test if this is working for all Projects
         cmd = f"{sys.executable} -m build"
         exit_code = subprocess.call(cmd.split())
 
@@ -138,3 +110,34 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         if exit_code != 0:
             logging.error("Building library with style %s failed with exit code %s", str(style.value), str(exit_code))
             raise typer.Exit(exit_code)
+
+
+def read_requirements():
+    requirement_files = glob("requirements*.txt",
+                             root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
+    requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
+                             requirement_files]
+    install_requires = []
+    extras_require = {'all': []}
+    for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
+        req_list = []
+        with open(req_name_abs) as f:
+            for req in f.read().splitlines():
+                req = req.strip()
+                if req != '' and not req.startswith('#'):
+                    # PEP 508
+                    req_split = req.split(",")
+                    if len(req_split) == 2:
+                        req = req_split[0].split("+")[0] + "," + req_split[1]
+                    else:
+                        req = req_split[0].split("+")[0]
+                    req_list.append(req)
+        if req_name == 'requirements.txt':
+            install_requires.extend(req_list)
+        else:
+            middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
+            extras_require[middle_name] = req_list
+        extras_require['all'].extend(req_list)
+    if not install_requires:
+        raise RuntimeError("Could not find a requirements.txt")
+    return install_requires, extras_require
