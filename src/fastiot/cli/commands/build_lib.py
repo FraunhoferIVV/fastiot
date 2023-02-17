@@ -97,7 +97,6 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         toml = open("pyproject.toml", "rb")
         toml_dict = tomli.load(toml)
         toml.close()
-        print(toml_dict)
         toml_dict["project"]["dependencies"] = install_requires
         toml_dict["project"]["version"] = get_version(complete=True)
         toml = open("pyproject.toml", "wb")
