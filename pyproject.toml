@@ -1,13 +1,15 @@
+# ATTENTION: Parts of this file are managed automatically!
+# This refers to build-system, project.dependencies, project.optional-dependencies, project.version, tool and nuitka.
+
 [build-system]
 requires = [
-    "setuptools>=67.3.2",
+    "setuptools>=67",
     "wheel",
 ]
-build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.168"
+version = "0.2.171"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -102,11 +104,22 @@ dash = [
 [project.scripts]
 fiot = "fastiot.cli.fiot:main"
 
-[tool.setuptools]
-packages = [
-    "fastiot",
+[tool.setuptools.packages.find]
+where = [
+    "src",
+]
+exclude = [
+    "fastiot_core_services*",
+    "fastiot_sample_services*",
+    "fastiot_tests*",
+    "fastiot.egg-info*",
 ]
 
-[tool.setuptools.package-dir]
-"" = "src"
-
+[nuitka]
+show-scons = false
+nofollow-import-to = [
+    "fastiot_core_services*",
+    "fastiot_sample_services*",
+    "fastiot_tests*",
+    "fastiot.egg-info*",
+]

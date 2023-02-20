@@ -6,7 +6,7 @@ import sys
 from enum import Enum
 from glob import glob
 from shutil import rmtree
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import tomli
 import tomli_w
@@ -30,30 +30,6 @@ class BuildLibStyles(str, Enum):
 def _styles_completion() -> List[str]:
     return [s.value for s in BuildLibStyles]
 
-
-def read_requirements():
-    requirement_files = glob("requirements*.txt",
-                             root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
-    requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
-                             requirement_files]
-    install_requires = []
-    extras_require = {'all': []}
-    for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
-        req_list = []
-        with open(req_name_abs) as f:
-            for req in f.read().splitlines():
-                req = req.strip()
-                if req != '' and not req.startswith('#'):
-                    req_list.append(req)
-        if req_name == 'requirements.txt':
-            install_requires.extend(req_list)
-        else:
-            middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
-            extras_require[middle_name] = req_list
-        extras_require['all'].extend(req_list)
-    if not install_requires:
-        raise RuntimeError("Could not find a requirements.txt")
-    return install_requires, extras_require
 
 
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -99,27 +75,112 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         return
 
     if update:
-        install_requires, extras_require = read_requirements()
+        _update_pyproject_toml()
 
-        with open(pyproject_toml, "rb") as toml:
-            toml_dict = tomli.load(toml)
-            toml_dict["project"]["dependencies"] = install_requires
-            toml_dict["project"]["optional-dependencies"] = extras_require
-            if get_version(complete=True) != "git-unspecified":
-                toml_dict["project"]["version"] = get_version(complete=True)
+    command_args = {
+        BuildLibStyles.wheel: '-w',
+        BuildLibStyles.sdist: '-s',
+    }
+    for style in styles:
+        if style == BuildLibStyles.compiled:
+            if not update:
+                logging.warning("Cannot compile library if flag `--update no` is set. Skipping.")
+                continue
+            _build_lib_with_nuitka(env=env)
+            continue
 
-        with open(pyproject_toml, "wb") as toml:
-            tomli_w.dump(toml_dict, toml)
+        cmd = f"{sys.executable} -m build -w {command_args[style]}"
+        exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
+
+        if exit_code != 0:
+            logging.error("Building library failed with exit code %s", str(exit_code))
+            raise typer.Exit(exit_code)
+
+    # Cleanup some possible left overs from building library
+    for directory in [("build", "lib"),
+                      ("build", "bdist.linux-x86_64"),
+                      ("src", f"{context.project_namespace}.egg-info")]:
+        try:
+            rmtree(os.path.join(context.project_root_dir, *directory))
+        except FileNotFoundError:
+            pass
+
+    logging.info("Successfully built library")
+
+
+def _update_pyproject_toml(build_system: Optional[Dict] = None):
+    context = ProjectContext.default
+    pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
+    packages = [os.path.basename(p) for p in glob(os.path.join(context.project_root_dir, "src", "*"))]
+    exclude_from_package = [p + "*" for p in packages if p != context.library_package]
+    install_requires, extras_require = read_requirements()
+
+    with open(pyproject_toml, "rb") as toml_file:
+        toml_dict = tomli.load(toml_file)
+
+    toml_dict["project"]["dependencies"] = install_requires
+    toml_dict["project"]["optional-dependencies"] = extras_require
+    if get_version(complete=True) != "git-unspecified":
+        toml_dict["project"]["version"] = get_version(complete=True)
+
+    toml_dict["build-system"] = build_system or {"requires": ["setuptools>=67", "wheel"]}
+
+    toml_dict["tool"] = {"setuptools": {"packages": {}}}
+    toml_dict["tool"]["setuptools"]["packages"]["find"] = {"where": ["src"],
+                                                           "exclude": exclude_from_package}
+
+    toml_dict["nuitka"] = {"show-scons": False,
+                           "nofollow-import-to": exclude_from_package}
+
+    with open(pyproject_toml, "wb") as toml_file:
+        toml_file.write("# ATTENTION: Parts of this file are managed automatically!\n"
+                        "# This refers to build-system, project.dependencies, project.optional-dependencies, "
+                        "project.version, tool and nuitka.\n\n".encode())
+        tomli_w.dump(toml_dict, toml_file)
+
+
+def _build_lib_with_nuitka(env):
+    context = ProjectContext.default
+
+    build_system = {"requires": ["setuptools>=67", "wheel", "nuitka", "toml"],
+                    "build-backend": "nuitka.distutils.Build"}
+
+    _update_pyproject_toml(build_system=build_system)
 
     cmd = f"{sys.executable} -m build"
     exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
 
     if exit_code != 0:
         logging.error("Building library failed with exit code %s", str(exit_code))
+        _update_pyproject_toml()  # Change back to regular file without link to nuitka build system
         raise typer.Exit(exit_code)
 
-    logging.info("Successfully built library")
+    _update_pyproject_toml()  # Change back to regular file without link to nuitka build system
 
+
+def read_requirements():
+    requirement_files = glob("requirements*.txt",
+                             root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
+    requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
+                             requirement_files]
+    install_requires = []
+    extras_require = {'all': []}
+    for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
+        req_list = []
+        with open(req_name_abs) as f:
+            for req in f.read().splitlines():
+                req = req.strip()
+                if req != '' and not req.startswith('#'):
+                    req_list.append(req)
+        if req_name == 'requirements.txt':
+            install_requires.extend(req_list)
+        else:
+            middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
+            extras_require[middle_name] = req_list
+        extras_require['all'].extend(req_list)
+    if not install_requires:
+        raise RuntimeError("Could not find a requirements.txt")
+    return install_requires, extras_require
 
 def _build_lib_with_setup_py(styles, env):
     context = ProjectContext.default

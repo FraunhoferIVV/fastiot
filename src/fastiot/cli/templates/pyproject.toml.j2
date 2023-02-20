@@ -1,25 +1,29 @@
+# ATTENTION: Parts of this file are managed automatically!
+# This refers to build-system, project.dependencies, project.optional-dependencies, project.version, tool and nuitka.
+
+
 [build-system]
 requires = [
     "setuptools",
-    "setuptools-scm",
+    "wheel"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "{{projectname}}"
-version = "0.0.0"           # may be changed automatically
+version = "0.0.0"           # will be changed automatically
 authors = [{name = "{{authors}}" },]
 description = "{{description}}"
 readme = "README.md"
 requires-python = "~={{python_version}}"
-dependencies = []            # may be changed automatically
+dependencies = []            # will be changed automatically
 
- # may be changed automatically
+# will be changed automatically
 [project.optional-dependencies]
 all = []
 
-
+# will be changed automatically
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["{{projectname}}"]
-exclude = ["{{projectname}}_tests", "{{projectname}}_service"]
+exclude = ["{{projectname}}_tests", "{{projectname}}_services"]
