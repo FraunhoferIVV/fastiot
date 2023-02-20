@@ -26,14 +26,14 @@
     - name: 'Activate prometheus monitoring'
       file:
         src: "/home/{{ deployment_target.remote_user }}/docker-compose.override.yml"
-        dest: "/home/{{ deployment_target.remote_user }}/{{config_name}}/docker-compose.override.yaml"
+        dest: "/home/{{ deployment_target.remote_user }}/{{ deployment_name }}/docker-compose.override.yaml"
         state: link
       when: override_exists.stat.exists == false
       tags: [ docker-compose ]
 {% endif %}
     - name: 'Start docker-compose'
       community.docker.docker_compose:
-        project_src: /home/{{ deployment_target.remote_user }}/{{deployment_name}}
+        project_src: /home/{{ deployment_target.remote_user }}/{{ deployment_name }}
         state: present
         pull: yes
         remove_orphans: yes
