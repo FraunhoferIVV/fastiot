@@ -1,13 +1,13 @@
 [build-system]
 requires = [
-    "setuptools",
-    "setuptools-scm",
+    "setuptools>=67.3.2",
+    "wheel",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastiot"
-version = "0.2.167"
+version = "0.2.168"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -27,7 +27,6 @@ dependencies = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
-    "wheel",
 ]
 
 [project.optional-dependencies]
@@ -61,7 +60,6 @@ all = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
-    "wheel",
 ]
 compile = [
     "Nuitka>=1.1.7,<2",
@@ -101,15 +99,14 @@ dash = [
     "nest_asyncio",
 ]
 
-[tool.setuptools.packages.find]
-where = [
-    "src",
-]
-include = [
+[project.scripts]
+fiot = "fastiot.cli.fiot:main"
+
+[tool.setuptools]
+packages = [
     "fastiot",
 ]
-exclude = [
-    "fastiot_core_services",
-    "fastiot_sample_services",
-    "fastiot_tests",
-]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
