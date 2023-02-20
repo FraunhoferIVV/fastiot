@@ -179,3 +179,7 @@ def get_version(complete=False, only_major=False, minor=False) -> str:
     if minor:
         parts = version.split('.')
         return f"{parts[0]}.{parts[1]}"
+
+
+if __name__ == '__main__':
+    get_version(complete=True)
