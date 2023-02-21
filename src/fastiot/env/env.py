@@ -200,6 +200,10 @@ class MongoDBEnv:
         return os.getenv(FASTIOT_MONGO_DB_NAME, "fastiot")
 
     @property
+    def mem_limit(self) -> str:
+        return os.getenv(FASTIOT_MONGO_DB_MEM_LIMIT, "256m")
+
+    @property
     def is_configured(self) -> bool:
         """
         Use to indicate if the mongodb is configured, it is not bound to any environment variable

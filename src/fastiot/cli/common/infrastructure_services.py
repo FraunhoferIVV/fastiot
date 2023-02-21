@@ -1,7 +1,7 @@
 from typing import List
 
 from fastiot.cli.model.infrastructure_service import InfrastructureService, InfrastructureServicePort, \
-    InfrastructureServiceEnvVar, InfrastructureServiceVolume
+    InfrastructureServiceEnvVar, InfrastructureServiceVolume, InfrastructureServiceExtension
 from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, \
     FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
     FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN, \
@@ -10,7 +10,8 @@ from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_
     FASTIOT_TIME_SCALE_DB_USER, FASTIOT_TIME_SCALE_DB_PASSWORD, FASTIOT_TIME_SCALE_DB_DATABASE, \
     FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME, FASTIOT_MARIA_DB_USER, FASTIOT_REDIS_PORT, \
     FASTIOT_REDIS_HOST, FASTIOT_REDIS_PASSWORD, FASTIOT_REDIS_VOLUME
-from fastiot.env.env_constants import FASTIOT_ELASTICSEARCH_HOST, FASTIOT_ELASTICSEARCH_PASSWORD, FASTIOT_ELASTICSEARCH_PORT, FASTIOT_ELASTICSEARCH_VOLUME
+from fastiot.env.env_constants import FASTIOT_ELASTICSEARCH_HOST, FASTIOT_ELASTICSEARCH_PASSWORD, \
+    FASTIOT_ELASTICSEARCH_PORT, FASTIOT_ELASTICSEARCH_VOLUME, FASTIOT_MONGO_DB_MEM_LIMIT
 
 
 class NatsService(InfrastructureService):
@@ -101,6 +102,12 @@ class MongoDBService(InfrastructureService):
         InfrastructureServiceVolume(
             container_volume='/data/db',
             env_var=FASTIOT_MONGO_DB_VOLUME
+        )
+    ]
+    extensions: List[InfrastructureServiceExtension] = [
+        InfrastructureServiceExtension(
+            option_name='mem_limit',
+            env_var=FASTIOT_MONGO_DB_MEM_LIMIT
         )
     ]
 

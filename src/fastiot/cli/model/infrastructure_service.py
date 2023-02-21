@@ -40,6 +40,16 @@ class InfrastructureServiceVolume(BaseModel):
     is set to a relative path (not starting with '/') it is interpreted relative to volume dir. """
 
 
+class InfrastructureServiceExtension(BaseModel):
+    """
+    An infrastructure service extension.
+    """
+    option_name: str
+    """ The name of option for container """
+    env_var: str
+    """ The env var which can be used for option modification. """
+
+
 class InfrastructureService(BaseModel):
     """
     Class to describe external services to be integrated in the deployments.
