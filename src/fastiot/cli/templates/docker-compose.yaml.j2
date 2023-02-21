@@ -40,8 +40,8 @@ services:
       - "{{ item }}"
 {% endfor %}
 {% endif %}
-{% if service.extensions|length > 0 %}
-{% for item in service.extensions %}
+{% if service.extras|length > 0 %}
+{% for item in service.extras %}
     {{item}}
 {% endfor %}
 {% endif %}

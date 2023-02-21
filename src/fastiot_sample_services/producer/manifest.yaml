@@ -4,3 +4,7 @@ fastiot_service:
   platforms:
     - amd64
     - arm64
+
+  mem_limit: 256m
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
