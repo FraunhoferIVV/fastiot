@@ -128,6 +128,16 @@ class NPM(BaseModel):
     """
 
 
+class ComposeExtensions(BaseModel):
+    """
+    Specifying more options for generating docker-compose file, for example the memory limit of container.
+    """
+    mem_limit: Optional[str] = None
+    """ Set the limit of memory usage by this docker container """
+    extra_hosts: Optional[List[str]] = None
+    """ Set the extra_hosts, if the contains try to connect to another in host network mode """
+
+
 class ServiceManifest(BaseModel):
     """
     Every service needs a :file:`manifest.yaml` to describe the service.
@@ -205,6 +215,10 @@ class ServiceManifest(BaseModel):
     """
     If your service  should not be compiled can change to False. Per default your service will be compiled using Nuitka
     to have some obfuscation in the code and potentially speed up the program.
+    """
+    compose_extensions: Optional[ComposeExtensions] = None
+    """
+    If you want to set some more options for your container, like mem_list, you may list them here.
     """
 
     @staticmethod

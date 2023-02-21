@@ -13,3 +13,4 @@ class ServiceComposeInfo(BaseModel):
     tmpfs: List[str] = []
 
     privileged: bool = False
+    extensions: List[str] = []

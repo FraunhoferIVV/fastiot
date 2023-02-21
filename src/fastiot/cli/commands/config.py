@@ -211,6 +211,7 @@ def _create_services_compose_infos(env: Dict[str, str],
         volumes = _create_volumes(env, service_env, deployment_config.config_dir, manifest)
         ports = _create_ports(env, service_env, manifest)
         devices = _create_devices(env, service_env, manifest)
+        extensions = _create_compose_extensions(manifest)
 
         result.append(ServiceComposeInfo(name=name,
                                          image=full_image_name,
@@ -218,7 +219,8 @@ def _create_services_compose_infos(env: Dict[str, str],
                                          ports=ports,
                                          volumes=volumes,
                                          devices=devices,
-                                         privileged=manifest.privileged))
+                                         privileged=manifest.privileged,
+                                         extensions=extensions))
     return result
 
 
@@ -295,6 +297,26 @@ def _create_devices(env: Dict[str, str], service_env: Dict[str, str], manifest: 
         service_env[device.env_variable] = device.location
 
     return devices
+
+
+def _create_compose_extensions(manifest: ServiceManifest) -> List[str]:
+    if manifest.compose_extensions is not None:
+        logging.warning('This feature is still experimental, and does not necessarily guarantee functionality !')
+        compose_extensions = []
+        for extension in manifest.compose_extensions.dict():
+            if isinstance(getattr(manifest.compose_extensions, extension), list):
+                indentation = '      - '
+                extensions_in_yaml_format = getattr(manifest.compose_extensions, extension)
+                adjusted_extensions = [
+                    indentation + item + '\n' if c != len(extensions_in_yaml_format) - 1 else indentation + item for
+                    c, item in enumerate(extensions_in_yaml_format)]
+                adjusted_extensions = "".join(adjusted_extensions)
+                compose_extensions.append(
+                    f"{extension}:\n{adjusted_extensions}")
+            else:
+                compose_extensions.append(f"{extension}: {getattr(manifest.compose_extensions, extension)}")
+        return compose_extensions
+    return []
 
 
 def _create_infrastructure_service_compose_infos(env: Dict[str, str],
