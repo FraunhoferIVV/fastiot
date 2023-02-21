@@ -40,7 +40,7 @@ class InfrastructureServiceVolume(BaseModel):
     is set to a relative path (not starting with '/') it is interpreted relative to volume dir. """
 
 
-class InfrastructureServiceExtension(BaseModel):
+class InfrastructureServiceComposeExtras(BaseModel):
     """
     An infrastructure service extension.
     """

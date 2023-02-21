@@ -1,7 +1,7 @@
 from typing import List
 
 from fastiot.cli.model.infrastructure_service import InfrastructureService, InfrastructureServicePort, \
-    InfrastructureServiceEnvVar, InfrastructureServiceVolume, InfrastructureServiceExtension
+    InfrastructureServiceEnvVar, InfrastructureServiceVolume, InfrastructureServiceComposeExtras
 from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_DB_PORT, FASTIOT_MONGO_DB_USER, \
     FASTIOT_MONGO_DB_PASSWORD, FASTIOT_MARIA_DB_PASSWORD, FASTIOT_MONGO_DB_VOLUME, FASTIOT_MARIA_DB_VOLUME, \
     FASTIOT_MARIA_DB_HOST, FASTIOT_MONGO_DB_HOST, FASTIOT_NATS_HOST, FASTIOT_INFLUX_DB_PORT, FASTIOT_INFLUX_DB_TOKEN, \
@@ -104,8 +104,8 @@ class MongoDBService(InfrastructureService):
             env_var=FASTIOT_MONGO_DB_VOLUME
         )
     ]
-    extensions: List[InfrastructureServiceExtension] = [
-        InfrastructureServiceExtension(
+    compose_extras: List[InfrastructureServiceComposeExtras] = [
+        InfrastructureServiceComposeExtras(
             option_name='mem_limit',
             env_var=FASTIOT_MONGO_DB_MEM_LIMIT
         )
