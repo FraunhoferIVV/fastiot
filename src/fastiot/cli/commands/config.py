@@ -374,13 +374,14 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                 service_temp_volumes.append(volume.container_volume)
             elif value:
                 service_volumes.append(f'{value}:{volume.container_volume}')
-        service_extensions: List[str] = []
+        service_extensions = ""
         if hasattr(service, 'extensions'):
             for extension in service.extensions:
                 option = extension.option_name
                 if extension.env_var in env:
                     value = env[extension.env_var]
-                    service_extensions.append(f'{option}: {value}')
+                    service_extensions += f'{option}: {value}\n'
+        service_extensions = service_extensions.rstrip()
 
         result.append(ServiceComposeInfo(
             name=service.name,
