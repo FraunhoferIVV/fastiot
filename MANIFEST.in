@@ -1,0 +1,6 @@
+# Exclude some files managed by git when building sdist package
+recursive-exclude docs *
+recursive-exclude deployments *
+recursive-exclude src/fastiot_core_services *
+recursive-exclude src/fastiot_sample_services *
+recursive-exclude src/fastiot_tests *

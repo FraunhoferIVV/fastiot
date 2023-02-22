@@ -36,8 +36,8 @@ def _styles_completion() -> List[str]:
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
                                                           help="Compile all styles configured for the project or force "
                                                                "(just for setup.py) compiled, wheel or sdist"),
-              update: Optional[bool] = typer.Option(True, '-u', '--update',
-                                                    help="set false to not overwrite pyproject.toml ")):
+              noupdate: Optional[bool] = typer.Option(False, '-n', '--noupdate',
+                                                    help="Use to not overwrite pyproject.toml ")):
     """ Compile the project library according to the project configuration. """
 
     context = ProjectContext.default
@@ -74,7 +74,7 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         _build_lib_with_setup_py(styles, env)
         return
 
-    if update:
+    if not noupdate:
         _update_pyproject_toml()
 
     command_args = {
@@ -83,7 +83,7 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     }
     for style in styles:
         if style == BuildLibStyles.compiled:
-            if not update:
+            if noupdate:
                 logging.warning("Cannot compile library if flag `--update no` is set. Skipping.")
                 continue
             _build_lib_with_nuitka(env=env)
@@ -123,7 +123,7 @@ def _update_pyproject_toml(build_system: Optional[Dict] = None):
     if get_version(complete=True) != "git-unspecified":
         toml_dict["project"]["version"] = get_version(complete=True)
 
-    toml_dict["build-system"] = build_system or {"requires": ["setuptools>=67", "wheel"]}
+    toml_dict["build-system"] = build_system or {"requires": ["setuptools>=67", "setuptools_scm[toml]>=6.2", "wheel"]}
 
     toml_dict["tool"] = {"setuptools": {"packages": {}}}
     toml_dict["tool"]["setuptools"]["packages"]["find"] = {"where": ["src"],
@@ -142,7 +142,7 @@ def _update_pyproject_toml(build_system: Optional[Dict] = None):
 def _build_lib_with_nuitka(env):
     context = ProjectContext.default
 
-    build_system = {"requires": ["setuptools>=67", "wheel", "nuitka", "toml"],
+    build_system = {"requires": ["setuptools>=67", "setuptools_scm[toml]>=6.2", "wheel", "nuitka", "toml"],
                     "build-backend": "nuitka.distutils.Build"}
 
     _update_pyproject_toml(build_system=build_system)

@@ -4,12 +4,13 @@
 [build-system]
 requires = [
     "setuptools>=67",
+    "setuptools_scm[toml]>=6.2",
     "wheel",
 ]
 
 [project]
 name = "fastiot"
-version = "0.2.171"
+version = "0.2.179"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -112,7 +113,6 @@ exclude = [
     "fastiot_core_services*",
     "fastiot_sample_services*",
     "fastiot_tests*",
-    "fastiot.egg-info*",
 ]
 
 [nuitka]
@@ -121,5 +121,4 @@ nofollow-import-to = [
     "fastiot_core_services*",
     "fastiot_sample_services*",
     "fastiot_tests*",
-    "fastiot.egg-info*",
 ]
