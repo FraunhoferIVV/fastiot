@@ -198,8 +198,8 @@ class ServiceManifest(BaseModel):
     additional_requirements: List[str] = []
     """
     If a specific service needs more packages installed than the others, you may add these here. It will look in the
-    requirements directory for the specified additional requirements and copy them inside the container. The install.sh
-    must be handle to install these.
+    requirements directory for the specified additional requirements and copy them inside the container. The 
+    :file:`install.sh` must be handle to install these.
     """
     compile: bool = True
     """
@@ -208,18 +208,16 @@ class ServiceManifest(BaseModel):
     """
     compose_extras: Optional[Dict] = {}
     """
-    If you want to set some more options for your container, like mem_list, you may list them here.
+    **ATTENTION:** Use at your own risk! Adding options not known or duplicating entries in :file:`docker-compose.yaml`
+    will make the file invalid and the services will deny to start.
+    
+    If you want to set some more options for your container, like `mem_limit`, you may list them here.
     You need to know which option accepts docker-compose. Please refer to 
-    https://docs.docker.com/compose/compose-file/compose-file-v2/#service-configuration-reference
-    For configuring this you can refer to src/fastiot_sample_services/producer/manifest.yaml, it shows, how you can
-    add more compose extras in manifest.yaml. 
+    https://docs.docker.com/compose/compose-file/compose-file-v2/#service-configuration-reference .
+    
+    For configuring this you can refer to :file:`src/fastiot_sample_services/producer/manifest.yaml`.
+    It shows, how you can add more compose extras in manifest.yaml. 
     """
-
-    @staticmethod
-    def get_compose_extensions(config: Dict):
-        all_fields = list(ServiceManifest.__fields__.keys())
-        compose_extensions = {field: config[field] for field in config if field not in all_fields}
-        return compose_extensions
 
     @staticmethod
     def from_yaml_file(filename: str, check_service_name: str = '') -> "ServiceManifest":
@@ -229,7 +227,6 @@ class ServiceManifest(BaseModel):
             kebab_case_to_snake_case(config)
 
         manifest = ServiceManifest(**config['fastiot_service'])
-        manifest.compose_extras = ServiceManifest.get_compose_extensions(config['fastiot_service'])
 
         if check_service_name and manifest.name != check_service_name:
             raise ValueError(f'Error raised during parsing of file "{filename}": '

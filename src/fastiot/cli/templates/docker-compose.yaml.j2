@@ -41,9 +41,9 @@ services:
 {% endfor %}
 {% endif %}
 {% if service.extras|length > 0 %}
-{% for item in service.extras %}
-    {{item}}
-{% endfor %}
+{% filter indent(width=4) %}
+    {{ service.extras }}
+{% endfilter %}
 {% endif %}
 {% if service.volumes|length > 0 %}
     volumes:

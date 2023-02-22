@@ -5,6 +5,9 @@ fastiot_service:
     - amd64
     - arm64
 
-  mem_limit: 256m
-  extra_hosts:
-    - "host.docker.internal:host-gateway"
+  # Example to show how to add various entries to the docker-compose file.
+  # This has to be done carefully to not destroy the docker-compose!
+  compose_extras:
+    mem_limit: 256m  # Limit the memory for the container, especially useful if an included library has a memleak.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

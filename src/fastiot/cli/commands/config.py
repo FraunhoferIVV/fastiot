@@ -4,8 +4,8 @@ import shutil
 from typing import Optional, List, Dict
 
 import typer
+import yaml
 
-from fastiot.cli.commands.create import create_toml
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
     FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
@@ -14,9 +14,9 @@ from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_por
     get_infrastructure_service_ports_randomly
 from fastiot.cli.model import DeploymentConfig, ServiceManifest, ServiceConfig
 from fastiot.cli.model.compose_info import ServiceComposeInfo
+from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.model.manifest import MountConfigDirEnum
 from fastiot.cli.model.project import ProjectContext
-from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 from fastiot.env import FASTIOT_CONFIG_DIR, env_basic
 from fastiot.env.env_constants import FASTIOT_VOLUME_DIR
@@ -299,25 +299,10 @@ def _create_devices(env: Dict[str, str], service_env: Dict[str, str], manifest: 
     return devices
 
 
-def _create_compose_extras(manifest: ServiceManifest) -> List[str]:
-    if manifest.compose_extras is not None:
-        logging.warning('This feature is still experimental, and does not necessarily guarantee functionality !')
-        compose_extras = []
-        for extras in manifest.compose_extras:
-            if isinstance(manifest.compose_extras[extras], list):
-                indentation = '      - '
-                extensions_in_yaml_format = manifest.compose_extras[extras]
-                extensions_in_yaml_format = [f'"{item}"' for item in extensions_in_yaml_format]
-                adjusted_extensions = [
-                    indentation + item + '\n' if c != len(extensions_in_yaml_format) - 1 else indentation + item for
-                    c, item in enumerate(extensions_in_yaml_format)]
-                adjusted_extensions = f"{(''.join(adjusted_extensions))}"
-                compose_extras.append(
-                    f"{extras}:\n{adjusted_extensions}")
-            else:
-                compose_extras.append(f"{extras}: {manifest.compose_extras[extras]}")
-        return compose_extras
-    return []
+def _create_compose_extras(manifest: ServiceManifest) -> str:
+    if manifest.compose_extras:
+        return yaml.dump(manifest.compose_extras).rstrip()
+    return ""
 
 
 def _create_infrastructure_service_compose_infos(env: Dict[str, str],
@@ -404,6 +389,6 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             ports=service_ports,
             volumes=service_volumes,
             tmpfs=service_temp_volumes,
-            extensions=service_extensions
+            extras=service_extensions
         ))
     return result
