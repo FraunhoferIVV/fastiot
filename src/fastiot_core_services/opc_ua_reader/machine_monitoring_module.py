@@ -7,11 +7,11 @@ from opcua import Client
 from fastiot.core import FastIoTService, loop
 from fastiot.core.time import get_time_now
 from fastiot.msg.thing import Thing
-from fastiot_core_services.machine_monitoring.env import env_opcua, OPCUARetrievalMode
-from fastiot_core_services.machine_monitoring.extract_thing_metadata import extract_thing_metadata_from_csv
+from fastiot_core_services.opc_ua_reader.env import env_opcua, OPCUARetrievalMode
+from fastiot_core_services.opc_ua_reader.extract_thing_metadata import extract_thing_metadata_from_csv
 
 
-class MachineMonitoring(FastIoTService):
+class OPCUAReader(FastIoTService):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -23,10 +23,10 @@ class MachineMonitoring(FastIoTService):
         self._load_config()
 
     def _load_config(self):
-        config_dir = env_opcua.machine_monitoring_config_dir
+        config_dir = env_opcua.opc_ua_reader_config_dir
         if os.path.isdir(config_dir):
             self._logger.info("Importing from csv")
-            things_filename = os.path.join(config_dir, "machine_monitoring_things.csv")
+            things_filename = os.path.join(config_dir, "opc_ua_reader_things.csv")
 
             if os.path.isfile(things_filename):
                 for nodeid, thing in extract_thing_metadata_from_csv(things_filename).items():
@@ -131,10 +131,10 @@ class MachineMonitoring(FastIoTService):
         except asyncio.TimeoutError:
             self._logger.error("Receiving no data. Writing to opcua error logfile.")
 
-            error_log_dir = os.path.dirname(env_opcua.machine_monitoring_error_logfile)
+            error_log_dir = os.path.dirname(env_opcua.opc_ua_reader_error_logfile)
             if os.path.isdir(error_log_dir) is False:
                 os.makedirs(error_log_dir)
-            with open(env_opcua.machine_monitoring_error_logfile, "a") as f:
+            with open(env_opcua.opc_ua_reader_error_logfile, "a") as f:
                 f.write(f"{get_time_now()} Receiving no data.\n")
         return asyncio.sleep(0.0)
 

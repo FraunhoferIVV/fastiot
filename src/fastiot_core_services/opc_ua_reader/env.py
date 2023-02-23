@@ -11,8 +11,8 @@ FASTIOT_OPCUA_APPLICATION_URI = 'FASTIOT_OPCUA_APPLICATION_URI'
 FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY = 'FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY'
 FASTIOT_OPCUA_RETRIEVAL_MODE = 'FASTIOT_OPCUA_RETRIEVAL_MODE'
 FASTIOT_OPCUA_POLLING_DELAY = 'FASTIOT_OPCUA_POLLING_DELAY'
-FASTIOT_MACHINE_MONITORING_CONFIG_NAME = 'FASTIOT_MACHINE_MONITORING_CONFIG_NAME'
-FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE = 'FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE'
+FASTIOT_OPC_UA_CONFIG_NAME = 'FASTIOT_OPC_UA_CONFIG_NAME'
+FASTIOT_OPC_UA_ERROR_LOGFILE = 'FASTIOT_OPC_UA_ERROR_LOGFILE'
 
 
 class OPCUARetrievalMode(str, Enum):
@@ -126,19 +126,19 @@ class OPCUAEnv:
         return OPCUARetrievalMode(os.getenv(FASTIOT_OPCUA_RETRIEVAL_MODE, OPCUARetrievalMode.polling))
 
     @property
-    def machine_monitoring_config_dir(self) -> str:
-        """ .. envvar:: FASTIOT_MACHINE_MONITORING_CONFIG_NAME
+    def opc_ua_reader_config_dir(self) -> str:
+        """ .. envvar:: FASTIOT_OPC_UA_CONFIG_NAME
 
         Specify a config name. This can be useful when running multiple instances of machine monitoring with a different
-        opc-ua node configuration inside the config_dir. Defaults to "machine_monitoring" and is relative to the config
+        opc-ua node configuration inside the config_dir. Defaults to "opc_ua_reader" and is relative to the config
         dir.
         """
-        config_dir_relative = os.getenv(FASTIOT_MACHINE_MONITORING_CONFIG_NAME, "machine_monitoring")
+        config_dir_relative = os.getenv(FASTIOT_OPC_UA_CONFIG_NAME, "opc_ua_reader")
         return os.path.join(env_basic.config_dir, config_dir_relative)
 
     @property
-    def machine_monitoring_error_logfile(self) -> str:
-        """ .. envvar:: FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE
+    def opc_ua_reader_error_logfile(self) -> str:
+        """ .. envvar:: FASTIOT_OPC_UA_ERROR_LOGFILE
 
         Specify an error log file. In this error log file are connection errors logged. If there is any error logged,
         the machine monitor is marked as unhealthy and depending on the deployment is restarted.
@@ -146,7 +146,7 @@ class OPCUAEnv:
         This can be useful if the OPC-UA Server has unstable subscriptions - so when they break the service is
         restarted.
         """
-        return os.getenv(FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, "/var/fastiot/logs/error.log")
+        return os.getenv(FASTIOT_OPC_UA_ERROR_LOGFILE, "/var/fastiot/logs/error.log")
 
 
 env_opcua = OPCUAEnv()

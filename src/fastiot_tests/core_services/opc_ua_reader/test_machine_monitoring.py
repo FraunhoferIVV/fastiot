@@ -14,13 +14,13 @@ from fastiot.env.env_constants import *
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.ports import get_local_random_port
-from fastiot_core_services.machine_monitoring.env import env_opcua, FASTIOT_OPCUA_ENDPOINT_URL, \
-    FASTIOT_OPCUA_RETRIEVAL_MODE, OPCUARetrievalMode, FASTIOT_MACHINE_MONITORING_CONFIG_NAME, \
+from fastiot_core_services.opc_ua_reader.env import env_opcua, FASTIOT_OPCUA_ENDPOINT_URL, \
+    FASTIOT_OPCUA_RETRIEVAL_MODE, OPCUARetrievalMode, \
     FASTIOT_OPCUA_SECURITY_STRING, FASTIOT_OPCUA_USER, FASTIOT_OPCUA_PASSWORD, FASTIOT_OPCUA_APPLICATION_URI, \
-    FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE, FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY
-from fastiot_core_services.machine_monitoring.machine_monitoring_module import MachineMonitoring
+    FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY, FASTIOT_OPC_UA_CONFIG_NAME, FASTIOT_OPC_UA_ERROR_LOGFILE
+from fastiot_core_services.opc_ua_reader.machine_monitoring_module import OPCUAReader
 
-module_id = "machine_monitoring"
+module_id = "opc_ua_reader"
 
 _default_state_sensor_int = get_uuid()
 _default_state_sensor_bool = get_uuid()
@@ -83,7 +83,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         await self.broker_connection.close()
 
     async def test_machine_monitoring_empty_config(self):
-        async with MachineMonitoring(broker_connection=self.broker_connection):
+        async with OPCUAReader(broker_connection=self.broker_connection):
             self.assertTrue(True)
 
     async def test_publish_machine_data_msg_polling(self):
@@ -95,7 +95,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         await self._execute_publish_machine_data_msg()
 
     async def _execute_publish_machine_data_msg(self):
-        os.environ[FASTIOT_MACHINE_MONITORING_CONFIG_NAME] = 'config_default_sensor'
+        os.environ[FASTIOT_OPC_UA_CONFIG_NAME] = 'config_default_sensor'
 
         msg_queue = asyncio.Queue()
 
@@ -103,7 +103,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
-        async with MachineMonitoring(broker_connection=self.broker_connection):
+        async with OPCUAReader(broker_connection=self.broker_connection):
             thing: Thing = await msg_queue.get()
             msg_queue.task_done()
             self.assertEqual('sim_machine', thing.machine)
@@ -119,14 +119,14 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         await self._execute_publish_multiple_machine_data_msg()
 
     async def _execute_publish_multiple_machine_data_msg(self):
-        os.environ[FASTIOT_MACHINE_MONITORING_CONFIG_NAME] = 'config_default_sensor'
+        os.environ[FASTIOT_OPC_UA_CONFIG_NAME] = 'config_default_sensor'
 
         msg_queue = asyncio.Queue()
         await self.broker_connection.subscribe_msg_queue(
             subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
-        async with MachineMonitoring(broker_connection=self.broker_connection):
+        async with OPCUAReader(broker_connection=self.broker_connection):
             thing: Thing = await asyncio.wait_for(msg_queue.get(), env_broker.default_timeout)
             msg_queue.task_done()
             self.assertEqual(20, thing.value)
@@ -145,7 +145,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         await self._execute_publish_machine_data_zero()
 
     async def _execute_publish_machine_data_zero(self):
-        os.environ[FASTIOT_MACHINE_MONITORING_CONFIG_NAME] = 'config_zero_var_sensor'
+        os.environ[FASTIOT_OPC_UA_CONFIG_NAME] = 'config_zero_var_sensor'
 
         msg_queue = asyncio.Queue()
 
@@ -153,7 +153,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             subject=Thing.get_subject(">"),
             msg_queue=msg_queue
         )
-        async with MachineMonitoring(broker_connection=self.broker_connection):
+        async with OPCUAReader(broker_connection=self.broker_connection):
             thing: Thing = await msg_queue.get()
             msg_queue.task_done()
             self.assertEqual(0, thing.value)
@@ -166,7 +166,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
             "/path/to/key/test_key.pem"
         os.environ[FASTIOT_OPCUA_SECURITY_STRING] = a_security_string
         with patch.object(Client, 'set_security_string', new_callable=Mock) as mock:
-            async with MachineMonitoring(broker_connection=self.broker_connection):
+            async with OPCUAReader(broker_connection=self.broker_connection):
                 pass
 
             self.assertEqual(1, mock.call_count)
@@ -177,7 +177,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
 
     async def test_no_security_string(self):
         with patch.object(Client, 'set_security_string', new_callable=Mock) as mock:
-            async with MachineMonitoring(broker_connection=self.broker_connection):
+            async with OPCUAReader(broker_connection=self.broker_connection):
                 pass
             self.assertEqual(0, mock.call_count)
 
@@ -188,7 +188,7 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         os.environ[FASTIOT_OPCUA_PASSWORD] = a_pw
         with patch.object(Client, 'set_user', new_callable=Mock) as user_mock:
             with patch.object(Client, 'set_password', new_callable=Mock) as pw_mock:
-                async with MachineMonitoring(broker_connection=self.broker_connection):
+                async with OPCUAReader(broker_connection=self.broker_connection):
                     pass
 
         self.assertEqual(1, user_mock.call_count)
@@ -205,33 +205,33 @@ class TestMachineMonitoring(unittest.IsolatedAsyncioTestCase):
         del os.environ[FASTIOT_OPCUA_PASSWORD]
 
     async def test_no_application_uri(self):
-        async with MachineMonitoring(broker_connection=self.broker_connection) as m:
+        async with OPCUAReader(broker_connection=self.broker_connection) as m:
             self.assertEqual('urn:freeopcua:client', m._opcua_client.application_uri)
 
     async def test_set_application_uri(self):
         an_application_uri = "sample"
         os.environ[FASTIOT_OPCUA_APPLICATION_URI] = an_application_uri
-        async with MachineMonitoring(broker_connection=self.broker_connection) as m:
+        async with OPCUAReader(broker_connection=self.broker_connection) as m:
             self.assertEqual(an_application_uri, m._opcua_client.application_uri)
         del os.environ[FASTIOT_OPCUA_APPLICATION_URI]
 
     async def test_log_opcua_error(self):
         with tempfile.TemporaryDirectory() as tempdir:
-            os.environ[FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE] = os.path.join(tempdir, "error.log")
+            os.environ[FASTIOT_OPC_UA_ERROR_LOGFILE] = os.path.join(tempdir, "error.log")
             os.environ[FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY] = '0.1'
             try:
-                async with MachineMonitoring(broker_connection=self.broker_connection):
+                async with OPCUAReader(broker_connection=self.broker_connection):
                     # Make sure machine monitoring deletes file during start
-                    self.assertFalse(os.path.isfile(env_opcua.machine_monitoring_error_logfile))
-                    while os.path.isfile(env_opcua.machine_monitoring_error_logfile) is False:
+                    self.assertFalse(os.path.isfile(env_opcua.opc_ua_reader_error_logfile))
+                    while os.path.isfile(env_opcua.opc_ua_reader_error_logfile) is False:
                         await asyncio.sleep(0.01)
 
-                with open(env_opcua.machine_monitoring_error_logfile) as f:
+                with open(env_opcua.opc_ua_reader_error_logfile) as f:
                     content = f.read()
                     pos = content.find('Receiving no data')
                     self.assertTrue(pos != -1)
             finally:
-                del os.environ[FASTIOT_MACHINE_MONITORING_ERROR_LOGFILE]
+                del os.environ[FASTIOT_OPC_UA_ERROR_LOGFILE]
                 del os.environ[FASTIOT_OPCUA_MAX_ALLOWED_DATA_DELAY]
 
 

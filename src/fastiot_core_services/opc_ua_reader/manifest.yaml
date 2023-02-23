@@ -1,5 +1,5 @@
 fastiot-service:
-  name: machine_monitoring
+  name: opc_ua_reader
 
   mount-config-dir: optional
 
