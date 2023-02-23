@@ -5,7 +5,7 @@ Service to read out OPC UA data
 For configuration please consult :class:`fastiot_core_services.opc_ua_reader.env.OPCUAEnv` and use a CSV-file.
 
 The main idea is to configure the opc-ua nodes via a csv-file and deploy this service to publish the data as
-FastIoT-Things on a nats broker.
+FastIoT-Things on a nats broker. See below example how to create your CSV-file.
 
 Features included:
  * Running multiple instances with different configurations
@@ -20,6 +20,19 @@ Known limitations:
  * No support of opc-ua functions
  * No support of opc-ua historic requests
  * Only nats-broker as data output supported
+
+
+Example CSV configuration
+-------------------------
+
+Example CSV, to be stored as :file:`opc_ua_reader_things.csv` in a directory defined with
+:envvar:`FASTIOT_OPC_UA_CONFIG_NAME` in the :file:`config_dir`.
+
+.. code-block:: csv
+
+   nodeid,thing_name,machine
+   ns=2;i=5,a_sensor,sim_machine
+
 """
 import logging
 
