@@ -45,6 +45,12 @@ services:
     {{ service.extras }}
 {% endfilter %}
 {% endif %}
+{% if service.devices|length > 0 %}
+    devices:
+{% for item in service.devices %}
+      - "{{ item }}"
+{% endfor %}
+{% endif %}
 {% if service.volumes|length > 0 %}
     volumes:
 {% for item in service.volumes %}
