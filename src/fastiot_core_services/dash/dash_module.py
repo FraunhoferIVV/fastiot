@@ -8,12 +8,14 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import dcc, html
 from flask import send_file
+from pymongo.errors import ServerSelectionTimeoutError
 
 from fastiot.core import FastIoTService, subscribe, Subject
 from fastiot.core.subject_helper import sanitize_pub_subject_name
 from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
+from fastiot.exceptions import ServiceError
 from fastiot.msg.thing import Thing
 from fastiot.util.read_yaml import read_config
 from fastiot_core_services.dash.env import env_dash
@@ -45,8 +47,13 @@ class DashModule(FastIoTService):
         self.initial_start_date = self.initial_date(self.config.get("initial_start_date"))
         self.initial_end_date = self.initial_date(self.config.get("initial_end_date"))
         self._setup_dash()
-        await self._setup_mongodb()
-        self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
+        try:
+            await self._setup_mongodb()
+            self.setup_historic_sensors(self.initial_start_date, self.initial_end_date)
+        except ServiceError as service_error:
+            self._logger.error(f'MongoDB Service is not available ! {service_error}')
+        except ServerSelectionTimeoutError as server_selection_timeout:
+            self._logger.error(f'MongoDB Server cannot be selected ! {server_selection_timeout}')
 
         await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_received_data)
 
@@ -224,16 +231,20 @@ class DashModule(FastIoTService):
                                                      sensor.get("service")
                                                      )
                     if "mongodb" in dashboard.get("db"):
-                        result = self._mongo_collection.find({
-                            "name": historic_sensor.name,
-                            "machine": historic_sensor.machine,
-                            'timestamp': {'$gte': start_time, '$lte': end_time}
-                        })
-                        r = list(result)
-                        self._logger.info(f'got {len(r)} results from mongodb')
-                        historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
-                        historic_sensor.historic_sensor_data.remove_until(start_time)
-                        historic_sensor.historic_sensor_data.remove_from(end_time)
+                        try:
+                            result = self._mongo_collection.find({
+                                "name": historic_sensor.name,
+                                "machine": historic_sensor.machine,
+                                'timestamp': {'$gte': start_time, '$lte': end_time}
+                            })
+                            r = list(result)
+                            self._logger.info(f'got {len(r)} results from mongodb')
+                            historic_sensor.historic_sensor_data = thing_series_from_mongodb_data_set(r)
+                            historic_sensor.historic_sensor_data.remove_until(start_time)
+                            historic_sensor.historic_sensor_data.remove_from(end_time)
+                        except AttributeError as e:
+                            self._logger.info(
+                                f'MongoDB Server cannot be connected, thus _mongo_collection is still None. {e}')
                     elif "influxdb" in dashboard.get("db"):
                         query_results = influx_query_wrapper(
                             influx_query,
