@@ -119,7 +119,7 @@ class MongoDB4Service(MongoDBService):
     (s. https://stackoverflow.com/questions/68419196 for more details)
     """
     name: str = 'mongodb4'
-    image: str = 'mongo:4'
+    image: str = 'mongo:4.4.18'
 
 
 class InfluxDBService(InfrastructureService):
