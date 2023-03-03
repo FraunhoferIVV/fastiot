@@ -7,7 +7,7 @@ from typing import Optional, List
 import typer
 
 from fastiot.cli.commands.stop import stop
-from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, FASTIOT_PULL_ALWAYS
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 
@@ -28,7 +28,11 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
           use_test_deployment: Optional[bool] = typer.Option(False,
                                                              help="Explicitly set the deployment_name to specified "
                                                                   "integration test deployment. Useful for the CI "
-                                                                  "runner")
+                                                                  "runner"),
+          pull_always: bool = typer.Option(False, '--pull-always',
+                                           help="If given, it will always use 'docker pull' command to pull images "
+                                                "from specified docker registries before starting the services. ",
+                                           envvar=FASTIOT_PULL_ALWAYS),
           ):
     """ Starts the selected environment.
     Be aware that the configuration needs to be built manually before using `fiot config`."""
@@ -51,6 +55,9 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
     cmd.append("up")
     if detach:
         cmd.append("-d")
+
+    if pull_always:
+        cmd += ['--pull', 'always']
 
     if service_names is not None:
         cmd += service_names
