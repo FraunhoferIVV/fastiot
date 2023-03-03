@@ -13,12 +13,13 @@ from typing import Optional
 import typer
 
 from fastiot import __version__
+from fastiot.cli.commands.build_lib import update_pyproject_toml
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, CONFIGURE_FILE_NAME, MANIFEST_FILENAME, \
     DEPLOYMENTS_CONFIG_FILE
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.model import DeploymentConfig
-from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.model.infrastructure_service import InfrastructureService
+from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import create_cmd
 
 
@@ -200,6 +201,8 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
         create_toml(path=pyproject_file,
                     short_description=description,
                     project_name=context.project_namespace)
+
+        update_pyproject_toml()
         logging.info("Successfully created pyproject.toml. Please see the file and make adjustments as needed.")
     else:
         logging.error("Not overwriting existing pyproject.toml. Use --force option to overwrite anyways.")

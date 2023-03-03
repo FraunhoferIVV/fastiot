@@ -75,7 +75,7 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         return
 
     if not noupdate:
-        _update_pyproject_toml()
+        update_pyproject_toml()
 
     command_args = {
         BuildLibStyles.wheel: '-w',
@@ -108,7 +108,7 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     logging.info("Successfully built library")
 
 
-def _update_pyproject_toml(build_system: Optional[Dict] = None):
+def update_pyproject_toml(build_system: Optional[Dict] = None):
     context = ProjectContext.default
     pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
     packages = [os.path.basename(p) for p in glob(os.path.join(context.project_root_dir, "src", "*"))]
@@ -145,17 +145,17 @@ def _build_lib_with_nuitka(env):
     build_system = {"requires": ["setuptools>=67", "setuptools_scm[toml]>=6.2", "wheel", "nuitka", "toml"],
                     "build-backend": "nuitka.distutils.Build"}
 
-    _update_pyproject_toml(build_system=build_system)
+    update_pyproject_toml(build_system=build_system)
 
     cmd = f"{sys.executable} -m build"
     exit_code = subprocess.call(cmd.split(), env=env, cwd=context.project_root_dir)
 
     if exit_code != 0:
         logging.error("Building library failed with exit code %s", str(exit_code))
-        _update_pyproject_toml()  # Change back to regular file without link to nuitka build system
+        update_pyproject_toml()  # Change back to regular file without link to nuitka build system
         raise typer.Exit(exit_code)
 
-    _update_pyproject_toml()  # Change back to regular file without link to nuitka build system
+    update_pyproject_toml()  # Change back to regular file without link to nuitka build system
 
 
 def read_requirements():
