@@ -302,6 +302,7 @@ class DashModule(FastIoTService):
                 name=sensor.get("name")
             )
             traces.append(trace1)
+        self.historic_sensor_list = []
         return traces
 
     async def _cb_received_data(self, subject: str, msg: Thing):
