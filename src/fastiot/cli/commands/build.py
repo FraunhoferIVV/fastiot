@@ -255,8 +255,8 @@ def _run_docker_bake_cmd(project_config, build_mode, push, no_cache):
 
     # We uninstall any registered qemu emulators first. Sometimes simply (re)-installing seems not to be enough and
     # will cause random segfaults especially when running apt within the ARM64-container
-    for cmd in ['docker run --privileged --rm tonistiigi/binfmt --uninstall "qemu-*"',
-                f"docker run --privileged --rm tonistiigi/binfmt --install {','.join(qemu_platforms)}",
+    for cmd in ['docker run --privileged --rm tonistiigi/binfmt:qemu-v6.2.0 --uninstall "qemu-*"',
+                f"docker run --privileged --rm tonistiigi/binfmt:qemu-v6.2.0 --install {','.join(qemu_platforms)}",
                 f"docker buildx create --name {BUILDER_NAME} --driver-opt image=moby/buildkit:master --use",
                 "docker buildx inspect --bootstrap"]:
         subprocess.call(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
