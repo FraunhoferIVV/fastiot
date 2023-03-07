@@ -10,7 +10,7 @@ requires = [
 
 [project]
 name = "fastiot"
-version = "0.2.192"
+version = "0.2.193"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -28,7 +28,6 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Framework :: FastIoT",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
