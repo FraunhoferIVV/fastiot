@@ -10,11 +10,33 @@ requires = [
 
 [project]
 name = "fastiot"
-version = "0.2.179"
+version = "0.2.192"
 authors = [
     { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
-    { email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
-    { email = "konstantin.merker@ivv-dd.fraunhofer.de" },
+    { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
+    { name = "Konstantin Merker" },
+]
+maintainers = [
+    { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
+    { name = "Jialiang Yin", email = "jialiang.yin@ivv-dd.fraunhofer.de" },
+]
+keywords = [
+    "Industrial IoT",
+    "IoT",
+    "Industry4.0",
+    "IIoT",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastIoT",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 description = "FastIoT Platform"
 readme = "README.md"
@@ -32,6 +54,10 @@ dependencies = [
     "build",
 ]
 
+[project.urls]
+Source = "https://github.com/FraunhoferIVV/fastiot"
+Documentation = "http://docs.dev.ivv-dd.fhg.de/fastiot/_latest/"
+
 [project.optional-dependencies]
 all = [
     "Nuitka>=1.1.7,<2",
@@ -46,13 +72,6 @@ all = [
     "opcua>=0.98.8,<1",
     "asyncua",
     "psycopg2-binary>=2.9.3,<3",
-    "dash~=2.6.1",
-    "plotly~=5.9.0",
-    "numpy",
-    "pandas",
-    "dash-bootstrap-components",
-    "xlsxwriter",
-    "nest_asyncio",
     "pydantic>=1.9.0,<2",
     "msgpack>=1,<2",
     "nats-py>=2.1.0,<3",
@@ -63,6 +82,14 @@ all = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
+    "dash~=2.6.1",
+    "plotly~=5.9.0",
+    "numpy",
+    "pandas",
+    "dash-bootstrap-components",
+    "xlsxwriter",
+    "nest_asyncio",
+    "pymongo>=4.1,<5",
 ]
 compile = [
     "Nuitka>=1.1.7,<2",
@@ -100,6 +127,7 @@ dash = [
     "dash-bootstrap-components",
     "xlsxwriter",
     "nest_asyncio",
+    "pymongo>=4.1,<5",
 ]
 
 [project.scripts]
