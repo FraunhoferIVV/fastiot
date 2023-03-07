@@ -127,7 +127,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 user=getpass.getuser()
             ))
     # create toml
-    create_toml(path=os.path.join(context.project_root_dir,"pyproject.toml"),
+    create_toml(path=os.path.join(context.project_root_dir, "pyproject.toml"),
                 short_description=description,
                 project_name=project_name)
 

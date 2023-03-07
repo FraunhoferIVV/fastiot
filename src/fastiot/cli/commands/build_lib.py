@@ -16,6 +16,7 @@ from fastiot import get_version
 from fastiot.cli.model import CompileSettingsEnum
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import DEFAULT_CONTEXT_SETTINGS, extras_cmd
+from fastiot.cli.version import create_version_file
 
 libraries = []
 
@@ -64,6 +65,8 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
 
     env = os.environ.copy()
     env['MAKEFLAGS'] = f"-j{len(os.sched_getaffinity(0))}"
+
+    create_version_file(os.path.join(context.library_package, '__version__.py'))
 
     pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
     if not os.path.isfile(pyproject_toml):
