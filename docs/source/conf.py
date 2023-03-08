@@ -119,8 +119,12 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'sphinx_material'
+##
+if not os.getenv('FASTIOT_DOCSTYLE_READTHEDOCS'):
+    html_theme = 'sphinx_material'
+else:
+    html_theme = 'sphinx_rtd_theme'
+
 html_theme_options = {'color_primary': 'teal', 'color_accent': 'orange'}
 show_related = True
 
