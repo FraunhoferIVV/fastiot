@@ -12,9 +12,9 @@ requires = [
 name = "fastiot"
 version = "0.2.193"
 authors = [
-    { name = "Fraunhofer Institute for Process Engineering and Packaging IVV" },
     { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
-    { name = "Konstantin Merker" },
+    { name = "Konstantin Merker", email = "konstantin.merker@ivv-dd.fraunhofer.de" }
+    { name = "Fraunhofer Institute for Process Engineering and Packaging IVV", "info@ivv-dd.fraunhofer.de"}
 ]
 maintainers = [
     { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
@@ -39,7 +39,7 @@ classifiers = [
 ]
 description = "FastIoT Platform"
 readme = "README.md"
-requires-python = "~=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "pydantic>=1.9.0,<2",
     "msgpack>=1,<2",
@@ -54,8 +54,9 @@ dependencies = [
 ]
 
 [project.urls]
+Homepage = "https://github.com/FraunhoferIVV/fastiot"
 Source = "https://github.com/FraunhoferIVV/fastiot"
-Documentation = "http://docs.dev.ivv-dd.fhg.de/fastiot/_latest/"
+Documentation = "https://fastiot.readthedocs.io"
 
 [project.optional-dependencies]
 all = [

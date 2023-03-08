@@ -11,10 +11,12 @@ and Ansible playbooks to bring the software to the systems they belong. Run `fio
 
 As for now the overall framework has only been used and tested on Linux systems.
 
-A full documentation is available at http://docs.dev.ivv-dd.fhg.de/fastiot/_latest/
+A full documentation is available at https://fastiot.readthedocs.io 
+(or at http://docs.dev.ivv-dd.fhg.de/fastiot/_latest/ within the Fraunhofer IVV)
 
 If you use this framework in your scientific projects please cite: 
-> Konstantin Merker, Tilman Klaeger, Lukas Oehm. "A Holistic Approach for Rapid Development of IIoT Systems"“", 2022. https://doi.org/10.48550/arXiv.2201.13243.
+> Tilman Klaeger, Konstantin Merker, "FastIoT – A Holistic Approach for Rapid Development of IIoT Systems", 2022.
+> https://doi.org/10.48550/arXiv.2201.13243.
 
 ## License
 
