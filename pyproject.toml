@@ -10,12 +10,7 @@ requires = [
 
 [project]
 name = "fastiot"
-version = "0.2.193"
-authors = [
-    { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
-    { name = "Konstantin Merker", email = "konstantin.merker@ivv-dd.fraunhofer.de" }
-    { name = "Fraunhofer Institute for Process Engineering and Packaging IVV", "info@ivv-dd.fraunhofer.de"}
-]
+version = "0.2.197"
 maintainers = [
     { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
     { name = "Jialiang Yin", email = "jialiang.yin@ivv-dd.fraunhofer.de" },
@@ -52,6 +47,18 @@ dependencies = [
     "tomli_w",
     "build",
 ]
+
+[[project.authors]]
+name = "Tilman Klaeger"
+email = "tilman.klaeger@ivv-dd.fraunhofer.de"
+
+[[project.authors]]
+name = "Konstantin Merker"
+email = "konstantin.merker@ivv-dd.fraunhofer.de"
+
+[[project.authors]]
+name = "Fraunhofer Institute for Process Engineering and Packaging IVV"
+email = "info@ivv-dd.fraunhofer.de"
 
 [project.urls]
 Homepage = "https://github.com/FraunhoferIVV/fastiot"
