@@ -28,7 +28,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                              help="The deployment configs to generate. "
                                                                   "Default: all configs"),
            tag: str = typer.Option('latest', '-t', '--tag',
-                                   help="Specify a default tag for the deployment(s).",
+                                   help="Specify a default tag for the deployment(s). Applies to all images not "
+                                        "further defined with image etc.",
                                    envvar=FASTIOT_DEFAULT_TAG),
            docker_registry: str = typer.Option('', '-r', '--docker-registry',
                                                help="Specify a default docker registry for the deployment(s)",
