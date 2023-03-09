@@ -202,9 +202,11 @@ def _create_services_compose_infos(env: Dict[str, str],
     result = []
     for name, service_config in deployment_config.services.items():
         if service_config is None:
-            service_config = ServiceConfig(image=f"{context.project_namespace}/{name}")
+            # This can only be the case for internal services as external ones need to define the image
+            # We set the tag here for internal services.
+            service_config = ServiceConfig(image=f"{context.project_namespace}/{name}", tag=tag)
 
-        full_image_name = _get_full_image_name(deployment_config, docker_registry, service_config, tag)
+        full_image_name = _get_full_image_name(deployment_config, docker_registry, service_config)
         manifest = _get_service_manifest(name, image_name=full_image_name, pull_always=pull_always)
 
         service_env = {**service_config.environment}
@@ -226,8 +228,7 @@ def _create_services_compose_infos(env: Dict[str, str],
 
 def _get_full_image_name(deployment_config: DeploymentConfig,
                          docker_registry: str,
-                         service_config: ServiceConfig,
-                         tag: str):
+                         service_config: ServiceConfig):
     if service_config.docker_registry:
         temp_docker_registry = service_config.docker_registry
     elif deployment_config.docker_registry:
@@ -239,7 +240,7 @@ def _get_full_image_name(deployment_config: DeploymentConfig,
     elif deployment_config.tag:
         temp_tag = deployment_config.tag
     else:
-        temp_tag = tag
+        temp_tag = ""
 
     full_image_name = service_config.image
     if temp_docker_registry:
