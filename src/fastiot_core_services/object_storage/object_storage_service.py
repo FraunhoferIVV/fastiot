@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import List, Dict
 
@@ -21,7 +22,9 @@ class ObjectStorageService(FastIoTService):
         database = self._mongodb_handler.get_database(env_mongodb.name)
         service_config = read_config(self)
         if not service_config:
-            self._logger.warning('Please set the config as the same as in Documentation, to get over Errors.')
+            self._logger.error('Please set the config as shown in the documentation! Aborting service!')
+            time.sleep(10)
+            raise RuntimeError
 
         self._mongo_object_db_col = database.get_collection(service_config['collection'])
         mongo_indices = service_config['search_index']
@@ -29,12 +32,21 @@ class ObjectStorageService(FastIoTService):
             self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
                                                index=[(index_name, pymongo.ASCENDING)],
                                                index_name=f"{index_name}_ascending")
-        self.subject = Subject(name=sanitize_pub_subject_name(service_config['subject_name']), msg_cls=dict)
-        self.reply_subject = HistObjectReq.get_reply_subject(name=filter_specific_sign(service_config['subject_name']))
+
 
     async def _start(self):
-        await self.broker_connection.subscribe(subject=self.subject, cb=self._cb_receive_data)
-        await self.broker_connection.subscribe_reply_cb(subject=self.reply_subject, cb=self._cb_reply_hist_object)
+        service_config = read_config(self)
+
+        subject = Subject(name=sanitize_pub_subject_name(service_config['subject_name']), msg_cls=dict)
+        await self.broker_connection.subscribe(subject=subject, cb=self._cb_receive_data)
+
+        if not service_config.get('reply_subject_name'):
+            self._logger.warning("Please set `reply_subject_name` in your configuration.\n"
+                                 "Using `subject_name` for receiving and sending is deprecating.")
+            service_config['reply_subject_name'] = service_config['subject_name']
+
+        reply_subject = HistObjectReq.get_reply_subject(name=filter_specific_sign(service_config['subject_name']))
+        await self.broker_connection.subscribe_reply_cb(subject=reply_subject, cb=self._cb_reply_hist_object)
 
     async def _cb_receive_data(self, subject_name: str, msg: dict):
         self._logger.debug("Received message %s", str(msg))

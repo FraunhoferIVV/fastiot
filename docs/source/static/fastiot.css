@@ -9,3 +9,7 @@
 span.sig-name.descname > span {
   font-weight: bold;
 }
+
+span.versionmodified.changed {
+  font-weight: bold;
+}
