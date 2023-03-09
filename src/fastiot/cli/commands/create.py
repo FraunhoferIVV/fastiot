@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import string
+import subprocess
 import sys
 from typing import Optional
 
@@ -30,7 +31,6 @@ def _create_random_password(length: int = 16) -> str:
 
 
 def create_toml(path: str, project_name: str, short_description: str = ""):
-
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
     with open(path, "w") as template_file:
@@ -197,15 +197,22 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
     context = ProjectContext.default
     pyproject_file = os.path.join(context.project_root_dir, "pyproject.toml")
 
-    if not os.path.isfile(pyproject_file) or force:
-        create_toml(path=pyproject_file,
-                    short_description=description,
-                    project_name=context.project_namespace)
-
-        update_pyproject_toml()
-        logging.info("Successfully created pyproject.toml. Please see the file and make adjustments as needed.")
-    else:
+    if os.path.isfile(pyproject_file) and not force:
         logging.error("Not overwriting existing pyproject.toml. Use --force option to overwrite anyways.")
+        raise typer.Exit(1)
+
+    create_toml(path=pyproject_file,
+                short_description=description,
+                project_name=context.project_namespace)
+
+    update_pyproject_toml()
+
+    if os.path.isdir(os.path.join(context.project_root_dir, '.git')):  # Add file to git now
+        cmd = "git add pyproject.toml"
+        subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+    logging.info("Successfully created pyproject.toml. Please see the file and make adjustments as needed.")
 
 
 def _sanitize_service_name(service_name):
