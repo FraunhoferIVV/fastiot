@@ -1,8 +1,10 @@
 import logging
 import os
 import shutil
+import subprocess
 from typing import Optional, List, Dict
 
+import tomli
 import typer
 import yaml
 
@@ -39,8 +41,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                    envvar=FASTIOT_NET),
            pull_always: bool = typer.Option(False, '--pull-always',
                                             help="If given, it will always use 'docker pull' command to pull images "
-                                                 "from specified docker registries before reading manifest.yaml "
-                                                 "files.",
+                                                 "from specified docker registries before reading manifest.yaml files.",
                                             envvar=FASTIOT_PULL_ALWAYS),
            use_test_deployment: bool = typer.Option(False,
                                                     help="Create only the configuration for the integration "
@@ -59,7 +60,13 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                 help="If this is set to True (default), it will try to import port "
                                                      "mounts from .env-file from build and use them if possible. Port "
                                                      "offset is ignored for imported ports.",
-                                                envvar=FASTIOT_USE_PORT_IMPORT)):
+                                                envvar=FASTIOT_USE_PORT_IMPORT),
+           create_requirements: bool = typer.Option(True,
+                                                    help="This will automatically create fixed requirements for "
+                                                         "reproducible builds."),
+           update_requirements: bool = typer.Option(False,
+                                                    help="Update all requirements files to latest versions matching "
+                                                         "the dependencies listed in your `pyproject.toml`.")):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
@@ -175,6 +182,10 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 for key, value in env_additions.items():
                     env_file.write(f"\n{key}={value}")
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
+
+
+    if create_requirements:
+        _create_requirements(upgrade=update_requirements)
 
     logging.info("Successfully created configurations!")
 
@@ -395,3 +406,43 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             extras=service_extensions
         ))
     return result
+
+def _create_requirements(upgrade: bool = False):
+
+    logging.info("Starting to create fixed requirements.txt files based on pyproject.toml …")
+    context = ProjectContext.default
+
+    pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
+    if not os.path.isfile(pyproject_toml):
+        logging.warning("Can not automatically create fixed requirements without `pyproject.toml`")
+        logging.warning("Use `fiot create pyproject-toml` to create one!")
+        return
+
+    upgrade = "--upgrade" if upgrade else ""
+
+    # Base
+    logging.info("    Building base requirements")
+    target_file  = os.path.join(context.project_root_dir, 'requirements.txt')
+    cmd = f"pip-compile --resolver=backtracking -o {target_file} {upgrade}"
+    subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+    with open(pyproject_toml, "rb") as toml_file:
+        toml_dict = tomli.load(toml_file)
+
+    if 'optional-dependencies' in toml_dict['project']:
+
+        for extra_dep in toml_dict['project']['optional-dependencies'].keys():
+            logging.info("    Building '%s'", extra_dep)
+            target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
+            cmd = f"pip-compile --resolver=backtracking -o {target_file} --extra={extra_dep} {upgrade}"
+            subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+        logging.info("    Building 'All requirements'")
+        target_file = os.path.join(context.project_root_dir, 'requirements', "requirements.all.txt")
+        cmd = f"pip-compile --resolver=backtracking -o {target_file} --all-extras {upgrade}"
+        subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+    logging.info("Don’t forget to add the changed requirements to git!")

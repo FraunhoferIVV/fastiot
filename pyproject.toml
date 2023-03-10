@@ -46,6 +46,7 @@ dependencies = [
     "tomli~=2.0.1",
     "tomli_w",
     "build",
+    "pip-tools"
 ]
 
 [[project.authors]]
