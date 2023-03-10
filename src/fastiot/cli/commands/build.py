@@ -136,6 +136,14 @@ def _create_docker_file(service: Service, context: ProjectContext):
         copyfile(service_own_dockerfile, docker_filename)
 
     else:
+        if os.path.isfile(os.path.join(context.project_root_dir, 'requirements.txt')):
+            base_requirements_file = 'requirements.txt'
+        else:
+            logging.warning("It seems like you do not have a `requirements.txt` in your project root. Trying to "
+                            "use the one in requirements directory.")
+            logging.warning("Think about migrating to the new style by running `fiot create pyproject-toml`.")
+            base_requirements_file = f'requirements{os.sep}requirements.txt'
+
         with open(docker_filename, "w") as dockerfile:
             manifest = service.read_manifest()
             template = DockerTemplate.get(manifest.template)
@@ -143,6 +151,7 @@ def _create_docker_file(service: Service, context: ProjectContext):
             dockerfile.write(dockerfile_template.render(service=service,
                                                         manifest=manifest,
                                                         context=context,
+                                                        base_requirements_file=base_requirements_file,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
                                                         maintainer=_get_maintainer()
