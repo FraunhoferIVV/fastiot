@@ -33,6 +33,9 @@ def _create_random_password(length: int = 16) -> str:
 def create_toml(path: str, project_name: str, short_description: str = ""):
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
+    fastiot_next_major_version = int(__version__.split(".", maxsplit=1)[0])
+    fastiot_dependency = f"fastiot>{__version__},>{fastiot_next_major_version}"
+
     with open(path, "w") as template_file:
         template = get_jinja_env().get_template("pyproject.toml.j2")
         template_file.write(template.render(
@@ -40,6 +43,7 @@ def create_toml(path: str, project_name: str, short_description: str = ""):
             authors=getpass.getuser(),
             description=short_description,
             python_version=python_version,
+            fastiot_dependency=fastiot_dependency
         ))
 
 
@@ -81,8 +85,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
     # Create necessary directories
     if not os.path.exists(context.project_root_dir):
         os.makedirs(context.project_root_dir)
-    for directory in ['requirements',
-                      os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
+    for directory in [os.path.join(DEPLOYMENTS_CONFIG_DIR, "integration_test"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "production"),
                       os.path.join(DEPLOYMENTS_CONFIG_DIR, "full"),
                       os.path.join("src", f"{project_name}"),
@@ -108,8 +111,7 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                                                            'production', DEPLOYMENTS_CONFIG_FILE)),
                        ('deployment.yaml.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', DEPLOYMENTS_CONFIG_FILE)),
                        ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'production', '.env')),
-                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', '.env')),
-                       ('requirements.txt.j2', os.path.join('requirements', 'requirements.txt'))]:
+                       ('.env.production.j2', os.path.join(DEPLOYMENTS_CONFIG_DIR, 'full', '.env'))]:
 
         # For each potential service create a unique password for the production deployment.
         password_fields = []
@@ -121,8 +123,6 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
             template = get_jinja_env().get_template(os.path.join('new_project', temp))
             template_file.write(template.render(
                 project_namespace=project_name,
-                version=__version__,
-                major_version=int(__version__.split(".", maxsplit=1)[0]),
                 env_vars=env_vars,
                 user=getpass.getuser()
             ))
@@ -205,14 +205,24 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
                 short_description=description,
                 project_name=context.project_namespace)
 
-    update_pyproject_toml()
+    update_pyproject_toml(update_requirements=True)
+
+    os.rename(os.path.join(context.project_root_dir, "requirements", "requirements.txt"),
+              os.path.join(context.project_root_dir, "requirements", "requirements.txt.bak"))
+    try:
+        os.rename(os.path.join(context.project_root_dir, "setup.py"),
+                  os.path.join(context.project_root_dir, "setup.py.bak"))
+    except FileNotFoundError:
+        pass
+
 
     if os.path.isdir(os.path.join(context.project_root_dir, '.git')):  # Add file to git now
-        cmd = "git add pyproject.toml"
+        cmd = f"git add pyproject.toml"
         subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
                         stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
-    logging.info("Successfully created pyproject.toml. Please see the file and make adjustments as needed.")
+    logging.info("Successfully created pyproject.toml. Please check the file and make adjustments as needed.")
+    logging.info("It is recommended to fixate your requirements now by running `fiot config`.")
 
 
 def _sanitize_service_name(service_name):

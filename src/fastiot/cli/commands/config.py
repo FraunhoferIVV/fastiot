@@ -10,7 +10,8 @@ import yaml
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
-    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
+    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT, \
+    FASTIOT_CREATE_REQUIREMENTS
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
     get_infrastructure_service_ports_randomly
@@ -63,7 +64,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                 envvar=FASTIOT_USE_PORT_IMPORT),
            create_requirements: bool = typer.Option(True,
                                                     help="This will automatically create fixed requirements for "
-                                                         "reproducible builds."),
+                                                         "reproducible builds. Should be set to false in CI-Runner.",
+                                                    envvar=FASTIOT_CREATE_REQUIREMENTS),
            update_requirements: bool = typer.Option(False,
                                                     help="Update all requirements files to latest versions matching "
                                                          "the dependencies listed in your `pyproject.toml`.")):
@@ -182,7 +184,6 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 for key, value in env_additions.items():
                     env_file.write(f"\n{key}={value}")
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
-
 
     if create_requirements:
         _create_requirements(upgrade=update_requirements)
@@ -407,9 +408,9 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
         ))
     return result
 
-def _create_requirements(upgrade: bool = False):
 
-    logging.info("Starting to create fixed requirements.txt files based on pyproject.toml …")
+def _create_requirements(upgrade: bool = False):
+    logging.info("Starting to create fixed requirements.txt files based on pyproject.toml…")
     context = ProjectContext.default
 
     pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
@@ -422,27 +423,30 @@ def _create_requirements(upgrade: bool = False):
 
     # Base
     logging.info("    Building base requirements")
-    target_file  = os.path.join(context.project_root_dir, 'requirements.txt')
-    cmd = f"pip-compile --resolver=backtracking -o {target_file} {upgrade}"
-    subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    target_file = os.path.join(context.project_root_dir, 'requirements.txt')
+    cmd = f"pip-compile --resolver=backtracking --output-file={target_file} {upgrade}"
+    _run_pip_compile(cmd, 'base')
 
     with open(pyproject_toml, "rb") as toml_file:
         toml_dict = tomli.load(toml_file)
 
     if 'optional-dependencies' in toml_dict['project']:
-
+        os.makedirs(os.path.join(context.project_root_dir, 'requirements'), exist_ok=True)
         for extra_dep in toml_dict['project']['optional-dependencies'].keys():
             logging.info("    Building '%s'", extra_dep)
             target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
             cmd = f"pip-compile --resolver=backtracking -o {target_file} --extra={extra_dep} {upgrade}"
-            subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-
-        logging.info("    Building 'All requirements'")
-        target_file = os.path.join(context.project_root_dir, 'requirements', "requirements.all.txt")
-        cmd = f"pip-compile --resolver=backtracking -o {target_file} --all-extras {upgrade}"
-        subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
-                        stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            _run_pip_compile(cmd, extra_dep)
 
     logging.info("Don’t forget to add the changed requirements to git!")
+
+
+def _run_pip_compile(cmd, name: str = ""):
+    process = subprocess.Popen(cmd.split(), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stderr, stdout = process.communicate()
+    # Popen seems to be more stable than subprocess.call
+    if process.returncode != 0:
+        logging.warning("Building requirements for %s failed with return code %d. Command used was `%s`",
+                        name, process.returncode, cmd)
+        logging.warning("The message was `%s`", stderr.decode().strip())
+        logging.info("Leaving file untouched.")

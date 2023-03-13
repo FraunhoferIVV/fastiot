@@ -111,18 +111,28 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
     logging.info("Successfully built library")
 
 
-def update_pyproject_toml(build_system: Optional[Dict] = None):
+def update_pyproject_toml(build_system: Optional[Dict] = None, update_requirements: Optional[bool] = False):
+    """
+    :param build_system: Add a dictionary to be inserted into the buildsytem-part of the :file:`pyproject.toml`
+    :param update_requirements: Use with care! This is basically for the old style, where requirements were managed
+                                in :file:`requirements/requirements.txt` and not in `pyproject.toml`.
+                                This should be needed only once, when migrating.
+    :return:
+    :rtype:
+    """
     context = ProjectContext.default
     pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
     packages = [os.path.basename(p) for p in glob(os.path.join(context.project_root_dir, "src", "*"))]
     exclude_from_package = [p + "*" for p in packages if p != context.library_package]
-    install_requires, extras_require = read_requirements()
 
     with open(pyproject_toml, "rb") as toml_file:
         toml_dict = tomli.load(toml_file)
 
-    toml_dict["project"]["dependencies"] = install_requires
-    toml_dict["project"]["optional-dependencies"] = extras_require
+    if update_requirements:
+        install_requires, extras_require = read_oldstyle_requirements()
+        toml_dict["project"]["dependencies"] = install_requires
+        toml_dict["project"]["optional-dependencies"] = extras_require
+
     if get_version(complete=True) != "git-unspecified":
         toml_dict["project"]["version"] = get_version(complete=True)
 
@@ -137,8 +147,7 @@ def update_pyproject_toml(build_system: Optional[Dict] = None):
 
     with open(pyproject_toml, "wb") as toml_file:
         toml_file.write("# ATTENTION: Parts of this file are managed automatically!\n"
-                        "# This refers to build-system, project.dependencies, project.optional-dependencies, "
-                        "project.version, tool and nuitka.\n\n".encode())
+                        "# This refers to build-system, project.version, tool and nuitka.\n\n".encode())
         tomli_w.dump(toml_dict, toml_file)
 
 
@@ -161,13 +170,13 @@ def _build_lib_with_nuitka(env):
     update_pyproject_toml()  # Change back to regular file without link to nuitka build system
 
 
-def read_requirements():
+def read_oldstyle_requirements():
     requirement_files = glob("requirements*.txt",
                              root_dir=os.path.join(ProjectContext.default.project_root_dir, 'requirements'))
     requirement_files_abs = [os.path.join(ProjectContext.default.project_root_dir, 'requirements', f) for f in
                              requirement_files]
     install_requires = []
-    extras_require = {'all': []}
+    extras_require = {}
     for req_name, req_name_abs in zip(requirement_files, requirement_files_abs):
         req_list = []
         with open(req_name_abs) as f:
@@ -180,7 +189,6 @@ def read_requirements():
         else:
             middle_name = req_name.removeprefix('requirements.').removesuffix('.txt')
             extras_require[middle_name] = req_list
-        extras_require['all'].extend(req_list)
     if not install_requires:
         raise RuntimeError("Could not find a requirements.txt")
     return install_requires, extras_require
