@@ -419,13 +419,9 @@ def _create_requirements(upgrade: bool = False):
         logging.warning("Use `fiot create pyproject-toml` to create one!")
         return
 
-    upgrade = "--upgrade" if upgrade else ""
-
     # Base
-    logging.info("    Building base requirements")
-    target_file = os.path.join(context.project_root_dir, 'requirements.txt')
-    cmd = f"pip-compile --resolver=backtracking --output-file={target_file} {upgrade}"
-    _run_pip_compile(cmd, 'base')
+    _run_pip_compile(file=os.path.join(context.project_root_dir, 'requirements.txt'),
+                     upgrade=upgrade, name='base')
 
     with open(pyproject_toml, "rb") as toml_file:
         toml_dict = tomli.load(toml_file)
@@ -433,20 +429,43 @@ def _create_requirements(upgrade: bool = False):
     if 'optional-dependencies' in toml_dict['project']:
         os.makedirs(os.path.join(context.project_root_dir, 'requirements'), exist_ok=True)
         for extra_dep in toml_dict['project']['optional-dependencies'].keys():
-            logging.info("    Building '%s'", extra_dep)
             target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
-            cmd = f"pip-compile --resolver=backtracking -o {target_file} --extra={extra_dep} {upgrade}"
-            _run_pip_compile(cmd, extra_dep)
+            _run_pip_compile(file=target_file, cmd_extras=f"--extra={extra_dep}", upgrade=upgrade, name=extra_dep)
+
+        target_file = os.path.join(context.project_root_dir, 'requirements', "requirements.all.txt")
+        _run_pip_compile(file=target_file, cmd_extras="--all-extras", upgrade=upgrade, name="all")
 
     logging.info("Don’t forget to add the changed requirements to git!")
 
 
-def _run_pip_compile(cmd, name: str = ""):
-    process = subprocess.Popen(cmd.split(), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stderr, stdout = process.communicate()
+def _run_pip_compile(file: str, cmd_extras: str = "", upgrade: bool = False, name: str = ""):
+    logging.info("    Building %s requirements", name)
+
+    cmd = f"pip-compile --annotation-style=line --resolver=backtracking --output-file={file} "
+    if upgrade:
+        cmd += "--upgrade "
+    if cmd_extras:
+        cmd += cmd_extras
+
     # Popen seems to be more stable than subprocess.call
+    process = subprocess.Popen(cmd.split(), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    stderr, stdout = process.communicate()
     if process.returncode != 0:
         logging.warning("Building requirements for %s failed with return code %d. Command used was `%s`",
                         name, process.returncode, cmd)
         logging.warning("The message was `%s`", stderr.decode().strip())
         logging.info("Leaving file untouched.")
+
+    # Do some cleanup on the generated requirements file to avoid information leakage
+    with open(file, 'r') as fp:
+        text = fp.readlines()
+
+    with open(file, "w") as fp:
+        for line in text:
+            if "pip-compile --" in line or "pip-compile -" in line:
+                fp.write("#    fiot config" + " --update-requirements\n" if upgrade else "\n")
+            elif "extra-index-url" in line or "trusted-host" in line:
+                continue
+            else:
+                fp.write(line)
