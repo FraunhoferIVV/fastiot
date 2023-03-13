@@ -25,10 +25,12 @@ msgpack==1.0.5
     # via fastiot (pyproject.toml)
 nats-py==2.2.0
     # via fastiot (pyproject.toml)
-nuitka==1.4.8
+nuitka==1.5
     # via fastiot (pyproject.toml)
 ordered-set==4.1.0
-    # via fastiot (pyproject.toml)
+    # via
+    #   fastiot (pyproject.toml)
+    #   nuitka
 packaging==23.0
     # via build
 pip-tools==6.12.3
@@ -54,6 +56,8 @@ typing-extensions==4.5.0
     # via pydantic
 wheel==0.38.4
     # via pip-tools
+zstandard==0.20.0
+    # via nuitka
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

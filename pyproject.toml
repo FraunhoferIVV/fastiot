@@ -115,7 +115,7 @@ docs = [
     "autodoc_pydantic",
     "sphinx-material",
     "sphinx_click",
-    "sphinx-rtd-theme"
+    "sphinx-rtd-theme",
 ]
 
 [project.scripts]

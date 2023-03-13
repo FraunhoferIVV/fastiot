@@ -103,7 +103,7 @@ werkzeug==2.2.3
     # via flask
 wheel==0.38.4
     # via pip-tools
-xlsxwriter==3.0.8
+xlsxwriter==3.0.9
     # via fastiot (pyproject.toml)
 
 # The following packages are considered to be unsafe in a requirements file:
