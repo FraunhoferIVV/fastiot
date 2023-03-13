@@ -17,7 +17,7 @@ ENV PIP_ROOT_USER_ACTION=ignore
 
 # Install requirements
 COPY install.sh ./
-COPY requirements/requirements.txt ./requirements/
+COPY {{ base_requirements_file }} ./requirements/
 RUN FASTIOT_EXTRA_PYPI={{extra_pypi}} /bin/bash -e install.sh
 
 {% if manifest.healthcheck.cmd != '' %}

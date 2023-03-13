@@ -11,6 +11,7 @@ from shutil import copyfile
 import typer
 from pydantic import BaseModel
 
+from fastiot.cli.commands.config import _create_requirements
 from fastiot.cli.constants import BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, \
     MANIFEST_FILENAME, DOCKER_BUILD_DIR
 from fastiot.cli.env import env_cli
@@ -136,6 +137,22 @@ def _create_docker_file(service: Service, context: ProjectContext):
         copyfile(service_own_dockerfile, docker_filename)
 
     else:
+        if os.path.isfile(os.path.join(context.project_root_dir, 'requirements.txt')):
+            base_requirements_file = 'requirements.txt'
+        elif os.path.isfile(os.path.join(context.project_root_dir, 'requirements', 'requirements.txt')):
+            logging.warning("It seems like you do not have a `requirements.txt` in your project root. Trying to "
+                            "use the one in requirements directory.")
+            logging.warning("Think about migrating to the new style by running `fiot create pyproject-toml`.")
+            base_requirements_file = os.path.join(context.project_root_dir, 'requirements', 'requirements.txt')
+        else:
+            logging.warning("It seems like you do not have a `requirements.txt` in your project root but migrated "
+                            "to the new pyproject.toml. ")
+            logging.warning("Please run `fiot config` to create proper requirements files!")
+            logging.warning("Will now try to run the command automatically. This may not properly fixate your"
+                            " versions!")
+            _create_requirements()
+            base_requirements_file = f'requirements.txt'
+
         with open(docker_filename, "w") as dockerfile:
             manifest = service.read_manifest()
             template = DockerTemplate.get(manifest.template)
@@ -143,6 +160,7 @@ def _create_docker_file(service: Service, context: ProjectContext):
             dockerfile.write(dockerfile_template.render(service=service,
                                                         manifest=manifest,
                                                         context=context,
+                                                        base_requirements_file=base_requirements_file,
                                                         extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
                                                                                   "www.piwheels.org/simple/"),
                                                         maintainer=_get_maintainer()

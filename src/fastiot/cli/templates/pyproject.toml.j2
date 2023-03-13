@@ -1,5 +1,5 @@
 # ATTENTION: Parts of this file are managed automatically!
-# This refers to build-system, project.dependencies, project.optional-dependencies, project.version, tool and nuitka.
+# This refers to build-system, project.version, tool and nuitka.
 
 
 [build-system]
@@ -16,7 +16,7 @@ authors = [{name = "{{authors}}" },]
 description = "{{description}}"
 readme = "README.md"
 requires-python = "~={{python_version}}"
-dependencies = []            # will be changed automatically
+dependencies = ["{{fastiot_dependency}}"]
 
 # will be changed automatically
 [project.optional-dependencies]

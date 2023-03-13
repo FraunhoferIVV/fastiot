@@ -13,3 +13,8 @@ span.sig-name.descname > span {
 span.versionmodified.changed {
   font-weight: bold;
 }
+
+span.caption-text {
+  font-style: italic;
+
+}
