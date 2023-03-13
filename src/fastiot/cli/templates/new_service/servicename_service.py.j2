@@ -33,16 +33,18 @@ class {{ service_name_class}}Service(FastIoTService):
                 timestamp=get_time_now()
             )
         )
-        logging.info("Published %d on sensor %s", value, subject.name)
+        self._logger.info("Published %d on sensor %s", value, subject.name)
         return asyncio.sleep(2)
 
     @subscribe(subject=Thing.get_subject('*'))
     async def consume(self, topic: str, msg: Thing):
         """ Subscribing to `Thing.*` messages """
-        logging.info("%s: %s", topic, str(msg))
+        self._logger.info("%s: %s", topic, str(msg))
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    # Change this to reduce verbosity or remove completely to use `FASTIOT_LOG_LEVEL` environment variable to configure
+    # logging.
+    logging.basicConfig(level=logging.DEBUG)
     {{ service_name_class}}Service.main()
 
