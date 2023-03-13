@@ -1,3 +1,6 @@
+.. _tut-manifest:
+
+
 ################################
 Service Manifest - manifest.yaml
 ################################

@@ -200,6 +200,8 @@ class ServiceManifest(BaseModel):
     If a specific service needs more packages installed than the others, you may add these here. It will look in the
     requirements directory for the specified additional requirements and copy them inside the container. The 
     :file:`install.sh` must be handle to install these.
+    
+    Please have a look at :ref:`tut-dependencies` for more information about dependency management in FastIoT.
     """
     compile: bool = True
     """
