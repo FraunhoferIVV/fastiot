@@ -55,7 +55,7 @@ If you want to use Ansible for deploying your services you also need to Ansible 
 
 It is always recommended to use a separate virtual environment for each project, so let’s create one: `python3 -m venv venv` and use it: `source venv/bin/activate`
 
-Afterwards you can install FastIoT: `python3 -m pip install https+git://github.com/FraunhoferIVV/fastiot.git`
+Afterwards you can install FastIoT: `python3 -m pip install fastiot`
 
 To setup a new project with the name `my_first_project` you can now run: `fiot create new-project my_first_project`
 

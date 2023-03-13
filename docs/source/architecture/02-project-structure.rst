@@ -20,15 +20,13 @@ For a new project this should usually be handled using the CLI (s. :ref:`first_p
 
 ``│       └── […]``
 
-``├── install.sh``  => Script to be started within the container to install packages, …
+``├── pyproject.toml``  => Python project configuration with dependencies, project description, library building information, …. To build a library you may use the command :func:`fastiot.cli.commands.build_lib.build_lib`
 
 ``├── Jenkinsfile`` => File for the CI runner, if needed
 
 ``├── README.md``  => It’s always nice to have a Readme
 
-``├── requirements.txt``  => Python Packages to be installed in your venv and in all containers
-
-``├── setup.py``  => If you want to provide a library to be installed by other projects. If this is needed, use command :func:`fastiot.cli.commands.build_lib.build_lib`
+``├── requirements.txt``  => Python Packages to be installed in your venv and in all containers (fixed requirements)
 
 ``├── src``  => All your code belongs in here
 
