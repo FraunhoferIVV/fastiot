@@ -41,6 +41,6 @@ def _convert_camelcase_to_snakecase(camel_list: list[str]) -> str:
 
 
 def filter_specific_sign(name: str) -> str:
-    sub_str = re.sub('\ |\*|', '', name)
+    sub_str = re.sub(r'\ |\*|', '', name)
     sub_str_l = [s for s in sub_str.split('.') if s != '']
     return '.'.join(sub_str_l)

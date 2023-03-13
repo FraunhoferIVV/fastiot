@@ -2,7 +2,7 @@ import unittest
 
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.serialization import serialize_from_bin
-from fastiot.db.redis_helper import getRedisClient, RedisHelper
+from fastiot.db.redis_helper import get_redis_client, RedisHelper
 from fastiot.msg.redis import RedisMsg
 from fastiot.testlib import populate_test_env
 
@@ -16,12 +16,12 @@ class TestRedisHelper(unittest.IsolatedAsyncioTestCase):
         await RedisHelper(self.broker_connection).deleteall()
 
     async def test_connection(self):
-        client = await getRedisClient()
+        client = await get_redis_client()
         self.assertTrue(client.ping())
 
     async def test_send_data(self):
         helper = RedisHelper(self.broker_connection)
-        client = await getRedisClient()
+        client = await get_redis_client()
         subject = RedisMsg.get_subject("sensor1")
         await helper.send_data(data="1", subject=subject)
         self.assertEqual("1", serialize_from_bin("".__class__, client.get("0")))

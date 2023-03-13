@@ -10,7 +10,7 @@ from dash import dcc, html
 from flask import send_file
 from pymongo.errors import ServerSelectionTimeoutError
 
-from fastiot.core import FastIoTService, subscribe, Subject
+from fastiot.core import FastIoTService, Subject
 from fastiot.core.subject_helper import sanitize_pub_subject_name
 from fastiot.db.influxdb_helper_fn import influx_query_wrapper, influx_query
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env

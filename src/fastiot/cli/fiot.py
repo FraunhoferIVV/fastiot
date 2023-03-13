@@ -23,8 +23,7 @@ def main():
             # reset current dir - we don't want to navigate to system's root dir unnecessarily
             curdir = entry_dir
             break
-        else:
-            curdir = newpath
+        curdir = newpath
     os.chdir(curdir)
 
     # import src dir if located and available
@@ -33,7 +32,7 @@ def main():
         sys.path.append(_src_dir)
 
     # trigger context creation
-    context = ProjectContext.default
+    context = ProjectContext.default  # pylint: disable=unused-variable
 
     typer_app.app()
 

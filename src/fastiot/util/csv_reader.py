@@ -53,6 +53,7 @@ class CSVReader:
         self._optional_fields = optional_fields
         self._checks = checks
         self._do_allow_arbitrary_fields = do_allow_arbitrary_fields
+        self.file = None
 
     def __enter__(self):
         # Upon entering we want to read through the hole csv file and check if its correctly formatted.

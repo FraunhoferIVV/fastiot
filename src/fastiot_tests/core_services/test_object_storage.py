@@ -11,12 +11,12 @@ from fastiot.core.data_models import FastIoTData, FastIoTPublish
 from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb, FASTIOT_SERVICE_ID
+from fastiot.msg.custom_db_data_type_conversion import to_mongo_data
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.object_helper import parse_object, parse_object_list
 from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
-from fastiot.msg.custom_db_data_type_conversion import to_mongo_data
 from fastiot_core_services.object_storage.object_storage_service import ObjectStorageService
 
 THING = Thing(machine='SomeMachine', name="RequestSensor", value=42, timestamp=datetime.now(), measurement_id="1")
@@ -96,7 +96,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         await self.broker_connection.publish(test_custom_msg_l.get_subject(), test_custom_msg_l)
         await asyncio.sleep(0.02)
         results = self._db_col.find({})
-        values = [value for value in results]
+        values = list(results)
         self.assertEqual(len(values[0]), 4)
 
     async def test_request_response_thing(self):
@@ -147,7 +147,8 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
                                      subject_name=sanitize_pub_subject_name('CustomTestMsgList'))
         reply_subject = hist_req_msg.get_reply_subject(name='custom_test_msg_list')
 
-        reply: HistObjectResp = await self.broker_connection.request(subject=reply_subject, msg=hist_req_msg, timeout=10)
+        reply: HistObjectResp = await self.broker_connection.request(subject=reply_subject, msg=hist_req_msg,
+                                                                     timeout=10)
         values = parse_object_list(reply.values, CustomTestMsgList)
         self.assertListEqual(expected_object_list, values)
 

@@ -88,7 +88,6 @@ class TestThingSeries(unittest.IsolatedAsyncioTestCase):
             historic_sensor.historic_sensor_data.remove_until(dt_start)
             historic_sensor.historic_sensor_data.remove_from(dt_end)
             historic_sensor_list.append(historic_sensor)
-        pass
 
     async def delete_data(self):
         await self.influx_client.delete_api().delete(stop="2024-01-01T00:00:00Z", start="1970-01-01T00:00:00Z",

@@ -12,18 +12,20 @@ class OpcUaServerService(FastIoTService):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.server = Server()
+        self._idx = None
+        self._opc_ua_variable = None
 
     async def _init_server(self):
         await self.server.init()
         self.server.set_endpoint(f'opc.tcp://0.0.0.0:{env_opc_ua_server.server_port}/freeopcua/server/')
 
         uri = 'http://examples.freeopcua.github.io'
-        self.idx = await self.server.register_namespace(uri)
+        self._idx = await self.server.register_namespace(uri)
 
         # populating our address space
         # server.nodes, contains links to very common nodes like objects and root
-        obj = await self.server.nodes.objects.add_object(self.idx, 'MyObject')
-        self.opc_ua_variable = await obj.add_variable(self.idx, 'LastThingValue', 0)
+        obj = await self.server.nodes.objects.add_object(self._idx, 'MyObject')
+        self._opc_ua_variable = await obj.add_variable(self._idx, 'LastThingValue', 0)
 
         # Set MyVariable to be writable by clients
         # await myvar.set_writable()
@@ -43,5 +45,5 @@ class OpcUaServerService(FastIoTService):
 
     @subscribe(subject=Thing.get_subject('*'))
     async def _cb_received_data(self, _: str, msg: Thing):
-        await self.opc_ua_variable.write_value(msg.value)
+        await self._opc_ua_variable.write_value(msg.value)
         logging.info("Received message from sensor %s: %s", msg.name, str(msg))

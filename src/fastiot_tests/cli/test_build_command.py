@@ -114,7 +114,7 @@ class TestBuildCommand(unittest.TestCase):
             self.assertEqual(0, result.exit_code)
             with open(os.path.join(docker_dir, 'docker-bake.hcl'), 'r') as f:
                 contents = f.read()
-                self.assertTrue(f'"type=local,dest=' in contents)
+                self.assertTrue('"type=local,dest=' in contents)
                 self.assertFalse('cache-to = [ "type=registry,' in contents)
 
     def test_build_empty_test_env(self):

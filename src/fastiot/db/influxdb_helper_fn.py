@@ -90,4 +90,3 @@ def influx_query_wrapper(coro, *args):
     coroutine = coro(*args)
     r = asyncio.run(coroutine)
     return r
-

@@ -10,7 +10,8 @@ Connection information to the database must be modified.
 
 To show your data create a yaml file, like in the example below.
 The start and end date of the first call of setup_historic_sensors Must be defined in the yaml file too.
-When you change the date  for historic sensors in the Web interface the time will be set to 00:00 of the given date. (You have to take this into account when requesting data)
+When you change the date  for historic sensors in the Web interface the time will be set to 00:00 of the given date.
+(You have to take this into account when requesting data)
 
 If not data is shown make sure that all environmental variables are set correctly.
 This concerns manly the connection data, like Ip address, port, the name of the Db or the collection name.

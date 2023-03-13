@@ -1,7 +1,5 @@
-import getpass
 import glob
 import os
-import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -76,4 +74,3 @@ def find_deployments(deployments: Optional[List[str]] = None, path: str = '') ->
 
 def _default_cache(package: str, service: str) -> str:
     return f"{package}-cache"
-

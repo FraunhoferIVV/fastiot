@@ -217,7 +217,7 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
 
 
     if os.path.isdir(os.path.join(context.project_root_dir, '.git')):  # Add file to git now
-        cmd = f"git add pyproject.toml"
+        cmd = "git add pyproject.toml"
         subprocess.call(cmd.split(" "), cwd=context.project_root_dir,
                         stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 

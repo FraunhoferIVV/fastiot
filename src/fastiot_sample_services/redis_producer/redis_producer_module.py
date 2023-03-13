@@ -13,7 +13,7 @@ class ExampleRedisProducerService(FastIoTService):
 
     def __int__(self, **kwargs):
         super().__init__(**kwargs)
-        helper = None
+        self.helper = None
 
     async def _start(self):
         self.helper = RedisHelper(self.broker_connection)

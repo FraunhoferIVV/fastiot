@@ -151,7 +151,7 @@ def _create_docker_file(service: Service, context: ProjectContext):
             logging.warning("Will now try to run the command automatically. This may not properly fixate your"
                             " versions!")
             _create_requirements()
-            base_requirements_file = f'requirements.txt'
+            base_requirements_file = 'requirements.txt'
 
         with open(docker_filename, "w") as dockerfile:
             manifest = service.read_manifest()

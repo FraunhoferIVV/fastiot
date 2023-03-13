@@ -176,8 +176,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 env_file.write("# The following content has been copied from there:\n\n")
                 env_file.write(env_file_content)
             else:
-                env_file.write(f"# Currently this file is empty or non-existent so there is nothing to copy from "
-                               f"there.\n")
+                env_file.write("# Currently this file is empty or non-existent so there is nothing to copy from "
+                               "there.\n")
 
             if env_additions:
                 env_file.write("\n# The following content has been injected via fastiot cli:\n")
@@ -420,7 +420,7 @@ def _create_requirements(upgrade: bool = False):
         return
 
     # Base
-    _run_pip_compile(file=os.path.join(context.project_root_dir, 'requirements.txt'),
+    _run_pip_compile(file_name=os.path.join(context.project_root_dir, 'requirements.txt'),
                      upgrade=upgrade, name='base')
 
     with open(pyproject_toml, "rb") as toml_file:
@@ -430,18 +430,18 @@ def _create_requirements(upgrade: bool = False):
         os.makedirs(os.path.join(context.project_root_dir, 'requirements'), exist_ok=True)
         for extra_dep in toml_dict['project']['optional-dependencies'].keys():
             target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
-            _run_pip_compile(file=target_file, cmd_extras=f"--extra={extra_dep}", upgrade=upgrade, name=extra_dep)
+            _run_pip_compile(file_name=target_file, cmd_extras=f"--extra={extra_dep}", upgrade=upgrade, name=extra_dep)
 
         target_file = os.path.join(context.project_root_dir, 'requirements', "requirements.all.txt")
-        _run_pip_compile(file=target_file, cmd_extras="--all-extras", upgrade=upgrade, name="all")
+        _run_pip_compile(file_name=target_file, cmd_extras="--all-extras", upgrade=upgrade, name="all")
 
     logging.info("Don’t forget to add the changed requirements to git!")
 
 
-def _run_pip_compile(file: str, cmd_extras: str = "", upgrade: bool = False, name: str = ""):
+def _run_pip_compile(file_name: str, cmd_extras: str = "", upgrade: bool = False, name: str = ""):
     logging.info("    Building %s requirements", name)
 
-    cmd = f"pip-compile --annotation-style=line --resolver=backtracking --output-file={file} "
+    cmd = f"pip-compile --annotation-style=line --resolver=backtracking --output-file={file_name} "
     if upgrade:
         cmd += "--upgrade "
     if cmd_extras:
@@ -458,14 +458,14 @@ def _run_pip_compile(file: str, cmd_extras: str = "", upgrade: bool = False, nam
         logging.info("Leaving file untouched.")
 
     # Do some cleanup on the generated requirements file to avoid information leakage
-    with open(file, 'r') as fp:
-        text = fp.readlines()
+    with open(file_name, 'r') as file:
+        text = file.readlines()
 
-    with open(file, "w") as fp:
+    with open(file_name, "w") as file:
         for line in text:
             if "pip-compile --" in line or "pip-compile -" in line:
-                fp.write("#    fiot config" + " --update-requirements\n" if upgrade else "\n")
+                file.write("#    fiot config" + " --update-requirements\n" if upgrade else "\n")
             elif "extra-index-url" in line or "trusted-host" in line:
                 continue
             else:
-                fp.write(line)
+                file.write(line)

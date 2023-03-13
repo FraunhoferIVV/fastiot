@@ -10,7 +10,7 @@ def build_query_dict(hist_object_req: HistObjectReq) -> Dict:
     """
     query_dict = {}
     if hist_object_req.subject_name is not None:
-        subject_substr = re.sub("\ |\*|", '', hist_object_req.subject_name).split('..')[0]
+        subject_substr = re.sub(r"\ |\*|", '', hist_object_req.subject_name).split('..')[0]
         query_dict = query_dict | {"_subject": {'$regex': subject_substr}}
     if hist_object_req.dt_start is not None and hist_object_req.dt_end is None:
         query_dict = query_dict | {"_timestamp": {'$gte': hist_object_req.dt_start}}

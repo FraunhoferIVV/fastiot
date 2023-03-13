@@ -10,15 +10,15 @@ from fastiot.msg import RedisMsg
 class RedisClient:
     client = None
 
-async def connectRedis():
+async def connect_redis():
     client = redis.Redis(
         host=env_redis.host,
         port=env_redis.port)
     return client
 
-async def getRedisClient():
+async def get_redis_client():
     if RedisClient.client is None:
-        RedisClient.client = await connectRedis()
+        RedisClient.client = await connect_redis()
     return RedisClient.client
 
 
@@ -55,7 +55,7 @@ class RedisHelper:
 
     async def send_data(self, data, subject):
         database_id = await self._create_id()
-        client = await getRedisClient()
+        client = await get_redis_client()
         data = serialize_to_bin(data.__class__, data)
         await self.delete()
         client.set(name=database_id, value=data)
@@ -65,11 +65,11 @@ class RedisHelper:
         logging.info("Saved data at %d from  %s", database_id, subject.name)
 
     async def get_data(self, address: str):
-        client = await getRedisClient()
+        client = await get_redis_client()
         return serialize_from_bin("".__class__, client.get(address))
 
     async def delete(self):
-        client = await getRedisClient()
+        client = await get_redis_client()
         while len(self.used_ids) > self.max_data_sets:
             delete = self.used_ids[0]
             client.delete(delete)
@@ -77,7 +77,7 @@ class RedisHelper:
             logging.debug("Removed Data with Id %d", delete)
 
     async def deleteall(self):
-        client = await getRedisClient()
+        client = await get_redis_client()
         while len(self.used_ids) > 0:
             delete = self.used_ids[0]
             client.delete(delete)
