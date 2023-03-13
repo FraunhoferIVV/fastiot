@@ -1,9 +1,0 @@
-sphinx>=5
-sphinx-automodapi
-sphinx-autodoc-typehints
-recommonmark
-myst-parser
-autodoc_pydantic
-git+https://github.com/bashtage/sphinx-material.git
-sphinx_click
-sphinx-rtd-theme

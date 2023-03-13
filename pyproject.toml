@@ -1,5 +1,5 @@
 # ATTENTION: Parts of this file are managed automatically!
-# This refers to build-system, project.dependencies, project.optional-dependencies, project.version, tool and nuitka.
+# This refers to build-system, project.version, tool and nuitka.
 
 [build-system]
 requires = [
@@ -40,13 +40,13 @@ dependencies = [
     "msgpack>=1,<2",
     "nats-py>=2.1.0,<3",
     "PyYAML>=5,<7",
-    "typer[all]>=0.4.1,<1",
+    "typer>=0.4.1,<1",
     "Jinja2>=2,<4",
     "Redis>4",
     "tomli~=2.0.1",
     "tomli_w",
     "build",
-    "pip-tools"
+    "pip-tools",
 ]
 
 [[project.authors]]
@@ -67,44 +67,13 @@ Source = "https://github.com/FraunhoferIVV/fastiot"
 Documentation = "https://fastiot.readthedocs.io"
 
 [project.optional-dependencies]
-all = [
-    "Nuitka>=1.1.7,<2",
-    "ordered-set",
-    "pytest>=7.2,<8",
-    "fastapi",
-    "aiofiles",
-    "uvicorn[standard]",
-    "influxdb-client[async]>=1.32,<2",
-    "PyMySQL>=1.0,<2",
-    "pymongo>=4.1,<5",
-    "opcua>=0.98.8,<1",
-    "asyncua",
-    "psycopg2-binary>=2.9.3,<3",
-    "pydantic>=1.9.0,<2",
-    "msgpack>=1,<2",
-    "nats-py>=2.1.0,<3",
-    "PyYAML>=5,<7",
-    "typer[all]>=0.4.1,<1",
-    "Jinja2>=2,<4",
-    "Redis>4",
-    "tomli~=2.0.1",
-    "tomli_w",
-    "build",
-    "dash~=2.6.1",
-    "plotly~=5.9.0",
-    "numpy",
-    "pandas",
-    "dash-bootstrap-components",
-    "xlsxwriter",
-    "nest_asyncio",
-    "pymongo>=4.1,<5",
-]
 compile = [
     "Nuitka>=1.1.7,<2",
     "ordered-set",
 ]
 dev = [
     "pytest>=7.2,<8",
+    "typer[all]>=0.4.1,<1",
 ]
 fastapi = [
     "fastapi",
@@ -136,6 +105,17 @@ dash = [
     "xlsxwriter",
     "nest_asyncio",
     "pymongo>=4.1,<5",
+]
+docs = [
+    "sphinx>=5",
+    "sphinx-automodapi",
+    "sphinx-autodoc-typehints",
+    "recommonmark",
+    "myst-parser",
+    "autodoc_pydantic",
+    "sphinx-material",
+    "sphinx_click",
+    "sphinx-rtd-theme"
 ]
 
 [project.scripts]
