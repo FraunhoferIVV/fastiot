@@ -152,6 +152,9 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         values = parse_object_list(reply.values, CustomTestMsgList)
         self.assertListEqual(expected_object_list, values)
 
+    #def test_object_overwriting(self):
+    #    await self._start_service()
+
 
 if __name__ == '__main__':
     unittest.main()
