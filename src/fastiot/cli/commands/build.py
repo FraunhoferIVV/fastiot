@@ -143,7 +143,7 @@ def _create_docker_file(service: Service, context: ProjectContext):
             logging.warning("It seems like you do not have a `requirements.txt` in your project root. Trying to "
                             "use the one in requirements directory.")
             logging.warning("Think about migrating to the new style by running `fiot create pyproject-toml`.")
-            base_requirements_file = os.path.join(context.project_root_dir, 'requirements', 'requirements.txt')
+            base_requirements_file = os.path.join('requirements', 'requirements.txt')
         else:
             logging.warning("It seems like you do not have a `requirements.txt` in your project root but migrated "
                             "to the new pyproject.toml. ")
