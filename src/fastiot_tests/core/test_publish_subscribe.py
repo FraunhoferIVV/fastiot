@@ -73,7 +73,7 @@ class TestPublishSubscribeException(unittest.IsolatedAsyncioTestCase):
             err = exception
             event.set()
 
-        subject = Thing.get_subject()
+        subject = Thing.get_subject('something')
         broker_connection = await NatsBrokerConnection.connect(subscription_error_cb=error_cb)
         subscription = await broker_connection.subscribe(subject=subject, cb=cb)
         try:

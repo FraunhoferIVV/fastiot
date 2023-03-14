@@ -3,12 +3,12 @@ from abc import ABC
 import random
 import re
 from datetime import datetime
-from typing import Type, Union, no_type_check
+from typing import Type, Union, no_type_check, Optional, ClassVar
 
 from pydantic import BaseModel
 from pydantic.class_validators import root_validator
 
-from fastiot.core.subject_helper import MSG_FORMAT_VERSION
+from fastiot.core.subject_helper import MSG_FORMAT_VERSION, HIERARCHY, WILDCARD_SAME_LEVEL
 from fastiot.core.time import ensure_tzinfo
 
 
@@ -31,13 +31,38 @@ class FastIoTData(BaseModel, ABC):
     the private attributes cannot be set with the @property, this overrode methode makes it possible.
     """
 
+    _handles_hierarchical_subjects : ClassVar[Optional[bool]] = None
+    """
+    Set to False to define subjects not ment to handle hierarchies. This may e.g. the case for certain control
+    messages targeted at one destination.
+    Set to True if you expect a hierarchy like :class:`fastiot.msg.thing.Thing`.
+    """
+
     @classmethod
-    def _get_subject_name(cls, name: str):
+    def _get_subject_name(cls, name: str) -> str:
+        """
+
+        :param name: Name of the subject to add to subject defined by class
+        :return: Combined, sanitized name of the full subject
+
+        :raises: RuntimeError
+        """
+
         # Convert CamelCase to snake_case
         subject_name = f"{MSG_FORMAT_VERSION}.{re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()}"
         if name:
             subject_name += "." + name
         subject_name = subject_name.replace(" ", "")  # remove spaces as they are invalid in subject name
+
+        if cls._handles_hierarchical_subjects is False and \
+            (HIERARCHY in subject_name or WILDCARD_SAME_LEVEL in subject_name):
+            raise RuntimeError("Subject `%s` contains a hierarchy. The data type `%s` is not ment to be used with "
+                               "hierarchical subjects.", subject_name, cls.__name__)
+        if cls._handles_hierarchical_subjects is True and name == "":
+            raise RuntimeError("Subject `%s` does not contain a hierarchy but the data type `%s` expects one.\n "
+                               "Please use name='my_sensor' to create a valid subject like `%s.my_sensor`.",
+                               subject_name, cls.__name__, cls.__name__)
+
         return subject_name
 
     @root_validator

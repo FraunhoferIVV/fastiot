@@ -15,6 +15,7 @@ class Thing(FastIoTPublish):
     This model expects a hierarchy, thus when subscribing always set the name to the sensor name you are looking for or
     to ``*`` to subscribe all sensors. See  :meth:`fastiot.core.data_models.FastIoTData.get_subject` for more details!.
     """
+    _handles_hierarchical_subjects = True
 
     machine: str
     """ Name of the machine. If you have many machines you may add the vendor to the machine name. """
