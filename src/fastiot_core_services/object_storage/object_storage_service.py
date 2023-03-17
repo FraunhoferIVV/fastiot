@@ -1,11 +1,13 @@
 import time
-from datetime import datetime
 from typing import List, Dict
 
 import pymongo
 
 from fastiot.core import FastIoTService, Subject
 from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
+from fastiot.core.time import get_time_now
+from fastiot.env import env_mongodb, env_basic
+from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
 from fastiot.env import env_mongodb
 from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
@@ -27,12 +29,35 @@ class ObjectStorageService(FastIoTService):
             raise RuntimeError
 
         self._mongo_object_db_col = database.get_collection(service_config['collection'])
-        mongo_indices = service_config['search_index']
-        for index_name in mongo_indices:
-            self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
-                                               index=[(index_name, pymongo.ASCENDING)],
-                                               index_name=f"{index_name}_ascending")
+        self._create_index(service_config['search_index'])
+        """
+        
+        """
+        self._enable_overwriting = ('enable_overwriting' in list(service_config.keys())
+                                    and service_config['enable_overwriting'])
+        if self._enable_overwriting:
+            self._primary_keys = service_config['identify_object_with']
 
+    def _create_index(self, mongo_indices):
+
+        for index in mongo_indices:
+            if "," in index:  # Build compound index
+                indices = index.split(",")
+                indices = [i.strip() for i in indices]
+
+                compound_index = list(zip(indices,
+                                          map(lambda index_name:
+                                              pymongo.ASCENDING if index_name != '_timestamp' else pymongo.DESCENDING,
+                                              indices)))
+                # the later the _timestamp in mongo_data - the more time relevant query results
+                self._logger.debug(compound_index)
+                self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
+                                                   index_name="compound_index",
+                                                   index=compound_index)
+            else:
+                self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
+                                                   index=[(index, pymongo.ASCENDING)],
+                                                   index_name=f"{index}_ascending")
 
     async def _start(self):
         service_config = read_config(self)
@@ -50,13 +75,35 @@ class ObjectStorageService(FastIoTService):
 
     async def _cb_receive_data(self, subject_name: str, msg: dict):
         self._logger.debug("Received message %s", str(msg))
+        # True for things; Possibly False for other messages
         if 'timestamp' in list(msg.keys()):
             timestamp = msg['timestamp']
         else:
-            timestamp = datetime.utcnow()
+            timestamp = get_time_now()
         mongo_data = to_mongo_data(timestamp=timestamp, subject_name=subject_name, msg=msg)
         self._logger.debug("Converted Mongo data is %s", mongo_data)
-        self._mongo_object_db_col.insert_one(mongo_data)
+        if not self._enable_overwriting:
+            self._mongo_object_db_col.insert_one(mongo_data)
+        else:
+            # the last overwriting data should be saved (overwriting has to be asynchron)
+            self._overwrite_data(mongo_data)
+
+    def _overwrite_data(self, mongo_data):
+        # generate upsert query
+        query = {}
+        for key_name in self._primary_keys:
+            query[key_name] = mongo_data[key_name]
+        # generate an update
+        update_fields = [field for field in list(mongo_data.keys()) if field not in self._primary_keys]
+        update = {'$set': {}}
+        for field in update_fields:
+            update['$set'][field] = mongo_data[field]
+        if env_basic.log_level <= 10:
+            self._logger.debug(self._mongo_object_db_col.find(query).explain())  # check if the index is used
+            self._logger.debug('found a document to update' if self._mongo_object_db_col.count_documents(query) > 0
+                               else 'inserting the document')
+
+        self._mongo_object_db_col.update_one(filter=query, update=update, upsert=True)
 
     async def _cb_reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
         self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)
