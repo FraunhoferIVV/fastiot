@@ -1,13 +1,13 @@
-import logging
 import time
-from datetime import datetime
 from typing import List, Dict
 
 import pymongo
-from fastiot.core.time import get_time_now
 
 from fastiot.core import FastIoTService, Subject
 from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
+from fastiot.core.time import get_time_now
+from fastiot.env import env_mongodb, env_basic
+from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
 from fastiot.env import env_mongodb
 from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
@@ -45,8 +45,7 @@ class ObjectStorageService(FastIoTService):
     def _init_compound_index(self, mongo_indices):
         compound_index = list(zip(mongo_indices,
                                   map(lambda index_name:
-                                      pymongo.ASCENDING if index_name != '_timestamp'
-                                      else pymongo.DESCENDING,
+                                      pymongo.ASCENDING if index_name != '_timestamp' else pymongo.DESCENDING,
                                       mongo_indices)))
         # the later the _timestamp in mongo_data - the more time relevant query results
         self._logger.debug(compound_index)
@@ -81,9 +80,9 @@ class ObjectStorageService(FastIoTService):
             self._mongo_object_db_col.insert_one(mongo_data)
         else:
             # the last overwriting data should be saved (overwriting has to be asynchron)
-            await self._overwrite_data(mongo_data)
+            self._overwrite_data(mongo_data)
 
-    async def _overwrite_data(self, mongo_data):
+    def _overwrite_data(self, mongo_data):
         # generate upsert query
         query = {}
         for key_name in self._primary_keys:
@@ -93,12 +92,12 @@ class ObjectStorageService(FastIoTService):
         update = {'$set': {}}
         for field in update_fields:
             update['$set'][field] = mongo_data[field]
-        self._logger.debug(self._mongo_object_db_col.find(query).explain())  # check if the index is used
-        self._logger.debug('found a document to update'
-                           if self._mongo_object_db_col.count_documents(query) > 0
-                           else 'inserting the document')
+        if env_basic.log_level <= 10:
+            self._logger.debug(self._mongo_object_db_col.find(query).explain())  # check if the index is used
+            self._logger.debug('found a document to update' if self._mongo_object_db_col.count_documents(query) > 0
+                               else 'inserting the document')
 
-        await self._mongo_object_db_col.update_one(filter=query, update=update, upsert=True)
+        self._mongo_object_db_col.update_one(filter=query, update=update, upsert=True)
 
     async def _cb_reply_hist_object(self, subject: str, hist_object_req: HistObjectReq) -> HistObjectResp:
         self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)

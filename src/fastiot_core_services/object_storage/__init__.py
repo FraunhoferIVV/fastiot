@@ -27,7 +27,7 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
   collection: 'thing'
   subject_name: 'thing.*'
   reply_subject_name: 'objects'
-  enable_overwriting: true
+  enable_overwriting: false
   identify_object_with:
    - "measurement_id"
    - "_timestamp"
@@ -39,7 +39,7 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
 * ``reply_subject_name``: The subject this services listens for Historic Object Requests
   (:class:`fastiot.msg.hist.HistObjectReq`)
 * ``enable_overwriting`` is a boolean flag for object overwriting
-* ``identify_object_with`` defines object fields, which define the whole object
+* ``identify_object_with`` defines object fields, which define the whole object with its uniqueness
   The other fields will be overwritten respectively.
   Needed only if ``enable_overwriting`` set on ``true``
 
@@ -47,6 +47,9 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
    Using ``subject_name`` to define the subject this service will respond is deprecated. Use the new field
    ``reply_subject_name`` instead. The old style will continue to work but throw a warning till it will be removed
    completely.
+
+.. versionadded:: 0.8.10
+   Added mode for overwriting objects.
 
 
 You can assign the subject like following ``MyDataType`` or ``my_data_type``,

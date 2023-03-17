@@ -10,7 +10,7 @@ span.sig-name.descname > span {
   font-weight: bold;
 }
 
-span.versionmodified.changed {
+span.versionmodified.changed, span.versionmodified.added {
   font-weight: bold;
 }
 
