@@ -27,13 +27,21 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
   collection: 'thing'
   subject_name: 'thing.*'
   reply_subject_name: 'objects'
+  enable_overwriting: true
+  identify_object_with:
+   - "measurement_id"
+   - "_timestamp"
 
-* ``search_index`` defines the MongoDB indices to speed up the query.
+* ``search_index`` defines the MongoDB compound index to speed up the query.
   ``_subject`` and ``_timestamp`` are defined as index for MongoDB per default.
 * ``collection`` is the Mongodb Collection, which you want to store your data in
 * ``subject_name`` is the subject, where you send your data.
 * ``reply_subject_name``: The subject this services listens for Historic Object Requests
   (:class:`fastiot.msg.hist.HistObjectReq`)
+* ``enable_overwriting`` is a boolean flag for object overwriting
+* ``identify_object_with`` defines object fields, which define the whole object
+  The other fields will be overwritten respectively.
+  Needed only if ``enable_overwriting`` set on ``true``
 
 .. versionchanged:: 0.2.101
    Using ``subject_name`` to define the subject this service will respond is deprecated. Use the new field
