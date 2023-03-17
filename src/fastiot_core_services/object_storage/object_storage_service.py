@@ -29,29 +29,35 @@ class ObjectStorageService(FastIoTService):
             raise RuntimeError
 
         self._mongo_object_db_col = database.get_collection(service_config['collection'])
-        self._init_compound_index(service_config['search_index'])
+        self._create_index(service_config['search_index'])
         """
-        mongo_indices = service_config['search_index']
-        for index_name in mongo_indices:
-            self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
-                                               index=[(index_name, pymongo.ASCENDING)],
-                                               index_name=f"{index_name}_ascending")
+        
         """
         self._enable_overwriting = ('enable_overwriting' in list(service_config.keys())
                                     and service_config['enable_overwriting'])
         if self._enable_overwriting:
             self._primary_keys = service_config['identify_object_with']
 
-    def _init_compound_index(self, mongo_indices):
-        compound_index = list(zip(mongo_indices,
-                                  map(lambda index_name:
-                                      pymongo.ASCENDING if index_name != '_timestamp' else pymongo.DESCENDING,
-                                      mongo_indices)))
-        # the later the _timestamp in mongo_data - the more time relevant query results
-        self._logger.debug(compound_index)
-        self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
-                                           index_name="compound_index",
-                                           index=compound_index)
+    def _create_index(self, mongo_indices):
+
+        for index in mongo_indices:
+            if "," in index:  # Build compound index
+                indices = index.split(",")
+                indices = [i.strip() for i in indices]
+
+                compound_index = list(zip(indices,
+                                          map(lambda index_name:
+                                              pymongo.ASCENDING if index_name != '_timestamp' else pymongo.DESCENDING,
+                                              indices)))
+                # the later the _timestamp in mongo_data - the more time relevant query results
+                self._logger.debug(compound_index)
+                self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
+                                                   index_name="compound_index",
+                                                   index=compound_index)
+            else:
+                self._mongodb_handler.create_index(collection=self._mongo_object_db_col,
+                                                   index=[(index, pymongo.ASCENDING)],
+                                                   index_name=f"{index}_ascending")
 
     async def _start(self):
         service_config = read_config(self)

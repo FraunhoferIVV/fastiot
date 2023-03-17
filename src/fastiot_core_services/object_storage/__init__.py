@@ -22,8 +22,8 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
 .. code:: yaml
 
   search_index:
-   - "_subject"
-   - "_timestamp"
+   - "_subject, _timestamp"
+   - "_id"
   collection: 'thing'
   subject_name: 'thing.*'
   reply_subject_name: 'objects'
@@ -32,8 +32,8 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
    - "measurement_id"
    - "_timestamp"
 
-* ``search_index`` defines the MongoDB compound index to speed up the query.
-  ``_subject`` and ``_timestamp`` are defined as index for MongoDB per default.
+* ``search_index`` defines the MongoDB index to speed up the query.
+  ``_subject`` and ``_timestamp`` are defined as compound index in the above example.
 * ``collection`` is the Mongodb Collection, which you want to store your data in
 * ``subject_name`` is the subject, where you send your data.
 * ``reply_subject_name``: The subject this services listens for Historic Object Requests
@@ -49,7 +49,9 @@ In Order to use this Service, you must set a config file named :file:`ObjectStor
    completely.
 
 .. versionadded:: 0.8.10
-   Added mode for overwriting objects.
+
+   * Added mode for overwriting objects.
+   * Added option for compound indices
 
 
 You can assign the subject like following ``MyDataType`` or ``my_data_type``,
