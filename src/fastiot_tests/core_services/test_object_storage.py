@@ -276,7 +276,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         # send messages
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         await asyncio.sleep(0.02)
         # modify messages
         messages = MESSAGES.copy()
@@ -295,8 +299,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         del messages[4:6]
         # send modified messages
         for msg in messages:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check results
         results = list(self._db_col.find({}))
         self.assertEqual(10, len(results))
