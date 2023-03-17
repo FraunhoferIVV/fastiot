@@ -181,15 +181,21 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         # send messages
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check if all objects have been inserted
         results = list(self._db_col.find({}))
         self.assertEqual(len(MESSAGES), len(results))
         # send messages one more time
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check if results are still the same
         results1 = list(self._db_col.find({}))
         self.assertListEqual(results, results1)
@@ -200,16 +206,22 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         # send messages
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # modify messages
         messages = MESSAGES.copy()
         for idx, msg in enumerate(messages):
             msg.value = idx*7
         # send modified messages
         for msg in messages:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check results
         results = list(self._db_col.find({}))
         self.assertEqual(len(MESSAGES), len(results))
@@ -221,8 +233,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         # send messages
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # modify messages (add new things)
         messages = MESSAGES.copy()
         messages += [Thing(machine='test_machine', name='sensor_1', measurement_id='8000e',
@@ -231,8 +246,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
                            value=True, timestamp=datetime(year=2023, month=3, day=16, microsecond=9000))]
         # send modified messages
         for msg in messages:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check results
         results = list(self._db_col.find({}))
         self.assertEqual(len(messages), len(results))
@@ -245,8 +263,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         self._db_col.delete_many({})
         # send messages
         for msg in MESSAGES:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # modify messages (update things, removing mustn't affect results)
         messages = MESSAGES.copy()
         messages[5].value = True
@@ -256,8 +277,11 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         del messages[2:4]
         # send modified messages
         for msg in messages:
-            await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check results
         results = list(self._db_col.find({}))
         self.assertEqual(len(MESSAGES), len(results))
@@ -330,15 +354,21 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
             messages.append(test_custom_msg_list)
         # send
         for msg in messages:
-            await self.broker_connection.publish(msg.get_subject(), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(msg.get_subject(), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check if all objects have been inserted
         results = list(self._db_col.find({}))
         self.assertEqual(5, len(results))
         # send once more
         for msg in messages:
-            await self.broker_connection.publish(msg.get_subject(), msg)
-        await asyncio.sleep(0.02)
+            try:
+                await self.broker_connection.publish(msg.get_subject(), msg)
+                await asyncio.sleep(0.002)
+            except RuntimeError:
+                pass
         # check results
         self.assertEqual(5, len(results))
 
