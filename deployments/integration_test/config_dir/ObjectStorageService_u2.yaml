@@ -1,0 +1,9 @@
+search_index:
+  - "_subject"
+  - "_timestamp"
+collection: custom_test_msg_list
+subject_name: 'custom_test_msg_list'
+enable_overwriting: true
+identify_object_with:
+  - "_subject"
+  - "_timestamp"
