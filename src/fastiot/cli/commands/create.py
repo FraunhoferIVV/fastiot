@@ -33,8 +33,12 @@ def _create_random_password(length: int = 16) -> str:
 def create_toml(path: str, project_name: str, short_description: str = ""):
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
-    fastiot_next_major_version = int(__version__.split(".", maxsplit=1)[0])
-    fastiot_dependency = f"fastiot>{__version__},>{fastiot_next_major_version}"
+    fastiot_dependency = f"fastiot>={__version__.split('.dev', 1)[0]}"  # Throw away any .dev… parts
+    try:
+        fastiot_next_major_version = int(__version__.split(".", maxsplit=1)[0]) + 1
+        fastiot_dependency += f",<{fastiot_next_major_version}"
+    except ValueError:
+        pass
 
     with open(path, "w") as template_file:
         template = get_jinja_env().get_template("pyproject.toml.j2")
