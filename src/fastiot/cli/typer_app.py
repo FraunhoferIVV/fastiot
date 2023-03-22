@@ -12,12 +12,14 @@ import os
 
 import typer
 
+from fastiot.env import env_basic
 
 DEFAULT_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 # Main typer app to add new commands to.
 app = typer.Typer(
-    context_settings=DEFAULT_CONTEXT_SETTINGS
+    context_settings=DEFAULT_CONTEXT_SETTINGS,
+    pretty_exceptions_show_locals=env_basic.log_level <= 10
 )
 
 # Use this command to create any subcommand of create, like `fastiot.cli create my-special-file`
