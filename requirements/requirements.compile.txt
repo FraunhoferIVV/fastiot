@@ -12,19 +12,19 @@ jinja2==3.1.2             # via fastiot (pyproject.toml)
 markupsafe==2.1.2         # via jinja2
 msgpack==1.0.5            # via fastiot (pyproject.toml)
 nats-py==2.2.0            # via fastiot (pyproject.toml)
-nuitka==1.5               # via fastiot (pyproject.toml)
+nuitka==1.5.3             # via fastiot (pyproject.toml)
 ordered-set==4.1.0        # via fastiot (pyproject.toml), nuitka
 packaging==23.0           # via build
 pip-tools==6.12.3         # via fastiot (pyproject.toml)
 pydantic==1.10.6          # via fastiot (pyproject.toml)
 pyproject-hooks==1.0.0    # via build
 pyyaml==6.0               # via fastiot (pyproject.toml)
-redis==4.5.1              # via fastiot (pyproject.toml)
+redis==4.5.2              # via fastiot (pyproject.toml)
 tomli==2.0.1              # via build, fastiot (pyproject.toml), pyproject-hooks
 tomli-w==1.0.0            # via fastiot (pyproject.toml)
 typer==0.7.0              # via fastiot (pyproject.toml)
 typing-extensions==4.5.0  # via pydantic
-wheel==0.38.4             # via pip-tools
+wheel==0.40.0             # via pip-tools
 zstandard==0.20.0         # via nuitka
 
 # The following packages are considered to be unsafe in a requirements file:

@@ -29,14 +29,14 @@ pyproject-hooks==1.0.0    # via build
 python-dateutil==2.8.2    # via influxdb-client
 pyyaml==6.0               # via fastiot (pyproject.toml)
 reactivex==4.0.4          # via influxdb-client
-redis==4.5.1              # via fastiot (pyproject.toml)
+redis==4.5.2              # via fastiot (pyproject.toml)
 six==1.16.0               # via python-dateutil
 tomli==2.0.1              # via build, fastiot (pyproject.toml), pyproject-hooks
 tomli-w==1.0.0            # via fastiot (pyproject.toml)
 typer==0.7.0              # via fastiot (pyproject.toml)
 typing-extensions==4.5.0  # via pydantic, reactivex
 urllib3==1.26.15          # via influxdb-client
-wheel==0.38.4             # via pip-tools
+wheel==0.40.0             # via pip-tools
 yarl==1.8.2               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:

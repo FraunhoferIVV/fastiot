@@ -25,14 +25,14 @@ pygments==2.14.0          # via rich
 pyproject-hooks==1.0.0    # via build
 pytest==7.2.2             # via fastiot (pyproject.toml)
 pyyaml==6.0               # via fastiot (pyproject.toml)
-redis==4.5.1              # via fastiot (pyproject.toml)
+redis==4.5.2              # via fastiot (pyproject.toml)
 rich==12.6.0              # via typer
 shellingham==1.5.0.post1  # via typer
 tomli==2.0.1              # via build, fastiot (pyproject.toml), pyproject-hooks, pytest
 tomli-w==1.0.0            # via fastiot (pyproject.toml)
 typer[all]==0.7.0         # via fastiot (pyproject.toml)
 typing-extensions==4.5.0  # via pydantic
-wheel==0.38.4             # via pip-tools
+wheel==0.40.0             # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

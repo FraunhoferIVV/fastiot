@@ -27,14 +27,14 @@ pyproject-hooks==1.0.0    # via build
 python-dateutil==2.8.2    # via asyncua, opcua
 pytz==2022.7.1            # via asyncua, opcua
 pyyaml==6.0               # via fastiot (pyproject.toml)
-redis==4.5.1              # via fastiot (pyproject.toml)
+redis==4.5.2              # via fastiot (pyproject.toml)
 six==1.16.0               # via python-dateutil
 sortedcontainers==2.4.0   # via asyncua
 tomli==2.0.1              # via build, fastiot (pyproject.toml), pyproject-hooks
 tomli-w==1.0.0            # via fastiot (pyproject.toml)
 typer==0.7.0              # via fastiot (pyproject.toml)
 typing-extensions==4.5.0  # via pydantic
-wheel==0.38.4             # via pip-tools
+wheel==0.40.0             # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
