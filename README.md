@@ -41,7 +41,7 @@ limitations under the License.
 
 These are the requirements you need to setup:
 
-* Python 3.8 or newer and the possibility to create virtual environments.
+* Python 3.9 or newer and the possibility to create virtual environments.
 
 If you want to build services or do integration tests with databases or other services you also need to have a working
 docker setup:
@@ -53,11 +53,12 @@ If you want to use Ansible for deploying your services you also need to Ansible 
 
 ## Getting started
 
-It is always recommended to use a separate virtual environment for each project, so let’s create one: `python3 -m venv venv` and use it: `source venv/bin/activate`
+It is always recommended to use a separate virtual environment for each project, so let’s create one: 
+`python3 -m venv venv` and use it: `source venv/bin/activate`
 
-Afterwards you can install FastIoT: `python3 -m pip install fastiot`
+Afterwards you can install FastIoT: `python3 -m pip install "fastiot[dev]"`
 
-To setup a new project with the name `my_first_project` you can now run: `fiot create new-project my_first_project`
+To set up a new project with the name `my_first_project` you can now run: `fiot create new-project my_first_project`
 
 Within this repository you can find some sample services to use as template.
 Or you can simply ask the CLI to create a new services: `fiot create new-service my_first_service`.
@@ -76,8 +77,9 @@ To run services locally, in your IDE or within a container you may also refer to
 
 ## Developing FastIoT
 
-Simply check out this project and install the dependencies listed in `requirements.txt`. To run all tests and sample 
-services you may also install additional packages listed in `requirements-complete.txt`. 
+Simply check out this project and install the dependencies listed in `requirements.txt`.
+To run all tests and sample services you may also install additional packages listed in 
+`requirements/requirements-all.txt`. 
 
 ### Project structure
 
@@ -86,11 +88,13 @@ parts are listed:
 
 * `src/fastiot`: The core library and base with CLI, message handling, …
 * `src/fastiot_core_services`: Core Services to use directly in any project
-* `src/fastiot_sample_services`: Some examples about how to write services. Maybe used as copy and paste template for own services.
+* `src/fastiot_sample_services`: Some examples about how to write services. Maybe used as copy and paste template for
+* own services.
 
 ### Release process
 
 Currently, and subject to change, new commits in the main-branch will rise the version number automatically and count 
 from the last tag set.
 
-Once the interfaces are proven to be stable, development will take place in specific dev branches and only be merged to main for a new release.
+Once the interfaces are proven to be stable, development will take place in specific dev branches and only be merged to
+main for a new release.
