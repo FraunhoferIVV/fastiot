@@ -181,9 +181,10 @@ def read_oldstyle_requirements():
         req_list = []
         with open(req_name_abs) as f:
             for req in f.read().splitlines():
-                req = req.strip()
-                if req != '' and not req.startswith('#'):
-                    req_list.append(req)
+                if not req or req.startswith('#'):
+                    continue
+                req = req.split('#', 1)[0].strip()
+                req_list.append(req)
         if req_name == 'requirements.txt':
             install_requires.extend(req_list)
         else:
