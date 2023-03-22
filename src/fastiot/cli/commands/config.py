@@ -108,9 +108,9 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         net = net.default
 
     for deployment_name in deployment_names:
-        deployment_dir = context.deployment_build_dir(name=deployment_name)
-        shutil.rmtree(deployment_dir, ignore_errors=True)
-        os.makedirs(deployment_dir, exist_ok=True)
+        deployment_build_dir = context.deployment_build_dir(name=deployment_name)
+        shutil.rmtree(deployment_build_dir, ignore_errors=True)
+        os.makedirs(deployment_build_dir, exist_ok=True)
 
         env = context.env_for_deployment(name=deployment_name)
         deployment_config = context.deployment_by_name(name=deployment_name)
@@ -134,14 +134,13 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         )
 
         if deployment_config.config_dir and FASTIOT_CONFIG_DIR not in env:
-            env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_build_dir(name=deployment_name),
+            env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_dir(name=deployment_name),
                                                              deployment_config.config_dir)
 
-        deployment_source_dir = os.path.join(context.project_root_dir, DEPLOYMENTS_CONFIG_DIR, deployment_name)
-        shutil.copytree(deployment_source_dir, deployment_dir, dirs_exist_ok=True,
+        shutil.copytree(context.deployment_dir(name=deployment_name), deployment_build_dir, dirs_exist_ok=True,
                         ignore=lambda _, __: ['deployment.yaml', '.env'])
 
-        with open(os.path.join(deployment_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
+        with open(os.path.join(deployment_build_dir, 'docker-compose.yaml'), "w") as docker_compose_file:
             docker_compose_template = get_jinja_env().get_template('docker-compose.yaml.j2')
             docker_compose_file.write(docker_compose_template.render(
                 docker_net_name=net,
