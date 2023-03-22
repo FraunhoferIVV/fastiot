@@ -11,7 +11,7 @@ from shutil import copyfile
 import typer
 from pydantic import BaseModel
 
-from fastiot.cli.commands.config import _create_requirements
+from fastiot.cli.commands.manage_requirements import set_requirements
 from fastiot.cli.constants import BUILD_MODES, BUILDER_NAME, FASTIOT_DOCKER_REGISTRY, FASTIOT_DOCKER_REGISTRY_CACHE, \
     MANIFEST_FILENAME, DOCKER_BUILD_DIR
 from fastiot.cli.env import env_cli
@@ -135,41 +135,50 @@ def _create_docker_file(service: Service, context: ProjectContext):
     if os.path.isfile(service_own_dockerfile):
         logging.debug("Using dockerfile from %s, not creating a new one", service.name)
         copyfile(service_own_dockerfile, docker_filename)
+        return
 
+    base_requirements_file = _set_requirements_file(context)
+
+    with open(docker_filename, "w") as dockerfile:
+        manifest = service.read_manifest()
+        template = DockerTemplate.get(manifest.template)
+        dockerfile_template = get_jinja_env(template_dir=template.dir).get_template(template.filename)
+        dockerfile.write(dockerfile_template.render(service=service,
+                                                    manifest=manifest,
+                                                    context=context,
+                                                    base_requirements_file=base_requirements_file,
+                                                    extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
+                                                                              "www.piwheels.org/simple/"),
+                                                    maintainer=_get_maintainer()
+                                                    )
+                         )
+
+
+def _set_requirements_file(context):
+    if os.path.isfile(os.path.join(context.project_root_dir, 'requirements.txt')):
+        base_requirements_file = 'requirements.txt'
+    elif os.path.isfile(os.path.join(context.project_root_dir, 'requirements', 'requirements.txt')):
+        logging.warning("It seems like you do not have a `requirements.txt` in your project root. Trying to "
+                        "use the one in requirements directory.")
+        logging.warning("Think about migrating to the new style by running `fiot create pyproject-toml`.")
+        base_requirements_file = os.path.join('requirements', 'requirements.txt')
     else:
-        if os.path.isfile(os.path.join(context.project_root_dir, 'requirements.txt')):
-            base_requirements_file = 'requirements.txt'
-        elif os.path.isfile(os.path.join(context.project_root_dir, 'requirements', 'requirements.txt')):
-            logging.warning("It seems like you do not have a `requirements.txt` in your project root. Trying to "
-                            "use the one in requirements directory.")
-            logging.warning("Think about migrating to the new style by running `fiot create pyproject-toml`.")
-            base_requirements_file = os.path.join('requirements', 'requirements.txt')
-        else:
-            logging.warning("It seems like you do not have a `requirements.txt` in your project root but migrated "
-                            "to the new pyproject.toml. ")
-            logging.warning("Please run `fiot config` to create proper requirements files!")
-            logging.warning("Will now try to run the command automatically. This may not properly fixate your"
-                            " versions!")
-            _create_requirements()
-            base_requirements_file = 'requirements.txt'
+        logging.warning("It seems like you do not have a `requirements.txt` in your project root but migrated "
+                        "to the new pyproject.toml. ")
+        logging.warning("Please run `fiot extras set-requirements` to create proper requirements files!")
+        logging.warning("Will now try to run the command automatically. This may not properly fixate your"
+                        " versions!")
+        set_requirements(True)
+        if not os.path.isfile(os.path.join(context.project_root_dir, 'requirements.txt')):
+            logging.error("Could not automatically create a new `requirments.txt`. Please consult the command "
+                          "output for more details.")
+            raise typer.Exit('Stopping build as no suitable requirements.txt could be found or build.')
 
-        with open(docker_filename, "w") as dockerfile:
-            manifest = service.read_manifest()
-            template = DockerTemplate.get(manifest.template)
-            dockerfile_template = get_jinja_env(template_dir=template.dir).get_template(template.filename)
-            dockerfile.write(dockerfile_template.render(service=service,
-                                                        manifest=manifest,
-                                                        context=context,
-                                                        base_requirements_file=base_requirements_file,
-                                                        extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
-                                                                                  "www.piwheels.org/simple/"),
-                                                        maintainer=_get_maintainer()
-                                                        )
-                             )
+        base_requirements_file = 'requirements.txt'
+    return base_requirements_file
 
 
 def _get_maintainer() -> str:
-
     cmd = "git show -q HEAD"
     try:
         git_log = subprocess.getoutput(cmd)

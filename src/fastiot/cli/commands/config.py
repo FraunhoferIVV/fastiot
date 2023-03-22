@@ -1,17 +1,14 @@
 import logging
 import os
 import shutil
-import subprocess
 from typing import Optional, List, Dict
 
-import tomli
 import typer
 import yaml
 
 from fastiot.cli.commands.deploy import _deployment_completion
 from fastiot.cli.constants import FASTIOT_DEFAULT_TAG, FASTIOT_DOCKER_REGISTRY, \
-    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT, \
-    FASTIOT_CREATE_REQUIREMENTS
+    FASTIOT_NET, DEPLOYMENTS_CONFIG_DIR, FASTIOT_PORT_OFFSET, FASTIOT_PULL_ALWAYS, FASTIOT_USE_PORT_IMPORT
 from fastiot.cli.helper_fn import get_jinja_env
 from fastiot.cli.infrastructure_service_fn import get_infrastructure_service_ports_monotonically_increasing, \
     get_infrastructure_service_ports_randomly
@@ -61,14 +58,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                                                 help="If this is set to True (default), it will try to import port "
                                                      "mounts from .env-file from build and use them if possible. Port "
                                                      "offset is ignored for imported ports.",
-                                                envvar=FASTIOT_USE_PORT_IMPORT),
-           create_requirements: bool = typer.Option(True,
-                                                    help="This will automatically create fixed requirements for "
-                                                         "reproducible builds. Should be set to false in CI-Runner.",
-                                                    envvar=FASTIOT_CREATE_REQUIREMENTS),
-           update_requirements: bool = typer.Option(False,
-                                                    help="Update all requirements files to latest versions matching "
-                                                         "the dependencies listed in your `pyproject.toml`.")):
+                                                envvar=FASTIOT_USE_PORT_IMPORT)):
     """
     This command generates deployment configs. Per default, it generates all configs. Optionally, you can specify a
     config to only generate a single deployment config. All generated files will be placed inside the build dir of your
@@ -184,9 +174,6 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 for key, value in env_additions.items():
                     env_file.write(f"\n{key}={value}")
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
-
-    if create_requirements:
-        _create_requirements(upgrade=update_requirements)
 
     logging.info("Successfully created configurations!")
 
@@ -407,65 +394,3 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             extras=service_extensions
         ))
     return result
-
-
-def _create_requirements(upgrade: bool = False):
-    logging.info("Starting to create fixed requirements.txt files based on pyproject.toml…")
-    context = ProjectContext.default
-
-    pyproject_toml = os.path.join(context.project_root_dir, 'pyproject.toml')
-    if not os.path.isfile(pyproject_toml):
-        logging.warning("Can not automatically create fixed requirements without `pyproject.toml`")
-        logging.warning("Use `fiot create pyproject-toml` to create one!")
-        return
-
-    # Base
-    _run_pip_compile(file_name=os.path.join(context.project_root_dir, 'requirements.txt'),
-                     upgrade=upgrade, name='base')
-
-    with open(pyproject_toml, "rb") as toml_file:
-        toml_dict = tomli.load(toml_file)
-
-    if 'optional-dependencies' in toml_dict['project']:
-        os.makedirs(os.path.join(context.project_root_dir, 'requirements'), exist_ok=True)
-        for extra_dep in toml_dict['project']['optional-dependencies'].keys():
-            target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
-            _run_pip_compile(file_name=target_file, cmd_extras=f"--extra={extra_dep}", upgrade=upgrade, name=extra_dep)
-
-        target_file = os.path.join(context.project_root_dir, 'requirements', "requirements.all.txt")
-        _run_pip_compile(file_name=target_file, cmd_extras="--all-extras", upgrade=upgrade, name="all")
-
-    logging.info("Don’t forget to add the changed requirements to git!")
-
-
-def _run_pip_compile(file_name: str, cmd_extras: str = "", upgrade: bool = False, name: str = ""):
-    logging.info("    Building %s requirements", name)
-
-    cmd = f"pip-compile --annotation-style=line --resolver=backtracking --output-file={file_name} "
-    if upgrade:
-        cmd += "--upgrade "
-    if cmd_extras:
-        cmd += cmd_extras
-
-    # Popen seems to be more stable than subprocess.call
-    process = subprocess.Popen(cmd.split(), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    stderr, stdout = process.communicate()
-    if process.returncode != 0:
-        logging.warning("Building requirements for %s failed with return code %d. Command used was `%s`",
-                        name, process.returncode, cmd)
-        logging.warning("The message was `%s`", stderr.decode().strip())
-        logging.info("Leaving file untouched.")
-
-    # Do some cleanup on the generated requirements file to avoid information leakage
-    with open(file_name, 'r') as file:
-        text = file.readlines()
-
-    with open(file_name, "w") as file:
-        for line in text:
-            if "pip-compile --" in line or "pip-compile -" in line:
-                file.write("#    fiot config" + " --update-requirements\n" if upgrade else "\n")
-            elif "extra-index-url" in line or "trusted-host" in line:
-                continue
-            else:
-                file.write(line)
