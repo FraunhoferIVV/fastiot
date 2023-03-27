@@ -49,8 +49,12 @@ class InfrastructureServiceComposeExtras(BaseModel):
     """
     option_name: str
     """ The name of option for container """
-    env_var: str
+
+    env_var: str = ""
     """ The env var which can be used for option modification. """
+
+    default_value: str = ""
+    """ The default value to set if no env_var is set """
 
 
 class InfrastructureService(BaseModel):
