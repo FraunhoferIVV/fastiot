@@ -38,6 +38,9 @@ class InfrastructureServiceVolume(BaseModel):
     """ The env var which can be used for volume mount modification. If the env var is set to 'tmpfs', it will mount the
     volume to a temporary file system inside the RAM. If the env var is set to '', the volume isn't mounted. If env var
     is set to a relative path (not starting with '/') it is interpreted relative to volume dir. """
+    tmpfs_for_tests : bool = True
+    """ By default all volumes will be mounted to tmpfs for the integration test deployment. Set to ``False`` to skip 
+    this. Be aware that you have to take care of cleaning yourself! """
 
 
 class InfrastructureServiceComposeExtras(BaseModel):
