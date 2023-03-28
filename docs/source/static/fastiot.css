@@ -18,3 +18,12 @@ span.caption-text {
   font-style: italic;
 
 }
+
+.command {
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
+  font-weight: normal;
+  text-color: #454500;
+  font-size: 75%;
+  border: 1px solid #e1e4e5;
+  padding: 2px 5px;
+}

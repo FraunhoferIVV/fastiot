@@ -1,8 +1,8 @@
 .. _database_services:
 
-===========================
 Database Services
-===========================
+=================
+
 In FastIoT Framework there are several database helper functions for connecting a database.
 But to reduce the FastIoT framework size, those libraries must be additionally installed.
 

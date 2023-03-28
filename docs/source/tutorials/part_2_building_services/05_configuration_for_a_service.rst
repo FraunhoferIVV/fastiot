@@ -1,11 +1,10 @@
 .. _configuration_for_service:
 
-===========================
 Configuration for a service
 ===========================
 
 Using environment variables
-===========================
+---------------------------
 
 A common way to pass configurations to software running in a container are environment variables. Those can easily be
 configured in an file called :file:`.env`. See :ref:`deployment_yaml` for more information about passing environment
@@ -39,7 +38,7 @@ maintainability:
 
 
 Using YAML-Files
-================
+----------------
 
 YAML, for yet another markup language, allows for more complex setups.
 Reading a yaml-file is pretty easy, using :func:`fastiot.util.read_yaml.read_config`.

@@ -122,17 +122,13 @@ todo_include_todos = True
 ##
 if not os.getenv('FASTIOT_DOCSTYLE_READTHEDOCS'):
     html_theme = 'sphinx_material'
+    html_theme_options = {'color_primary': 'teal', 'color_accent': 'orange'}
+
 else:
     html_theme = 'sphinx_rtd_theme'
+    html_theme_options = {'titles_only': False}
 
-html_theme_options = {'color_primary': 'teal', 'color_accent': 'orange'}
 show_related = True
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-# html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -150,12 +146,12 @@ html_css_files = [
 #
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
-html_sidebars = {
-    '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
-        'searchbox.html',
-    ]
-}
+#html_sidebars = {
+#    '**': [
+#        'relations.html',  # needs 'show_related': True theme option to display
+#        'searchbox.html',
+#    ]
+#}
 
 
 # -- Options for HTMLHelp output ------------------------------------------

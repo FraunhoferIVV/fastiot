@@ -1,6 +1,5 @@
-#######################################
 Customized logging
-#######################################
+==================
 
 
 In FastIoT Framework, there is a logging with default setting, it will configurate the format of logging messages.

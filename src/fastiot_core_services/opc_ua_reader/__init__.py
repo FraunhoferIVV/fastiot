@@ -28,7 +28,7 @@ Example CSV configuration
 Example CSV, to be stored as :file:`opc_ua_reader_things.csv` in a directory defined with
 :envvar:`FASTIOT_OPC_UA_CONFIG_NAME` in the :file:`config_dir`.
 
-.. code-block:: csv
+.. code-block::
 
    nodeid,thing_name,machine
    ns=2;i=5,a_sensor,sim_machine

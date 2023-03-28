@@ -1,8 +1,7 @@
 .. _tut-configure_py:
 
-########################################
 Project configuration using configure.py
-########################################
+========================================
 
 The basic configuration for your project is read from the file :file:`configure.py` in your project root dir.
 

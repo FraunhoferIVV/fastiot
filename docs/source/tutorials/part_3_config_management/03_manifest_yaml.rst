@@ -1,9 +1,7 @@
 .. _tut-manifest:
 
-
-################################
 Service Manifest - manifest.yaml
-################################
+================================
 
 In the :file:`manifest.yaml` are information about dependencies of the module, ports to open, devices and mounts to bind, ….
 

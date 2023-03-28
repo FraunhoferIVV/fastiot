@@ -1,6 +1,6 @@
-#########################
-Part 2: Building services
-#########################
+**********************************
+Tutorial Part 2: Building services
+**********************************
 
 Information specific for building services
 

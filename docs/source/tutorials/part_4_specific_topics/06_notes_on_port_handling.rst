@@ -1,4 +1,3 @@
-====================================
 Some notes on working with TCP ports
 ====================================
 
@@ -13,7 +12,7 @@ Therefore a complex logic has been integrated in the configuration handling and 
 Automatic port selection
 ------------------------
 
-Use the command ``fiot config --port-offset=0`` to use random ports free at the moment of creating the config file for
+Use the command :command:`fiot config --port-offset=0` to use random ports free at the moment of creating the config file for
 the first time.
 
 **Hint:** You may also use the :envvar:`FASTIOT_PORT_OFFSET` to set a system-wide default.
@@ -23,9 +22,9 @@ If you configured your project as proposed in :ref:`label-setting-up-pycharm` th
 are now stored in the deplomynet-specific directory below :file:`build/deployments`.
 
 **Attention:** Because some local tools e.g. a database client might be configured with ports; it's not feasable to have
-new random ports each time you run ``fiot config``. That's why the config cmd will try to import generated ports from
+new random ports each time you run :command:`fiot config`. That's why the config cmd will try to import generated ports from
 the built configuration. If you don't want this behavior, you can use the no-use-port-import option like this:
-``fiot config --port-offset=0 --no-use-port-import``.
+:command:`fiot config --port-offset=0 --no-use-port-import`.
 This will generate completely new ports, unless your :file:`.env` in your :file:`deployments/my_deployment/` has
 something statically configured.
 

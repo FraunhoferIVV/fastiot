@@ -1,6 +1,5 @@
 .. _label-setting-up-pycharm:
 
-##################################
 Setting up PyCharm for development
 ##################################
 
@@ -8,7 +7,7 @@ Setting up PyCharm for development
    :local:
 
 Goal
-====
+----
 
 After having checked out your project you want to get started and develop on new or existing modules.
 There you need to open your freshly created or checked out project in PyCharm.
@@ -23,7 +22,7 @@ Next some more things need to be working in order for your module to start:
 * Active Environment Variables
 
 Docker
-======
+------
 
 **Attention:**
  You need to be in the docker-Group on your Linux system to be allowed to start docker containers and the docker
@@ -38,7 +37,7 @@ the fastiot CLI.
 For testing most of the time the integration test deployment is very suitable.
 
 Environment Variables
-=====================
+---------------------
 
 A lot of services within docker depend on a proper setup of environment variables just as some helpers and clients
 within the framework.
@@ -54,7 +53,7 @@ It is possible to define all environment variables in a .env-file. This is recom
 
 
 Starting your services
-======================
+----------------------
 
 Now it’s time to make your module ready for the first start:
 
@@ -77,7 +76,7 @@ Now it’s time to make your module ready for the first start:
 
 Technically your service is now able to start.
 You usually will need at least a message broker to be running for.
-You may start the deployment with the command ``fiot start integration_test``.
+You may start the deployment with the command :command:`fiot start integration_test`.
 
 Now you should really be able to start your service in Run or Debug-Mode.
 

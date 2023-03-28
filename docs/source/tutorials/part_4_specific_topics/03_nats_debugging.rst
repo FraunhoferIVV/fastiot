@@ -1,13 +1,12 @@
-#######################################
 Debugging message flow between services
-#######################################
+=======================================
 
 Debugging nats messages with telnet
 -----------------------------------
 
 If you are not sure if your data is handled by the nats broker correctly you can use telnet for debugging.
 
-Run ``telnet localhost 4222`` (or whatever your configuration looks like) in the terminal.
+Run :command:`telnet localhost 4222` (or whatever your configuration looks like) in the terminal.
 
 Subscribe to topics with ``SUB my.topic 10`` and you will see the messages passing by. Use a different number for each subscription.
 

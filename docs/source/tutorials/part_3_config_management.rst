@@ -1,6 +1,6 @@
-####################################
-Part 3: Config management
-####################################
+**********************************
+Tutorial Part 3: Config management
+**********************************
 
 The configuration of a FastIoT project is divided in three parts:
 

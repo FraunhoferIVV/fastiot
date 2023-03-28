@@ -1,8 +1,7 @@
 .. _deployment_yaml:
 
-##########################################
 Deployment configuration - deployment.yaml
-##########################################
+==========================================
 
 Configuration is done via :file:`deployment.yaml` file, the according data model can be found at
 :class:`fastiot.cli.model.deployment.DeploymentConfig`, where you will always find the latest in-depth documentation.
@@ -21,7 +20,7 @@ Here we will provide a short description of the core concepts. A useful starting
 
 
 The config command
-==================
+------------------
 
 FastIoT provides a config command `fiot config`. The config command transpiles the config into another format. Currently,
 only docker-compose.yaml is supported as a target, which is configured per default. In theory, FastIoT could be expanded
@@ -35,7 +34,7 @@ for a docker-compose feature, which is currently not supported via FastIoT, plea
 
 
 Image Names and Services
-========================
+------------------------
 
 By default the image name will be constructed using the configured Docker-Registry (either in the file or using :envvar:`FASTIOT_DOCKER_REGISTRY`),
 the project namespace from your :file:`configure.py`, the service and name and a tag: ``REGISTRY/namespace/image_name:tag``.
@@ -47,7 +46,7 @@ cannot be guessed correctly and you need to define it manually using :class:`fas
 
 
 Environment Variables
-=====================
+---------------------
 
 Environment variables are configured with a file called :file:`.env` in the deployment configuration.
 Each service can have an empty value (respecting FastIoT's sensible defaults pattern) but can also be configured with a
@@ -68,7 +67,7 @@ the network get the correct env variable overwrites injected.
 
 
 Short Example of a deployments.yaml
-===================================
+-----------------------------------
 
 .. code-block:: yaml
 
@@ -95,7 +94,7 @@ Short Example of a deployments.yaml
 
 
 Rolling out the project with Ansible
-====================================
+------------------------------------
 
 You can copy the created docker-compose file to the target (mostly together with the :file:`config_dir`) and run the update
 using a remote connection like SSH.

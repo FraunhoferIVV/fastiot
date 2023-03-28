@@ -1,13 +1,12 @@
 .. _publish-subscribe:
 
-#####################################################
 Publish, subscribe, request and reply in your service
-#####################################################
+=====================================================
 
 The whole framework is based on messages, s. :ref:`architecture-overview` for details.
 
 Subjects in nats and FastIoT
-============================
+----------------------------
 
 The whole messing is based on Subjects you subscribe to or publish messages on. For details how this is handled within
 nats.io please refer to their official documentation at https://docs.nats.io/nats-concepts/subjects
@@ -25,7 +24,7 @@ FastIoT only brings very basic data types defined in :mod:`fastiot.msg` coming w
 define custom data models for your projects please refer to :ref:`tut-custom_data_types`.
 
 Subscribing to an existing subject
-==================================
+----------------------------------
 
 To subscribe to an subject you just have to add a method to your service and decorate it with an ``@subscribe``.
 :meth:`fastiot.core.service_annotations.subscribe` needs to have a :class:`fastiot.core.data_models.Subject` passed. The
@@ -54,7 +53,7 @@ To subscribe to a non-hierarchical subject you can leave out the argument ``'*'`
 A working example can be found in the consumer example service: :class:`fastiot_sample_services.consumer.consumer_module.ExampleConsumerService`
 
 Defining own subjects
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Instead of relying on the subject defined by data model you can also create you own subject:
 
@@ -68,7 +67,7 @@ receive the message as plain dictionary. We strongly recommend to use Pydantic d
 dictionaries.
 
 Publishing data
-===============
+---------------
 
 Publishing data works on the same principle as receiving with a subscription regarding topics.
 The following code will initiate a forever running loop and publish a message with the value 42 on the topic
@@ -112,7 +111,7 @@ you can use
 
 
 Request and Reply
-=================
+-----------------
 
 Sometimes you may not kind of "shout" the data over the broker (publish) but make sure it arrives and you get a certain
 response.

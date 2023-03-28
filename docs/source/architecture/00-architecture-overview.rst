@@ -1,8 +1,7 @@
 .. _architecture-overview:
 
-*********************
 Architecture Overview
-*********************
+=====================
 
 FastIoT is designed as a service architecture.
 
@@ -15,7 +14,7 @@ We use the following technologies to support the architecture:
 
 
 Modules and Messaging Basics
-============================
+----------------------------
 
 Messages:
  * ... can be sent or received by modules via the NATS Broker using publish and subscribe.

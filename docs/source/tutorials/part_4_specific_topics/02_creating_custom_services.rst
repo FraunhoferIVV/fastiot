@@ -1,5 +1,4 @@
 .. _tut-custom_infrastructure_services:
-=====================================================
 Adding custom infrastructure services to your project
 =====================================================
 

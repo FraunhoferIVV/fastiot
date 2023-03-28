@@ -1,6 +1,5 @@
-##################################
 Running unit and integration tests
-##################################
+==================================
 
 Testing within a microservice framework is a little more difficult compared to monolithic architectures as many tests
 rely on the message broker to be available.
@@ -9,9 +8,9 @@ If created your deployment configurations and started the broker like describe i
 you should be able to simply start the tests with your IDE from the test-package automatically created.
 
 
-As an alternative you can also use the command ``fiot run-tests``. This will even create a configuration if not yet done.
+As an alternative you can also use the command :command:`fiot run-tests`. This will even create a configuration if not yet done.
 If you want this as a One-Shot-Solution you can also run the services specified in the integration test deployment,
-execute the tests and stop everything afterwards: ``fiot run-tests --start-deployment``.
+execute the tests and stop everything afterwards: :command:`fiot run-tests --start-deployment`.
 
 **Some remarks regarding configuration and environment variables:** The connection to the broker heavily depends on the
 correct environment variables. This is not only needed for running locally, but also for the unittests.
