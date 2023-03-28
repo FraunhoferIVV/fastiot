@@ -45,13 +45,18 @@ class InfrastructureServiceVolume(BaseModel):
 
 class InfrastructureServiceComposeExtras(BaseModel):
     """
-    An infrastructure service extension.
+    Options to be added to the docker-compose file for the infrastructure service.
     """
     option_name: str
-    """ The name of option for container """
+    """ The name of the option for container """
 
     env_var: str = ""
-    """ The env var which can be used for option modification. """
+    """
+    The env var which can be used for option modification.
+    Add this variable like ``FASTIOT_MONGODB_MEMLIMIT`` to your :file:`.env` and the value will be used.
+    
+    If the option only should have a fixed value, e.g. setting some extra permissions, you may as well leave this empty. 
+    """
 
     default_value: str = ""
     """ The default value to set if no env_var is set """
@@ -77,7 +82,15 @@ class InfrastructureService(BaseModel):
     """ List of environment variables containing a password. Those will be filled with random passwords for new
      projects automatically. """
     ports: List[InfrastructureServicePort] = []
+    """ List of ports to assign to the service """
     volumes: List[InfrastructureServiceVolume] = []
+    """ List of volumes to mount inside the service """
+    compose_extras: List[InfrastructureServiceComposeExtras] = []
+    """
+    Add additional infos to be added to the docker-compose file.
+    
+    Caution: These parameters will not be checked! Make sure, that those do not make the docker-compose file invalid!
+    """
 
     @classproperty
     def all(cls) -> Dict[str, "InfrastructureService"]:
