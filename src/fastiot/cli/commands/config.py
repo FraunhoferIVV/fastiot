@@ -98,16 +98,15 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
     else:
         infrastructure_ports = get_infrastructure_service_ports_monotonically_increasing(offset=port_offset)
 
-    if use_port_import:
-        temp_build_env = context.build_env_for_deployment(context.integration_test_deployment)
-        for key, value in temp_build_env.items():
-            if key in infrastructure_ports:
-                infrastructure_ports[key] = int(value)
-
     if not isinstance(net, str):  # Workaround for https://github.com/tiangolo/typer/issues/106
         net = net.default
 
     for deployment_name in deployment_names:
+        if use_port_import:  # We read in any previously set ports for the deployment in the build dir
+            temp_build_env = context.build_env_for_deployment(deployment_name)
+            for key, value in [(k, v) for k, v in temp_build_env.items() if k in infrastructure_ports]:
+                infrastructure_ports[key] = int(value)
+
         deployment_build_dir = context.deployment_build_dir(name=deployment_name)
         shutil.rmtree(deployment_build_dir, ignore_errors=True)
         os.makedirs(deployment_build_dir, exist_ok=True)
