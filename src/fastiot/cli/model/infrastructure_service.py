@@ -35,9 +35,13 @@ class InfrastructureServiceVolume(BaseModel):
     deployment and otherwise to volume dir -> project namespace -> deployment name -> service name e.g.
     /var/fastiot/fastiot/core/mariadb """
     env_var: str
-    """ The env var which can be used for volume mount modification. If the env var is set to 'tmpfs', it will mount the
-    volume to a temporary file system inside the RAM. If the env var is set to '', the volume isn't mounted. If env var
-    is set to a relative path (not starting with '/') it is interpreted relative to volume dir. """
+    """ The env var which can be used for volume mount modification.
+    You may simply use your :file:`.env` to set this. 
+    If the env var is set to 'tmpfs', it will mount the volume to a temporary file system inside the RAM.
+    If the env var is set to '', the volume isn't mounted.
+    If env var is set to a relative path (not starting with '/') it is interpreted relative to volume dir. 
+    If env var starts with a / the absolute path will be used.
+    """
     tmpfs_for_tests : bool = True
     """ By default all volumes will be mounted to tmpfs for the integration test deployment. Set to ``False`` to skip 
     this. Be aware that you have to take care of cleaning yourself! """

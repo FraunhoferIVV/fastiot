@@ -367,7 +367,7 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                 if volume.env_var in env:
                     # set configured volume
                     value = env[volume.env_var]
-                    if value != 'tmpfs' and value != '' and value[0] != '/':
+                    if value != 'tmpfs' and value != '' and value[0] != '/' and not value.startswith('./'):
                         value = os.path.join(root_volume, value)
 
             if value == 'tmpfs':
