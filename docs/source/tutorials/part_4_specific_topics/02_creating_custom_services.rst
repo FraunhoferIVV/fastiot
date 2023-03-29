@@ -19,5 +19,7 @@ To add your own service you have to follow a few basic steps:
 2. Add the corresponding import, e.g.  ``your_project_lib.extension.services`` to your :file:`configure.py` in your
    project root dir using the :attr:`fastiot.cli.model.project.ProjectContext.extensions`. Make sure this will really
    import the class.
-
-You should now be able to add your infrastructure service to your deployment configurations.
+3. You should now be able to add a service in your :file:`deployment.yaml` with the name you specified.
+4. Build your configuration using :command:`fiot config`. If the command fails try to raise the debug level:
+   :command:`FASTIOT_DEBUG_LEVEL="DEBUG" fiot config`
+5. You should now have a docker-compose file with your new infrastructure service added!
