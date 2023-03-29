@@ -3,11 +3,12 @@ import tempfile
 import unittest
 from glob import glob
 from typing import List
+from unittest import mock
 
 from typer.testing import CliRunner
 
 from fastiot.cli import find_deployments
-from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, FASTIOT_CONFIGURE_FILE
+from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, FASTIOT_CONFIGURE_FILE, FASTIOT_PORT_OFFSET
 from fastiot.cli.model import ProjectContext, Service, InfrastructureService
 from fastiot.cli.model.infrastructure_service import InfrastructureServicePort
 from fastiot.cli.typer_app import app, _import_infrastructure_services
@@ -29,7 +30,7 @@ class AAAService(InfrastructureService):
         )
     ]
 
-
+@mock.patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != FASTIOT_PORT_OFFSET}, clear=True)
 class TestConfigCommand(unittest.TestCase):
     def setUp(self):
         self._backup_context = ProjectContext.default.copy(deep=True)
