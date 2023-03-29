@@ -9,6 +9,7 @@ import shutil
 import string
 import subprocess
 import sys
+from glob import glob
 from typing import Optional
 
 import typer
@@ -28,27 +29,6 @@ def _create_random_password(length: int = 16) -> str:
     chars = list(string.ascii_letters + string.digits + "_-.,:%?!*")
     password = [random.choice(chars) for _ in range(length)]
     return "".join(password)
-
-
-def create_toml(path: str, project_name: str, short_description: str = ""):
-    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
-
-    fastiot_dependency = f"fastiot>={__version__.split('.dev', 1)[0]}"  # Throw away any .dev… parts
-    try:
-        fastiot_next_major_version = int(__version__.split(".", maxsplit=1)[0]) + 1
-        fastiot_dependency += f",<{fastiot_next_major_version}"
-    except ValueError:
-        pass
-
-    with open(path, "w") as template_file:
-        template = get_jinja_env().get_template("pyproject.toml.j2")
-        template_file.write(template.render(
-            projectname=project_name,
-            authors=getpass.getuser(),
-            description=short_description,
-            python_version=python_version,
-            fastiot_dependency=fastiot_dependency
-        ))
 
 
 @create_cmd.command()
@@ -135,6 +115,8 @@ def new_project(project_name: str = typer.Argument(None, help="The project name 
                 short_description=description,
                 project_name=project_name)
 
+    _create_manifest_in(force=force)
+
     logging.info("Project created successfully. Check pyproject.toml for correct configuration")
 
 
@@ -210,6 +192,7 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
                 project_name=context.project_namespace)
 
     update_pyproject_toml(update_requirements=True)
+    _create_manifest_in(force=force)
 
     os.rename(os.path.join(context.project_root_dir, "requirements", "requirements.txt"),
               os.path.join(context.project_root_dir, "requirements", "requirements.txt.bak"))
@@ -218,7 +201,6 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
                   os.path.join(context.project_root_dir, "setup.py.bak"))
     except FileNotFoundError:
         pass
-
 
     if os.path.isdir(os.path.join(context.project_root_dir, '.git')):  # Add file to git now
         cmd = "git add pyproject.toml"
@@ -277,3 +259,48 @@ def _add_service_to_deployment(service_name: str):
     if service_name not in deployment.services:
         deployment.services[service_name] = None
         deployment.to_yaml_file(deployment_file)
+
+
+def create_toml(path: str, project_name: str, short_description: str = ""):
+    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+
+    fastiot_dependency = f"fastiot>={__version__.split('.dev', 1)[0]}"  # Throw away any .dev… parts
+    try:
+        fastiot_next_major_version = int(__version__.split(".", maxsplit=1)[0]) + 1
+        fastiot_dependency += f",<{fastiot_next_major_version}"
+    except ValueError:
+        pass
+
+    with open(path, "w") as template_file:
+        template = get_jinja_env().get_template("pyproject.toml.j2")
+        template_file.write(template.render(
+            projectname=project_name,
+            authors=getpass.getuser(),
+            description=short_description,
+            python_version=python_version,
+            fastiot_dependency=fastiot_dependency
+        ))
+
+
+def _create_manifest_in(force: bool):
+    """ MANIFEST.in includes vcs tracked files *not* to pack into the library source package. """
+
+    context: ProjectContext = ProjectContext.default
+
+    manifest_in_file = os.path.join(context.project_root_dir, 'MANIFEST.in')
+    if os.path.isfile(manifest_in_file) and not force:
+        logging.debug("MANIFEST.in in %s already exists. Skipping creation, since overwriting has not been forced.",
+                      context.project_root_dir)
+
+    excludes = ['docs', DEPLOYMENTS_CONFIG_DIR]
+    excludes += [f"src{os.sep}{os.path.basename(e)}" for e in glob(os.path.join(context.project_root_dir, 'src', '*'))]
+    excludes = [e for e in excludes if e != f"src{os.sep}{context.library_package}"]
+    # We definitely want to have the library, but nothing else
+
+    with open(manifest_in_file, "w") as file:
+        file.write("# Exclude some files managed by git when building sdist package\n")
+        file.write("# This file has been automatically generated but is not maintained automatically.\n")
+        file.write("# If you create any new directories and add them to your VCS, please consider adding them here\n")
+        file.write("# or your library source package will grow!\n\n")
+        for exclude in excludes:
+            file.write(f"recursive-exclude {exclude} *\n")

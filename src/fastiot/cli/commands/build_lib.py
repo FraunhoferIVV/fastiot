@@ -134,7 +134,7 @@ def update_pyproject_toml(build_system: Optional[Dict] = None, update_requiremen
         toml_dict["project"]["optional-dependencies"] = extras_require
         logging.info("Requirements from directory requirements are now set in your pyproject.toml")
         logging.info("After checking the contents you should consider running `fiot extras set-requirements` to fixate "
-                     "your new requirments.txt")
+                     "your new requirements.txt")
 
     if get_version(complete=True) != "git-unspecified":
         toml_dict["project"]["version"] = get_version(complete=True)

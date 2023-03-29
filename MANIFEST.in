@@ -1,4 +1,8 @@
 # Exclude some files managed by git when building sdist package
+# This file has been automatically generated but is not maintained automatically.
+# If you create any new directories and add them to your VCS, please consider adding them here
+# or your library source package will grow!
+
 recursive-exclude docs *
 recursive-exclude deployments *
 recursive-exclude src/fastiot_core_services *
