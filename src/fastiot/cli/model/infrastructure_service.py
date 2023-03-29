@@ -1,7 +1,7 @@
 """ Some helpers to work with external services: importing, port handling, … """
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from fastiot.util.classproperty import classproperty
 
@@ -95,6 +95,14 @@ class InfrastructureService(BaseModel):
     
     Caution: These parameters will not be checked! Make sure, that those do not make the docker-compose file invalid!
     """
+
+    @validator('name', always=True)
+    def check_name(cls, value):
+        for char in ['-', ' ']:
+            if char in value:
+                raise ValueError(f"{char} is not valid in service name {value}")
+        return value
+
 
     @classproperty
     def all(cls) -> Dict[str, "InfrastructureService"]:

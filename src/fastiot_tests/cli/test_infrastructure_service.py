@@ -1,5 +1,7 @@
 import unittest
 
+from pydantic import ValidationError
+
 from fastiot import InfrastructureService
 from fastiot_tests.cli.service_test import SomeTestService
 
@@ -9,3 +11,9 @@ class TestInfrastructureService(unittest.TestCase):
         _ = SomeTestService  # Make sure test service is imported first
         all_services = InfrastructureService.all.values()
         self.assertTrue('test_service' in [service.name for service in all_services])
+
+    def test_infrastructure_service_name_validation(self):
+        with self.assertRaises(ValidationError):
+            class InvalidService(InfrastructureService):
+                name: str ="invalid-service"
+            _ = InvalidService()
