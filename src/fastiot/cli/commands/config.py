@@ -127,6 +127,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         )
         services = _create_services_compose_infos(
             env=env,
+            env_additions=env_additions,
             deployment_config=deployment_config,
             docker_registry=docker_registry,
             tag=tag,
@@ -136,6 +137,12 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         if deployment_config.config_dir and FASTIOT_CONFIG_DIR not in env:
             env_additions[FASTIOT_CONFIG_DIR] = os.path.join(context.deployment_dir(name=deployment_name),
                                                              deployment_config.config_dir)
+
+        # Adjust relative paths in env_additions
+        for key, value in env_additions.items():
+            if value.startswith('./'):
+                env_additions[key] = os.path.join(context.deployment_dir(name=deployment_name), value)
+
 
         shutil.copytree(context.deployment_dir(name=deployment_name), deployment_build_dir, dirs_exist_ok=True,
                         ignore=lambda _, __: ['deployment.yaml', '.env'])
@@ -192,6 +199,7 @@ def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
 
 
 def _create_services_compose_infos(env: Dict[str, str],
+                                   env_additions: Dict[str, str],
                                    deployment_config: DeploymentConfig,
                                    docker_registry: str,
                                    tag: str,
@@ -209,7 +217,7 @@ def _create_services_compose_infos(env: Dict[str, str],
         manifest = _get_service_manifest(name, image_name=full_image_name, pull_always=pull_always)
 
         service_env = {**service_config.environment}
-        volumes = _create_volumes(env, service_env, deployment_config.config_dir, manifest)
+        volumes = _create_volumes(env, env_additions, service_env, deployment_config.config_dir, manifest)
         ports = _create_ports(env, service_env, manifest)
         devices = _create_devices(env, service_env, manifest)
         extras = _create_compose_extras(manifest)
@@ -272,13 +280,19 @@ def _create_ports(env: Dict[str, str], service_env: Dict[str, str], manifest: Se
     return ports
 
 
-def _create_volumes(env: Dict[str, str], service_env: Dict[str, str],
+def _create_volumes(env: Dict[str, str], env_additions: Dict[str, str], service_env: Dict[str, str],
                     config_dir: str, manifest: ServiceManifest) -> List[str]:
     volumes = []
     for volume in manifest.volumes:
+        if env.get(volume.env_variable) == "":
+            continue
         external_volume = env.get(volume.env_variable, volume.location)
-        volumes.append(f"{external_volume}:{external_volume}")
-        service_env[volume.env_variable] = external_volume
+        volumes.append(f"{external_volume}:{volume.location}")
+        # We use the default location inside the container as possible relative paths will make trouble there.
+        service_env[volume.env_variable] = volume.location
+        # The env var inside the container will point at the right location
+        env_additions[volume.env_variable] = external_volume
+        # Externally we point to the env var specified path, to be made absolute on the system later on
 
     if manifest.mount_config_dir in [MountConfigDirEnum.required, MountConfigDirEnum.optional] and config_dir:
         volumes.append(f"{config_dir}:/etc/fastiot")

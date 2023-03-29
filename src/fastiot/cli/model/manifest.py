@@ -29,17 +29,30 @@ class Port(BaseModel):
 
 class Volume(BaseModel):
     """
-    A volume entry represents one directory used by the service which should be mounted outside the container.
+    A volume entry represents one directory used by the service which should be mounted from your host into the
+    container.
     """
 
     location: str
     """
-    The volume location to be used. If you provide something like :file:`/opt/mydata` it will be accessible as
-    :file:`opt/mydata` in  your container.
+    Provide the location inside the container.
+    This value will also be used in your local environment if the defined environment variable is not set.
     """
     env_variable: str
     """
-    See attribute `env_variable` in :class:`fastiot.cli.model.manifest.Port`.
+    Define the variable name, that is used to overwrite the default location specified in ``location``. 
+    If you put e.g. ``MYSERVICE_DATA_VOLUME`` you may add `something like to following to your :file:`.env` file:
+    ``MYSERVICE_DATA_VOLUME=./data`` or ``MYSERVICE_DATA_VOLUME=/opt/myproject/data``.  
+    The first one will be used relative to your deployments dir and the docker-compose file in there.
+    The second one will be used as absolute path in your filesystem.
+    If undefined the path specified in location will also be used on the host.
+    If the environment variable is set to an empty string (``""``) the volume will not be mounted and no persistence
+    will happen for this volume.
+    
+    To find the volume inside your service please read the specified environment variable. 
+    Inside the container this will be the same as defined in ``location``.
+    For debugging purposes the :file:`env` in the build-directory will be adjusted to point to your deployments
+    directory.
     """
 
 
