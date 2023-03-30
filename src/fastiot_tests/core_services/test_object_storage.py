@@ -10,7 +10,8 @@ from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.data_models import FastIoTData, FastIoTPublish
 from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
 from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
-from fastiot.env import env_mongodb, FASTIOT_SERVICE_ID
+from fastiot.env import env_mongodb
+from fastiot.env.env_constants_basic import FASTIOT_SERVICE_ID
 from fastiot.msg.custom_db_data_type_conversion import to_mongo_data
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
 from fastiot.msg.thing import Thing

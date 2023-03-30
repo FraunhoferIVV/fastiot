@@ -3,7 +3,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from fastiot import InfrastructureService
+from fastiot.cli.model import InfrastructureService
 from fastiot_tests.cli.service_test import SomeTestService
 
 

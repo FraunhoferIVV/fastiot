@@ -7,7 +7,7 @@ import unittest
 from fastiot.core import FastIoTService
 from fastiot.core.broker_connection import BrokerConnectionDummy
 from fastiot.env import env_basic
-from fastiot.env.env_constants import FASTIOT_CONFIG_DIR
+from fastiot.env.env_constants_basic import FASTIOT_CONFIG_DIR
 from fastiot.util.read_yaml import read_config
 from fastiot.testlib import populate_test_env
 
