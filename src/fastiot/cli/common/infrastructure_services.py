@@ -94,9 +94,10 @@ class MariaDBService(InfrastructureService):
             env_var=FASTIOT_MARIA_DB_VOLUME
         ),
         InfrastructureServiceVolume(
-            container_volume='/docker-entrypoint-initdb.d/base.sql',
+            container_volume='/docker-entrypoint-initdb.d/entry.sql',
             default_volume_mount='',
-            env_var=FASTIOT_MARIA_DB_ENTRY
+            env_var=FASTIOT_MARIA_DB_ENTRY,
+            tmpfs_for_tests=False  # mounting literally nothing to an entry point does not make sense => Don’t use tmpfs
         )
     ]
 
