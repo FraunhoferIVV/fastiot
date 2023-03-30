@@ -104,6 +104,7 @@ class InfrastructureService(BaseModel):
 
     @validator('name', always=True)
     def check_name(cls, value):
+        """ Make sure there are now spaces and - in the name. """
         for char in ['-', ' ']:
             if char in value:
                 raise ValueError(f"{char} is not valid in service name {value}")

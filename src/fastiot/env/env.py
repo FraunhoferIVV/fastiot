@@ -145,7 +145,7 @@ class BrokerEnv:
 
 class MongoDBEnv:
     """
-    Environment variables for mongodb :ref:`MongoDB Service <MongoDBService>`
+    Environment variables for mongodb :class:`fastiot.cli.common.infrastructure_services.MongoDBService`
 
     Use the properties from :func:`fastiot.env.env.env_mongodb` to read the values in an easy manner within your
     code.
@@ -230,7 +230,7 @@ class MongoDBColConstants:
 
 class MariaDBEnv:
     """
-    Environment variables for mariadb :ref:`MariaDB Service <MariaDBService>`
+    Environment variables for mariadb :class:`fastiot.cli.common.infrastructure_services.MariaDBService`
 
     Use the properties from :func:`fastiot.env.env.env_mariadb` to read the values in an easy manner within your
     code. This will provide the environment variables needed for
@@ -286,7 +286,7 @@ class MariaDBEnv:
 
 class InfluxDBEnv:
     """
-    Environment variables for influxdb :ref:`InfluxDB Service <InfluxDBService>`
+    Environment variables for influxdb :class:`fastiot.cli.common.infrastructure_services.InfluxDBService`
 
     Use the properties from :func:`fastiot.env.env.env_influxdb` to read the values in an easy manner within your
     code. For connecting to InfluxDB, which is started with a token, you only need host, port and token.
@@ -355,7 +355,7 @@ class InfluxDBEnv:
 
 class TimeScaleDBEnv:
     """
-    Environment variables for timescaledb :ref:`TimeScaleDB Service <TimeScaleDBService>`
+    Environment variables for timescaledb :class:`fastiot.cli.common.infrastructure_services.TimeScaleDBService`
 
     Use the properties from :func:`fastiot.env.env.env_timescaledb` to read the values in an easy manner within your
     code.
@@ -406,6 +406,7 @@ class TimeScaleDBEnv:
 
 
 class RedisEnv:
+    """ Environment variables to connect to the Redis Server """
     @property
     def host(self) -> str:
         """ .. envvar:: FASTIOT_INFLUX_DB_HOST

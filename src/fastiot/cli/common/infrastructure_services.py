@@ -1,3 +1,12 @@
+"""
+Infrastructure Services
+=======================
+
+This file contains all preconfigured infrastructure services.
+Those are easy to integrate just by adding their name into the ``infrastructure-services:`` key in your
+:file:`deployment.yaml`.
+"""
+
 from typing import List
 
 from fastiot.cli.model.infrastructure_service import InfrastructureService, InfrastructureServicePort, \
@@ -15,6 +24,12 @@ from fastiot.env.env_constants import FASTIOT_ELASTICSEARCH_HOST, FASTIOT_ELASTI
 
 
 class NatsService(InfrastructureService):
+    """
+    Service definition for the nats message broker.
+
+    Usually no configuration is needed for this service!
+    """
+
     name: str = 'nats'
     image: str = 'nats:latest'
     host_name_env_var = FASTIOT_NATS_HOST
@@ -28,9 +43,20 @@ class NatsService(InfrastructureService):
 
 
 class MariaDBService(InfrastructureService):
-    """ .. _MariaDBService:
+    """
+    Definition of the Service to use `MariaDB <https://mariadb.com>`_.
 
-    Here, all relevant environment variables are listed to build a MariaDB Service,
+    The environment variables are documented at :class:`fastiot.env.env.MariaDBEnv`.
+
+    With the following steps you are able to provision your MariaDB with an inital SQL-File at the first start:
+      1. Add an file like :file:`entry.sql` to your deployment dir
+      2. Add the environment variable :envvar:`FASTIOT_MARIA_DB_ENTRY` to your :file:`.env` in the deployment dir like
+         ``FASTIOT_MARIA_DB_ENTRY='./entry.sql'``
+      3. Run :command:`fiot config` to update your configuration.
+
+    .. seealso::
+       :ref:`database_services`
+           How to add databases to your service.
     """
     name: str = 'mariadb'
     image: str = 'mariadb:10.8'
@@ -76,9 +102,12 @@ class MariaDBService(InfrastructureService):
 
 
 class MongoDBService(InfrastructureService):
-    """ .. _MongoDBService:
+    """
+    Definition of the service to use a MongoDB.
 
-    Here, all relevant environment variables are listed to build a MongoDB Service,
+    .. seealso::
+       :ref:`database_services`
+           How to add databases to your service.
     """
     name: str = 'mongodb'
     image: str = 'mongo:5.0'
@@ -118,9 +147,10 @@ class MongoDBService(InfrastructureService):
 
 
 class MongoDB4Service(MongoDBService):
-    """ .. _MongoDB4Service
+    """
+    Infrastructure service for a MongoDB in version 4.
 
-    Infrastructure service for a MongoDB in version 4. This is the latest version to work with a Raspberry Pi 4
+    This is the latest version to work with a Raspberry Pi 4
     (s. https://stackoverflow.com/questions/68419196 for more details)
     """
     name: str = 'mongodb4'
@@ -128,9 +158,12 @@ class MongoDB4Service(MongoDBService):
 
 
 class InfluxDBService(InfrastructureService):
-    """ .. _InfluxDBService:
+    """
+    Definition of the InfluxDB Service
 
-    Here, all relevant environment variables are listed to build a InfluxDB Service,
+    .. seealso::
+       :ref:`database_services`
+           How to add databases to your service.
     """
     name: str = 'influxdb'
     image: str = 'influxdb:2.0'
@@ -185,9 +218,12 @@ class InfluxDBService(InfrastructureService):
 
 
 class TimeScaleDBService(InfrastructureService):
-    """ .. _TimeScaleDBService:
+    """
+    Definition of a TimeScaleDB Service
 
-    Here, all relevant environment variables are listed to build a TimeScaleDB Service,
+    .. seealso::
+       :ref:`database_services`
+           How to add databases to your service.
     """
     name: str = 'timescaledb'
     image: str = 'timescale/timescaledb:latest-pg14'
@@ -226,9 +262,14 @@ class TimeScaleDBService(InfrastructureService):
 
 
 class RedisService(InfrastructureService):
-    """ .. _RedisService:
+    """
+    Definition of the Redis Service.
 
-    Here, all relevant environment variables are listed to build a Redis Service,
+    .. seealso::
+       :class:`fastiot.db.redis_helper.RedisHelper`
+          How to easily interact using the integrated RedisHelper.
+       :mod:`fastiot_sample_services.redis_producer`
+          Example service for sending and receiving data over a Redis Server.
     """
     name: str = 'redis'
     image: str = 'redis:7'
@@ -258,9 +299,8 @@ class RedisService(InfrastructureService):
 
 
 class ElasticSearch(InfrastructureService):
-    """ .. _ElasticSearch:
-
-    Here, all relevant environment variables are listed to build an ElasticSearch Service,
+    """
+    Definition of an ElasticDB Service
     """
     name: str = 'elasticsearch'
     image: str = 'docker.elastic.co/elasticsearch/elasticsearch:7.17.8'

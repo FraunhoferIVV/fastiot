@@ -34,6 +34,12 @@ class RedisHelper:
 
     You can access the stored data with :meth:`get_data`. The Id of the Data has to be provided. and the returned data
     will be deserialized with :meth:`fastiot.core.serialization.serialize_from_bin`.
+
+    .. seealso::
+       :mod:`fastiot_sample_services.redis_producer`
+          Example service for sending and receiving data over a Redis Server.
+       :class:`fastiot.cli.common.infrastructure_services.RedisService`
+          The infrastructure service definition for the Redis Server.
     """
 
     def __init__(self, broker_connection):
