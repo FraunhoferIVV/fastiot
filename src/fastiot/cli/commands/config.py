@@ -18,8 +18,8 @@ from fastiot.cli.model.infrastructure_service import InfrastructureService
 from fastiot.cli.model.manifest import MountConfigDirEnum
 from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
-from fastiot.env import FASTIOT_CONFIG_DIR, env_basic
-from fastiot.env.env_constants import FASTIOT_VOLUME_DIR
+from fastiot.env import env_basic
+from fastiot.env.env_constants_basic import FASTIOT_CONFIG_DIR, FASTIOT_VOLUME_DIR
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)

@@ -10,7 +10,7 @@ from opcua import Client, Server
 from fastiot.core.broker_connection import NatsBrokerConnection
 from fastiot.core.core_uuid import get_uuid
 from fastiot.env.env import env_broker
-from fastiot.env.env_constants import *
+from fastiot.env.env_constants_basic import FASTIOT_CONFIG_DIR
 from fastiot.msg.thing import Thing
 from fastiot.testlib import populate_test_env
 from fastiot.util.ports import get_local_random_port

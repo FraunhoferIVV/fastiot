@@ -19,7 +19,7 @@ Add ``mongodb`` to your :file:`deployment.yaml` and also consult
 *Hint:* When working with a Raspberry Pi only MongoDB upto version 4 is working.
 Please use :class:`fastiot.cli.common.infrastructure_services.MongoDB4Service` in this case!
 
-The environment variables are documented at :class:`fastiot.env.env.MongoDBEnv`
+The environment variables are documented at :class:`fastiot.env.env_mongodb.MongoDBEnv`
 
 For MongoDB you can use :func:`fastiot.db.mongodb_helper_fn.get_mongodb_client_from_env` to create a mongodb client.
 After setting all relevant env variables you may access mongodb client through following code:
@@ -37,7 +37,7 @@ MariaDB
 Add ``mariadb`` as service to your :file:`deployment.yaml` and see
 :class:`fastiot.cli.common.infrastructure_services.MariaDBService` for adding e.g. an Entrypoint volume mount.
 
-The environment variables are documented at :class:`fastiot.env.env.MariaDBEnv`
+The environment variables are documented at :class:`fastiot.env.env_mariadb.MariaDBEnv`
 
 To access your database you may use :func:`fastiot.db.mariadb_helper_fn.get_mariadb_client_from_env` to create a mariadb client.
 
@@ -54,7 +54,7 @@ InfluxDB
 Add ``influxdb`` to your :file:`deployment.yaml` and also consult
 :class:`fastiot.cli.common.infrastructure_services.InfluxDBService` for more information about the service.
 
-The environment variables are documented at :class:`fastiot.env.env.InfluxDBEnv`
+The environment variables are documented at :class:`fastiot.env.env_influxdb.InfluxDBEnv`
 
 For InfluxDB you can use :func:`fastiot.db.influxdb_helper_fn.get_async_influxdb_client_from_env` to create a influxdb client.
 
@@ -72,7 +72,7 @@ TimeScaleDB
 Add ``timescaledb`` to your :file:`deployment.yaml` and also consult
 :class:`fastiot.cli.common.infrastructure_services.TimeScaleDBService` for more information about the service.
 
-The environment variables are documented at :class:`fastiot.env.env.TimeScaleDBEnv`
+The environment variables are documented at :class:`fastiot.env.env_timescaledb.TimeScaleDBEnv`
 
 For TimeScaleDB you can use :func:`fastiot.db.time_scale_helper_fn.get_timescaledb_client_from_env` to create a time scale connection.
 
@@ -80,7 +80,8 @@ For TimeScaleDB you can use :func:`fastiot.db.time_scale_helper_fn.get_timescale
 
   time_scale_db_client = get_timescaledb_client_from_env()
 
-With this `time_scale_db_client` you can access all functions in psycopg2 api. Before working with psycopg2, the
-`libpq-dev` must be manually installed in your OS to install the Python package `psycopg2`!
+With this ``time_scale_db_client`` you can access all functions in psycopg2 api.
+Before working with psycopg2, the ``libpq-dev`` must be manually installed in your OS to install the Python package
+``psycopg2``!
 For details s. https://www.psycopg.org/docs/
 
