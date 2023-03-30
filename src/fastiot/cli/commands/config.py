@@ -374,7 +374,10 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             value = 'tmpfs'
             if not is_integration_test_deployment or not volume.tmpfs_for_tests:
                 # set default for none integration test volumes
-                value = f"{root_volume}/{project_namespace}/{deployment_config.name}/{name}"
+                if volume.default_volume_mount is None:
+                    value = f"{root_volume}/{project_namespace}/{deployment_config.name}/{name}"
+                else:
+                    value = volume.default_volume_mount
 
             if volume.env_var:
                 if volume.env_var in env:

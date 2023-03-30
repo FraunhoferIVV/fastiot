@@ -11,7 +11,7 @@ from fastiot.env import FASTIOT_NATS_PORT, FASTIOT_MARIA_DB_PORT, FASTIOT_MONGO_
     FASTIOT_TIME_SCALE_DB_HOST, FASTIOT_TIME_SCALE_DB_VOLUME, FASTIOT_MARIA_DB_USER, FASTIOT_REDIS_PORT, \
     FASTIOT_REDIS_HOST, FASTIOT_REDIS_PASSWORD, FASTIOT_REDIS_VOLUME
 from fastiot.env.env_constants import FASTIOT_ELASTICSEARCH_HOST, FASTIOT_ELASTICSEARCH_PASSWORD, \
-    FASTIOT_ELASTICSEARCH_PORT, FASTIOT_ELASTICSEARCH_VOLUME, FASTIOT_MONGO_DB_MEM_LIMIT
+    FASTIOT_ELASTICSEARCH_PORT, FASTIOT_ELASTICSEARCH_VOLUME, FASTIOT_MONGO_DB_MEM_LIMIT, FASTIOT_MARIA_DB_ENTRY
 
 
 class NatsService(InfrastructureService):
@@ -66,6 +66,11 @@ class MariaDBService(InfrastructureService):
         InfrastructureServiceVolume(
             container_volume='/var/lib/mysql',
             env_var=FASTIOT_MARIA_DB_VOLUME
+        ),
+        InfrastructureServiceVolume(
+            container_volume='/docker-entrypoint-initdb.d/base.sql',
+            default_volume_mount='',
+            env_var=FASTIOT_MARIA_DB_ENTRY
         )
     ]
 

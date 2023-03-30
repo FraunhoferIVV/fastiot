@@ -42,6 +42,12 @@ class InfrastructureServiceVolume(BaseModel):
     If env var is set to a relative path (not starting with '/') it is interpreted relative to volume dir. 
     If env var starts with a / the absolute path will be used.
     """
+    default_volume_mount: Optional[str] = None
+    """ Set an default for the volume mount if ``env_var`` is not set. 
+    If it uses the default ``None`` it will use :envvar:`FASTIOT_VOLUME_DIR` as ``root_volume`` and the following path 
+    :file:`{root_volume}/{project_namespace}/{deployment}/{infrastructure_service_name}`
+    Otherwise the options from ``env_var`` will apply.
+    """
     tmpfs_for_tests : bool = True
     """ By default all volumes will be mounted to tmpfs for the integration test deployment. Set to ``False`` to skip 
     this. Be aware that you have to take care of cleaning yourself! """
