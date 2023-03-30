@@ -208,7 +208,7 @@ def pyproject_toml(description: Optional[str] = typer.Option("", '-d', '--descri
                         stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
     logging.info("Successfully created pyproject.toml. Please check the file and make adjustments as needed.")
-    logging.info("It is recommended to fixate your requirements now by running `fiot config`.")
+    logging.info("It is recommended to fixate your requirements now by running `fiot extras set-requirements`.")
 
 
 def _sanitize_service_name(service_name):

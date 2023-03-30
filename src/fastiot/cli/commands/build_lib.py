@@ -23,6 +23,7 @@ libraries = []
 
 class BuildLibStyles(str, Enum):
     all = 'all'
+    force_all = 'force-all'
     compiled = 'compiled'
     wheel = 'wheel'
     sdist = 'sdist'
@@ -35,8 +36,10 @@ def _styles_completion() -> List[str]:
 
 @extras_cmd.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
 def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=_styles_completion,
-                                                          help="Compile all styles configured for the project or force "
-                                                               "(just for setup.py) compiled, wheel or sdist"),
+                                                          help="Compile all styles configured for the project. You may "
+                                                               "use `all` for all configured, `force-all` to build "
+                                                               "all independent of the actual configuration, "
+                                                               "`compiled`, `wheel` or `sdist`."),
               noupdate: Optional[bool] = typer.Option(False, '-n', '--noupdate',
                                                     help="Use to not overwrite pyproject.toml ")):
     """ Compile the project library according to the project configuration. """
@@ -46,17 +49,20 @@ def build_lib(build_style: Optional[str] = typer.Argument('all', shell_complete=
         logging.info("No library package configured in configure.py. Exiting.")
         return
 
+    if context.lib_compilation_mode in [CompileSettingsEnum.disabled, CompileSettingsEnum.none] and \
+            build_style == BuildLibStyles.all:
+        logging.info("Compilation is set to %s. Not building the library.", build_style)
+        return
+
     logging.info("Starting to build library.")
 
-    if not isinstance(build_style, str):
-        build_style = build_style.default
-
-    if build_style == BuildLibStyles.all:
+    if build_style in [BuildLibStyles.all, BuildLibStyles.force_all]:
         if context.lib_compilation_mode == CompileSettingsEnum.only_compiled:
             styles = [BuildLibStyles.compiled]
         elif context.lib_compilation_mode == CompileSettingsEnum.only_source:
             styles = [BuildLibStyles.wheel, BuildLibStyles.sdist]
-        elif context.lib_compilation_mode == CompileSettingsEnum.all_variants:
+        elif context.lib_compilation_mode == CompileSettingsEnum.all_variants or \
+                build_style == BuildLibStyles.force_all:
             styles = [BuildLibStyles.wheel, BuildLibStyles.sdist, BuildLibStyles.compiled]
         else:
             raise NotImplementedError()

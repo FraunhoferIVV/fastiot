@@ -22,7 +22,10 @@ class CompileSettingsEnum(str, Enum):
     # Only provide a source-version (.tar.gz and .whl)
     all_variants = 'all_variants'
     # Provide compiled and source version of the library
-
+    none = 'none'
+    # Don’t build the library at all. Same as ``disabled``
+    disabled = 'disabled'
+    # Don’t build the library at all
 
 class ProjectContext(BaseModel):
     """
@@ -88,9 +91,9 @@ class ProjectContext(BaseModel):
     Most of the times this is done filling the :file:`__init__.py` correspondingly.
     """
 
-    lib_compilation_mode: CompileSettingsEnum = CompileSettingsEnum.only_compiled
-    """ Set to false if you do not want your library to be compiled (and obfuscated), use options from
-    :class:`fastiot.cli.model.project.CompileSettingsEnum` """
+    lib_compilation_mode: CompileSettingsEnum = CompileSettingsEnum.disabled
+    """ Adjust, if you want your library to be build as wheel or compiled (and obfuscated). 
+    Use options from :class:`fastiot.cli.model.project.CompileSettingsEnum` """
 
     _default_context = None
 
