@@ -6,7 +6,7 @@ Deployment configuration - deployment.yaml
 Configuration is done via :file:`deployment.yaml` file, the according data model can be found at
 :class:`fastiot.cli.model.deployment.DeploymentConfig`, where you will always find the latest in-depth documentation.
 Here we will provide a short description of the core concepts. A useful starting point is automatically created when using
-``fiot create new-project`` to create a new project.
+:command:`fiot create new-project` to create a new project.
 
 - name: A meaningful name for the deployment.
 - services: Dictionary of FastIoT Services (:class:`fastiot.cli.model.deployment.ServiceConfig`) within *and* from other projects.
@@ -22,7 +22,7 @@ Here we will provide a short description of the core concepts. A useful starting
 The config command
 ------------------
 
-FastIoT provides a config command `fiot config`. The config command transpiles the config into another format. Currently,
+FastIoT provides a config command :command:`fiot config`. The config command transpiles the config into another format. Currently,
 only docker-compose.yaml is supported as a target, which is configured per default. In theory, FastIoT could be expanded
 to also include other deployable formats e.g. helm-charts, but this is not implemented yet.
 
@@ -100,7 +100,7 @@ You can copy the created docker-compose file to the target (mostly together with
 using a remote connection like SSH.
 
 But it is easier using some kind of Configuration management. Thus Ansible is coupled to the Framework. If you run
-``fiot deploy my_deployment`` an Ansible playbook is generated and deployed to the configured target:
+:command:`fiot deploy my_deployment` an Ansible playbook is generated and deployed to the configured target:
 
 This will copy the :file:`docker-compose.yaml` and the :file:`config_dir` to the target, pull (and update) the Docker images
 on the target and restart the services. If specified this works for many hosts in parallel.

@@ -11,7 +11,7 @@ configured in an file called :file:`.env`. See :ref:`deployment_yaml` for more i
 variables to the container.
 
 We recommend to use environment variables for small configurations where only a few settings are needed and no complex
-structures like large lists, etc. are neccessary. Larger configurations should use yaml-files (s. next section).
+structures like large lists, etc. are necessary. Larger configurations should use yaml-files (s. next section).
 
 Reading environment variables is fairly easy in Python, just use ``os.environ.get('YOUR_ENV_VAR')``. In this framework
 a slightly more complex solution has been chosen for better documentation, usage within integration tests and
