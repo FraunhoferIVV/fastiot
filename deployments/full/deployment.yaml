@@ -16,5 +16,6 @@ services:
   consumer: null
   fastapi: null
   producer: null
+  opc_ua_server: null
 tag: ''
 version: 1

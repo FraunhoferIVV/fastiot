@@ -9,8 +9,8 @@ def get_infrastructure_service_ports_randomly() -> Dict[str, int]:
     """
     Get random environment variables for all ports.
 
-    On very busy machines this may to reuse of ports, if another service takes the port betweening determining its free
-    status and acutally starting the service.
+    On very busy machines this may to reuse of ports, if another service takes the port between determining its free
+    status and actually starting the service.
 
     :return: dict with the environment variables and the corresponding port numbers
     """

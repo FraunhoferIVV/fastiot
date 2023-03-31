@@ -20,6 +20,7 @@ from fastiot.cli.model.project import ProjectContext
 from fastiot.cli.typer_app import app, DEFAULT_CONTEXT_SETTINGS
 from fastiot.env import env_basic
 from fastiot.env.env_constants_basic import FASTIOT_CONFIG_DIR, FASTIOT_VOLUME_DIR
+from fastiot.util.ports import get_local_random_port
 
 
 @app.command(context_settings=DEFAULT_CONTEXT_SETTINGS)
@@ -88,24 +89,10 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
     else:
         deployment_names = context.deployment_names
 
-    # This will set environment variables for externally opened ports, usually to be used for integration tests but also
-    # to access the services externally. When creating the compose infos for infrastructure services the env vars will
-    # be used, so no further access to the settings is needed.
-    if port_offset is None:
-        infrastructure_ports = {}
-    elif port_offset == 0:
-        infrastructure_ports = get_infrastructure_service_ports_randomly()
-    else:
-        infrastructure_ports = get_infrastructure_service_ports_monotonically_increasing(offset=port_offset)
-
     if not isinstance(net, str):  # Workaround for https://github.com/tiangolo/typer/issues/106
         net = net.default
 
     for deployment_name in deployment_names:
-        if use_port_import:  # We read in any previously set ports for the deployment in the build dir
-            temp_build_env = context.build_env_for_deployment(deployment_name)
-            for key, value in [(k, v) for k, v in temp_build_env.items() if k in infrastructure_ports]:
-                infrastructure_ports[key] = int(value)
 
         deployment_build_dir = context.deployment_build_dir(name=deployment_name)
         shutil.rmtree(deployment_build_dir, ignore_errors=True)
@@ -119,18 +106,30 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
             env=env,
             env_additions=env_additions,
             env_service_internal_modifications=env_service_internal_modifications,
-            infrastructure_ports=infrastructure_ports,
             deployment_config=deployment_config,
             is_integration_test_deployment=deployment_name == context.integration_test_deployment,
-            project_namespace=context.project_namespace
+            project_namespace=context.project_namespace,
+            port_offset=port_offset, use_port_import=use_port_import,
+            deployment_name=deployment_name
         )
+
+        local_port_offset = port_offset
+        if port_offset > 0:  # Detect the highest used port as offset for our own services
+            for service in infrastructure_services:
+                for port in service.ports:
+                    port = port.split(':', 1)[0]
+                    port_offset = port + 1 if port > port_offset else port_offset
+
         services = _create_services_compose_infos(
             env=env,
             env_additions=env_additions,
+            env_service_internal_modifications=env_service_internal_modifications,
             deployment_config=deployment_config,
             docker_registry=docker_registry,
             tag=tag,
-            pull_always=pull_always
+            pull_always=pull_always,
+            local_port_offset=local_port_offset,
+            use_port_import=use_port_import
         )
 
         if deployment_config.config_dir and FASTIOT_CONFIG_DIR not in env:
@@ -181,6 +180,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 env_file.write("\n")  # ending files with '\n' as it is a best practice for file management under linux
 
     logging.info("Successfully created configurations!")
+    logging.info("If you need to interact directly with any ports of services please have a look at the .env file in "
+                 "the directory builds/{deployment}.")
 
 
 def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
@@ -199,10 +200,12 @@ def _apply_checks_for_deployment_names(deployments: List[str]) -> List[str]:
 
 def _create_services_compose_infos(env: Dict[str, str],
                                    env_additions: Dict[str, str],
+                                   env_service_internal_modifications: Dict[str, str],
                                    deployment_config: DeploymentConfig,
                                    docker_registry: str,
                                    tag: str,
-                                   pull_always: bool
+                                   pull_always: bool,
+                                   local_port_offset, use_port_import
                                    ) -> List[ServiceComposeInfo]:
     context: ProjectContext = ProjectContext.default
     result = []
@@ -217,7 +220,9 @@ def _create_services_compose_infos(env: Dict[str, str],
 
         service_env = {**service_config.environment}
         volumes = _create_volumes(env, env_additions, service_env, deployment_config.config_dir, manifest)
-        ports = _create_ports(env, service_env, manifest)
+        ports = _create_ports(env, env_additions, env_service_internal_modifications, manifest,
+                              local_port_offset=local_port_offset, use_port_import=use_port_import,
+                              deployment_name=deployment_config.name)
         devices = _create_devices(env, service_env, manifest)
         extras = _create_compose_extras(manifest)
 
@@ -270,12 +275,32 @@ def _get_service_manifest(service_name: str, image_name: str, pull_always: bool)
     return ServiceManifest.from_docker_image(image_name, pull_always=pull_always)
 
 
-def _create_ports(env: Dict[str, str], service_env: Dict[str, str], manifest: ServiceManifest) -> List[str]:
+def _create_ports(env: Dict[str, str], env_additions: Dict[str, str],
+                  env_service_internal_modifications: Dict[str, str], manifest: ServiceManifest,
+                  local_port_offset: Optional[int], use_port_import: bool,
+                  deployment_name: str
+                  ) -> List[str]:
+    context: ProjectContext = ProjectContext.default
+    build_env = context.build_env_for_deployment(deployment_name)
+
     ports = []
-    for port in manifest.ports:
-        external_port = int(env.get(port.env_variable, str(port.port)))
-        ports.append(f"{external_port}:{external_port}")
-        service_env[port.env_variable] = str(external_port)
+    for i, port in enumerate(manifest.ports):
+
+        if local_port_offset is None:
+            external_port = int(env.get(port.env_variable, str(port.port)))
+        elif local_port_offset == 0:
+            external_port = get_local_random_port()
+        else:
+            external_port = local_port_offset + i
+
+        if use_port_import:
+            external_port = build_env.get(port.env_variable, external_port)
+
+        env_service_internal_modifications[port.env_variable] = str(port.port)
+        env_additions[port.env_variable] = str(external_port)
+
+        ports.append(f"{external_port}:{port.port}")
+
     return ports
 
 
@@ -321,13 +346,15 @@ def _create_compose_extras(manifest: ServiceManifest) -> str:
 def _create_infrastructure_service_compose_infos(env: Dict[str, str],
                                                  env_additions: Dict[str, str],
                                                  env_service_internal_modifications: Dict[str, str],
-                                                 infrastructure_ports: Dict[str, int],
                                                  deployment_config: DeploymentConfig,
                                                  is_integration_test_deployment: bool,
-                                                 project_namespace: str
+                                                 project_namespace: str,
+                                                 port_offset, use_port_import, deployment_name
                                                  ) -> List[ServiceComposeInfo]:
     services_map = InfrastructureService.all
     result = []
+
+    infrastructure_ports = _set_infrastructure_ports(deployment_name, port_offset, use_port_import)
 
     for name, infrastructure_service_config in deployment_config.infrastructure_services.items():
 
@@ -413,3 +440,25 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
             extras=service_extensions
         ))
     return result
+
+
+def _set_infrastructure_ports(deployment_name, port_offset, use_port_import):
+
+    context: ProjectContext = ProjectContext.default
+
+
+    # This will set environment variables for externally opened ports, usually to be used for integration tests but also
+    # to access the services externally. When creating the compose infos for infrastructure services the env vars will
+    # be used, so no further access to the settings is needed.
+    if port_offset is None:
+        infrastructure_ports = {}
+    elif port_offset == 0:
+        infrastructure_ports = get_infrastructure_service_ports_randomly()
+    else:
+        infrastructure_ports = get_infrastructure_service_ports_monotonically_increasing(offset=port_offset)
+
+    if use_port_import:  # We read in any previously set ports for the deployment in the build dir
+        temp_build_env = context.build_env_for_deployment(deployment_name)
+        for key, value in [(k, v) for k, v in temp_build_env.items() if k in infrastructure_ports]:
+            infrastructure_ports[key] = int(value)
+    return infrastructure_ports
