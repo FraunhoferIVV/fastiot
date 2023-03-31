@@ -117,7 +117,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         if port_offset > 0:  # Detect the highest used port as offset for our own services
             for service in infrastructure_services:
                 for port in service.ports:
-                    port = port.split(':', 1)[0]
+                    port = int(port.split(':', 1)[0])
                     port_offset = port + 1 if port > port_offset else port_offset
 
         services = _create_services_compose_infos(
