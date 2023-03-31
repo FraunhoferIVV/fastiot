@@ -89,9 +89,6 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
     else:
         deployment_names = context.deployment_names
 
-    if not isinstance(net, str):  # Workaround for https://github.com/tiangolo/typer/issues/106
-        net = net.default
-
     for deployment_name in deployment_names:
 
         deployment_build_dir = context.deployment_build_dir(name=deployment_name)
@@ -114,7 +111,7 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
         )
 
         local_port_offset = port_offset
-        if port_offset > 0:  # Detect the highest used port as offset for our own services
+        if port_offset and port_offset > 0:  # Detect the highest used port as offset for our own services
             for service in infrastructure_services:
                 for port in service.ports:
                     port = int(port.split(':', 1)[0])
