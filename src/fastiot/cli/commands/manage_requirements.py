@@ -35,7 +35,7 @@ def set_requirements(
     with open(pyproject_toml, "rb") as toml_file:
         toml_dict = tomli.load(toml_file)
 
-    if 'optional-dependencies' in toml_dict['project']:
+    if 'optional-dependencies' in toml_dict['project'] and toml_dict['project']['optional-dependencies']:
         os.makedirs(os.path.join(context.project_root_dir, 'requirements'), exist_ok=True)
         for extra_dep in toml_dict['project']['optional-dependencies'].keys():
             target_file = os.path.join(context.project_root_dir, 'requirements', f"requirements.{extra_dep}.txt")
