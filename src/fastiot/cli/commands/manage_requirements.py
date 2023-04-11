@@ -75,7 +75,8 @@ def _run_pip_compile(file_name: str, cmd_extras: str = "", upgrade: bool = False
     with open(file_name, "w") as file:
         for line in text:
             if "pip-compile --" in line or "pip-compile -" in line:
-                file.write("#    fiot config" + " --update-requirements\n" if upgrade else "\n")
+                file.write("#    fiot extras set-requirements")
+                file.write(" --update-requirements\n" if upgrade else "\n")
             elif "extra-index-url" in line or "trusted-host" in line:
                 continue
             else:
