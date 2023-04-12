@@ -1,4 +1,4 @@
-# Fast-IoT (fastiot)
+# FastIoT (fastiot)
 
 FastIoT is a framework for rapid development of IIoT-Systems using Python as main programming language.
 It helps to set up a micro-service architecture and create services. The development has been started as basis for 

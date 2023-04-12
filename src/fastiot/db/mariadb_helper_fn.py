@@ -41,8 +41,8 @@ def get_mariadb_client(host: str, port: int, schema: Optional[str],
         # pylint: disable=import-outside-toplevel
         import pymysql.cursors
     except (ImportError, ModuleNotFoundError):
-        logging.error("You have to manually install `PyMySQL>=1.0,<2` using your `requirements.txt` "
-                                 "to make use of this helper.")
+        logging.error("You have to manually install `fastiot[mariadb]` or `PyMySQL>=1.0,<2` using your "
+                      "`pyproject.toml` to make use of this helper.")
         sys.exit(5)
 
     for _ in range(10):

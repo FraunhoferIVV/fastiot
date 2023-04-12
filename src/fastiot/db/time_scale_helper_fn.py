@@ -1,4 +1,3 @@
-# --------- apt-get install libpq-dev first to install psycopg2 !!! -----------
 import sys
 import time
 
@@ -13,6 +12,9 @@ def get_timescaledb_client_from_env():
     if you want to use your own settings instead of default:
     :envvar:`FASTIOT_TIME_SCALE_DB_HOST`, :envvar:`FASTIOT_TIME_SCALE_DB_PORT`, :envvar:`FASTIOT_TIME_SCALE_DB_USER`,
     :envvar:`FASTIOT_TIME_SCALE_DB_PASSWORD`, :envvar:`FASTIOT_TIME_SCALE_DB_DATABASE`
+
+    *Attention*: You must have `libpq-dev` installed in your system (or your container), e.g.
+    :command:`apt-get install libpq-dev`.
 
     >>> time_scale_db_client = get_timescaledb_client_from_env()
     """
@@ -33,8 +35,8 @@ def get_timescaledb_client(host: str, port: int, user: str, password: str,
         import psycopg2
         from psycopg2 import OperationalError
     except (ImportError, ModuleNotFoundError):
-        logging.error("You have to manually install `psycopg2>=2.9.3,<3` using your `requirements.txt` "
-                      "to make use of this helper.")
+        logging.error("You have to manually install `fastiot[postgredb]` or `psycopg2>=2.9.3,<3` using your "
+                      "`pyproject.toml` to make use of this helper.")
         sys.exit(5)
 
     client_parameters = {"user": user, "password": password, "host": host,

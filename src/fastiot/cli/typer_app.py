@@ -9,8 +9,16 @@ Basically your commands will be decorated with an `@app.command()`. Replace `app
 import importlib
 import logging
 import os
+import sys
 
-import typer
+from fastiot.cli.env import env_cli
+
+try:
+    import typer
+except ImportError:
+    if not env_cli.within_container:
+        logging.error("Could not import Typer. To use the CLI you need to install `fastiot[dev]`.")
+    sys.exit(1)
 
 from fastiot.env import env_basic
 

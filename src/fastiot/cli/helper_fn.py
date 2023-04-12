@@ -1,9 +1,17 @@
 import glob
+import logging
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+try:
+    from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+
+except ImportError:
+    logging.debug("Could not import Jinja. To use the CLI you need to install `fastiot[dev]`.")
+    # This warning should more present when starting the CLI, so just set this to debugging output.
+    Environment, FileSystemLoader, StrictUndefined = None, None, None
 
 from fastiot.cli.constants import DEPLOYMENTS_CONFIG_DIR, DEPLOYMENTS_CONFIG_FILE, MANIFEST_FILENAME, TEMPLATES_DIR
 from fastiot.cli.model import Service, DeploymentConfig
@@ -28,7 +36,7 @@ def find_services(package: Optional[str] = None,
     """
     Find services in a package
 
-    :param package: The package name within your :file:`src`. If not defined the whole :path:`src` will be searched for
+    :param package: The package name within your :file:`src`. If not defined the whole :file:`src` will be searched for
                     suitable services containing a :file:`manifest.yaml` and a :file:`run.py`
     :param path: Optional, specify a search path, uses ``os.getcwd()`` as default
     :param services: Optional; if specified it will only include the listed services

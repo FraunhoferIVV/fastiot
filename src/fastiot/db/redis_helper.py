@@ -1,6 +1,5 @@
 import logging
-
-import redis
+import sys
 
 from fastiot.core.serialization import serialize_to_bin, serialize_from_bin
 from fastiot.env.env import env_redis
@@ -10,11 +9,19 @@ from fastiot.msg import RedisMsg
 class RedisClient:
     client = None
 
+
 async def connect_redis():
+    try:
+        import redis  # pylint: disable=import-outside-toplevel
+    except ImportError:
+        logging.error("You have to manually install `redis>=4.5,<5` or `fastiot[redis]` using your `pyproject.toml` "
+                      "to make use of this helper.")
+        sys.exit(5)
     client = redis.Redis(
         host=env_redis.host,
         port=env_redis.port)
     return client
+
 
 async def get_redis_client():
     if RedisClient.client is None:
@@ -34,6 +41,9 @@ class RedisHelper:
 
     You can access the stored data with :meth:`get_data`. The Id of the Data has to be provided. and the returned data
     will be deserialized with :meth:`fastiot.core.serialization.serialize_from_bin`.
+
+    You have to add ``redis`` or ``fastiot[redis]`` to your requirements in :file:`pyproject.toml` or (old style)
+    :file:`requirements.txt`.
 
     .. seealso::
        :mod:`fastiot_sample_services.redis_producer`

@@ -25,7 +25,7 @@ class MongoClientWrapper:
             from pymongo.errors import ConnectionFailure
         except (ImportError, ModuleNotFoundError):
             logging.error("You have to manually install "
-                          "`pymongo>=4.1,<5` using your `requirements.txt` to make use of "
+                          "`pymongo>=4.1,<5` or `fastiot[mongo]` using your `pyproject.toml` to make use of "
                           "this helper.")
             sys.exit(5)
 

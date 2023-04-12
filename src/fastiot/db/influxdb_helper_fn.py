@@ -45,8 +45,8 @@ async def create_async_influxdb_client_from_env():
         from influxdb_client.client.exceptions import InfluxDBError
         from aiohttp.client_exceptions import ClientError
     except (ImportError, ModuleNotFoundError):
-        logging.error("You have to manually install `influxdb-client[async]>=1.30,<2` using your `requirements.txt` "
-                      "to make use of this helper.")
+        logging.error("You have to manually install `fastiot[influxdb]` or `influxdb-client[async]>=1.30,<2` using "
+                      "your `pyproject.toml` to make use of this helper.")
         sys.exit(5)
 
     sleep_time = 0.25

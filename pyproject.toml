@@ -39,14 +39,7 @@ dependencies = [
     "pydantic>=1.9.0,<2",
     "msgpack>=1,<2",
     "nats-py>=2.1.0,<3",
-    "PyYAML>=5,<7",
-    "typer>=0.4.1,<1",
-    "Jinja2>=2,<4",
-    "Redis>4",
-    "tomli~=2.0.1",
-    "tomli_w",
-    "build",
-    "pip-tools",
+    "PyYAML>=5,<7"
 ]
 
 [[project.authors]]
@@ -74,6 +67,12 @@ compile = [
 dev = [
     "pytest>=7.2,<8",
     "typer[all]>=0.4.1,<1",
+    "tomli~=2.0.1",
+    "tomli_w",
+    "build",
+    "pip-tools",
+    "typer>=0.4.1,<1",
+    "Jinja2>=2,<4"
 ]
 fastapi = [
     "fastapi",
@@ -95,6 +94,9 @@ opcua = [
 ]
 postgredb = [
     "psycopg2-binary>=2.9.3,<3",
+]
+redis = [
+    "Redis>4"
 ]
 dash = [
     "dash~=2.6.1",
