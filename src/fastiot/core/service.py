@@ -61,6 +61,7 @@ class FastIoTService:
         self._subs: List[Subscription] = []
         self.service_id: str = env_basic.service_id  # Use to separate different services instantiated
         self._logger = logging
+        self._logger.info("Started service %s!", self.__class__.__name__)
 
     def _setup_annotations(self):
         # We cannot setup annotations inside __init__ because some services may have properties which rely on the
