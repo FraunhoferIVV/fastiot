@@ -1,18 +1,22 @@
 """ data models for FastIoT and infrastructure services """
 import os
+import datetime
+
 from typing import List
 
 from pydantic import BaseModel
 
 from fastiot.cli.constants import MANIFEST_FILENAME
 from fastiot.cli.model import ServiceManifest
-
+from fastiot.cli.version import get_version
 
 class Service(BaseModel):
     """
     The model class for a service
     """
     name: str
+    build_date: str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    version: str = get_version()
     package: str
     cache: str = ""
     """
