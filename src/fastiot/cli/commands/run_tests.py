@@ -59,7 +59,7 @@ def run_tests(start_deployment: bool = typer.Option(False, help="Also start and 
         config(use_test_deployment=True, port_offset=0)
 
     if start_deployment:
-        start(use_test_deployment=True, detach=True, project_name=None, service_names=None)
+        start(use_test_deployment=True, detach=True, project_name="", service_names=None)
 
     env = os.environ.copy()
     src_dir = os.path.join(context.project_root_dir, 'src')

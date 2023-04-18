@@ -48,22 +48,26 @@ def start(deployment_name: Optional[str] = typer.Argument(default=None, shell_co
         logging.error("You have to define an environment to start or use the optional --use-test-deployment!")
         raise typer.Exit(-1)
 
+    cwd = os.path.join(context.project_root_dir, context.build_dir, DEPLOYMENTS_CONFIG_DIR,
+                       deployment_name)
+
     cmd = ["docker-compose"]
     project_name = project_name or getpass.getuser() + "__" + context.project_namespace + "__" + deployment_name
     cmd.append("--project-name=" + project_name)
+
+    if pull_always:
+        pull_cmd = cmd + ["pull"]
+        exit_code = subprocess.call(pull_cmd, cwd=cwd)
+        if exit_code != 0:
+            logging.warning("Pulling images was not successful. Trying to continue.")
 
     cmd.append("up")
     if detach:
         cmd.append("-d")
 
-    if pull_always:
-        cmd += ['--pull', 'always']
-
     if service_names is not None:
         cmd += service_names
 
-    cwd = os.path.join(context.project_root_dir, context.build_dir, DEPLOYMENTS_CONFIG_DIR,
-                       deployment_name)
     logging.debug("Running command to start the environment: %s", " ".join(cmd))
     os.environ['COMPOSE_HTTP_TIMEOUT'] = '300'
     exit_code = 0
