@@ -33,6 +33,12 @@ class Service(BaseModel):
     Examples: mypackage-cache:latest, mypackage-cache:my-feature
     """
 
+    maintainer: str = ""
+    """ Used for docker labels """
+    git_revision: str = ""
+    """ Used for docker labels """
+
+
     def read_manifest(self, check_service_name: str = "") -> ServiceManifest:
         """ Reads out the service manifest, if not run before using the yaml-file otherwise just ``self.manifest``"""
         from fastiot.cli.model.project import ProjectContext  # pylint: disable=import-outside-toplevel
