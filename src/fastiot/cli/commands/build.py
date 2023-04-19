@@ -124,6 +124,9 @@ def _create_all_docker_files(context: ProjectContext, services: Optional[List[st
             _create_docker_file(service, context)
 
 
+
+
+
 def _create_docker_file(service: Service, context: ProjectContext):
     build_dir = os.path.join(context.project_root_dir, context.build_dir, DOCKER_BUILD_DIR)
     os.makedirs(build_dir, exist_ok=True)
@@ -139,6 +142,9 @@ def _create_docker_file(service: Service, context: ProjectContext):
 
     base_requirements_file = _set_requirements_file(context)
 
+    service.maintainer = _get_maintainer()
+    service.git_revision = _get_git_revision()
+
     with open(docker_filename, "w") as dockerfile:
         manifest = service.read_manifest()
         template = DockerTemplate.get(manifest.template)
@@ -148,9 +154,7 @@ def _create_docker_file(service: Service, context: ProjectContext):
                                                     context=context,
                                                     base_requirements_file=base_requirements_file,
                                                     extra_pypi=os.environ.get('FASTIOT_EXTRA_PYPI',
-                                                                              "www.piwheels.org/simple/"),
-                                                    maintainer=_get_maintainer()
-                                                    )
+                                                                              "www.piwheels.org/simple/"))
                          )
 
 
@@ -189,6 +193,13 @@ def _get_maintainer() -> str:
 
     return maintainer
 
+def _get_git_revision() -> str:
+    cmd = "git rev-parse HEAD"
+    try:
+        revision = subprocess.getoutput(cmd)
+    except (AttributeError, TypeError):
+        revision = ""
+    return revision
 
 def _docker_bake(context: ProjectContext,
                  tags: List[str],

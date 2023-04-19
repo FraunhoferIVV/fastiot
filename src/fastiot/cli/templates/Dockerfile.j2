@@ -57,7 +57,13 @@ COPY src/{{context.library_package}} /opt/fastiot/src/{{context.library_package}
 {% endif %}
 COPY src/{{ service.package }}/{{ service.name }} /opt/fastiot/src/{{ service.package }}/{{ service.name }}
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
-MAINTAINER {{ maintainer }}
+
+MAINTAINER {{ service.maintainer }}
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.name={{ service.name }}
+LABEL org.label-schema.build-date={{ service.build_date }}
+LABEL org.label-schema.maintainer="{{ service.maintainer }}"
+LABEL org.label-schema.version={{ service.version }}
 
 {%if not manifest.privileged%}
 USER fastiot
@@ -107,7 +113,13 @@ COPY --from=build-npm src/{{ service.package }}/{{ service.name }}/{{manifest.np
 {% endif %}
 
 COPY src/{{ service.package }}/{{ service.name }}/manifest.yaml /opt/fastiot/manifest.yaml
-MAINTAINER {{ maintainer }}
+MAINTAINER {{ service.maintainer }}
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.name="{{ context.project_namespace }}-{{ service.name }}"
+LABEL org.label-schema.build-date={{ service.build_date }}
+LABEL org.label-schema.maintainer="{{ service.maintainer }}"
+LABEL org.label-schema.version={{ service.version }}
+LABEL org.label-schema.vcs-ref="{{ service.git_revision }}"
 
 {%if not manifest.privileged%}
 USER fastiot

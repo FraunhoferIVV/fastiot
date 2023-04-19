@@ -1,18 +1,22 @@
 """ data models for FastIoT and infrastructure services """
 import os
+import datetime
+
 from typing import List
 
 from pydantic import BaseModel
 
 from fastiot.cli.constants import MANIFEST_FILENAME
 from fastiot.cli.model import ServiceManifest
-
+from fastiot.cli.version import get_version
 
 class Service(BaseModel):
     """
     The model class for a service
     """
     name: str
+    build_date: str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    version: str = get_version()
     package: str
     cache: str = ""
     """
@@ -28,6 +32,12 @@ class Service(BaseModel):
     feature branches.
     Examples: mypackage-cache:latest, mypackage-cache:my-feature
     """
+
+    maintainer: str = ""
+    """ Used for docker labels """
+    git_revision: str = ""
+    """ Used for docker labels """
+
 
     def read_manifest(self, check_service_name: str = "") -> ServiceManifest:
         """ Reads out the service manifest, if not run before using the yaml-file otherwise just ``self.manifest``"""
