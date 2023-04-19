@@ -1,3 +1,6 @@
+.. role:: python(code)
+   :language: python
+
 Writing unit and integration tests
 ==================================
 
@@ -28,11 +31,12 @@ complete.
   from fastiot.msg.thing import Thing
   from fastiot.testlib import populate_test_env
 
+
   class TestMyService(unittest.IsolatedAsyncioTestCase):
   """ Asynchronous test case """
 
-    async def asyncSetUp(self):
-          """ We have to usual setup, but here as `asyncSetUp`.
+      async def asyncSetUp(self):
+          """ We have to usual setup, but here as `asyncSetUp`. """
           populate_test_env()  # We add the environment variables we generated in :file:`build/deployment`
           self.broker_connection = await NatsBrokerConnection.connect()  # Initiate a broker connection
 
@@ -52,6 +56,7 @@ See :class:`fastiot_tests.core_services.test_nats_logger.TestNatsLogger` for a s
 
 An alternative way is to start the service as a thread.
 Add imports and actual logic as needed.
+
 
 .. code:: python
 
@@ -81,12 +86,12 @@ Setting environment variables
 -----------------------------
 
 Sometimes you may want to have an environment variable to be read in your service.
-The simples way is to just add ``os.environ['MY_VAR'] = 'something'`` to your test code.
+The simples way is to just add :python:`os.environ['MY_VAR'] = 'something'` to your test code.
 
 Be aware, that those variables may stay alive for further tests and thus could interact.
 
 A more secure way is to use `mocking <https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch.dict>`_
-Use the dictionary ``os.environ`` to patch.
+Use the dictionary :python:`os.environ` to patch.
 
 See :class:`fastiot_tests.cli.test_config_cmd.TestConfigCommand` for an example.
 
@@ -104,7 +109,6 @@ FastIoT provides a simple option to look for an open port using :meth:`fastiot.u
 
 
   class MyTestCase(unittest.IsolatedAsyncioTestCase):
-
       async def asyncSetUp(self):
           populate_test_env()
           os.environ[MY_PROJECT_A_SERVICE_PORT] = str(get_local_random_port())
