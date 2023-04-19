@@ -2,10 +2,12 @@ import asyncio
 import signal
 from typing import List
 
+from fastiot.cli.env import env_cli
 from fastiot.core.logger import logging
 from fastiot.core.broker_connection import BrokerConnection, NatsBrokerConnection, Subscription
 from fastiot.env import env_basic
 from fastiot.exceptions.exceptions import ShutdownRequestedInterruption
+from fastiot.testlib import populate_test_env
 
 
 class FastIoTService:
@@ -45,6 +47,13 @@ class FastIoTService:
                 await app.run()
             finally:
                 await broker_connection.close()
+
+        if not env_cli.within_container and env_basic.config_dir == '/etc/fastiot':  # Test for default (= not set)
+            # Some helper for local development: Read in env vars like in unit tests
+            deployment_name = env_cli.use_local_deployment
+            logging.info("Service started locally. Population environment with variables from %s",
+                         deployment_name or "integration test")
+            populate_test_env(deployment_name=deployment_name)
 
         asyncio.run(run_main())
 

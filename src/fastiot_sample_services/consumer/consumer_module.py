@@ -1,7 +1,7 @@
 import asyncio
-import logging
 from datetime import datetime
 
+from fastiot import logging
 from fastiot.core import FastIoTService, loop, subscribe, ReplySubject
 from fastiot.msg.thing import Thing
 
@@ -22,5 +22,4 @@ class ExampleConsumerService(FastIoTService):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     ExampleConsumerService.main()
