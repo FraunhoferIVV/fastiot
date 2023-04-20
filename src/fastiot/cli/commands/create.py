@@ -227,6 +227,7 @@ def _find_service_package(project_config, service_package):
     service_package_list = []
     for package in os.listdir(os.path.join(project_config.project_root_dir, "src")):
         if package != project_config.library_package and package != project_config.test_package and \
+                package != '__pycache__' and \
                 os.path.isdir(os.path.join(project_config.project_root_dir, 'src', package)):
             service_package_list.append(package)
     if len(service_package_list) == 0:
