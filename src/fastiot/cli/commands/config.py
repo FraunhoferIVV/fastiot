@@ -381,8 +381,8 @@ def _create_infrastructure_service_compose_infos(env: Dict[str, str],
         service_ports: List[str] = []
         for port in service.ports:
             if port.env_var:
-                value = env.get(port.env_var, str(port.default_port_mount))
-                value = str(infrastructure_ports.get(port.env_var, value))
+                value = infrastructure_ports.get(port.env_var, str(port.default_port_mount))
+                value = str(env.get(port.env_var, value))
             else:
                 value = str(port.default_port_mount)
             if port.env_var not in env:

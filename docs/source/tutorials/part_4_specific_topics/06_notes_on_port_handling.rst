@@ -27,6 +27,8 @@ the built configuration. If you don't want this behavior, you can use the no-use
 :command:`fiot config --port-offset=0 --no-use-port-import`.
 This will generate completely new ports, unless your :file:`.env` in your :file:`deployments/my_deployment/` has
 something statically configured.
+Statically configured ports will always have precedence.
+Use this with caution as this may cause trouble on other systems or the CI runner if any conflicts occur.
 
 **Attention**: Even though there are 65336 ports (0..1024 only available to users with system privileges) it may happen,
 that a port is in use when you start your deployment. In this case you have to rerun fiot config with the option
@@ -47,6 +49,7 @@ you can simply fixate ports there, e.g.:
 will set the TCP port for a MongoDB to ``20334``.
 See :ref:`deployment_yaml` for more details on handling deployments).
 
+**Attention:** Use this with caution as this may cause trouble on other systems or the CI runner if any conflicts occur.
 
 Ports within the docker networks
 --------------------------------
