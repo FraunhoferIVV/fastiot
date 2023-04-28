@@ -7,7 +7,6 @@ from typing import Type, Optional
 
 from fastiot.cli.constants import CONFIGURE_FILE_NAME
 from fastiot.cli.model.project import ProjectContext
-from fastiot.core import FastIoTService
 from fastiot.env.env import env_tests
 
 
@@ -56,13 +55,13 @@ def _set_cwd_project_root_dir():
     sys.exit(1)
 
 
-async def init_background_process(service: Type[FastIoTService], startup_time: float = 0.2):
+async def init_background_process(service: object, startup_time: float = 0.2):
     """
     Helper to start a FastIoT Service as background task.
     This may help if your service already has many internal tasks and needs to act as a server for your unit or
     integration tests.
 
-    Be sure to stop your service afterwards like in the following example:
+    Be sure to stop your service afterward like in the following example:
 
     >>> from fastiot_sample_services.producer.producer_module import ExampleProducerService
     >>> from fastiot.testlib import init_background_process
@@ -101,7 +100,7 @@ class BackgroundProcess:
     >>> # Outside the context the service will be terminated and killed
     """
 
-    def __init__(self, service: Type[FastIoTService], startup_time: float = 0.2, stop_time: float = 0.05):
+    def __init__(self, service: object, startup_time: float = 0.2, stop_time: float = 0.05):
         """
         Constructor
 
