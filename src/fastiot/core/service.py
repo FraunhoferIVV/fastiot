@@ -1,6 +1,6 @@
 import asyncio
 import signal
-from typing import List
+from typing import List, Optional
 
 from fastiot.cli.env import env_cli
 from fastiot.core.logger import logging
@@ -57,7 +57,7 @@ class FastIoTService:
 
         asyncio.run(run_main())
 
-    def __init__(self, broker_connection: BrokerConnection, **kwargs):
+    def __init__(self, broker_connection: Optional[BrokerConnection] = None, **kwargs):
         super().__init__(**kwargs)
         self.broker_connection = broker_connection
         self._shutdown_event = asyncio.Event()
@@ -180,6 +180,8 @@ class FastIoTService:
     async def __aenter__(self):
         self._shutdown_event.clear()
         self._setup_annotations()
+        if not self.broker_connection:
+            self.broker_connection = await NatsBrokerConnection.connect()
         await self._start()
         await self._start_annotated_subs()
         await self._start_annotated_loops()

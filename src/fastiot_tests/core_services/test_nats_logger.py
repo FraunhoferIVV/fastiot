@@ -19,7 +19,7 @@ class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
         self.broker_connection = await NatsBrokerConnection.connect()
 
     async def test_unfiltered(self):
-        async with NatsLoggerService(broker_connection=self.broker_connection) as service:
+        async with NatsLoggerService() as service:
             with self.assertLogs(level="INFO") as capture:
                 try:
                     await self.broker_connection.publish(Thing.get_subject(name='unfiltered'), MESSAGE)
@@ -30,7 +30,7 @@ class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
     async def test_filtered(self):
         os.environ[FASTIOT_NATS_LOGGER_FILTER_FIELD] = 'value'
         os.environ[FASTIOT_NATS_LOGGER_FILTER_VALUE] = '25'
-        async with NatsLoggerService(broker_connection=self.broker_connection) as _:
+        async with NatsLoggerService() as _:
             with self.assertLogs(level="INFO") as capture:
                 try:
                     await self.broker_connection.publish(Thing.get_subject(name='filtered'), MESSAGE)
