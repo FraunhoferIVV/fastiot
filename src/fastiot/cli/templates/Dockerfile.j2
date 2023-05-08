@@ -32,7 +32,7 @@ HEALTHCHECK \
 
 {% if manifest.npm %}
 ### Stage: npm ###
-FROM node:14-buster-slim as build-npm
+FROM {{ manifest.npm.node_base_image }} as build-npm
 COPY src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}} src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}
 WORKDIR src/{{ service.package }}/{{ service.name }}/{{manifest.npm.src}}
 RUN npm ci
