@@ -47,9 +47,11 @@ you can simply fixate ports there, e.g.:
   FASTIOT_MONGO_DB_PORT=20334
 
 will set the TCP port for a MongoDB to ``20334``.
+Setting a port in your environment has always the highest priority.
 See :ref:`deployment_yaml` for more details on handling deployments).
 
 **Attention:** Use this with caution as this may cause trouble on other systems or the CI runner if any conflicts occur.
+
 
 Ports within the docker networks
 --------------------------------

@@ -283,15 +283,18 @@ def _create_ports(env: Dict[str, str], env_additions: Dict[str, str],
     ports = []
     for i, port in enumerate(manifest.ports):
 
-        if local_port_offset is None:
-            external_port = int(env.get(port.env_variable, str(port.port)))
+        if local_port_offset is None:  # Nothing has been defined, use default port for service
+            external_port = port.port
         elif local_port_offset == 0:
             external_port = get_local_random_port()
         else:
             external_port = local_port_offset + i
 
-        if use_port_import:
+        if use_port_import:  # If defined lookup already defined port in build dir
             external_port = build_env.get(port.env_variable, external_port)
+
+        # Highest priority for ports the user has manually taken care of and defined it in his environment
+        external_port = env.get(port.env_variable, external_port)
 
         env_service_internal_modifications[port.env_variable] = str(port.port)
         env_additions[port.env_variable] = str(external_port)
