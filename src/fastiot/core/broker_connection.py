@@ -83,7 +83,10 @@ class NatsBrokerSubscriptionReplySubject(NatsBrokerSubscription):
     def __init__(self,
                  subject: ReplySubject,
                  cb: SubscriptionReplyCallback,
-                 send_reply_fn: Callable[[Subject, Msg], Coroutine[None, None, None]]):
+                 send_reply_fn: Callable[[Subject, Msg], Coroutine[None, None, None]],
+                 **kwargs):
+        super().__init__(**kwargs)
+
         self._subject = subject
         self._cb = cb
         self._num_cb_params = len(signature(cb).parameters)
