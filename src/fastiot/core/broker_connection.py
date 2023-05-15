@@ -393,6 +393,10 @@ class BrokerConnectionDummy(BrokerConnection):
     A dummy broker implementation to mock dependencies.
     """
 
+    @property
+    def is_connected(self) -> bool:
+        return True
+
     async def subscribe(self,
                         subject: Subject,
                         cb: SubscriptionCallback) -> Subscription:
