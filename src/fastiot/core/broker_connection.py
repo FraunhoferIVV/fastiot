@@ -195,7 +195,7 @@ class BrokerConnection(ABC):
 
         :param subject: The subject used for sending the request.
         :param msg: The request
-        :param timeout: The time to wait for an answer. Raises ErrTimeout if no answer is received in time.
+        :param timeout: The time in seconds to wait for an answer. Raises ErrTimeout if no answer is received in time.
         :return The response
         """
         inbox = subject.make_generic_reply_inbox()
