@@ -1,7 +1,7 @@
 import asyncio
 import concurrent.futures
 import threading
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from asyncio import get_running_loop
 from inspect import signature
 from typing import Any, Callable, Coroutine, Optional
@@ -208,6 +208,11 @@ class BrokerConnection(ABC):
             await sub.unsubscribe()
         return result
 
+    @property
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """ Return the connection status e.g. for health checks """
+
     def run_threadsafe_nowait(self, coro: Coroutine) -> concurrent.futures.Future:
         """
         Runs a coroutine on brokers event loop. This method is thread-safe. It
@@ -368,6 +373,9 @@ class NatsBrokerConnection(BrokerConnection):
             reply=reply_str
         )
 
+    @property
+    def is_connected(self):
+        return self._client.is_connected
 
 class SubscriptionDummy(Subscription):
     async def unsubscribe(self):
