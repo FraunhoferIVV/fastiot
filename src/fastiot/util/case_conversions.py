@@ -3,7 +3,7 @@ from typing import Dict, List
 
 def kebab_case_to_snake_case(d: Dict):
     """
-    Converts keys of dictionary recursivly from kebab case, e.g. 'my-key' to snake case, e.g. 'my_key'.
+    Converts keys of dictionary recursively from kebab case, e.g. ``my-key`` to snake case, e.g. ``my_key``.
     """
 
     keys = list(d.keys())

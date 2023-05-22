@@ -13,13 +13,15 @@ class CSVReader:
 
     Example usage:
 
-    with CSVReader('my_file.csv',
-                   required_fields=['my_field1', 'my_field2'],
-                   optional_fields=['my_optional_field2']) as reader:
-        for data_row in reader:
-            print(data_row['my_field1'])
-            print(data_row['my_field2'])
-            print(data_row.get('my_optional_field2', 'unset'))
+    ..  code-block:: python
+
+        with CSVReader('my_file.csv',
+                       required_fields=['my_field1', 'my_field2'],
+                       optional_fields=['my_optional_field2']) as reader:
+            for data_row in reader:
+                print(data_row['my_field1'])
+                print(data_row['my_field2'])
+                print(data_row.get('my_optional_field2', 'unset'))
     """
 
     def __init__(self,

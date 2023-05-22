@@ -9,18 +9,18 @@ class RedisEnv:
     """ Environment variables to connect to the Redis Server """
     @property
     def host(self) -> str:
-        """ .. envvar:: FASTIOT_INFLUX_DB_HOST
+        """ .. envvar:: FASTIOT_REDIS_HOST
 
-        Use to get/set the influx database host. This is usually either ``influxdb`` within the docker network or
-        ``localhost`` when developing against a local influxdb.
+        Use to get/set the redis database host. This is usually either ``redis`` within the docker network or
+        ``localhost`` when developing against a local redis server.
         """
         return os.getenv(FASTIOT_REDIS_HOST, 'localhost')
 
     @property
     def port(self) -> int:
-        """ .. envvar:: FASTIOT_INFLUX_DB_PORT
+        """ .. envvar:: FASTIOT_REDIS_PORT
 
-        Use to get/set the Redis port, defaults to 8086. """
+        Use to get/set the Redis port, defaults to 6379. """
         return int(os.getenv(FASTIOT_REDIS_PORT, RedisService().get_default_port()))
 
     @property

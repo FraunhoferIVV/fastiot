@@ -22,6 +22,7 @@ class FastIoTService:
         creating a new service. Do not overwrite, unless you know exactly what you are doing.
 
         :param kwargs: kwargs will be passed to class constructor.
+
         """
 
         async def run_main():
@@ -123,14 +124,14 @@ class FastIoTService:
     async def wait_for_shutdown(self, timeout: float = 0.0) -> bool:
         """
         Method to wait for service shutdown. This is helpfull if you have a loop
-        running forever till the service needs to shutdown.
+        running forever till the service needs to shut down.
 
         Shutdown may occur when some other parts of the service fail like
         database connection or broker connection.
 
         Per default, it will wait indefinetly, but you can specify a timeout. If
         timeout exceeds, it will not raise a timeout error, but instead return
-        false. Otherwise it will return true.
+        false. Otherwise, it will return true.
 
         Example:
         >>> while await self.wait_for_shutdown(1.0) is False:
@@ -138,7 +139,7 @@ class FastIoTService:
 
         :param timeout: Specify a time you want to wait for the shutdown. A
                         value of 0.0 (default) will wait indefinetly.
-        :result Return true if shutdown is requested, false if timeout occured.
+        :returns: Return true if shutdown is requested, false if timeout occured.
         """
         if timeout < 0:
             raise ValueError("Timeout must be greater or equal zero")
@@ -163,7 +164,7 @@ class FastIoTService:
         requested.
 
         :param coro: The coroutine to wait for
-        :returns The result of the coroutine
+        :returns: The result of the coroutine
         """
         do_raise_err = True
         async def _wait_and_raise_interruption():

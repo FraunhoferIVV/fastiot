@@ -1,4 +1,8 @@
 """
+=================
+Dashboard Service
+=================
+
 This Module is able to show live data received from nats ('Things') collected by sensors in a web application.
 Via callbacks a link from the web application back to the data bank shown is given.
 Classes HistoricSensor and LiveSensor were added to modularise the code.
@@ -18,7 +22,9 @@ This concerns manly the connection data, like Ip address, port, the name of the 
 
 
 necessary yaml file
-::
+
+.. code-block:: yaml
+
     subject_name: 'thing.*' or 'thing.>' # this subject_name defines in which format the message is subscribed.
     #dashboards shown in the web applications.
     initial_start_date: now-30:00:00   #initial date shown in historic data. This can be set with either one of these

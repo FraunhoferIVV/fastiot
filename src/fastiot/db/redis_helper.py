@@ -34,9 +34,9 @@ class RedisHelper:
     Saves files in the redis Database and sends the ID of the files  as  :class:`fastiot.msg.redis.RedisMsg`.
 
     You can send files by using :meth:`send_data` you must specify the data to send and the subject under which the data
-    should be published. The max number of Datasets you can store at once is specified by :var: `max_data_sets` .
+    should be published. The max number of Datasets you can store at once is specified by ``max_data_sets`` .
     If you add a Dataset above the given limit the first Dataset stored is deleted. When you have problems that an ID
-    is overwritten before you accessed the data you can change the :var:`id_buffer` to have more Ids before an ID is
+    is overwritten before you accessed the data you can change the ``id_buffer`` to have more Ids before an ID is
     reused.
 
     You can access the stored data with :meth:`get_data`. The Id of the Data has to be provided. and the returned data
@@ -59,7 +59,7 @@ class RedisHelper:
         """ The max number of Datasets you can store at once """
         self.id_counter = 0
         self.id_buffer = 2
-        """ :var:`max_data_sets` * :var:`id_buffer` is the total number of Ids, used before an id is overwritten """
+        """ ``max_data_sets`` * ``id_buffer`` is the total number of Ids, used before an id is overwritten """
 
     async def _create_id(self) -> int:
         if self.id_counter >= (self.max_data_sets * self.id_buffer):

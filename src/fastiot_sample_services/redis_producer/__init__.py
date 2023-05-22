@@ -1,7 +1,7 @@
 """
-=====================
+======================
 Example Redis Producer
-=====================
+======================
 
 Redis Producer gives an example on how to interact with :class:`fastiot.db.redis_helper.RedisHelper`.
 

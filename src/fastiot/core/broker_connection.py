@@ -1,7 +1,7 @@
 import asyncio
 import concurrent.futures
 import threading
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from asyncio import get_running_loop
 from inspect import signature
 from typing import Any, Callable, Coroutine, Optional

@@ -10,7 +10,7 @@ def parse_bool_flag(env_var: str, default: bool) -> bool:
 
     :param env_var: The name of the env var
     :param default: The default flag if the env var doesn't exist in os environment.
-    :return The flag, true or false
+    :return: The flag, true or false
     """
     if env_var in os.environ:
         return os.environ[env_var].lower() == 'true'
