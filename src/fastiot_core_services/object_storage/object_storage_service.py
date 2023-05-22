@@ -11,7 +11,7 @@ from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo
 from fastiot.env import env_mongodb
 from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
 from fastiot.msg.hist import HistObjectReq, HistObjectResp
-from fastiot.util.read_yaml import read_config
+from fastiot.util.config_helper import read_config
 from fastiot_core_services.object_storage.mongodb_handler import MongoDBHandler
 from fastiot_core_services.object_storage.object_storage_helper_fn import build_query_dict
 

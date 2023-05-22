@@ -65,7 +65,7 @@ class BasicEnv:
 
         Use this variable to differentiate between multiple instances of the same service. The result is available as
         ``self.service_id``. It is for example used to read a configuration file for each service with
-        :func:`fastiot.util.read_yaml.read_config`. See
+        :func:`fastiot.util.config_helper.read_config`. See :ref:`configuration_for_service` for more information.
         """
         return os.getenv(FASTIOT_SERVICE_ID, '')
 

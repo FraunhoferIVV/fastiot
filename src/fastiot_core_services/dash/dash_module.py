@@ -17,7 +17,7 @@ from fastiot.db.mongodb_helper_fn import get_mongodb_client_from_env
 from fastiot.env import env_mongodb
 from fastiot.exceptions import ServiceError
 from fastiot.msg.thing import Thing
-from fastiot.util.read_yaml import read_config
+from fastiot.util.config_helper import read_config
 from fastiot_core_services.dash.env import env_dash
 from fastiot_core_services.dash.model.historic_sensor import HistoricSensor
 from fastiot_core_services.dash.model.live_sensor import LiveSensor
