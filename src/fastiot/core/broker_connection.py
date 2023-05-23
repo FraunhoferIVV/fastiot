@@ -199,7 +199,7 @@ class BrokerConnection(ABC):
         :param subject: The subject used for sending the request.
         :param msg: The request
         :param timeout: The time in seconds to wait for an answer. Raises ErrTimeout if no answer is received in time.
-        :return The response
+        :return: The response
         """
         inbox = subject.make_generic_reply_inbox()
         msg_queue = asyncio.Queue()
@@ -297,7 +297,7 @@ class BrokerConnection(ABC):
         :param subject: The subject info to publish the request.
         :param msg: The request message.
         :param timeout: The timeout for the broker call.
-        :return The requested message.
+        :return: The requested message.
         """
         return self.run_threadsafe(
             coro=self.request(subject=subject, msg=msg, timeout=timeout)

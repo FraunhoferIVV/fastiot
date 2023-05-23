@@ -26,7 +26,7 @@ your :envvar:`PYTHONPATH` and and execute :command:`bin/fiot` instead. Run the f
 
 .. code-block:: bash
 
-  export PYTHONPATH="$PWD/src":$PYTHONPATH
+  export PYTHONPATH="$PWD/src:$PYTHONPATH"
   bin/fiot --help
 
 Docker Images and custom docker-compose files based on your sam-compose.yaml are built via :command:`fiot build` and

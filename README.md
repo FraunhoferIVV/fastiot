@@ -79,7 +79,12 @@ To run services locally, in your IDE or within a container you may also refer to
 
 Simply check out this project and install the dependencies listed in `requirements.txt`.
 To run all tests and sample services you may also install additional packages listed in 
-`requirements/requirements-all.txt`. 
+`requirements/requirements.all.txt`.
+Do *NOT* install fastiot when developing within this code.
+This will produce duplicates and may show weird errors. 
+If in doubt run `pip uninstall fastiot`.
+
+To make sure you can run commands like `fiot` you must add the `src`-directory to your Python Path: `export PYTHONPATH="$(pwd)/src:$PYTHONPATH`
 
 ### Project structure
 
