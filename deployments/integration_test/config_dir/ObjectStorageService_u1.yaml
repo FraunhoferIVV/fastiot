@@ -1,12 +1,15 @@
 search_index:
- - "measurement_id"
- - "name"
- - "_timestamp"
-collection: 'thing'
-subject_name: 'thing.*'
-reply_subject_name: 'objects'
-enable_overwriting: true
-identify_object_with:
- - "measurement_id"
- - "name"
- - "_timestamp"
+  thing:
+    - "measurement_id"
+    - "name"
+    - "_timestamp"
+
+subscriptions:
+  'thing.*':
+    collection: 'thing'
+    reply_subject_name: 'objects'
+    enable_overwriting: true
+    identify_object_with:
+      - "measurement_id"
+      - "name"
+      - "_timestamp"

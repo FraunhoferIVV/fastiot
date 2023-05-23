@@ -1,6 +1,10 @@
 search_index:
-  - "_subject"
-  - "_timestamp"
-collection: things
-subject_name: 'thing.*'
+  things:
+    - "_subject"
+    - "_timestamp"
+  other_things: ['_subject']
+
+subscriptions:
+  'thing.*':
+    collection: "things"
 

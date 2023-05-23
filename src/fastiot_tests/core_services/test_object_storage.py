@@ -215,12 +215,12 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         # modify messages
         messages = MESSAGES.copy()
         for idx, msg in enumerate(messages):
-            msg.value = idx*7
+            msg.value = idx * 7
         # send modified messages
         for msg in messages:
             try:
                 await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-                await asyncio.sleep(0.002)
+                await asyncio.sleep(0.005)
             except RuntimeError:
                 pass
         # check results
@@ -236,7 +236,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         for msg in MESSAGES:
             try:
                 await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-                await asyncio.sleep(0.002)
+                await asyncio.sleep(0.005)
             except RuntimeError:
                 pass
         # modify messages (add new things)
@@ -249,7 +249,7 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         for msg in messages:
             try:
                 await self.broker_connection.publish(Thing.get_subject(msg.name), msg)
-                await asyncio.sleep(0.002)
+                await asyncio.sleep(0.005)
             except RuntimeError:
                 pass
         # check results
