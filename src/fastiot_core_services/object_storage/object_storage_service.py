@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from typing import List, Dict
@@ -29,14 +30,14 @@ class ObjectStorageService(FastIoTService):
 
         self._create_index()
 
-
     def _create_index(self):
 
         for collection, index_config in self.service_config.search_index.items():
             for index in index_config:
                 if "," in index:  # Build compound index
-                    self._logger.warning("Using a list seperated by ',' is deprecated. Please convert your configuration "
-                                         "to a proper YAML list.")
+                    self._logger.warning(
+                        "Using a list seperated by ',' is deprecated. Please convert your configuration "
+                        "to a proper YAML list.")
                     indices = index.split(",")
                     index = [i.strip() for i in indices]
 
@@ -94,10 +95,9 @@ class ObjectStorageService(FastIoTService):
             return list(self.service_config.subscriptions.values())[0]
 
         for subscription_name in self.service_config.subscriptions.keys():
-            regex =r'v1\.' + subscription_name.replace('.', r'\.').replace("*", r"[^\.]*").replace(">", r"\..*") + '$'
-            if re.finditer(regex, subject_name):
+            regex = r'v1\.' + subscription_name.replace('.', r'\.').replace("*", r"[^\.]*").replace(">", r"\..*") + '$'
+            if re.findall(regex, subject_name):
                 return self.service_config.subscriptions[subscription_name]
-
 
     def _overwrite_data(self, mongo_data, subscription_config: SubscriptionConfig):
 
@@ -127,7 +127,7 @@ class ObjectStorageService(FastIoTService):
 
         self._logger.debug("Received request on subject %s with message %s", subject, hist_object_req)
         query_dict = build_query_dict(hist_object_req=hist_object_req)
-        query_results = self._query_db(subscription_config= sub_config,
+        query_results = self._query_db(subscription_config=sub_config,
                                        query_dict=query_dict, limit_nr=hist_object_req.limit)
         values = [from_mongo_data(result) for result in query_results]
         if values:
@@ -141,3 +141,10 @@ class ObjectStorageService(FastIoTService):
     def _query_db(self, subscription_config: SubscriptionConfig, query_dict: Dict, limit_nr: int) -> List:
         collection = self.database[subscription_config.collection]
         return list(collection.find(query_dict).limit(limit_nr))
+
+
+if __name__ == '__main__':
+    # Change this to reduce verbosity or remove completely to use `FASTIOT_LOG_LEVEL` environment variable to configure
+    # logging.
+    logging.basicConfig(level=logging.DEBUG)
+    ObjectStorageService.main()
