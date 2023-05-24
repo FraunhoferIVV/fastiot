@@ -1,6 +1,6 @@
 search_index:
   custom_test_msg_list:
-    - ["_subject", "_timestamp"]
+    - "_subject, _timestamp"
 
 subscriptions:
   custom_test_msg_list:

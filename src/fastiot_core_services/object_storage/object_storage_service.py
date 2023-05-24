@@ -6,7 +6,8 @@ from typing import List, Dict
 import pymongo
 
 from fastiot.core import FastIoTService, Subject
-from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign
+from fastiot.core.subject_helper import sanitize_pub_subject_name, filter_specific_sign, MSG_FORMAT_VERSION, \
+    WILDCARD_SAME_LEVEL, HIERARCHY
 from fastiot.core.time import get_time_now
 from fastiot.env import env_basic, env_mongodb
 from fastiot.msg.custom_db_data_type_conversion import to_mongo_data, from_mongo_data
@@ -33,7 +34,7 @@ class ObjectStorageService(FastIoTService):
     def _create_index(self):
 
         for collection, index_config in self.service_config.search_index.items():
-            for index in index_config:
+            for index_nr, index in enumerate(index_config):
                 if "," in index:  # Build compound index
                     self._logger.warning(
                         "Using a list seperated by ',' is deprecated. Please convert your configuration "
@@ -53,8 +54,7 @@ class ObjectStorageService(FastIoTService):
                     index = [(index, pymongo.ASCENDING)]
 
                 self._mongodb_handler.create_index(collection=self.database[collection],
-                                                   index=index,
-                                                   index_name="compound_index")
+                                                   index=index, index_name=f"index_{index_nr}")
 
     async def _start(self):
 
@@ -91,13 +91,19 @@ class ObjectStorageService(FastIoTService):
             self._overwrite_data(mongo_data, subscription_config)
 
     def _find_matching_subject(self, subject_name: str) -> SubscriptionConfig:
-        if len(self.service_config.subscriptions) == 0:  # Quick fix for most tasks
+        if len(self.service_config.subscriptions) == 1:  # Quick fix for most tasks
             return list(self.service_config.subscriptions.values())[0]
 
-        for subscription_name in self.service_config.subscriptions.keys():
-            regex = r'v1\.' + subscription_name.replace('.', r'\.').replace("*", r"[^\.]*").replace(">", r"\..*") + '$'
+        for subscription_name in self.service_config.subscriptions:
+            regex = MSG_FORMAT_VERSION + r'\.'
+            regex += subscription_name.replace('.', r'\.'). \
+                         replace(WILDCARD_SAME_LEVEL, r"[^\.]*"). \
+                         replace(HIERARCHY, r".*") + '$'
             if re.findall(regex, subject_name):
                 return self.service_config.subscriptions[subscription_name]
+
+        raise RuntimeError(f"Could not find any configured subject to match the message received via subject "
+                           f"`{subject_name}`")
 
     def _overwrite_data(self, mongo_data, subscription_config: SubscriptionConfig):
 

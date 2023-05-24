@@ -373,5 +373,35 @@ class TestObjectStorage(unittest.IsolatedAsyncioTestCase):
         # check results
         self.assertEqual(5, len(results))
 
+    async def test_multiple_subscriptions(self):
+        self.get_mongo_col(service_id='double', collection_name='things')
+        await self._start_service()
+        self._database['things'].delete_many({})
+        self._database['things_two'].delete_many({})
+        self._database['things_three'].delete_many({})
+
+        try:
+            await self.broker_connection.publish(msg=MESSAGES[0],
+                                                 subject=Thing.get_subject('one.one'))
+            await self.broker_connection.publish(msg=MESSAGES[0],
+                                                 subject=Thing.get_subject('two'))
+            await self.broker_connection.publish(msg=MESSAGES[0],
+                                                 subject=Thing.get_subject('three.a.little.deeper'))
+            await self.broker_connection.publish(msg=MESSAGES[1],
+                                                 subject=Thing.get_subject('three'))  # Should not be saved!
+            await asyncio.sleep(0.004)
+        except RuntimeError:
+            pass
+
+        results_1 = list(self._database['things'].find({}))
+        results_2 = list(self._database['things_two'].find({}))
+        results_3 = list(self._database['things_three'].find({}))
+
+        for i, result in enumerate([results_1, results_2, results_3]):
+            self.assertEqual(1, len(result), f"Length of result {i+1} does not match!")
+            self.assertEqual(MESSAGES[0], parse_object(result[0], Thing))
+
+
+
 if __name__ == '__main__':
     unittest.main()

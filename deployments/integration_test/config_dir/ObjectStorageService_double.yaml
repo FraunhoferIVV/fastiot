@@ -1,0 +1,12 @@
+subscriptions:
+  'thing.one.*':
+    collection: "things"
+    reply_subject_name: nothing
+
+  'thing.two':
+    collection: "things_two"
+    reply_subject_name: nothing
+
+  'thing.three.>':
+    collection: "things_three"
+    reply_subject_name: nothing
