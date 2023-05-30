@@ -62,8 +62,6 @@ class FastIoTService:
                          deployment_name or "integration test")
             populate_test_env(deployment_name=deployment_name)
 
-        asyncio.run(run_main())
-
     def __init__(self, broker_connection: Optional[BrokerConnection] = None, **kwargs):
         super().__init__(**kwargs)
         self.broker_connection = broker_connection
@@ -89,7 +87,7 @@ class FastIoTService:
         for name in dir(self):
             if name.startswith('__'):
                 continue
-            attr = self.__getattribute__(name)
+            attr = getattr(self, name)
             if hasattr(attr, '_fastiot_subject'):
                 self._subscription_fns.append(attr)
             if hasattr(attr, '_fastiot_reply_subject'):
@@ -180,8 +178,8 @@ class FastIoTService:
             if do_raise_err:
                 raise ShutdownRequestedInterruption()
 
-        for c in asyncio.as_completed([coro, _wait_and_raise_interruption()]):
-            result = await c
+        for coro_completed in asyncio.as_completed([coro, _wait_and_raise_interruption()]):
+            result = await coro_completed
             do_raise_err = False  # We don't want error to be raised if coroutine finished successfully.
             return result
 
@@ -242,14 +240,14 @@ class FastIoTService:
     async def _start_annotated_subs(self):
         for subscription_fn in self._subscription_fns:
             sub = await self.broker_connection.subscribe(
-                subject=subscription_fn._fastiot_subject,
+                subject=subscription_fn._fastiot_subject,  # pylint: disable=protected-access
                 cb=subscription_fn
             )
             self._subs.append(sub)
 
         for subscription_fn in self._reply_subscription_fns:
             sub = await self.broker_connection.subscribe_reply_cb(
-                subject=subscription_fn._fastiot_reply_subject,
+                subject=subscription_fn._fastiot_reply_subject,  # pylint: disable=protected-access
                 cb=subscription_fn
             )
             self._subs.append(sub)
