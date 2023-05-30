@@ -1,6 +1,6 @@
 import asyncio
 import signal
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from fastiot.cli.env import env_cli
 from fastiot.core.logger import logging
@@ -121,11 +121,12 @@ class FastIoTService:
         err = None
         try:
             await coro
-        except Exception as e:
+        except Exception as exception:  # pylint: disable=broad-exception-caught
             logging.exception("Uncaught exception raised inside task")
-            err = e
+            err = exception
         if err:
-            await self.request_shutdown("Task failed with an exception")
+
+            await self.request_shutdown("Task failed with an exception", exception=err)
 
     async def wait_for_shutdown(self, timeout: float = 0.0) -> bool:
         """
@@ -225,10 +226,13 @@ class FastIoTService:
         await self._stop()
         await self._stop_tasks()
 
-    async def request_shutdown(self, reason: str = ''):
+    async def request_shutdown(self, reason: str = '', exception: Optional[Type[Exception]] = None ):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
-        if self._shutdown_event.is_set() is False and reason:
-            logging.info("Initial shutdown requested with reason: %s.", str(reason))
+        if self._shutdown_event.is_set() is False and (reason or exception):
+            if reason:
+                self._logger.info("Initial shutdown requested with reason: %s.", str(reason))
+            if exception:
+                self._logger.exception(exception)
         self._shutdown_event.set()
 
     async def _start_annotated_loops(self):
