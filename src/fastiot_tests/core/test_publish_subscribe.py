@@ -65,11 +65,12 @@ class TestPublishSubscribeException(unittest.IsolatedAsyncioTestCase):
     async def test_raise_exception_in_subscription(self):
         async def cb(*_):
             raise ValueError()
-        populate_test_env()
 
+        populate_test_env()
 
         err = None
         event = asyncio.Event()
+
         async def error_cb(exception):
             nonlocal err
             err = exception

@@ -19,7 +19,7 @@ class TestNatsLogger(unittest.IsolatedAsyncioTestCase):
         self.broker_connection = await NatsBrokerConnection.connect()
 
     async def test_unfiltered(self):
-        async with NatsLoggerService() as service:
+        async with NatsLoggerService() as _:
             with self.assertLogs(level="INFO") as capture:
                 try:
                     await self.broker_connection.publish(Thing.get_subject(name='unfiltered'), MESSAGE)
