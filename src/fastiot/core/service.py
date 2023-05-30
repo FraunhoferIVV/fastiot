@@ -49,6 +49,12 @@ class FastIoTService:
             finally:
                 await broker_connection.close()
 
+        cls._try_setup_test_env()
+
+        asyncio.run(run_main())
+
+    @staticmethod
+    def _try_setup_test_env():
         if not env_cli.within_container and env_basic.config_dir == '/etc/fastiot':  # Test for default (= not set)
             # Some helper for local development: Read in env vars like in unit tests
             deployment_name = env_cli.use_local_deployment
@@ -181,6 +187,7 @@ class FastIoTService:
     async def __aenter__(self):
         self._shutdown_event.clear()
         self._setup_annotations()
+        self._try_setup_test_env()
         if not self.broker_connection:
             self.broker_connection = await NatsBrokerConnection.connect()
         await self._start()
