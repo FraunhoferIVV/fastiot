@@ -31,15 +31,54 @@ class LoopingFastIoTTestService(FastIoTService):
 
 class TestPublishSubscribe(unittest.IsolatedAsyncioTestCase):
 
-    async def test_regular_output(self):
+    async def test_regular_output_aenter(self):
         with self.assertLogs(level="INFO") as capture:
             async with LoopingFastIoTTestService(broker_connection=BrokerConnectionDummy()) as service:
+                shutdown_requested = await service.wait_for_shutdown(timeout=0.01)
+                self.assertFalse(shutdown_requested)
                 await asyncio.sleep(0.03)
                 self.assertEqual(2, sum("Loop Running" in t for t in capture.output))
-                service.request_shutdown()
+                await service.request_shutdown()
 
-    async def test_crash_in_loop(self):
+    async def test_crash_in_loop_aenter(self):
         async with LoopingFastIoTTestService(broker_connection=BrokerConnectionDummy()) as service:
+            shutdown_requested = await service.wait_for_shutdown(timeout=0.01)
+            self.assertFalse(shutdown_requested)
+
             service.set_crash_parameter(True)
+
             shutdown_requested = await service.wait_for_shutdown(timeout=0.25)
             self.assertTrue(shutdown_requested)
+
+    async def test_regular_output(self):
+        service = LoopingFastIoTTestService(broker_connection=BrokerConnectionDummy())
+        with self.assertLogs(level="INFO") as capture:
+            service_task = asyncio.create_task(service.run())
+            await asyncio.sleep(0.05)
+
+            shutdown_requested = await service.wait_for_shutdown(timeout=0.01)
+            self.assertFalse(shutdown_requested)
+
+            self.assertEqual(2, sum("Loop Running" in t for t in capture.output))
+            await service.request_shutdown()
+
+        shutdown_requested = await service.wait_for_shutdown(timeout=10)
+        self.assertTrue(shutdown_requested)
+        service_task.cancel()
+
+    async def test_crash_in_loop(self):
+        service = LoopingFastIoTTestService(broker_connection=BrokerConnectionDummy())
+        service_task = asyncio.create_task(service.run())
+        shutdown_requested = await service.wait_for_shutdown(timeout=0.01)
+        self.assertFalse(shutdown_requested)
+
+        service.set_crash_parameter(True)
+
+        shutdown_requested = await service.wait_for_shutdown(timeout=10)
+        self.assertTrue(shutdown_requested)
+
+        service_task.cancel()
+
+
+if __name__ == '__main__':
+    unittest.main()

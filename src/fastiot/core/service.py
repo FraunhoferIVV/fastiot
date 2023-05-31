@@ -123,7 +123,6 @@ class FastIoTService:
             logging.exception("Uncaught exception raised inside task")
             err = exception
         if err:
-
             await self.request_shutdown("Task failed with an exception", exception=err)
 
     async def wait_for_shutdown(self, timeout: float = 0.0) -> bool:
