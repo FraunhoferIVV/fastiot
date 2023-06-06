@@ -15,3 +15,6 @@ class ServiceComposeInfo(BaseModel):
     privileged: bool = False
     extras: str = ""
     # Must contain valid YAML including newlines if necessary.
+
+    labels: List = []
+    extra_networks: List[str] = []

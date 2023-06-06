@@ -35,7 +35,10 @@ class ServiceConfig(BaseModel):
     """ The specified tag. If given it will override the tag for the service """
     environment: Dict[str, str] = {}
     """ Includes all environment variables specifically for this service """
-
+    labels: list = []
+    """ Provide any docker labels like needed for Traefik """
+    extra_networks: list = []
+    """Hook this service to an external docker network by e.g. another deployment on the same host."""
 
 class AnsibleHost(BaseModel):
     """

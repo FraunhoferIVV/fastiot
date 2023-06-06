@@ -139,6 +139,11 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 env_additions[key] = os.path.join(context.deployment_dir(name=deployment_name), value)
 
 
+        # Collect additional, external docker networks
+        external_networks = []
+        for service in services:
+            external_networks += service.extra_networks
+
         shutil.copytree(context.deployment_dir(name=deployment_name), deployment_build_dir, dirs_exist_ok=True,
                         ignore=lambda _, __: ['deployment.yaml', '.env'])
 
@@ -149,7 +154,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 environment_for_docker_compose_file=env_service_internal_modifications,
                 services=services + infrastructure_services,
                 env_file=env or env_additions,
-                deployment_config=deployment_config
+                deployment_config=deployment_config,
+                external_networks=external_networks
             ))
 
         env_filename = context.env_file_for_deployment(name=deployment_name)
@@ -231,7 +237,9 @@ def _create_services_compose_infos(env: Dict[str, str],
                                          volumes=volumes,
                                          devices=devices,
                                          privileged=manifest.privileged,
-                                         extras=extras))
+                                         extras=extras,
+                                         labels=service_config.labels,
+                                         extra_networks=service_config.extra_networks))
     return result
 
 

@@ -47,6 +47,12 @@ services:
       - "{{ item }}"
 {% endfor %}
 {% endif %}
+{% if service.labels|length > 0 %}
+    labels:
+{% for item in service.labels %}
+      - "{{ item }}"
+{% endfor %}
+{% endif %}
 {% if service.extras|length > 0 %}
 {% filter indent(width=4) %}
     {{ service.extras }}
@@ -75,11 +81,18 @@ services:
 {% endif %}
     networks:
       - "{{ docker_net_name }}"
+{% for item in service.extra_networks %}
+      - "{{ item }}"
+{% endfor %}
     logging:
       <<: *logging_var
     restart: always
 
 
 {% endfor %}
-networks:
   {{ docker_net_name }}:
+{% for net in external_networks %}
+  {{ net }}:
+    external: true
+    name: {{ net }}
+{% endfor %}
