@@ -90,6 +90,7 @@ services:
 
 
 {% endfor %}
+networks:
   {{ docker_net_name }}:
 {% for net in external_networks %}
   {{ net }}:
