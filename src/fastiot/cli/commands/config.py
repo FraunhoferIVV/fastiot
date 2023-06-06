@@ -148,7 +148,8 @@ def config(deployments: Optional[List[str]] = typer.Argument(default=None,
                 docker_net_name=net,
                 environment_for_docker_compose_file=env_service_internal_modifications,
                 services=services + infrastructure_services,
-                env_file=env or env_additions
+                env_file=env or env_additions,
+                deployment_config=deployment_config
             ))
 
         env_filename = context.env_file_for_deployment(name=deployment_name)

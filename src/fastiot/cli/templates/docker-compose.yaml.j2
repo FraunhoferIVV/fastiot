@@ -11,11 +11,18 @@ x-env: &env_var
 
 {% endif %}
 x-logging: &logging_var
-  logging:
-    driver: "json-file"
-    options:
-      max-size: "50m"
-      max-file: "10"
+  driver: "{{ deployment_config.logging_config.log_driver }}"
+  options:
+{% if deployment_config.logging_config.max_size %}
+    "max-size": "{{ deployment_config.logging_config.max_size }}"
+{% endif %}
+{% if deployment_config.logging_config.max_file %}
+    "max-file": "{{ deployment_config.logging_config.max_file }}"
+{% endif %}
+{% for option_name, option in deployment_config.logging_config.additional_options.items() %}
+    "{{option_name}}": "{{ option }}"
+{% endfor %}
+
 
 services:
 {% for service in services %}
@@ -68,7 +75,10 @@ services:
 {% endif %}
     networks:
       - "{{ docker_net_name }}"
+    logging:
+      <<: *logging_var
     restart: always
+
 
 {% endfor %}
 networks:

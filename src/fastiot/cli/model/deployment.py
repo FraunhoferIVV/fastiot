@@ -62,6 +62,20 @@ class DeploymentTargetSetup(BaseModel):
     the current project. Only works if you do *not* have :file:`docker-compose.override.yaml` in your deployment
     already."""
 
+class DeploymentLogging(BaseModel):
+    """
+    Adjust docker-compose logging configuration if needed. The defaults should fit well
+    """
+    log_driver: str = "local"
+    """
+    Set a logging driver. The docker default is ``json-file`` with recommandation for ``local`` (used as default here)
+    """
+    max_size: Optional[str] = "10m"
+    """ Maximum size for a single logfile, defaults to '10m' (10 MB) """
+    max_file: Optional[int] = 5
+    """ Maximum number of files to keep """
+    additional_options: Dict[str, str] = {}
+    """ Any additional options you may want to set for your selected driver """
 
 class DeploymentConfig(BaseModel):
     """
@@ -88,6 +102,7 @@ class DeploymentConfig(BaseModel):
 
         It defaults to :file:`config_dir`
     """
+    logging_config: DeploymentLogging = DeploymentLogging()
 
     @root_validator
     def check_services(cls, values):

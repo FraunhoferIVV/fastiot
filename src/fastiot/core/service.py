@@ -106,7 +106,7 @@ class FastIoTService:
         """
         Creates an asyncio-Task which is managed by this class. If the execution
         of the coroutine raises an exception, they are logged and a service
-        shutdown is requested. If the task terminates reguarly, it is dropped
+        shutdown is requested. If the task terminates regularly, it is dropped
         and the module continuous to run.
 
         The task is awaited after _stop() has been called.
@@ -225,7 +225,7 @@ class FastIoTService:
 
     async def request_shutdown(self, reason: str = '', exception: Optional[Type[Exception]] = None ):
         """ Sets the shutdown request for all loops and tasks in the service to stop """
-        if self._shutdown_event.is_set() is False and (reason or exception):
+        if not self._shutdown_event.is_set() and (reason or exception):
             if reason:
                 self._logger.info("Initial shutdown requested with reason: %s.", str(reason))
             if exception:
@@ -257,6 +257,8 @@ class FastIoTService:
             try:
                 await self.run_coro(awaitable)
             except ShutdownRequestedInterruption:
+                break
+            except Exception:
                 break
 
     async def _stop_subs(self):
