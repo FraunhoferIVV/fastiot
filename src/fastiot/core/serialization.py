@@ -7,6 +7,8 @@ from fastiot.core.data_models import FastIoTData, Msg, MsgCls
 def serialize_to_bin(msg_cls: MsgCls, msg: Msg) -> bytes:
     """
     Serializes a msg to binary. It also applies some basic type checks.
+    Please be careful, msgpack will only serialize python primary data types.
+    Data types from numpy for example, cannot be serialized.
     """
     if issubclass(msg_cls, FastIoTData):
         if not isinstance(msg, msg_cls):
