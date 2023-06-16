@@ -139,7 +139,7 @@ class NPM(BaseModel):
     in your npm config or in case of vue js application in the file :file:`vue.config.js` use the `outputDir` variable
     as relative path here, e.g. ``dist: ../static``
     """
-    node_base_image: str = 'node:16-buster-slim'
+    node_base_image: str = 'node:16-bookworm-slim'
     """
     If you need a different image for building your vue.js app (or whatever) you may define it here.
     The default is currently set to ``node:16-buster-slim``.
