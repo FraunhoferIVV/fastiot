@@ -111,7 +111,7 @@ dash = [
     "pymongo>=4.1,<5",
 ]
 docs = [
-    "sphinx>=5",
+    "sphinx>=5,<7",
     "sphinx-automodapi",
     "sphinx-autodoc-typehints",
     "recommonmark",
