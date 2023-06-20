@@ -10,9 +10,10 @@ requires = [
 
 [project]
 name = "fastiot"
-version = "0.2.197"
+version = "1.0"
 maintainers = [
     { name = "Tilman Klaeger", email = "tilman.klaeger@ivv-dd.fraunhofer.de" },
+    { name = "Tim Kaluza", email = "tim.kaluza@ivv-dd.fraunhofer.de" },
     { name = "Jialiang Yin", email = "jialiang.yin@ivv-dd.fraunhofer.de" },
 ]
 keywords = [
@@ -22,7 +23,7 @@ keywords = [
     "IIoT",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
