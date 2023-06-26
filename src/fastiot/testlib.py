@@ -1,9 +1,10 @@
 """ Helpers to make writing tests easier """
-import asyncio
 import os
+import subprocess
 import sys
+import time
 from asyncio.subprocess import Process
-from typing import Type, Optional
+from typing import Optional
 
 from fastiot.cli.constants import CONFIGURE_FILE_NAME
 from fastiot.cli.model.project import ProjectContext
@@ -55,47 +56,20 @@ def _set_cwd_project_root_dir():
     sys.exit(1)
 
 
-async def init_background_process(service: object, startup_time: float = 0.2):
-    """
-    Helper to start a FastIoT Service as background task.
-    This may help if your service already has many internal tasks and needs to act as a server for your unit or
-    integration tests.
-
-    Be sure to stop your service afterward like in the following example:
-
-    >>> from fastiot_sample_services.producer.producer_module import ExampleProducerService
-    >>> from fastiot.testlib import init_background_process
-    >>>
-    >>> background_process = await init_background_process(service=ExampleProducerService)
-    >>> # Do some stuff with the service
-    >>> background_process.terminate()
-    >>> # Or if you want to be really sure to have a stopped service:
-    >>> try:
-    >>>     background_process.kill()
-    >>> except ProcessLookupError:
-    >>>     pass
-
-    :param service: The Service inheriting from :class:`fastiot.core.service.FastIoTService` (without ())
-    :param startup_time: The time to wait for the service to become ready, defaults to 0.2 seconds
-    :return: A Process
-    """
-    class_name = f"{service.__module__}.run"
-    proc = await asyncio.create_subprocess_exec(sys.executable, "-m", class_name)
-    await asyncio.sleep(startup_time)
-    return proc
-
-
 class BackgroundProcess:
     """
-    Class to help with FastIoT Services as background process for tests.
+    Class to help with FastIoT Services as background process for tests using a separate python process.
 
-    This class is especially made to be used in async with contexts and behaves similar to
-    :func:`fastiot.testlib.init_background_process` but saves you from manually exiting the service:
+    This may help if your service already has many internal tasks and needs to act as a server for your unit or
+    integration tests.
+    Make sure to have a reasonable long startup time for the service to start. If in doubt use a couple seconds and
+    slowly reduce when testing locally.
+
 
     >>> from fastiot_sample_services.producer.producer_module import ExampleProducerService
     >>> from fastiot.testlib import BackgroundProcess
     >>>
-    >>> async with BackgroundProcess(ExampleProducerService, startup_time=0.03):
+    >>> with BackgroundProcess(ExampleProducerService, startup_time=1.5):
     >>>     pass  # Do some stuff with the service
     >>> # Outside the context the service will be terminated and killed
     """
@@ -112,13 +86,12 @@ class BackgroundProcess:
         self.startup_time = startup_time
         self.stop_time = stop_time
 
-    async def __aenter__(self):
-        self.process = await init_background_process(self.service, self.startup_time)
+    def __enter__(self):
+        class_name = ".".join(self.service.__module__.split('.')[0:-1]) + ".run"
+        proc = [sys.executable, "-m", class_name]
+        self.process = subprocess.Popen(proc)
+        time.sleep(self.startup_time)
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.process.terminate()
-        await asyncio.sleep(self.stop_time)
-        try:
-            self.process.kill()
-        except ProcessLookupError:
-            pass
+        time.sleep(self.stop_time)
